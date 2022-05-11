@@ -73,11 +73,19 @@ Hardware support
 
 
 # Running the code
+
+## Python
 ```
 > python3
 > import fastdup
 > fastdup.__version__ # prints the version number
-> fastdup.run(“/path/to/your/folder”) #main running function
+> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
+```
+  
+## C++
+```
+/usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
+
 ```
   
 Detailed Python API documentation
