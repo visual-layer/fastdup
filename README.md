@@ -40,9 +40,13 @@ Download the FastDup latest wheel from the following shared folder: `s3://visual
 
 Latest version: 0.25
 
-## For pip (python 3.8) install using
+## For pip (python 3.8 or python 3.7) install using
 ```
 pip install fastdup-<VERSION>-cp38-cp38-linux_x86_64.whl
+```
+or 
+```
+pip install fastdup-<VERSION>-cp37-cp37m-linux_x86_64.whl
 ```
 
 ## For conda (python 3.7.11) install using
@@ -51,6 +55,10 @@ conda install -y pandas tqdm opencv numpy
 conda install fastdup-<VERSION>-py37_0.tar.bz
 ```
 
+## Install a debian package
+```
+sudo dpkg -i fastdup-ubuntu-<VERSION>.deb
+```
 
 # Currently supported software/hardware
 
