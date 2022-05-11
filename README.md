@@ -36,8 +36,13 @@ Required setup
 
 
 # Pip Package setup
-Download the FastDup latest binaries from our [release](https://github.com/visualdatabase/fastdup/releases/) page.
 
+## Install from pypi
+```
+pip install fastdup
+```
+
+or download the FastDup latest binaries from our [release](https://github.com/visualdatabase/fastdup/releases/) page.
 
 ## For pip (python 3.8 or python 3.7) install using
 ```
