@@ -5,6 +5,23 @@ FastDup is a tool for fast detection of duplicate and near duplicate images.
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/flower.png)
 
+# FastDup is FAST
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_performance.png)
+
+We run on the full ImageNet dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
+
+# FastDup is ACCURATE
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_duplicates.png)
+
+FastDup identifies 1,200,000 duplicate images on the ImageNet dataset.
+
+
+
+
+
+
 # Installation
 ## Ubuntu 20.04 LTS Machine Setup
 Required setup
