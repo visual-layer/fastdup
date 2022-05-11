@@ -36,7 +36,7 @@ Required setup
 
 
 # Pip Package setup
-Download the FastDup latest wheel from the following shared folder: `s3://visualdb`
+Download the FastDup latest binaries from our [release](https://github.com/visualdatabase/fastdup/releases/) page.
 
 Latest version: 0.25
 
