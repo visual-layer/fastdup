@@ -15,7 +15,7 @@ We run on the full ImageNet dataset (11.5M images) to compare all pairs of image
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_duplicates.png)
 
-FastDup identifies 1,200,000 duplicate images on the ImageNet dataset.
+FastDup identifies 1,200,000 duplicate images on the ImageNet dataset, a new unknown resut!
 
 
 
