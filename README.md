@@ -3,7 +3,7 @@
 
 FastDup is a tool for fast detection of duplicate and near duplicate images.
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/flower.png?raw=true)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/flower.png)
 
 # Installation
 ## Ubuntu 20.04 LTS Machine Setup
