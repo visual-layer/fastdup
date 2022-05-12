@@ -32,9 +32,8 @@ pip install fastdup
 ## Python
 ```
 > python3
-> import fastdup
-> fastdup.__version__ # prints the version number
-> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
+#> import fastdup
+#> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
 ```
   
 ## C++
