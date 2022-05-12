@@ -15,22 +15,41 @@ We run on the full ImageNet dataset (11.5M images) to compare all pairs of image
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_duplicates.png)
 
-FastDup identifies 1,200,000 duplicate images on the ImageNet dataset.
+FastDup identifies 1,200,000 duplicate images on the ImageNet dataset, a new unknown resut!
 
 
+# Installing the code
+For Python 3.7 and 3.8
+```
+pip install fastdup
+```
 
-
+[Install from stable release](INSTALL.md)
 
 
 # Running the code
+
+## Python
 ```
 > python3
 > import fastdup
 > fastdup.__version__ # prints the version number
-> fastdup.run(“/path/to/your/folder”) #main running function
+> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
+```
+  
+## C++
+```
+/usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
+
 ```
 
 [Detailed running instructions](RUN.md)
+
+
+
+# Support for s3 cloud/ google storage
+[Detailed instructions](CLOUD.md)
+
 
 ## Error handling
 When bad images are encountered, namely corrupted images that can not be read, an additional csv output file is generated called features.dat.bad. The bad images filenames are stored there. In addition there is a printout that states the number of good and bad images encountered. The good images filenames are stored in the file features.dat.csv file. Namely the bad images are excluded from the total images listing. The function fastdup.load_binary_features() reads the features corresponding to the good images and returns a list of all the good images, and a numpy array of all their corresponding features.
