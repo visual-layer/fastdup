@@ -28,20 +28,21 @@ We run on the full ImageNet dataset (11.5M images) to compare all pairs of image
 
 Dataset|	Identical Pairs|	Near-Identical Pairs
 -------|----------------------|--------------------
-imagenet21k-resized	|1,194,059|	53,358
-places365-standard	|33,115	|2,342
-landmark-recognition-2021	|2,613	|2,484
-imdb-wiki	|187,985|	456
-coco	|54	|14
-visualgenome	|223	|315
-sku110k	|7	|110
-herbarium-2022-fgvc9	|8,599	|1,383
-iwildcam2021-fgvc9	|120,991	|45,946
-sorghum-id-fgvc-9	|46	|212
-snakeclef2022-fgvc9	|6,953	|33,128
-fungiclef2022-fgvc9	|2,205	|75
-hotel-id-to-combat-human-trafficking-2022-fgvc9|	3,544	|2,704
-geolifeclef-2022-lifeclef-2022-fgvc9	|93,109|	234,342
+[imagenet21k-resized](https://www.image-net.org/challenges/LSVRC/)	|1,194,059|	53,358
+[geolifeclef-2022-lifeclef-2022-fgvc9](https://www.kaggle.com/competitions/geolifeclef-2022-lifeclef-2022-fgvc9/data)	|93,109|	234,342
+[places365-standard](http://places2.csail.mit.edu/download.html)	|33,115	|2,342
+[landmark-recognition-2021](https://www.kaggle.com/c/landmark-recognition-2021)	|2,613	|2,484
+[imdb-wiki](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/)		|187,985|	456
+[coco](https://cocodataset.org/#home)		|54	|14
+[visualgenome](https://visualgenome.org/)		|223	|315
+[sku110k](https://github.com/eg4000/SKU110K_CVPR19)	|7	|110
+[herbarium-2022-fgvc9](https://www.kaggle.com/c/herbarium-2022-fgvc9)		|8,599	|1,383
+[iwildcam2021-fgvc9](https://www.kaggle.com/c/iwildcam2022-fgvc9/)	|120,991	|45,946
+[sorghum-id-fgvc-9](https://www.kaggle.com/competitions/sorghum-id-fgvc-9/data)	|46	|212
+[snakeclef2022-fgvc9](https://www.kaggle.com/competitions/snakeclef2022/data)	|6,953	|33,128
+[fungiclef2022-fgvc9](https://www.kaggle.com/competitions/fungiclef2022/data)	|2,205	|75
+[hotel-id-to-combat-human-trafficking-2022-fgvc9](https://www.kaggle.com/competitions/hotel-id-to-combat-human-trafficking-2022-fgvc9/data)|	3,544	|2,704
+
 
 FastDup identifies 1,200,000 duplicate images on the ImageNet dataset, a new unknown resut!
 
