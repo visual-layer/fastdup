@@ -33,7 +33,7 @@ pip install fastdup
 ```python
 python3
 import fastdup
-fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
+fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #main running function
 ```
   
 ## C++
