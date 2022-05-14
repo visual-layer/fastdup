@@ -25,9 +25,9 @@ We run on the full ImageNet dataset (11.5M images) to compare all pairs of image
 
 # FastDup is ACCURATE
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_duplicates.png)
 
 Dataset|	Identical Pairs|	Near-Identical Pairs
+-------|----------------------|--------------------
 imagenet21k-resized	|1,194,059|	53,358
 places365-standard	|33,115	|2,342
 landmark-recognition-2021	|2,613	|2,484
