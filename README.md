@@ -31,15 +31,14 @@ pip install fastdup
 
 ## Python
 ```python
-> python3
-#> import fastdup
-#> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
+python3
+import fastdup
+fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
 ```
   
 ## C++
 ```bash
 /usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
-
 ```
 
 [Detailed running instructions](RUN.md)
