@@ -20,7 +20,7 @@ FastDup identifies 1,200,000 duplicate images on the ImageNet dataset, a new unk
 
 # Installing the code
 For Python 3.7 and 3.8
-```
+```python
 pip install fastdup
 ```
 
@@ -30,14 +30,14 @@ pip install fastdup
 # Running the code
 
 ## Python
-```
+```python
 > python3
 #> import fastdup
 #> fastdup.run(input_dir=“/path/to/your/folder”, work_dir="/path/to/your/folder") #main running function
 ```
   
 ## C++
-```
+```bash
 /usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
 
 ```
