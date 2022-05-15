@@ -3,7 +3,7 @@
 
 FastDup is a tool for fast detection of duplicate and near duplicate images.
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
 
 # FastDup is FAST
 
