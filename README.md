@@ -1,13 +1,45 @@
 
-# FastDup Manual
+# FastDup 
 
-FastDup is a tool for fast detection of duplicate and near duplicate images.
+FastDup is a tool for fast detection of duplicate and near duplicate images. FastDup  scales to millions of images running on CPU only.
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
 
-# FastDup is FAST
+## Quick Installation
+For Python 3.7 and 3.8
+```python
+pip install fastdup
+```
 
-Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
+[Install from stable release](INSTALL.md)
+
+
+## Running the code
+
+### Python
+```python
+python3
+import fastdup
+fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #main running function
+```
+  
+### C++
+```bash
+/usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
+```
+
+[Detailed running instructions](RUN.md)
+
+
+
+### Support for s3 cloud/ google storage
+[Detailed instructions](CLOUD.md)
+
+
+## Results on Key Datasets
+We have thourougly tested fastdup across various famous computer-vision dataset. Ranging from Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet21K dataset, a new unknown result! Full results are below.
+
+### FastDup is FAST
 
 |Dataset	        |Total Images	|Owner			|Image Res     |cost [$]|spot cost [$]|processing [sec]|throughput [1/sec]|
 |-----------------------|---------------|-----------------------|--------------|--------|-------|-------|-----|
@@ -21,9 +53,11 @@ Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
 |[visualgenome](https://visualgenome.org/)		|108,079	|stanford	        |334x500	|0.05	|0.01	|124	|872|
 |[sku110k](https://github.com/eg4000/SKU110K_CVPR19)		|11,743	        |trax	                |4160x2340	|0.03	|0.01	|77	|153|
 
-We run on the full ImageNet dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
+* Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
 
-# FastDup is ACCURATE
+* We run on the full ImageNet dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
+
+### FastDup is ACCURATE
 
 
 Dataset|	Identical Pairs|	Near-Identical Pairs
@@ -42,39 +76,3 @@ Dataset|	Identical Pairs|	Near-Identical Pairs
 [snakeclef2022-fgvc9](https://www.kaggle.com/competitions/snakeclef2022/data)	|6,953	|33,128
 [fungiclef2022-fgvc9](https://www.kaggle.com/competitions/fungiclef2022/data)	|2,205	|75
 [hotel-id-to-combat-human-trafficking-2022-fgvc9](https://www.kaggle.com/competitions/hotel-id-to-combat-human-trafficking-2022-fgvc9/data)|	3,544	|2,704
-
-
-FastDup identifies 1,200,000 duplicate images on the ImageNet dataset, a new unknown resut!
-
-
-# Installing the code
-For Python 3.7 and 3.8
-```python
-pip install fastdup
-```
-
-[Install from stable release](INSTALL.md)
-
-
-# Running the code
-
-## Python
-```python
-python3
-import fastdup
-fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #main running function
-```
-  
-## C++
-```bash
-/usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
-```
-
-[Detailed running instructions](RUN.md)
-
-
-
-# Support for s3 cloud/ google storage
-[Detailed instructions](CLOUD.md)
-
-
