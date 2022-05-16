@@ -1,4 +1,7 @@
 # Installation
+fastdup is currently only supported on Ubuntu 20.04 OS.
+
+
 ## Ubuntu 20.04 LTS Machine Setup
 Required machine setup
 ```bash
@@ -15,11 +18,11 @@ pip install --upgrade pip
 # Pip Package setup
 Download the FastDup latest wheel from the following shared folder: `s3://visualdb`
 
-Latest version: 0.25
+Latest version: 0.34
 
-## For pip (python 3.8) install using
+## For pip (python 3.8 or 3.7) install using
 ```bash
-pip install fastdup-<VERSION>-cp38-cp38-linux_x86_64.whl
+python3.8 -m pip install fastdup-<VERSION>-cp38-cp38-linux_x86_64.whl
 ```
 
 ## For conda (python 3.7.11) install using
