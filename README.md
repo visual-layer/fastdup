@@ -46,7 +46,7 @@ Dataset|	Identical Pairs|	Near-Identical Pairs
 ## Quick Installation
 For Python 3.7 and 3.8
 ```python
-pip install fastdup
+python3.8 -m pip install fastdup
 ```
 
 [Install from stable release](INSTALL.md)
@@ -56,7 +56,7 @@ pip install fastdup
 
 ### Python
 ```python
-python3
+python3.8
 import fastdup
 fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #main running function
 ```
