@@ -43,7 +43,7 @@ Dataset|	Identical Pairs|	Near-Identical Pairs
 [fungiclef2022-fgvc9](https://www.kaggle.com/competitions/fungiclef2022/data)	|2,205	|75
 [hotel-id-to-combat-human-trafficking-2022-fgvc9](https://www.kaggle.com/competitions/hotel-id-to-combat-human-trafficking-2022-fgvc9/data)|	3,544	|2,704
 
-## Quick Installation
+## Quick Installation (Only Ubuntu 20.04 supported for now!)
 For Python 3.7 and 3.8
 ```python
 python3.8 -m pip install fastdup
