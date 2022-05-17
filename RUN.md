@@ -41,10 +41,11 @@ Alternatively, it is also possible to give a location of a file listing images f
 
         max_offset (int): Optional max offset to start iterating on the full file list. Default is -1.
 
- 	   faiss_mode (str): When nn_provider='faiss' selects the faiss mode. Supported options are HNSW32 and any other faiss string.
+ 	faiss_mode (str): When nn_provider='faiss' selects the faiss mode. Supported options are HNSW32 and any other faiss string.
 
-   faiss_param (str): When nn_provider='faiss' assigns optional faiss parameters. For example efSearch=175. Multiple params are supported - for example 'efSearch=175,nprobes=200'
+   	faiss_param (str): When nn_provider='faiss' assigns optional faiss parameters. For example efSearch=175. Multiple params are supported - for example 'efSearch=175,nprobes=200'
 
+	bounding_box (str): Optional bounding box for cropping images before the fastdup tool is applied. For example bounding_box='rows=100,cols=100,width=250,height=310'. Rows and cols gives the top left corner coordinates, and width and height the bounding box dimensions. (Row is the y axis and col is the x axis. The box is cropped in the range [rows:rows+height, cols:cols+width].
 
        
         
