@@ -48,4 +48,6 @@ Hardware support
 - CPU (GPU not needed!)
 
 
-
+# Common installation issues and their solution
+- ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel on this platform.
+- Solution: Check that you are on ubuntu 20.04 (via the command `uname -a`). Check that you are using the right python version (python3.8 and not python). Make sure pip is up to date using `python3.8 -m pip install -U pip`). Make sure you install using `python3.8 -m pip install..` and not just `pip install...`.
