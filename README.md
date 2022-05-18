@@ -6,11 +6,13 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 <p align="center">
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
-Temporal relations between images identified by fastdup
+*Temporal relations between images identified by fastdup (near duplicates).*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/wild_animal_outliers.png)
-Outliers in a wildlife animal image dataset identified by fastdup
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers.png)
+*Outliers in a landmarks 2021 dataset (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers.png)
+*IMDB outliers (data goal is for face detection, gender and age detection)*
 </p>
 
 
