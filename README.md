@@ -21,7 +21,7 @@ We have thourougly tested fastdup across various famous visual dataset. Ranging 
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
 |-----------------------|---------------|--------|-------------|----------------|---------------|---------|
 |[imagenet21k-resized](https://www.image-net.org/challenges/LSVRC/)	|11,582,724	|4.98	|1.24	|11,561	|[1,194,059](https://www.databasevisual.com/imagenet-21k-resized-leaks)|[View](https://www.databasevisual.com/imagenet-21k-anonalies)|
-|[places365-standard](http://places2.csail.mit.edu/download.html)	|2,168,460	|1.01	|0.25	|2,349	|93,109|View|
+|[places365-standard](http://places2.csail.mit.edu/download.html)	|2,168,460	|1.01	|0.25	|[2,349](https://www.databasevisual.com/places-365-leaks)	|93,109|[View](https://www.databasevisual.com/places-365-anomalies)|
 |[herbarium-2022-fgvc9](https://www.kaggle.com/c/herbarium-2022-fgvc9)	|1,050,179	|0.69	|0.17	|1,598	|33,115|View|
 |[landmark-recognition-2021](https://www.kaggle.com/c/landmark-recognition-2021)|1,590,815|0.96	|0.24	|2,236	|2,613|View|
 |[imdb-wiki](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/)	|514,883	|0.65	|0.16	|1,509	|187,965|View|
