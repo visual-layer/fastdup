@@ -58,7 +58,7 @@ For Python 3.7 and 3.8
 python3.8 -m pip install fastdup
 ```
 
-[Install from stable release](INSTALL.md)
+[Install from stable release and installation issues](INSTALL.md)
 
 
 ## Running the code
