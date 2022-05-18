@@ -81,3 +81,23 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 
 ### Support for s3 cloud/ google storage
 [Detailed instructions](CLOUD.md)
+
+
+## Feature summary
+
+  | Free version | Enterprise Edition
+--|----------|-----------------
+Operating Systems | Ubuntu 20.04 | Plus Amazon Linux, RedHat, Windows, Mac OS
+Python Versions | Python 3.7+3.8+conda | Plus Python 3.6, 3.9, 3.10
+Compute | CPU | GPU, TPU, Intel OpenVino
+Instance | On demand | Support for spot instance
+Numbr of images | Up to 1 million | Up to 1 billion
+Execution | Single node | Cluster
+Features | Outlier detection, duplicate detection | Plus novelty detection, wrong label detection, missing label detection, data summarization, connected components, train/test leaks, temporal sequence detection, advanced visual search
+Input | Images | Plus Video
+
+
+
+
+
+
