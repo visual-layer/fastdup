@@ -19,7 +19,7 @@ We have thourougly tested fastdup across various famous visual dataset. Ranging 
 
 ### FastDup is FAST
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
-|-----------------------|---------------|--------|-------|-------|----------|-----|----|
+|-----------------------|---------------|--------|-------------|----------------|---------------|---------|
 |[imagenet21k-resized](https://www.image-net.org/challenges/LSVRC/)	|11,582,724	|4.98	|1.24	|11,561	|[1,194,059](https://www.databasevisual.com/imagenet-21k-resized-leaks)|[View](https://www.databasevisual.com/imagenet-21k-anonalies)|
 |[places365-standard](http://places2.csail.mit.edu/download.html)	|2,168,460	|1.01	|0.25	|2,349	|93,109|View|
 |[herbarium-2022-fgvc9](https://www.kaggle.com/c/herbarium-2022-fgvc9)	|1,050,179	|0.69	|0.17	|1,598	|33,115|View|
