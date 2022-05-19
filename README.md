@@ -70,7 +70,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 ## Feature summary
 |  | Free version | Enterprise Edition|
 |--|--------------|-------------------|
-|Operating Systems | Ubuntu 20.04 | Plus Amazon Linux, RedHat, Windows, Mac OS|
+|Operating Systems | Ubuntu 20.04, Ubuntu 18.04  | Plus Amazon Linux, RedHat, Windows, Mac OS|
 |Python Versions | Python 3.7+3.8+conda | Plus Python 3.6, 3.9, 3.10|
 |Compute | CPU | GPU, TPU, Intel OpenVino|
 |Storage| NFS, local | Plus ec2 s3, google cloud storage, minio |
