@@ -65,7 +65,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 [Detailed instructions](CLOUD.md)
 
 ### Getting started example (can be found under examples/)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif =768x465)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset*
 
 
