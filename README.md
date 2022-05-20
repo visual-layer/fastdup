@@ -61,7 +61,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 
 [Detailed running instructions](RUN.md)
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s.gif)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 
 ### Support for s3 cloud/ google storage
 [Detailed instructions](CLOUD.md)
