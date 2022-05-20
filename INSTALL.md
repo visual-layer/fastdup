@@ -11,6 +11,7 @@ sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt update
 sudo apt -y install python3.8
 sudo apt -y install python3-pip
+sudo apt -y install libgl1-mesa-glx
 pip install --upgrade pip
 ```
 
@@ -55,3 +56,6 @@ ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel
 - Check that you are using the right python version (python3.8 and not python). 
 - Make sure pip is up to date using `python3.8 -m pip install -U pip`). 
 - Make sure you install using `python3.8 -m pip install..` and not just `pip install...`.
+
+ERROR: libGL.so.1: cannot open shared object file: No such file or directory
+- Need to install depedency: `sudo apt -y nstall libgl1-mesa-glx`
