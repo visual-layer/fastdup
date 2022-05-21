@@ -1,8 +1,8 @@
 # Installation
-fastdup is currently only supported on Ubuntu 20.04 OS.
+fastdup is currently only supported on Ubuntu 20.04 or 18.04 OS.
 
 
-## Ubuntu 20.04 LTS Machine Setup
+## Ubuntu 20.04/18.04 LTS Machine Setup
 Required machine setup
 ```bash
 sudo apt update
@@ -78,7 +78,7 @@ ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel
 - Make sure you install using `python3.8 -m pip install..` and not just `pip install...`.
 - If that does not work, please open an issue with the otuput of `python3.8 -m pip debug --verbose` 
 
-ERROR: libGL.so.1: cannot open shared object file: No such file or directory
+ERROR: `libGL.so.1: cannot open shared object file: No such file or directory`
 - Need to install depedency: `sudo apt -y nstall libgl1-mesa-glx`
 
 
