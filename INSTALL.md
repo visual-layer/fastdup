@@ -12,7 +12,7 @@ sudo apt update
 sudo apt -y install python3.8
 sudo apt -y install python3-pip
 sudo apt -y install libgl1-mesa-glx
-pip install --upgrade pip
+python3.8 -m pip install --upgrade pip
 ```
 
 
