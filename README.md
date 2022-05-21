@@ -5,8 +5,8 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
-*Temporal relations between images identified by fastdup (near duplicates).*
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_dupicates.png)
+*Duplicates and near duplicates identified in ImageNet data*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers.png)
 *Outliers in a landmarks 2021 dataset (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
