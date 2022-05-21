@@ -17,6 +17,10 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels.png)
 *Wrong labels in the ImageNet dataset*
 
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny.png)
+*Fun labels in the ImageNet dataset*
+
+
 
 ## Results on Key Datasets
 We have thourougly tested fastdup across various famous visual dataset. Ranging from Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet21K dataset, a new unknown result! Full results are below.
