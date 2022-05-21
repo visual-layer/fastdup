@@ -3,7 +3,6 @@
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similaritity, learn the normal behavior and temporal interactions between imsges. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup  scales to millions of images running on CPU only.
 
-
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
 *Temporal relations between images identified by fastdup (near duplicates).*
 
@@ -15,6 +14,7 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels.png)
 *Wrong labels in the ImageNet dataset*
+
 
 ## Results on Key Datasets
 We have thourougly tested fastdup across various famous visual dataset. Ranging from Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet21K dataset, a new unknown result! Full results are below.
@@ -61,10 +61,13 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 
 [Detailed running instructions](RUN.md)
 
-
-
 ### Support for s3 cloud/ google storage
 [Detailed instructions](CLOUD.md)
+
+### Getting started example (can be found under examples/)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
+*Working on the Food-101 dataset*
+
 
 
 ## Feature summary
