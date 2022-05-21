@@ -1,12 +1,12 @@
 
 # FastDup 
 
-FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similaritity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup  scales to millions of images running on CPU only.
+FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similaritity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_duplicates.png)
-*Duplicates and near duplicates identified in ImageNet data*
+*Duplicates and near duplicates identified in ms-coco dataset*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers.png)
 *Outliers in a landmarks 2021 dataset (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
@@ -23,7 +23,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 
 ## Results on Key Datasets
-We have thourougly tested fastdup across various famous visual dataset. Ranging from Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet21K dataset, a new unknown result! Full results are below.
+We have thourougly tested fastdup across various famous visual datasets. Ranging from pilar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, a new unknown result! Full results are below.
 
 ### FastDup is FAST
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
@@ -40,7 +40,7 @@ We have thourougly tested fastdup across various famous visual dataset. Ranging 
 
 * Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
 
-* We run on the full ImageNet dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
+* We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
 
 ## Quick Installation (Ubuntu 20.04 or Ubuntu 18.04)
 For Python 3.7 and 3.8
@@ -81,10 +81,10 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 |--|--------------|-------------------|
 |Operating Systems | Ubuntu 20.04, Ubuntu 18.04  | Plus Amazon Linux, RedHat, Windows, Mac OS|
 |Python Versions | Python 3.7+3.8+conda | Plus Python 3.6, 3.9, 3.10|
-|Compute | CPU | GPU, TPU, Intel OpenVino|
+|Compute | CPU | Plus GPU, TPU, Intel OpenVino|
 |Storage| NFS, local | Plus ec2 s3, google cloud storage, minio |
-|Cloud Instance | On demand | Support for spot instance|
-|Numbr of images | Up to 1 million | Up to 1 billion|
+|Cloud Instance | On demand | Plus spot instance|
+|Number of images | Up to 1 million | Up to 1 billion|
 |Execution | Single node | Cluster|
 |Features | Outlier detection, duplicate detection | Plus novelty detection, wrong label detection, missing label detection, data summarization, connected components, train/test leaks, temporal sequence detection, advanced visual search, label quality analysis|
 |Input | Images | Plus Video|
