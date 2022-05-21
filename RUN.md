@@ -19,7 +19,12 @@ Alternatively, it is also possible to give a location of a file listing images f
 
         num_images (int): Number of images to run on. Default is -1 which means run on all the images in the image_dir folder.
 
-        nnmodel (str): Nearest Neighbor model for clustering the features together, when using turi (has no effect when using faiss). Supported options are brute_force (exact), ball_tree and lsh (both approximate). Default is brute_force.
+        turi_param (str): Optional additional parameters for turi. Supported paramets are:
+        - nnmodel=0|1|2Nearest Neighbor model for clustering the features together, when using turi (has no effect when using faiss). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
+        - ccthreshold=XX where XX in the range [0,1]. Construct similarities graph when the similarity > XX.
+        - run_cc=0|1 Distable/enable connected components computation on the graph of similarities.
+        - run_pagerank=0|1 Disable/enable pagerank computation on the graph of similarities.
+        - run_degree=0|1 Distable/enable degree distribution computation on the graph of similarities,
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Default is cosine. Other distances are euclidean, squared_euclidean, manhattan.
 
@@ -91,6 +96,10 @@ def load_binary_feature(filename):
 
 Faiss index files
 - When using faiss an additional intermediate results file is created: `faiss.index`.
+
+Graph computation
+- When enableing connected components a file named `components_info.csv` is created with number of nodes (=images) per component.
+- A file named `connected_components.csv` includes the output of pagerank, degree distribution and connected component assignments. The first column is the index in the `features.dat.csv` file (the image list). This file is sorted according to the list.
 
 ## Error handling
 When bad images are encountered, namely corrupted images that can not be read, an additional csv output file is generated called features.dat.bad. The bad images filenames are stored there. In addition there is a printout that states the number of good and bad images encountered. The good images filenames are stored in the file features.dat.csv file. Namely the bad images are excluded from the total images listing. The function fastdup.load_binary_features() reads the features corresponding to the good images and returns a list of all the good images, and a numpy array of all their corresponding features.
