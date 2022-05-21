@@ -3,6 +3,8 @@
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similaritity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup  scales to millions of images running on CPU only.
 
+From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/git_main-min.png)
 *Temporal relations between images identified by fastdup (near duplicates).*
 
@@ -85,7 +87,8 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 |Export| csv   | Plus Elastic Search|
 
 
-
+# Technology
+We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate).
 
 
 
