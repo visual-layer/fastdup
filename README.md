@@ -15,10 +15,10 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 *IMDB outliers (data goal is for face detection, gender and age detection)*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels.png)
-*Wrong labels in the ImageNet dataset*
+*Wrong labels in the ImageNet-21K dataset*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny.png)
-*Fun labels in the ImageNet dataset*
+*Fun labels in the ImageNet-21K dataset*
 
 
 
@@ -70,9 +70,9 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 ### Support for s3 cloud/ google storage
 [Detailed instructions](CLOUD.md)
 
-### Getting started example (can be found under examples/)
+### Getting started example (Food-101 Dataset, can be found under examples/)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
-*Working on the Food-101 dataset*
+*Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 
 
