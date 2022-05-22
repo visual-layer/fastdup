@@ -1,23 +1,23 @@
 
 # FastDup 
 
-FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similaritity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
+FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_duplicates.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in ms-coco dataset*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in a landmarks 2021 dataset (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
 *IMDB outliers (data goal is for face detection, gender and age detection)*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the ImageNet-21K dataset*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the ImageNet-21K dataset*
 
 
@@ -71,7 +71,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 [Detailed instructions](CLOUD.md)
 
 ### Getting started example (Food-101 Dataset, can be found under examples/)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop-min.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 
