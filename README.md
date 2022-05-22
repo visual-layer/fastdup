@@ -71,7 +71,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 [Detailed instructions](CLOUD.md)
 
 ### Getting started example (Food-101 Dataset, can be found under examples/)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop-min.gif)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 
