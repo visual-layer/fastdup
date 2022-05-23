@@ -75,24 +75,5 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 
-
-## Feature summary
-|  | Free version | Enterprise Edition|
-|--|--------------|-------------------|
-|Operating Systems | Ubuntu 20.04, Ubuntu 18.04  | Plus Amazon Linux, RedHat, Windows, Mac OS|
-|Python Versions | Python 3.7+3.8+conda | Plus Python 3.6, 3.9, 3.10|
-|Compute | CPU | Plus GPU, TPU, Intel OpenVino|
-|Storage| NFS, local | Plus ec2 s3, google cloud storage, minio |
-|Cloud Instance | On demand | Plus spot instance|
-|Number of images | Up to 1 million | Up to 1 billion|
-|Execution | Single node | Cluster|
-|Features | Outlier detection, duplicate detection | Plus novelty detection, wrong label detection, missing label detection, data summarization, connected components, train/test leaks, temporal sequence detection, advanced visual search, label quality analysis|
-|Input | Images | Plus Video|
-|Export| csv   | Plus Elastic Search|
-
-
 # Technology
 We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli).
-
-
-
