@@ -29,13 +29,13 @@ We have thourougly tested fastdup across various famous visual datasets. Ranging
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
 |-----------------------|---------------|--------|-------------|----------------|---------------|---------|
 |[imagenet21k-resized](https://www.image-net.org/challenges/LSVRC/)	|11,582,724	|4.98	|1.24	|11,561	|[1,194,059](https://www.databasevisual.com/imagenet-21k-resized-leaks)|[Anomalies](https://www.databasevisual.com/imagenet-21k-anonalies) [Wrong Labels](https://www.databasevisual.com/imagenet-21k-wrong-labels)||
+|[imdb-wiki](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/)	|514,883	|0.65	|0.16	|1,509	|[187,965](https://www.databasevisual.com/imdb-wiki-leaks)|[View](https://www.databasevisual.com/imdb-wiki-anomalies)|
 |[places365-standard](http://places2.csail.mit.edu/download.html)	|2,168,460	|1.01	|0.25	|2,349|[93,109](https://www.databasevisual.com/places-365-leaks)|[View](https://www.databasevisual.com/places-365-anomalies)|
 |[herbarium-2022-fgvc9](https://www.kaggle.com/c/herbarium-2022-fgvc9)	|1,050,179	|0.69	|0.17	|1,598	|[33,115](https://www.databasevisual.com/herbarium-leaks)|[View](https://www.databasevisual.com/herbarium-2022-anomalies)|
 |[landmark-recognition-2021](https://www.kaggle.com/c/landmark-recognition-2021)|1,590,815|0.96	|0.24	|2,236	|[2,613](https://www.databasevisual.com/landmarks-2021-leaks)|[View](https://www.databasevisual.com/landmark-anomalies)|
-|[imdb-wiki](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/)	|514,883	|0.65	|0.16	|1,509	|[187,965](https://www.databasevisual.com/imdb-wiki-leaks)|[View](https://www.databasevisual.com/imdb-wiki-anomalies)|
+|[visualgenome](https://visualgenome.org/)		|108,079	|0.05	|0.01	|124	|223|View|
 |[iwildcam2021-fgvc9](https://www.kaggle.com/c/iwildcam2022-fgvc9/)	|261,428	|0.29	|0.07	|682	|[54](https://www.databasevisual.com/iwildcam2022-leaks)|[View](https://www.databasevisual.com/iwildcam2022-anomalies)|
 |[coco](https://cocodataset.org/#home)			|163,957	|0.09	|0.02	|218	|54|View|
-|[visualgenome](https://visualgenome.org/)		|108,079	|0.05	|0.01	|124	|223|View|
 |[sku110k](https://github.com/eg4000/SKU110K_CVPR19)		|11,743	|0.03	|0.01	|77	|[7](https://www.databasevisual.com/sku110k-leaks)|[View](https://www.databasevisual.com/sku110k-anomalies)|
 
 * Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
