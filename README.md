@@ -8,6 +8,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in ms-coco and imagenet-21K dataset*
 
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in a landmarks 2021 dataset (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
@@ -23,7 +24,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 
 ## Results on Key Datasets
-We have thourougly tested fastdup across various famous visual datasets. Ranging from pilar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits. This is a new unknown result! Full results are below.
+We have thourougly tested fastdup across various famous visual datasets. Ranging from pilar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits (train/val splits are taken from https://github.com/Alibaba-MIIL/ImageNet21K). This is a new unknown result! Full results are below.
 
 ### FastDup is FAST
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
