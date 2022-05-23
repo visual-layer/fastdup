@@ -70,7 +70,12 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 ### Support for s3 cloud/ google storage
 [Detailed instructions](CLOUD.md)
 
-### Getting started example (Food-101 Dataset, can be found under examples/)
+### Getting started examples
+(Food-101 Dataset, can be found under examples/)
+[Finding duplicates and outliers in the Food-101 datadset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
+
+[Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
