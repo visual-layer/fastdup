@@ -38,8 +38,8 @@ We have thoroughly tested fastdup across various famous visual datasets. Ranging
 |[coco](https://cocodataset.org/#home)			|163,957	|0.09	|0.02	|218	|54|View|
 |[sku110k](https://github.com/eg4000/SKU110K_CVPR19)		|11,743	|0.03	|0.01	|77	|[7](https://www.databasevisual.com/sku110k-leaks)|[View](https://www.databasevisual.com/sku110k-anomalies)|
 
-* Experiments on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
-
+* Experiments presented are on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
+* All experiments could be also reproduced on a 8 core, 32GB machine (excluding Imagenet-21K).
 * We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
 
 ## Quick Installation (Ubuntu 20.04 or Ubuntu 18.04)
