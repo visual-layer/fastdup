@@ -18,7 +18,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 *Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wine flavors from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. *
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset.*
 
 
 
