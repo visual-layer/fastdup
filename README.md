@@ -14,6 +14,15 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face detection, gender and age detection)*
 
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wine flavors from their image.*
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. *
+
+
+
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*
 
@@ -75,4 +84,5 @@ We build upon several excellent open source tools. [Microsoft's ONNX Runtime](ht
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a><br>
-<a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>
+<a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+<a href="https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA">Join our Slack channel</a>
