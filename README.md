@@ -46,13 +46,13 @@ We have thoroughly tested fastdup across various famous visual datasets. Ranging
 * All experiments could be also reproduced on a 8 core, 32GB machine (excluding Imagenet-21K).
 * We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
 
-## Quick Installation (Ubuntu 20.04 or Ubuntu 18.04)
-For Python 3.7 and 3.8
+# Quick Installation 
+For Python 3.7 and 3.8 (Ubuntu 20.04 or Ubuntu 18.04)
 ```python
 python3.8 -m pip install fastdup
 ```
 
-## Running the code
+# Running the code
 
 ```python
 import fastdup
@@ -64,11 +64,11 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
-#### Getting started examples
+## Getting started examples
 - [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
 - [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 
-#### Detailed instructions
+## Detailed instructions
 [Detailed isntructions, install from stable release and installation issues](INSTALL.md)
 [Detailed running instructions](RUN.md)
 
