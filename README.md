@@ -52,31 +52,31 @@ For Python 3.7 and 3.8
 python3.8 -m pip install fastdup
 ```
 
-[Detailed isntructions, install from stable release and installation issues](INSTALL.md)
-
-
 ## Running the code
 
 ### Python
 ```python
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder")                              #main running function
-fastdup.create_duplicates_gallery('similarity.csv', save_path='.')         #create a visual gallery of found duplicates
-fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')         #create a visual gallery of anomalies
+fastdup.run(input_dir="/path/to/your/folder")                            #main running function
+fastdup.create_duplicates_gallery('similarity.csv', save_path='.')       #create a visual gallery of found duplicates
+fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create a visual gallery of anomalies
 ```
-
-[Detailed running instructions](RUN.md)
-
-## Getting started examples
-- [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
-- [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
+### Getting started examples
+- [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
+- [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
+
+### Detailed instructions
+[Detailed isntructions, install from stable release and installation issues](INSTALL.md)
+[Detailed running instructions](RUN.md)
+
 
 # Technology
 We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli).
+
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a><br>
