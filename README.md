@@ -54,7 +54,6 @@ python3.8 -m pip install fastdup
 
 ## Running the code
 
-### Python
 ```python
 import fastdup
 fastdup.run(input_dir="/path/to/your/folder")                            #main running function
@@ -65,15 +64,15 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
-### Getting started examples
+#### Getting started examples
 - [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
 - [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 
-### Detailed instructions
+#### Detailed instructions
 [Detailed isntructions, install from stable release and installation issues](INSTALL.md)
 [Detailed running instructions](RUN.md)
 
-## Support 
+# Support 
 <a href="https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA">Join our Slack channel</a>
 
 # Technology
