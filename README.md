@@ -69,8 +69,8 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 - [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 
 ## Detailed instructions
-[Detailed isntructions, install from stable release and installation issues](INSTALL.md)
-[Detailed running instructions](RUN.md)
+- [Detailed isntructions, install from stable release and installation issues](INSTALL.md)
+- [Detailed running instructions](RUN.md)
 
 # Support 
 <a href="https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA">Join our Slack channel</a>
