@@ -8,20 +8,20 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset.* Different labels to visually similar red-wine images.
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face detection, gender and age detection)*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in the [Google Landmark Recognition 2021 dataset](https://www.kaggle.com/competitions/landmark-recognition-2021) (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wine flavors from their image.*
-
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset* Different labels to visaully similar daisy flower images.
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset.* Different labels to visually similar red-wine images.
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wine flavors from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
