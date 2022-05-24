@@ -74,5 +74,5 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')         #crea
 We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli).
 
 # About Us
-<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>
+<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a><br>
 <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>
