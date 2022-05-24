@@ -54,20 +54,13 @@ python3.8 -m pip install fastdup
 
 ### Python
 ```python
-python3.8
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #main running function
-```
-  
-### C++
-```bash
-/usr/bin/fastdup /path/to/your/folder --work_dir="/tmp/fastdup_files"
+fastdup.run(input_dir="/path/to/your/folder")                              #main running function
+fastdup.create_duplicates_gallery('similarity.csv', save_path='.')         #create a visual gallery of found duplicates
+fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')         #create a visual gallery of anomalies
 ```
 
 [Detailed running instructions](RUN.md)
-
-### Support for s3 cloud/ google storage
-[Detailed instructions](CLOUD.md)
 
 ## Getting started examples
 - [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
@@ -79,3 +72,7 @@ fastdup.run(input_dir="/path/to/your/folder", work_dir="/path/to/your/folder") #
 
 # Technology
 We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli).
+
+# About Us
+<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>
+<a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>
