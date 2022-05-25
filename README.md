@@ -17,7 +17,10 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 *Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wine flavors from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset.* Different labels to visually similar red-wine images.
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. Different labels to visually similar red-wine images.*
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_broken.png)
+*Thousands of broken ImageNet images that have confusing labels of real objects.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face detection, gender and age detection)*
