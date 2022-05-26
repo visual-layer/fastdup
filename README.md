@@ -2,12 +2,9 @@
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
 
-> Large Image Datasets Todaty are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a><br> | 
-> <a href="[https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22](https://youtu.be/16v_6Vk59hc)">Video Tutorial </a><br>
+> Large Image Datasets Todaty are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a><br> | <a href="[https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22](https://youtu.be/16v_6Vk59hc)">Video Tutorial </a><br>
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
-
-READ OUT FASTDUP [BLOG POST](https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22).
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
