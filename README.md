@@ -1,10 +1,9 @@
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
-<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a><br>
-<a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
-> Large Image Datasets Todaty are a Mess | `Blog Post <https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22>`_ | `Video Tutorial <https://youtu.be/16v_6Vk59hc>`_ 
+> Large Image Datasets Todaty are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a><br> | 
+> <a href="[https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22](https://youtu.be/16v_6Vk59hc)">Video Tutorial </a><br>
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
 
