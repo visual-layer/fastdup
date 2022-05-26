@@ -1,8 +1,7 @@
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
-
-> Large Image Datasets Todaty are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a><br> <a href="https://youtu.be/16v_6Vk59hc">Video Tutorial </a><br>
+> Large Image Datasets Today are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a> | <a href="https://youtu.be/16v_6Vk59hc">Video Tutorial </a><br>
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
 
@@ -84,8 +83,6 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 # Technology
 We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli).
 
-
 # About Us
-<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a><br>
-<a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
