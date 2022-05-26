@@ -56,17 +56,29 @@ sudo dpkg -i fastdup-<VERSION>-ubuntu-20.04.deb
 ```
 Application name is fastdup.
 
+# Docker
+
+```bash
+docker build -f Dockerfile .
+```
+
+
+
+
 # Currently supported software/hardware
 
 Operating system
 - `Ubuntu 20.04 LTS`
 - `Ubuntu 18.04 LTS`
+- `Mac OSX M1 Chip`
 
 Software versions
 - `Python 3.8` (via pip) or `Python 3.7` (via pip or conda) or a `debian package` (Python is not required)
 
 Hardware support
 - CPU (GPU not needed!)
+
+
 
 
 # Common installation issues and their solution
