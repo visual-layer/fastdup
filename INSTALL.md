@@ -57,9 +57,15 @@ sudo dpkg -i fastdup-<VERSION>-ubuntu-20.04.deb
 Application name is fastdup.
 
 # Docker
-
+##Pull from docker hub the latest ubuntu
 ```bash
-docker build -f Dockerfile .
+docker pull karpadoni/fastdup-ubuntu-20.04
+```
+
+
+## Build your own docker
+```bash
+docker build -f Dockerfile -t fastdup-ubuntu .
 ```
 
 
