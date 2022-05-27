@@ -1,3 +1,4 @@
+![PyPI - Downloads](https://img.shields.io/pypi/dm/fastdup)
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
