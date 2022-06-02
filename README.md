@@ -35,7 +35,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
 
-## Comoimg soon: performa image graph search (please reach out if you like to beta test)
+## Comoimg soon: image graph search (please reach out if you like to beta test)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz23.png)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz2.png)
 *Upcoming new features: image graph search!*
