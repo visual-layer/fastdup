@@ -62,8 +62,8 @@ Alternatively, it is also possible to give a location of a file listing images f
 
 The input to fastdup tool is given in the command line argument: `data_dir`. There are a few options:
 - Location of a local folder. In that case all images in this folder are searched recursively.
-- Location of an s3 path. Again all images in the path will be used recursively.
-- A file containing image locations (either local or full s3 paths). Each image in its own row.
+- Location of an `s3` path. Again all images in the path will be used recursively.
+- A file containing image locations (either local or full `s3` paths). Each image filename in its own row.
 
 The intermediate outputs and final outputs are stored in the folder `work_dir`.
 
@@ -129,7 +129,7 @@ When using faiss an additional intermediate results file is created: `faiss.inde
 
 Following the image feature extraction and the contruction of the nearest neighbor model of paris of similar images, fastdup runs a connected component algorithm to cluster similar images together in groups. See [turi create](https://apple.github.io/turicreate/docs/api/generated/turicreate.connected_components.create.html). The connected components algorithm takes the pairs computed by fastdup in the `similarity.csv` file, builds a graph structure from them, and computes connected clusters of images.
 
-- A file named `components_info.csv` is created with number of nodes (=images) per component (=cluster of images)..
+- A file named `components_info.csv` is created with number of nodes (=images) per component (=cluster of images).
 
 Example:
 
@@ -164,6 +164,11 @@ __id,component_id,pagerank,delta
 - `delta` - pagerank related change
 
 In the above example, both image 2 and 4 are part of component 19, images 0,1,3 have their own unique component, which means they are not connected to the other images in the graph. For experimenting with differnet component thresholds, change the parameter `ccthreshold` which is given inside `turi_param='ccthreshold=0.88'` flag. When the `ccthreshold` is higher, less images are grouped together and more components are created. When the ccthreshold is lower, more images are grouped together and less components are created.
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/vis42.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/vis46.png)
+*Exaple components obtained from the ImageNet dataset using ccthreshold=0.96*
+
 
 ## Error handling
 
