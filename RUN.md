@@ -11,6 +11,8 @@ Alternatively, it is also possible to give a location of a file listing images f
 
         work_dir (str): Working directory for saving intermediate results and outputs.
 
+	test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
+
         compute (str): Compute type [cpu|gpu] default is cpu.
 
         verbose (boolean): Verbosity. Default is False.
@@ -24,7 +26,9 @@ Alternatively, it is also possible to give a location of a file listing images f
         - ccthreshold=XX where XX in the range [0,1]. Construct similarities graph when the similarity > XX.
         - run_cc=0|1 Distable/enable connected components computation on the graph of similarities.
         - run_pagerank=0|1 Disable/enable pagerank computation on the graph of similarities.
-        - run_degree=0|1 Distable/enable degree distribution computation on the graph of similarities,
+        - run_degree=0|1 Distable/enable degree distribution computation on the graph of similarities
+   	- store_int=0|1 store the similarity as string filenames or string index of the file id (to save space)
+        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Default is cosine. Other distances are euclidean, squared_euclidean, manhattan.
 
