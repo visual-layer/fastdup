@@ -265,6 +265,7 @@ Note: the report should be generated on the same machine since we assume that th
 
 
 ## Advanced topics: resuming a stored run <a name="resume"/>
+
 There are several supported running modes:
 - `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
 It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
