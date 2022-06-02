@@ -204,26 +204,12 @@ Example command line:
 ```
 
 
-## Advanced topics: resuming a stored run
-There are several supported running modes:
-- `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
-It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
-The features are extracted and saved into the `working_dir` path  (the default features out file nme is `features.dat`
-in the same folder for storing the numpy features and `features.dat.csv` for storing the image file names corresponding to the numpy features).
-For larger dataset it may be wise to split the run into two, to make sure intermediate results are stored in case you encounter an error. 
-- `run_mode=1` computes the extracted features and stores them, does not compute the NN embedding. For large datasets, 
-it is possible to run on a few computing nodes, to extract the features, in parallel. Use the `min_offset` and `max_offset` flags to allocate a subset of the images for each computing node. Offsets start from 0 to `n-1` where `n` is the number of images in the input_dir folder.
-- `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
-- `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `input_dir` parameter. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
-- `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
-
-
 
 ## Visualizing the outputs
 
 The following command creates the html report:
 ```
-def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True):
+def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None):
 
     Function to create and display a gallery of images computed by the similarity metrics
 
@@ -239,7 +225,8 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 The html generated had 3 images in each row. To the left and middle are the two similar images, and the third image to the right is a superposition of both images on top of each other to show the differnces more easy.
 
 A second function create an html report gallery of outliers:
-   '''
+```
+def create_outliers_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None):
 
     Function to create and display a gallery of images computed by the outliers metrics
 
@@ -265,7 +252,22 @@ Note: the report should be generated on the same machine since we assume that th
 
 
 
+## Advanced topics: resuming a stored run
+There are several supported running modes:
+- `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
+It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
+The features are extracted and saved into the `working_dir` path  (the default features out file nme is `features.dat`
+in the same folder for storing the numpy features and `features.dat.csv` for storing the image file names corresponding to the numpy features).
+For larger dataset it may be wise to split the run into two, to make sure intermediate results are stored in case you encounter an error. 
+- `run_mode=1` computes the extracted features and stores them, does not compute the NN embedding. For large datasets, 
+it is possible to run on a few computing nodes, to extract the features, in parallel. Use the `min_offset` and `max_offset` flags to allocate a subset of the images for each computing node. Offsets start from 0 to `n-1` where `n` is the number of images in the input_dir folder.
+- `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
+- `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `input_dir` parameter. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
+- `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
+
+
 ### Support for s3 cloud/ google storage
+
 [Detailed instructions](CLOUD.md)
 
 
