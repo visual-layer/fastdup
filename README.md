@@ -1,7 +1,7 @@
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
-> Large Image Datasets Today are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a> | <a href="https://youtu.be/16v_6Vk59hc">Video Tutorial </a><br>
+> Large Image Datasets Today are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a> | <a href="https://youtu.be/vDqOlpZeeH8">Video Tutorial </a><br>
 
 FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
 
@@ -21,7 +21,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 ## Find outliers
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
-*[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face detection, gender and age detection)*
+*[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face recognition, gender and age classification)*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in the [Google Landmark Recognition 2021 dataset](https://www.kaggle.com/competitions/landmark-recognition-2021) (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
