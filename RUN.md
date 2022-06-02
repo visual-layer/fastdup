@@ -220,7 +220,6 @@ it is possible to run on a few computing nodes, to extract the features, in para
 
 
 ## Visualizing the outputs
-Once fastdup runs you can look at the results in an easy way using two options. When running from a jupyter notebook the code will produce a table gallery. Otherwise when running a from python shell an html report will be generated.
 
 The following command creates the html report:
 ```
@@ -233,14 +232,33 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         save_path (str): output folder location for the visuals
         num_images(int): Max number of images to display (deafult = 50)
         descending (boolean): If False, print the similarities from the least similar to the most similar. Default is True.
+	lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 ```
 
-# Example of the html generated.
+The html generated had 3 images in each row. To the left and middle are the two similar images, and the third image to the right is a superposition of both images on top of each other to show the differnces more easy.
 
-Example for the html report generation:
+A second function create an html report gallery of outliers:
+   '''
+
+    Function to create and display a gallery of images computed by the outliers metrics
+
+    Parameters:
+        outliers_file (str): csv file with the computed outliers by the fastdup tool
+        save_path (str): output folder location for the visuals
+
+        num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+
+        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+     '''
+
+
+Command line example for the html report generation:
 ```
 import fastdup
-fastdup.generate_duplicates_gallery(‘/path/to/similarity.csv’, save_path=’/path/to/report/’)
+fastdup.generate_duplicates_gallery('/path/to/similarity.csv', save_path='/path/to/report/')
 ```
 
 Note: the report should be generated on the same machine since we assume that the input folder for reading the images exists under the same location.
