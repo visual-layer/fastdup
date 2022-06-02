@@ -251,8 +251,7 @@ def create_outliers_gallery(similarity_file, save_path, num_images=20, descendin
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
-     '''
-
+```
 
 Command line example for the html report generation:
 ```
