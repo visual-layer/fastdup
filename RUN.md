@@ -1,5 +1,5 @@
   
-Detailed Python API documentation
+# Detailed Python API documentation
 
 ```
     Run fastdup tool for find duplicate and near duplicate images in a corpus of images. 
@@ -59,22 +59,20 @@ Alternatively, it is also possible to give a location of a file listing images f
 ```
   
 ## Input / output formats
-The input to fastdup tool is given in the command line argument: data_dir. There are a few options:
-Location of a local folder. In that case all images in this folder are searched recursively.
-Location of an s3 path. Again all images in the path will be used recursively.
-A file containing image locations (either local or full s3 paths). Each image in its own row.
 
-The intermediate outputs and final outputs are stored in the folder work_dir.
-Feature extraction related files:
-Binary numpy array containing n rows of 576 columns with the feature vectors. (Default filename is features.dat)
-An additional csv file containing the full paths to the image names corresponding to the feature vectors (default filename is features.dat.csv). This is needed from two reasons:
-The order of extraction may change depends on the file system listing 
-In case of corrupted images, its feature vector is skipped and not generated. In that case an additional output file is provided ( features.bad.csv) 
+The input to fastdup tool is given in the command line argument: `data_dir`. There are a few options:
+- Location of a local folder. In that case all images in this folder are searched recursively.
+- Location of an s3 path. Again all images in the path will be used recursively.
+- A file containing image locations (either local or full s3 paths). Each image in its own row.
 
-Similarity pair list
-The output of the fastdup tool is a similarity file (filename is similarity.csv) which is a csv file with 3 columns: from, to, distance. The file is sorted from the closest matching images to less similar images.
+The intermediate outputs and final outputs are stored in the folder `work_dir`.
 
-Note: for exploiting the binary features we provide the following function in Python:
+### Feature extraction related files:
+
+Binary numpy array containing `n` rows (where `n` is the number of images) of 576 columns with the feature vectors. (Default filename is `features.dat`)
+An additional csv file containing the full paths to the image names corresponding to the feature vectors (default filename is `features.dat.csv`). Both those files are linked to each other. The reason we save the list of filenaes is that theh order of extraction may change depends on the file system listing. In addition, in case of corrupted images, its feature vector is skipped and not generated. In that case an additional output file is provided ( `features.bad.csv`). This file lists all the bad or corrupted images that were skipped. 
+
+Note: for using the binary features we provide the following function in Python:
 
 ```
 def load_binary_feature(filename):
@@ -94,19 +92,87 @@ def load_binary_feature(filename):
 
 ```
 
-Faiss index files
-- When using faiss an additional intermediate results file is created: `faiss.index`.
 
-Graph computation
-- When enableing connected components a file named `components_info.csv` is created with number of nodes (=images) per component.
-- A file named `connected_components.csv` includes the output of pagerank, degree distribution and connected component assignments. The first column is the index in the `features.dat.csv` file (the image list). This file is sorted according to the list.
+### Similarity pair list
+
+The output of the fastdup tool is a similarity file (filename is `similarity.csv`) which is a csv file with 3 columns: `from`, `to`, `distance`. The file is sorted from the closest matching images to less similar images. Similarity scores are between 0 and 1 where 1 is identical.
+
+Example similarity file:
+
+```
+$ head similarity.csv
+from,to,distance
+/mnt/data/sku110k/train_4690.jpg,/mnt/data/sku110k/train_1720.jpg,0.920244
+/mnt/data/sku110k/val_202.jpg,/mnt/data/sku110k/train_4109.jpg,0.918458
+```
+Note that the number of image pairs inside the simiarity file is controlled by the `threshold` parameter. For example when `threshold=0.8` only image pairs with cosine similarity equal or larger than 0.8 are stored in the similarity file. 
+
+A second output of the fastdup tool is outlier file (filename is `outliers.csv`) which is a csv file with 3 columns: `from`,`to`,`distance`. The file is sorted from least outliers on top to the most outliers in the bottom. 
+
+Note that the number of image pairs inside the outlier file is controlled by the `lower_treshold` parameter which is the percentage. For example `lower_threshold=0.05` means that 5% outliers out of the total pairs of edges computed are stored in the outliers output file. When increasing `k` the number of nearest neighbor edges, the number of outliers increses as well since the outliers is from the number of pairs computed and not from the number of images.
+
+Example outliers file:
+
+```
+$ head outliers.csv
+from,to,distance
+/mnt/data/sku110k/train_7010.jpg,/mnt/data/sku110k/train_8110.jpg,0.54312
+/mnt/data/sku110k/train_7995.jpg,/mnt/data/sku110k/train_465.jpg,0.44212
+```
+
+
+### Faiss index files
+
+When using faiss an additional intermediate results file is created: `faiss.index`. This file is stored according to the faiss format.
+
+### Graph computation
+
+Following the image feature extraction and the contruction of the nearest neighbor model of paris of similar images, fastdup runs a connected component algorithm to cluster similar images together in groups. See [turi create](https://apple.github.io/turicreate/docs/api/generated/turicreate.connected_components.create.html). The connected components algorithm takes the pairs computed by fastdup in the `similarity.csv` file, builds a graph structure from them, and computes connected clusters of images.
+
+- A file named `components_info.csv` is created with number of nodes (=images) per component (=cluster of images)..
+
+Example:
+
+```
+$ head component_info.csv
+component_id,Count
+0,1
+1,1
+2,1
+3,1
+```
+
+- `component_id` is the integer component of the cluster of images. This is just an id, the number has no meaning.
+- `Count` the number of images clusterd together on this cluster. This is just a stastics, the actual mapping between component id and all the images on that component id cluster is explained below.
+
+- A file named `connected_components.csv` includes the output of [pagerank](https://apple.github.io/turicreate/docs/api/generated/turicreate.pagerank.create.html), degree distribution and connected component assignments. The first column is the index in the `features.dat.csv` file (the image list). This file is sorted according to the list.
+Example:
+
+```
+$ head connected_components.csv
+__id,component_id,pagerank,delta
+0,7,0.15,0
+1,16,0.15,0
+2,19,0.15,0
+3,14,0.15,0
+4,19,0.15,0
+```
+
+- `__id` - the offset in the `features.dat.csv` image list file. Offset starts from 0.
+- `component_id` - the id of the component, a positive integer. If two images have the same component_id it seems they have a graph connection
+- `pagerank` - pagerank sccore of the image based on the similarity graph
+- `delta` - pagerank related change
+
+In the above example, both image 2 and 4 are part of component 19, images 0,1,3 have their own unique component, which means they are not connected to the other images in the graph. For experimenting with differnet component thresholds, change the parameter `ccthreshold` which is given inside `turi_param='ccthreshold=0.88'` flag. When the `ccthreshold` is higher, less images are grouped together and more components are created. When the ccthreshold is lower, more images are grouped together and less components are created.
 
 ## Error handling
+
 When bad images are encountered, namely corrupted images that can not be read, an additional csv output file is generated called features.dat.bad. The bad images filenames are stored there. In addition there is a printout that states the number of good and bad images encountered. The good images filenames are stored in the file features.dat.csv file. Namely the bad images are excluded from the total images listing. The function fastdup.load_binary_features() reads the features corresponding to the good images and returns a list of all the good images, and a numpy array of all their corresponding features.
 The output file similarity.csv with the list of all similar pairs does not include any of the bad images.
 
 
-## Speeding up the nearest neighbor search
+## Nearest neighbor search
+
 Once short feature vectors are generated per each image, we cluster them to find similarities using a nearest neighbor method. FastDup supports two families of algorithms (given using the nn_provider command line argument)
 - turi
 - faiss
@@ -170,6 +236,10 @@ fastdup.generate_duplicates_gallery(‘/path/to/similarity.csv’, save_path=’
 
 Note: the report should be generated on the same machine since we assume that the input folder for reading the images exists under the same location.
 
+
+
+### Support for s3 cloud/ google storage
+[Detailed instructions](CLOUD.md)
 
 
 
