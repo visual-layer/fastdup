@@ -11,7 +11,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
-## Perform face detection
+## Perform face recognition
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz0.png)
 *Can you tell who is the same person?*
 
