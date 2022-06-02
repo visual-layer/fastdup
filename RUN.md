@@ -1,13 +1,16 @@
 
 ##### Table of Contents  
+
 [Running the code](#run)  
 [Input/Output](#input)
+[Error handling](#error)
 [Nearest neighbors](#nn)
 [Visualization](#visualization)
 [Resuming a stored run](#resume)
 [Support for cloud storage](#s3)
  
 <a name="run"/>
+
 ## Detailed Python API documentation
 The main function of fastdup is `run`. It works by extracting short feature vectors from each image, clsutering the images together using a nearest neighbor model which computes similarities of pairs of images. Then a graph is formed to deduce the network structure of local similarities. The input/ outputs are described below in the section Input/Output. 
 
@@ -72,6 +75,7 @@ Alternatively, it is also possible to give a location of a file listing images f
         Status code 0 = success, 1 = error.
 ```
 <a name="input"/>  
+
 ## Input / output formats
 
 The input to fastdup tool is given in the command line argument: `data_dir`. There are a few options:
@@ -184,6 +188,7 @@ In the above example, both image 2 and 4 are part of component 19, images 0,1,3 
 *Exaple components obtained from the ImageNet dataset using ccthreshold=0.96*
 
 <a name="error"/>
+
 ## Error handling
 
 When bad images are encountered, namely corrupted images that can not be read, an additional csv output file is generated called features.dat.bad. The bad images filenames are stored there. In addition there is a printout that states the number of good and bad images encountered. The good images filenames are stored in the file features.dat.csv file. Namely the bad images are excluded from the total images listing. The function fastdup.load_binary_features() reads the features corresponding to the good images and returns a list of all the good images, and a numpy array of all their corresponding features.
@@ -191,6 +196,7 @@ The output file similarity.csv with the list of all similar pairs does not inclu
 
 
 <a name="nn"/>
+
 ## Nearest neighbor search
 
 Once short feature vectors are generated per each image, we cluster them to find similarities using a nearest neighbor method. FastDup supports two families of algorithms (given using the nn_provider command line argument)
@@ -263,6 +269,7 @@ Note: the report should be generated on the same machine since we assume that th
 
 
 <a name="resume"/>
+
 ## Advanced topics: resuming a stored run
 There are several supported running modes:
 - `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
@@ -277,6 +284,7 @@ it is possible to run on a few computing nodes, to extract the features, in para
 - `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
 
 <a name="s3"/>
+
 ## Support for s3 cloud/ google storage
 
 [Detailed instructions](CLOUD.md)
