@@ -7,29 +7,37 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
+## Identify duplicates
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
-*Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
-
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wines from their image.*
-
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. All daisies..*
-
+## Find corrupated and broken images
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_broken.png)
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
 
+## Find outliers
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face detection, gender and age detection)*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in the [Google Landmark Recognition 2021 dataset](https://www.kaggle.com/competitions/landmark-recognition-2021) (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
+## Find wrong labels
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
+*Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/daisy.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) datas## Find image with contradicting labels
+
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wines from their image.*
+
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
+
+## To be released soon: performa image graph search
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz23.png)
+*Upcoming new features: image graph search!*
 
 
 ## Results on Key Datasets
