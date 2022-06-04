@@ -42,6 +42,8 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ## Coming soon: image graph search (please reach out if you like to beta test)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz23.png)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz2.png)
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/tmp13_viz5.png)
+
 *Upcoming new features: image graph search!*
 
 
