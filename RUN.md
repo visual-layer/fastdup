@@ -7,7 +7,7 @@
 4. [Nearest neighbors](#nn)
 5. [Visualization](#visualization)
 6. [Resuming a stored run](#resume)
-7. [Running using your own extracted features](#extract)
+7. [Running using your own extracted features](#external)
 8. [Support for cloud storage](#s3)
  
 
@@ -278,7 +278,7 @@ it is possible to run on a few computing nodes, to extract the features, in para
 - `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `input_dir` parameter. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
 - `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
 
-## Advacned topics: providing externally computed feature vectors <a name="external"/>
+## Advanced topics: providing externally computed feature vectors <a name="external"/>
 
 It is possible to compute feature vectors on your own. For running fastdup with your own feature vectors export the feature vectors into binary format using the function `fastdup.save_binary_feature(save_path, filenames, np_array)`. Where `save_path` is the folder you like to run from, filenames is a list of aboslute paths of the images of length `n`, and `np_array` is a matrix of size `n x d` where `d` is the feature vector length. Note that the np_array should be of type `'float32'`.  
 
