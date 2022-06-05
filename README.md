@@ -1,3 +1,4 @@
+[![Downloads](https://pepy.tech/badge/fastdup)](https://pepy.tech/project/fastdup)
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
