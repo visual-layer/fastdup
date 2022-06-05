@@ -7,7 +7,8 @@
 4. [Nearest neighbors](#nn)
 5. [Visualization](#visualization)
 6. [Resuming a stored run](#resume)
-7. [Support for cloud storage](#s3)
+7. [Running using your own extracted features](#extract)
+8. [Support for cloud storage](#s3)
  
 
 ## Detailed Python API documentation <a name="run"/>
