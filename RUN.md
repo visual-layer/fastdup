@@ -280,9 +280,9 @@ it is possible to run on a few computing nodes, to extract the features, in para
 
 ## Advanced topics: providing externally computed feature vectors <a name="external"/>
 
-It is possible to compute feature vectors on your own. For running fastdup with your own feature vectors export the feature vectors into binary format using the function `fastdup.save_binary_feature(save_path, filenames, np_array)`. Where `save_path` is the folder you like to run from, filenames is a list of aboslute paths of the images of length `n`, and `np_array` is a matrix of size `n x d` where `d` is the feature vector length. Note that the np_array should be of type `'float32'`.  
+It is possible to compute feature vectors on your own. For running fastdup with your own feature vectors export the feature vectors into binary format using the function `fastdup.save_binary_feature(save_path, filenames, np_array)`. Where `save_path` is the folder you like to run from, `filenames` is a list of aboslute paths of the images of length `n`, and `np_array` is a matrix of size `n x d` where `d` is the feature vector length. Note that the `np_array` should be of type `'float32'`.  
 
-Next run fastdup with run_mode=2 (which skips the image extraction phase and loads your stored features instead) and make sure to point `work_dir` to the `save_path` which is the location of your stored features. Don't forget to assign `d` to your feature length.
+Next run fastdup with `run_mode=2` (which skips the image extraction phase and loads your stored features instead) and make sure to point `work_dir` to the `save_path` which is the location of your stored features. Don't forget to assign `d` to your feature length.
 
 Example:
 ```python
