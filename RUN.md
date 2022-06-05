@@ -286,8 +286,10 @@ Next run fastdup with `run_mode=2` (which skips the image extraction phase and l
 
 Example:
 ```python
+import os
 import fastdup 
 import numpy as np
+
 filesnames = ['a.jpg', 'b.jpg', 'c.jpg']
 d = 20 # feature length
 n = 3 # number of images
@@ -295,7 +297,11 @@ work_dir = '/path/to/work_dir'  # temp working directory
 array = np.random.rand(n,d)
 fastdup.save_binary_feature(work_dir, filenames, array)
 fastdup.run('/path/to/images', work_dir=work_dir, d=d, run_mode=2)
+...
+fastdup.create_duplicates_gallery(os.path.join(work_dir, 'similarity.csv'))
 ```
+
+Note: the `similarity.csv` file is saved to the `work_dir`.
 
 ## Support for s3 cloud/ google storage <a name="s3"/>
 
