@@ -300,18 +300,19 @@ train_array = np.random.rand(train_n,d) # replace this placeholder with your own
 #export the feature in fastdup readable format
 fastdup.save_binary_feature(work_dir, filenames, train_array)
 # build the NN model and store it to work_dir/faiss.index
-fastdup.run('/path/to/abs_image_paths.txt', work_dir=work_dir, d=d, run_mode=2)
+fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=work_dir, d=d, run_mode=2)
 ...
 # Now search for test images using your precomputed features
+test_filenames = ['d.jpg', 'e.jpg']
+test_n = 2
 test_dir = 'path/to/test_dir'
 test_array = np.random.rand(test_n, d) # replace placeholder this with your own test features
-fastdup.save_binary_feature(test_dir, filenames, test_array)
+fastdup.save_binary_feature(test_dir, test_filenames, test_array)
 shutil.copy(os.path.join(work_dir, 'faiss.index'), test_dir)
-fastdup.run('/path/to/abs_image_paths.txt', work_dir=test_dir, d=d ,run_mode=4)
+fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=test_dir, d=d ,run_mode=4)
 fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 ```
 
-Note: the `similarity.csv` file is saved to the `work_dir`.
 
 ## Support for s3 cloud/ google storage <a name="s3"/>
 
