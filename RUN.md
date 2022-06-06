@@ -288,6 +288,7 @@ Example:
 ```python
 import os
 import fastdup 
+import shutil
 import numpy as np
 
 filesnames = ['a.jpg', 'b.jpg', 'c.jpg']
@@ -305,7 +306,8 @@ fastdup.run('/path/to/abs_image_paths.txt', work_dir=work_dir, d=d, run_mode=2)
 test_dir = 'path/to/test_dir'
 test_array = np.random.rand(test_n, d) # replace placeholder this with your own test features
 fastdup.save_binary_feature(test_dir, filenames, test_array)
-fastdup.run('/path/to/abs_image_paths.txt', work_dir=work_dir, test_dir=test_dir, d=d ,run_mode=4)
+shutil.copy(os.path.join(work_dir, 'faiss.index'), test_dir)
+fastdup.run('/path/to/abs_image_paths.txt', work_dir=test_dir, d=d ,run_mode=4)
 fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 ```
 
