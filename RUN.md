@@ -278,9 +278,9 @@ it is possible to run on a few computing nodes, to extract the features, in para
 - `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `input_dir` parameter. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
 - `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
 
-## Advanced topics: providing externally computed feature vectors <a name="external"/>
+## Advanced topics: vector search <a name="external"/>
 
-It is possible to compute feature vectors on your own. For running fastdup with your own feature vectors export the feature vectors into binary format using the function `fastdup.save_binary_feature(save_path, filenames, np_array)`. Where `save_path` is the folder you like to run from, `filenames` is a list of aboslute paths of the images of length `n`, and `np_array` is a matrix of size `n x d` where `d` is the feature vector length. Note that the `np_array` should be of type `'float32'`.  
+It is possible to use fastdup for feature vector search. We assume you have feature vectors computed for your training data. Save your computed features using  `fastdup.save_binary_feature(save_path, filenames, np_array)`. Where `save_path` is the folder you like to run from, `filenames` is a list of aboslute paths of the images of length `n`, and `np_array` is a matrix of size `n x d` where `d` is the feature vector length. Note that the `np_array` should be of type `'float32'`.  
 
 Next run fastdup with `run_mode=2` (which skips the image extraction phase and loads your stored features instead) and make sure to point `work_dir` to the `save_path` which is the location of your stored features. Don't forget to assign `d` to your feature length.
 
@@ -292,13 +292,21 @@ import numpy as np
 
 filesnames = ['a.jpg', 'b.jpg', 'c.jpg']
 d = 20 # feature length
-n = 3 # number of images
-work_dir = '/path/to/work_dir'  # temp working directory
-array = np.random.rand(n,d)
-fastdup.save_binary_feature(work_dir, filenames, array)
-fastdup.run('/path/to/images', work_dir=work_dir, d=d, run_mode=2)
+train_n = 3 # number of images
+work_dir = '/path/to/train_dir'  # temp working directory
+train_array = np.random.rand(train_n,d) # replace this placeholder with your own features
+
+#export the feature in fastdup readable format
+fastdup.save_binary_feature(work_dir, filenames, train_array)
+# build the NN model and store it to work_dir/faiss.index
+fastdup.run('/path/to/abs_image_paths.txt', work_dir=work_dir, d=d, run_mode=2)
 ...
-fastdup.create_duplicates_gallery(os.path.join(work_dir, 'similarity.csv'))
+# Now search for test images using your precomputed features
+test_dir = 'path/to/test_dir'
+test_array = np.random.rand(test_n, d) # replace placeholder this with your own test features
+fastdup.save_binary_feature(test_dir, filenames, test_array)
+fastdup.run('/path/to/abs_image_paths.txt', work_dir=work_dir, test_dir=test_dir, d=d ,run_mode=4)
+fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 ```
 
 Note: the `similarity.csv` file is saved to the `work_dir`.
