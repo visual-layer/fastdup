@@ -79,7 +79,8 @@ docker build -f Dockerfile -t fastdup-ubuntu .
 Operating system
 - `Ubuntu 20.04 LTS`
 - `Ubuntu 18.04 LTS`
-- `Mac OSX M1 Chip`
+- `Mac OSX M1 Chip` (tested on Big Sur)
+- `Mac Intel Chip` (tested on Mojave)
 
 Software versions
 - `Python 3.8` (via pip) or `Python 3.7` (via pip or conda) or a `debian package` (Python is not required)
