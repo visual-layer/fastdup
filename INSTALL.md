@@ -24,6 +24,8 @@ python3.8 -m pip install --upgrade pip
 python3.8 -m pip install fastdup
 ```
 
+Note: you may need to upgrade your pip, using the command `python3.8 -m pip install -U pip`.
+
 ## Using stable release
 
 - download the latest wheel for your system from our [release page](https://github.com/visualdatabase/fastdup/releases). Assuming the wheel file is found in your working folder, run:
@@ -31,6 +33,8 @@ python3.8 -m pip install fastdup
 ```bash
 python3.8 -m pip install *.whl
 ```
+
+Note: you may need to upgrade your pip, using the command `python3.8 -m pip install -U pip`.
 
 # Conda setup (Python 3.7 only)
 ## Using Anaconda channels:
@@ -94,11 +98,11 @@ Hardware support
 # Common installation issues and their solution
 
 ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel on this platform.
-- Check that you are on ubuntu 20.04 or 18.04 (via the command `lsb_release -r`). 
-- Check that you are using the right python version (python3.8 and not python). 
+- Check that you are on ubuntu 20.04 or 18.04 (via the command `lsb_release -r`). Alternatively on Mac M1 Big Sur or Mac Intel Mojave (use the command `sw_vers`) 
+- Check that you are using the right python version (python3.8 and not python) 
 - Make sure pip is up to date using `python3.8 -m pip install -U pip`). 
 - Make sure you install using `python3.8 -m pip install..` and not just `pip install...`.
-- If that does not work, please open an issue with the otuput of `python3.8 -m pip debug --verbose` 
+- If that does not work, please open an issue with the otuput of `python3.8 -m pip debug --verbose` or join our slack channel.
 
 ERROR: `libGL.so.1: cannot open shared object file: No such file or directory`
 - Need to install depedency: `sudo apt -y nstall libgl1-mesa-glx`
