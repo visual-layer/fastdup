@@ -367,7 +367,7 @@ fastdup.run('s3://mybucket/myfolder', run_mode=1, work_dir='/path/to/work_dir',
             min_offset=0, max_offset=2000)
 
 ```
-The first job runs on 2000 tars from 0 to 2000 not including. Next you can run with `min_offset=2000, max_offset=4000` etc. 
+The first job runs on 2000 tars from 0 to 2000 not including. In parallel you can run with `min_offset=2000, max_offset=4000` on another node etc. We estimate the extraction speed in around 4M images per hour on a 32 core machine (no GPU).
 
 Once all jobs are finished, collect all the output files from the `work_dir` into a single location and run:
 
