@@ -359,7 +359,7 @@ Note that it is possible to configure the behaviour regarding deletion of files.
 ```
 This keeps all the downloaded tars and images in the /tmp folder.
 
-Running example. Assume you got to the full dataset downloaded into s3://mybucket/myfolder. In total there are 40,000 tar files. Further assume you want to run using 20 compute nodes to extract the feature in parallel. In this case you cam run:
+Running example. Assume you got to the full dataset downloaded into `s3://mybucket/myfolder`. In total there are 40,000 tar files. Further assume you want to run using 20 compute nodes to extract the feature in parallel. In this case you cam run:
 
 ```python
 import fastdup
@@ -369,11 +369,11 @@ fastdup.run('s3://mybucket/myfolder', run_mode=1, work_dir='/path/to/work_dir',
 ```
 The first job runs on 2000 tars from 0 to 2000 not including. Next you can run with `min_offset=2000, max_offset=4000` etc.
 
-Once all jobs are finished, collect all the output files from the work_dir into a single location and run:
+Once all jobs are finished, collect all the output files from the `work_dir` into a single location and run:
 
 ```python
 import fastdup
-fastdup.run('', run_mode=2, work_dir='/path/to/work_dir)
+fastdup.run('', run_mode=2, work_dir='/path/to/work_dir')
 ```
 
 For running on 50M images you will need an ubuntu machine with 32 cores and 256GB RAM. We are working on further scaling the implementation for the full dataset - stay tuned!
