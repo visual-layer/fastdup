@@ -9,6 +9,7 @@
 6. [Resuming a stored run](#resume)
 7. [Performing vector search](#external)
 8. [Support for cloud storage](#s3)
+9. [Working with tar/zip files as input](#tar)
  
 
 ## Detailed Python API documentation <a name="run"/>
@@ -322,6 +323,61 @@ fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 ## Support for s3 cloud/ google storage <a name="s3"/>
 
 [Detailed instructions](CLOUD.md)
+
+## Working with tar/tgz/zip files as input <a name="tar"/>
+
+Some popular datasets like [LAOIN 400M](https://laion.ai/laion-400-open-dataset/) use webdataset compressed formats. Fastdup supports the following compressed file formats: `tar,tgz,tar.gz,zip`. Those compressed files can be located in a local folder or remote s3 or minio path.
+
+For example, the LAOIN dataset contains the following tar files:
+
+```
+00000.tar containing:
+000000000.jpg
+000000001.jpg
+000000002.jpg
+...
+```
+Each tar file contains 10K images.
+
+When working with compressed files you need to run with `run_mode=1` for performing the extraction of feature vectors first, since we do not know ahead how many files are in each tar when copied from s3. After the feature vectors are extracted, collect all the output files into the same folder and run again with `run_mode=2` to compute the NN model.
+
+The compressed are first copied locally into the `/tmp/<tarname>/` folder and then extracted. For each compressed tar file we generate two output files: `<tarnamr>features.dat` for the binary features and `<tarname>features.dat.csv` for the file list.
+
+Example output file for the tar above (the path is given via the `work_dir` command line argument).
+
+```
+$ cat 00000.tarfeatures.dat.csv
+filename
+/tmp/00000.tar/000000000.jpg
+/tmp/00000.tar/000000001.jpg
+...
+```
+
+Note that it is possible to configure the behaviour regarding deletion of files. On default, both the downloaded tar files and the extracted images are deleted after the feature vectors are extracted. If you want to keep them locally (assuming there is large enough hard drive) you can run with : 
+```
+... turi_param='delete_tar=0,delete_img=0'
+```
+This keeps all the downloaded tars and images in the /tmp folder.
+
+Running example. Assume you got to the full dataset downloaded into s3://mybucket/myfolder. In total there are 40,000 tar files. Further assume you want to run using 20 compute nodes to extract the feature in parallel. In this case you cam run:
+
+```python
+import fastdup
+fastdup.run('s3://mybucket/myfolder', run_mode=1, work_dir='/path/to/work_dir',
+            min_offset=0, max_offset=2000)
+
+```
+The first job runs on 2000 tars from 0 to 2000 not including. Next you can run with `min_offset=2000, max_offset=4000` etc.
+
+Once all jobs are finished, collect all the output files from the work_dir into a single location and run:
+
+```python
+import fastdup
+fastdup.run('', run_mode=2, work_dir='/path/to/work_dir)
+```
+
+For running on 50M images you will need an ubuntu machine with 32 cores and 256GB RAM. We are working on further scaling the implementation for the full dataset - stay tuned!
+
 
 
 
