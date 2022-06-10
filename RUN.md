@@ -341,7 +341,7 @@ Each tar file contains 10K images.
 
 When working with compressed files you need to run with `run_mode=1` for performing the extraction of feature vectors first, since we do not know ahead how many files are in each tar when copied from s3. After the feature vectors are extracted, collect all the output files into the same folder and run again with `run_mode=2` to compute the NN model.
 
-The compressed are first copied locally into the `/tmp/<tarname>/` folder and then extracted. For each compressed tar file we generate two output files: `<tarnamr>features.dat` for the binary features and `<tarname>features.dat.csv` for the file list.
+The compressed files are first copied locally into the `/tmp/<tarname>/` folder and then extracted. For each compressed tar file we generate two output files: `<tarname>features.dat` for the binary features and `<tarname>features.dat.csv` for the file list.
 
 Example output file for the tar above (the path is given via the `work_dir` command line argument).
 
@@ -367,7 +367,7 @@ fastdup.run('s3://mybucket/myfolder', run_mode=1, work_dir='/path/to/work_dir',
             min_offset=0, max_offset=2000)
 
 ```
-The first job runs on 2000 tars from 0 to 2000 not including. Next you can run with `min_offset=2000, max_offset=4000` etc.
+The first job runs on 2000 tars from 0 to 2000 not including. Next you can run with `min_offset=2000, max_offset=4000` etc. 
 
 Once all jobs are finished, collect all the output files from the `work_dir` into a single location and run:
 
