@@ -77,10 +77,12 @@ Alternatively, it is also possible to give a location of a file listing images f
 
 ## Input / output formats <a name="input"/>  
 
-The input to fastdup tool is given in the command line argument: `data_dir`. There are a few options:
-- Location of a local folder. In that case all images in this folder are searched recursively.
+The input to fastdup tool is given in the command line argument: `input_dir`. There are a few options:
+- Location of a local folder. In that case all images in this folder are searched recursively. Supported images are jpeg, jpg, tiff, tif, giff, png. 
 - Location of an `s3` path. Again all images in the path will be used recursively.
+- Location of a minio client path. Path should start with minio:// for example `minio://google/my_bucket/my_folder`.
 - A file containing image locations (either local or full `s3` paths). Each image filename in its own row.
+- In addition we support tar, tgz, tar.gz and zip files containing images. Those files could be either local, or on s3 bucket or minio clinet.
 
 The intermediate outputs and final outputs are stored in the folder `work_dir`.
 
@@ -102,6 +104,9 @@ def load_binary_feature(filename):
     Returns:
         A list of with all image file names of length X.
         An np matrix of shape X rows x 576 cols. Each row conform to feature vector os a single image.
+
+    Note: 
+       When using tar, tgz, tar.gz or zip files, for each file a different features.dat and feature.dat.csv are created.
 
     Example:
         import fastdup
