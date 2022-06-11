@@ -1,5 +1,9 @@
 [![Downloads](https://pepy.tech/badge/fastdup)](https://pepy.tech/project/fastdup)
 
+<div>
+   <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+</div>
+
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
 > Large Image Datasets Today are a Mess | <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Blog Post</a> | <a href="https://youtu.be/vDqOlpZeeH8">Video Tutorial </a><br>
@@ -87,7 +91,8 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 
 ## Getting started examples
 - [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
-- [Finding duplicates and outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
+- [Finding duplicates, outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
+- [Finding duplicates, outliers and connected components in the Food-101 dataset](https://colab.research.google.com/drive/1HEiHfXZ0fqOfQoAYHbWmlF8KOunr3eSg?usp=sharing)
 
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](INSTALL.md)
