@@ -1,6 +1,6 @@
-[![Downloads](https://pepy.tech/badge/fastdup)](https://pepy.tech/project/fastdup)
 
 <div>
+   <a href="https://pepy.tech/project/fastdup"><img src="https://pepy.tech/badge/fastdup"></a>
    <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
 </div>
 
