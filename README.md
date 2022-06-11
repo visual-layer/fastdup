@@ -2,7 +2,6 @@
 <div>
    <a href="https://pepy.tech/project/fastdup"><img src="https://pepy.tech/badge/fastdup"></a>
    <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
- <a href="https://hub.docker.com/r/karpadoni/fastdup"><img src="https://img.shields.io/docker/pulls/karpadoni/fastdup?logo=docker" alt="Docker Pulls"></a>
 </div>
 
 FastDup | A tool for gaining insights from a large image collection
