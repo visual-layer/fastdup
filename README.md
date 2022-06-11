@@ -92,7 +92,7 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 ## Getting started examples
 - [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
 - [Finding duplicates, outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
-- [Finding duplicates, outliers and connected components in the Food-101 dataset](https://colab.research.google.com/drive/1HEiHfXZ0fqOfQoAYHbWmlF8KOunr3eSg?usp=sharing)
+- [Finding duplicates, outliers and connected components in the Food-101 dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb)
 
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](INSTALL.md)
