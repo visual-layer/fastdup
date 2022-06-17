@@ -88,7 +88,7 @@ fastdup.create_duplicates_gallery('similarity.csv', save_path='.')       #create
 fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create a visual gallery of anomalies
 ```
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/fastdup_clip_24s_crop.gif)
+![alt text](./gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 ## Getting started examples
@@ -96,6 +96,8 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 - [Finding duplicates, outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 - [Finding duplicates, outliers and connected components in the Food-101 dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb)
 - [🔥🔥🔥 Analyzing video of the MEVA dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_video.ipynb)
+
+![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](INSTALL.md)

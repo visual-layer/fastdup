@@ -10,7 +10,7 @@
 7. [Performing vector search](#external)
 8. [Support for cloud storage](#s3)
 9. [Working with tar/zip files as input](#tar)
- 
+10. [Debugging fastdup] 
 
 ## Detailed Python API documentation <a name="run"/>
 The main function of fastdup is `run`. It works by extracting short feature vectors from each image, clsutering the images together using a nearest neighbor model which computes similarities of pairs of images. Then a graph is formed to deduce the network structure of local similarities. The input/ outputs are described below in the section Input/Output. 
@@ -380,4 +380,13 @@ For running on 50M images you will need an ubuntu machine with 32 cores and 256G
 
 
 
+
+## Debugging fastdup <a name="debug"/>
+
+To debug program execution the following is recommended
+- Make sure you have upgraded fastdup to the latest version, we release versions a couple of times a week.
+- It is recommneded to debug in a python shell (and not in a Jupyter notebook)
+- Run with `verbose=1` to get additional traces
+- Run with `num_images=10` to run on a small subset of your data before running on the full dataset.
+- If the issue persist please join our slack channel, we would love to support!
 
