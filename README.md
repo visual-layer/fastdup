@@ -19,10 +19,6 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
-## Find similar persons
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz0.png)
-*Can you tell how many different persons?*
-
 ## Find corrupted and broken images
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_broken.png)
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
@@ -33,6 +29,11 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
 *Outliers in the [Google Landmark Recognition 2021 dataset](https://www.kaggle.com/competitions/landmark-recognition-2021) (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
+
+## Find similar persons
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz0.png)
+*Can you tell how many different persons?*
+
 
 ## Find wrong labels
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
@@ -84,9 +85,10 @@ python3.8 -m pip install fastdup
 
 ```python
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder")                            #main running function
-fastdup.create_duplicates_gallery('similarity.csv', save_path='.')       #create a visual gallery of found duplicates
-fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create a visual gallery of anomalies
+fastdup.run(input_dir="/path/to/your/folder", work_dir='out')                            #main running function
+fastdup.create_duplicates_gallery('out/similarity.csv', save_path='.')       #create a visual gallery of found duplicates
+fastdup.create_outliers_gallery('out/outliers.csv',   save_path='.')       #create a visual gallery of anomalies
+fastdup.create_components_gallery('out', save_path='.')                    #create visualiaiton of connected components
 ```
 
 ![alt text](./gallery/fastdup_clip_24s_crop.gif)
@@ -97,6 +99,7 @@ fastdup.create_duplicates_gallery('outliers.csv',   save_path='.')       #create
 - [Finding duplicates, outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
 - [🔥🔥🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb)
 - [🔥Analyzing video of the MEVA dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_video.ipynb)
+- [Kaggle notebook - visualizing the pistachio dataset](https://www.kaggle.com/code/graphlab/fastdup/notebook)
 
 ![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
