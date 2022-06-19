@@ -16,22 +16,20 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
 ## Identify duplicates
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/mscoco_duplicates-min.png)
+![alt text](./gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
 ## Find corrupted and broken images
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_broken.png)
+![alt text](./gallery/imagenet21k_broken.png)
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
 
 ## Find outliers
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imdb_outliers-min.png)
+![alt text](./gallery/imdb_outliers-min.png)
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face recognition, gender and age classification)*
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/landmark_outliers-min.png)
-*Outliers in the [Google Landmark Recognition 2021 dataset](https://www.kaggle.com/competitions/landmark-recognition-2021) (dataset intention is to capture recognizable landmarks, like the empire state building etc.)*
 
 ## Find similar persons
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz0.png)
+![alt text](./gallery/viz0.png)
 *Can you tell how many different persons?*
 
 
