@@ -10,7 +10,8 @@
 7. [Performing vector search](#external)
 8. [Support for cloud storage](#s3)
 9. [Working with tar/zip files as input](#tar)
-10. [Debugging fastdup] 
+10. [Working with video](#video)
+11. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
 The main function of fastdup is `run`. It works by extracting short feature vectors from each image, clsutering the images together using a nearest neighbor model which computes similarities of pairs of images. Then a graph is formed to deduce the network structure of local similarities. The input/ outputs are described below in the section Input/Output. 
@@ -380,6 +381,25 @@ For running on 50M images you will need an ubuntu machine with 32 cores and 256G
 
 
 
+## Running video <a name="video"/>
+
+fastdup supports video in mp4 and avi formats. For other formats please reach out. For running on video you need to install ffmpeg.
+
+On Ubuntu
+```bash
+sudo apt install ffmpeg
+```
+
+On Mac
+```bash
+brew install ffmpeg
+```
+
+Note: on Mac 10.14 we encountered brew error, you can download statically compile ffmpeg [here](https://evermeet.cx/ffmpeg/).
+
+Currently we extract frame 1 per sec, please reach out if you need other support. Our video tutorial is found here:
+- [🔥Analyzing video of the MEVA dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_video.ipynb)
+
 
 ## Debugging fastdup <a name="debug"/>
 
@@ -388,5 +408,4 @@ To debug program execution the following is recommended
 - It is recommneded to debug in a python shell (and not in a Jupyter notebook)
 - Run with `verbose=1` to get additional traces
 - Run with `num_images=10` to run on a small subset of your data before running on the full dataset.
-- If the issue persist please join our slack channel, we would love to support!
-
+- If the issue persist please join our [Slack Channel]("https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA")
