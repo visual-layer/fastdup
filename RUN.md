@@ -21,8 +21,15 @@ The main function of fastdup is `run`. It works by extracting short feature vect
     The only mandatory argument is image_dir. Given an image directory it will compare all pairs of images and store the most similar ones in the output file output_similarity.
 
     Parameters:
-        input_dir (str): Location of the images directory (or videos). Mandatory.
-Alternatively, it is also possible to give a location of a file listing images full path, one image per row.
+        input_dir (str): Location of the images/videos to analyze.
+        - A local folder
+        - A remote folder (s3 or minio starting with minio://)
+        - A file containing absolute filenames each on its own row
+        - A python list with absolute filenames
+        We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
+        If you have other image extensions that are readable by opencv imread() you can give them in a file and then we do not check for the
+        known extnsions.
+        Note: it is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files in case your folders are mixed.
 
         work_dir (str): Working directory for saving intermediate results and outputs. Default is local folder ('.').
 
