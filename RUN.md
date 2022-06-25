@@ -45,13 +45,16 @@ The main function of fastdup is `run`. It works by extracting short feature vect
         num_images (int): Number of images to run on. Default is -1 which means run on all the images in the image_dir folder.
 
         turi_param (str): Optional additional parameters for turi. Supported paramets are:
-        - nnmodel=0|1|2Nearest Neighbor model for clustering the features together, when using turi (has no effect when using faiss). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
+        - nnmodel=0|1|2 Nearest Neighbor model for clustering the features together, when using turi (has no effect when using faiss). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
         - ccthreshold=XX where XX in the range [0,1]. Construct similarities graph when the similarity > XX.
         - run_cc=0|1 Distable/enable connected components computation on the graph of similarities.
         - run_pagerank=0|1 Disable/enable pagerank computation on the graph of similarities.
         - run_degree=0|1 Distable/enable degree distribution computation on the graph of similarities
    	- store_int=0|1 store the similarity as string filenames or string index of the file id (to save space)
-        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
+        - tar_only=0|1 run only on tar files and ignore images in folders. Default is 0.
+        - delete_tar=0|1 when working with tar files obtained from cloud storage delete the tar after download
+        - delete_img=0|1 when working with images obtained from cloud storage delete the image after download
+	Example run: turi_param='nnmodel=0,ccthreshold=0.99'
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Default is cosine. Other distances are euclidean, squared_euclidean, manhattan.
 
