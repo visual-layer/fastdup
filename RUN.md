@@ -26,6 +26,7 @@ The main function of fastdup is `run`. It works by extracting short feature vect
         - A remote folder (s3 or minio starting with minio://)
         - A file containing absolute filenames each on its own row
         - A python list with absolute filenames
+        - yolov5 yaml input file containing train and test folders (single folder supported for now)
         We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
         If you have other image extensions that are readable by opencv imread() you can give them in a file and then we do not check for the
         known extnsions.
