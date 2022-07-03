@@ -293,7 +293,7 @@ For larger dataset it may be wise to split the run into two, to make sure interm
 - `run_mode=1` computes the extracted features and stores them, does not compute the NN embedding. For large datasets, 
 it is possible to run on a few computing nodes, to extract the features, in parallel. Use the `min_offset` and `max_offset` flags to allocate a subset of the images for each computing node. Offsets start from 0 to `n-1` where `n` is the number of images in the input_dir folder.
 - `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
-- `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `input_dir` parameter. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
+- `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `test_dir` parameter. `input_dir` should point to the location of the train data. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
 - `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
 
 ## Advanced topics: vector search <a name="external"/>
