@@ -54,7 +54,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 *Upcoming new features: image graph search!*
 
 
-## Results on Key Datasets
+## Results on Key Datasets ([full results here](https://docs.google.com/spreadsheets/d/1wikhI6tWkbX_oofW_OynSelvEbWSeina6-ho3ZsMtX8/edit?usp=sharing))
 We have thoroughly tested fastdup across various famous visual datasets. Ranging from pilar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits (this amounts to 20% of the validation set). This is a new unknown result! Full results are below. * train/val splits are taken from https://github.com/Alibaba-MIIL/ImageNet21 .
 
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
