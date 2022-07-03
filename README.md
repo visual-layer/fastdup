@@ -103,8 +103,8 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 ![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
 ## Detailed instructions
-- [Detailed instructions, install from stable release and installation issues](INSTALL.md)
-- [Detailed running instructions](RUN.md)
+- [Detailed instructions, install from stable release and installation issues](https://bit.ly/3yDc2qw)
+- [Detailed running instructions](https://bit.ly/3OFLlY5)
 
 # Support 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
