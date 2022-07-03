@@ -20,34 +20,35 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](./gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
-## Find corrupted and broken images
+## [Find corrupted and broken images](https://bit.ly/3nD3o5k)
 ![alt text](./gallery/imagenet21k_broken.png)
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
 
-## Find outliers
+## [Find outliers](https://bit.ly/3bNiceX)
 ![alt text](./gallery/imdb_outliers-min.png))
 *[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face recognition, gender and age classification)*
 
 
-## Find similar persons
+## [Find similar persons](https://bit.ly/3a9tud4)
 ![alt text](./gallery/viz0.png)
 *Can you tell how many different persons?*
 
 
-## Find wrong labels
+## [Find wrong labels](https://bit.ly/3bPbVPW)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) datas## Find image with contradicting labels
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) 
 
+## [Find image with contradicting labels](https://bit.ly/3yE5kAI)
 ![alt text](https://bit.ly/3yE5kAI)
 *Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wines from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
 
-## Coming soon: image graph search (please reach out if you like to beta test)
+## [Coming soon: image graph search (please reach out if you like to beta test)](https://bit.ly/3bJlIXC)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz23.png)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz2.png)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/tmp13_viz5.png)
