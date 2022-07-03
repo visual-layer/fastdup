@@ -25,8 +25,8 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
 
 ## [Find outliers](https://bit.ly/3bNiceX)
-![alt text](./gallery/imdb_outliers-min.png))
-*[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/ ) outliers (data goal is for face recognition, gender and age classification)*
+![alt text](./gallery/imdb_outliers-min.png)
+*[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/) outliers (data goal is for face recognition, gender and age classification)*
 
 
 ## [Find similar persons](https://bit.ly/3a9tud4)
