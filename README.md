@@ -94,11 +94,11 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 ## Getting started examples
-- [Getting started on a Kaggle dataset](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_kaggle.ipynb)
-- [Finding duplicates, outliers in the Food-101 datadset:](https://github.com/visualdatabase/fastdup/blob/main/examples/getting_started_food101.ipynb)
-- [🔥🔥🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb)
-- [🔥Analyzing video of the MEVA dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_video.ipynb)
-- [Kaggle notebook - visualizing the pistachio dataset](https://www.kaggle.com/code/graphlab/fastdup/notebook)
+- [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
+- [Finding duplicates, outliers in the Food-101 datadset:](https://bit.ly/3yhoafo)
+- [🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://bit.ly/3ydvtVJ)
+- [🔥Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
+- [Kaggle notebook - visualizing the pistachio dataset](https://bit.ly/3ygkg6C)
 
 ![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
