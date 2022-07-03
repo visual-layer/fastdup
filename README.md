@@ -38,12 +38,10 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) 
 
 ## [Find image with contradicting labels](https://bit.ly/3yE5kAI)
-![alt text](https://bit.ly/3yE5kAI)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset. No human can tell those red wines from their image.*
+![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
+*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) . No human can tell those red wines from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
