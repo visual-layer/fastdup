@@ -16,7 +16,7 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-## [Identify duplicates](https://bit.ly/3OZqbnj)
+## [Identify duplicates]([https://bit.ly/3OZqbnj](https://bit.ly/3AkSUz1))
 ![alt text](./gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
