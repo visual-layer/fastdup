@@ -295,7 +295,28 @@ fastdup.create_duplicates_gallery('/path/to/similarity.csv', save_path='/path/to
 
 Note: the report should be generated on the same machine since we assume that the input folder for reading the images exists under the same location.
 
+Another form of visualization is using TensorBoard Projector as shown in [this notebook](https://bit.ly/3ydvtVJ). 
 
+The following function saves the data in a ready format for TensorBoard projector:
+
+```
+def export_to_tensorboard_projector(work_dir:str, log_dir:str, sample_size:int = 900,
+                                    sample_method:str='random', with_images=True, get_label_func=None):
+    Export feature vector embeddings to be visualized using tensorboard projector app.
+    work_dir: work_dir where fastdup results are stored
+    log_dir: output dir where tensorboard will read from
+    sample_size: how many images to view
+    sample_method: how to sample, currently 'random' is supported
+    with_images:bool add images to the visualization (default True)
+    get_label_func (callable): Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+    :return:
+```
+
+After storing the data you should run (in a Jupyter notebook)
+```
+%load_ext tensorboard
+%tensorboard --logdir=<log_dir>
+```
 
 ## Advanced topics: resuming a stored run <a name="resume"/>
 
