@@ -45,7 +45,7 @@ The main function of fastdup is `run`. It works by extracting short feature vect
         num_images (int): Number of images to run on. Default is -1 which means run on all the images in the image_dir folder.
 
         turi_param (str): Optional additional parameters for turi. Supported paramets are:
-        - nnmodel=0|1|2 Nearest Neighbor model for clustering the features together, when using turi (has no effect when using faiss). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
+        - nnmodel=0|1|2 Nearest Neighbor model for clustering the features together, when using turi (has no effect when using nnf). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
         - ccthreshold=XX where XX in the range [0,1]. Construct similarities graph when the similarity > XX.
         - run_cc=0|1 Distable/enable connected components computation on the graph of similarities.
         - run_pagerank=0|1 Disable/enable pagerank computation on the graph of similarities.
@@ -70,15 +70,15 @@ The main function of fastdup is `run`. It works by extracting short feature vect
 
         run_mode (int): This software can run for either feature vector extraction and similarity measurement (0), or just feature vector extraction (1), or just similarity measure computation (2). 
  
-   nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|faiss.
+   nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|nnf.
 
         min_offset (int): Optional min offset to start iterating on the full file list. Default is -1.
 
         max_offset (int): Optional max offset to start iterating on the full file list. Default is -1.
 
- 	faiss_mode (str): When nn_provider='faiss' selects the faiss mode. Supported options are HNSW32 and any other faiss string.
+ 	nnf_mode (str): When nn_provider='nnf' selects the nnf mode. Supported options are HNSW32 and any other nnf string.
 
-   	faiss_param (str): When nn_provider='faiss' assigns optional faiss parameters. For example efSearch=175. Multiple params are supported - for example 'efSearch=175,nprobes=200'
+   	nnf_param (str): When nn_provider='nnf' assigns optional nnf parameters. For example efSearch=175. Multiple params are supported - for example 'efSearch=175,nprobes=200'
 
 	bounding_box (str): Optional bounding box for cropping images before the fastdup tool is applied. For example bounding_box='rows=100,cols=100,width=250,height=310'. Rows and cols gives the top left corner coordinates, and width and height the bounding box dimensions. (Row is the y axis and col is the x axis. The box is cropped in the range [rows:rows+height, cols:cols+width].
 
@@ -158,7 +158,7 @@ from,to,distance
 
 ### Faiss index files
 
-When using faiss an additional intermediate results file is created: `faiss.index`. This file is stored according to the faiss format. This file contains the trained nearest neighbor model. It is possible to resume a stored run and reading the trained nearest neighbor model from disk. See run_mode documentation.
+When using nnf an additional intermediate results file is created: `nnf.index`. This file is stored according to the nnf format. This file contains the trained nearest neighbor model. It is possible to resume a stored run and reading the trained nearest neighbor model from disk. See run_mode documentation.
 
 ### Graph computation
 
@@ -216,13 +216,13 @@ The output file similarity.csv with the list of all similar pairs does not inclu
 
 Once short feature vectors are generated per each image, we cluster them to find similarities using a nearest neighbor method. FastDup supports two families of algorithms (given using the nn_provider command line argument)
 - turi
-- faiss
-Turi (nn_provider=’turi’) has the following methods inside
-- nnmodel=’brute_force’ (exact method but may be slower)
-- nnmodel=’ball_tree’ (approximate method)
-- nnmodel=’lsh’  (locality sensitive hashing, approximate method)
-Faiss (nn_provider=’faiss’) supports multiple methods
-- faiss_mode=’HSNW32’ the default
+- nnf
+Turi (nn_provider='turi') has the following methods inside
+- nnmodel='brute_force' (exact method but may be slower)
+- nnmodel='ball_tree' (approximate method)
+- nnmodel='lsh'  (locality sensitive hashing, approximate method)
+Faiss (nn_provider='nnf') supports multiple methods
+- nnf_mode='HSNW32' the default
 
 
 
@@ -231,8 +231,8 @@ Faiss (nn_provider=’faiss’) supports multiple methods
 Example command line:
 ```
 > import fastdup
-> fastdup.run(“/path/to/folder”, nn_provider=”turi”, nnmodel=’brute_force’)
-> fastdup.run(“/path/to/folder”, nn_provider=”faiss”, faiss_mode=’HSNW32’)
+> fastdup.run('/path/to/folder', nn_provider='turi', nnmodel='brute_force')
+> fastdup.run('/path/to/folder', nn_provider='nnf')
 ```
 
 
@@ -264,18 +264,33 @@ def create_outliers_gallery(similarity_file, save_path, num_images=20, descendin
     Parameters:
         outliers_file (str): csv file with the computed outliers by the fastdup tool
         save_path (str): output folder location for the visuals
-
         num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
-
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 ```
 
+Another function creates an html report gallery of components. Components are clusters of similar images (more than two).
+```
+def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual'):
+
+    Function to create and display a gallery of images for the largest graph components
+
+    Parameters:
+        work_dir (str): path to fastdup work_dir
+        save_path (str): output folder location for the visuals
+        num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
+        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
+```
+     
+
 Command line example for the html report generation:
 ```
 import fastdup
-fastdup.generate_duplicates_gallery('/path/to/similarity.csv', save_path='/path/to/report/')
+fastdup.create_duplicates_gallery('/path/to/similarity.csv', save_path='/path/to/report/')
 ```
 
 Note: the report should be generated on the same machine since we assume that the input folder for reading the images exists under the same location.
@@ -293,8 +308,8 @@ For larger dataset it may be wise to split the run into two, to make sure interm
 - `run_mode=1` computes the extracted features and stores them, does not compute the NN embedding. For large datasets, 
 it is possible to run on a few computing nodes, to extract the features, in parallel. Use the `min_offset` and `max_offset` flags to allocate a subset of the images for each computing node. Offsets start from 0 to `n-1` where `n` is the number of images in the input_dir folder.
 - `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
-- `run_mode=3` Reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on all inages give by the `test_dir` parameter. `input_dir` should point to the location of the train data. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
-- `run_mode=4` reads the NN model stored by `faiss.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
+- `run_mode=3` Reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on all inages give by the `test_dir` parameter. `input_dir` should point to the location of the train data. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
+- `run_mode=4` reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
 
 ## Advanced topics: vector search <a name="external"/>
 
@@ -317,7 +332,7 @@ train_array = np.random.rand(train_n,d) # replace this placeholder with your own
 
 #export the feature in fastdup readable format
 fastdup.save_binary_feature(work_dir, filenames, train_array)
-# build the NN model and store it to work_dir/faiss.index
+# build the NN model and store it to work_dir/nnf.index
 fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=work_dir, d=d, run_mode=2)
 ...
 # Now search for test images using your precomputed features
@@ -326,7 +341,7 @@ test_n = 2
 test_dir = 'path/to/test_dir'
 test_array = np.random.rand(test_n, d) # replace placeholder this with your own test features
 fastdup.save_binary_feature(test_dir, test_filenames, test_array)
-shutil.copy(os.path.join(work_dir, 'faiss.index'), test_dir)
+shutil.copy(os.path.join(work_dir, 'nnf.index'), test_dir)
 fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=test_dir, d=d ,run_mode=4)
 fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 ```
