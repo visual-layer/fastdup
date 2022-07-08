@@ -156,7 +156,7 @@ from,to,distance
 ```
 
 
-### Faiss index files
+### NNF index files
 
 When using nnf an additional intermediate results file is created: `nnf.index`. This file is stored according to the nnf format. This file contains the trained nearest neighbor model. It is possible to resume a stored run and reading the trained nearest neighbor model from disk. See run_mode documentation.
 
@@ -221,7 +221,7 @@ Turi (nn_provider='turi') has the following methods inside
 - nnmodel='brute_force' (exact method but may be slower)
 - nnmodel='ball_tree' (approximate method)
 - nnmodel='lsh'  (locality sensitive hashing, approximate method)
-Faiss (nn_provider='nnf') supports multiple methods
+NNF (nn_provider='nnf') supports multiple methods
 - nnf_mode='HSNW32' the default
 
 
