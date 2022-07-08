@@ -240,7 +240,7 @@ Example command line:
 
 The following command creates the html report:
 ```
-def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None):
+def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None, slice=None):
 
     Function to create and display a gallery of images computed by the similarity metrics
 
@@ -251,13 +251,14 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         descending (boolean): If False, print the similarities from the least similar to the most similar. Default is True.
 	lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+	slice (str): Optional parameter to select a slice of the duplicates based on a specific label.
 ```
 
 The html generated had 3 images in each row. To the left and middle are the two similar images, and the third image to the right is a superposition of both images on top of each other to show the differnces more easy.
 
 A second function create an html report gallery of outliers:
 ```
-def create_outliers_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None):
+def create_outliers_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None, slice=None):
 
     Function to create and display a gallery of images computed by the outliers metrics
 
@@ -268,11 +269,14 @@ def create_outliers_gallery(similarity_file, save_path, num_images=20, descendin
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+	how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
+                                                      all = take the image that is far away from all other images. Default is one.
+        slice (str): Optional parameter to select a slice of the outliers file based on a specific label.
 ```
 
 Another function creates an html report gallery of components. Components are clusters of similar images (more than two).
 ```
-def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual'):
+def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual', slice=None):
 
     Function to create and display a gallery of images for the largest graph components
 
@@ -284,6 +288,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
         get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
+	 slice(str) : optional label to draw only a subset of the components conforming to this label.
 ```
      
 
