@@ -354,7 +354,7 @@ filesnames = ['a.jpg', 'b.jpg', 'c.jpg']
 d = 20 # feature length
 train_n = 3 # number of images
 work_dir = '/path/to/train_dir'  # temp working directory
-train_array = np.random.rand(train_n,d) # replace this placeholder with your own features
+train_array = np.zeros((train_n, d), dtype='float32')# replace this placeholder with your own features
 
 #export the feature in fastdup readable format
 fastdup.save_binary_feature(work_dir, filenames, train_array)
@@ -365,7 +365,7 @@ fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=work_dir, d=d, 
 test_filenames = ['d.jpg', 'e.jpg']
 test_n = 2
 test_dir = 'path/to/test_dir'
-test_array = np.random.rand(test_n, d) # replace placeholder this with your own test features
+train_array = np.zeros((train_n, d), dtype='float32') # replace placeholder this with your own test features
 fastdup.save_binary_feature(test_dir, test_filenames, test_array)
 shutil.copy(os.path.join(work_dir, 'nnf.index'), test_dir)
 fastdup.run(os.path.join(work_dir, 'features.dat.csv'), work_dir=test_dir, d=d ,run_mode=4)
