@@ -10,9 +10,7 @@ from ctypes import *
 import pandas as pd
 pd.set_option('display.max_colwidth', None)
 import numpy as np
-import traceback
 import platform
-from .capture_io import *
 from .galleries import *
 import contextlib
 from fastdup import coco
@@ -62,7 +60,6 @@ def run(input_dir='',
         threshold=0.9,         #threshold for finding simiar images. Default is 0.85 (values 0->1)
         lower_threshold=0.05,   #lower threshold for finding simiar images. Default is 0.05 (values 0->1)
         model_path=model_path_full,
-        #ONNX model path
         license='CC-BY-NC-ND-4.0',            #license string
         version=False,          #show version and exit      
         nearest_neighbors_k=2, 
@@ -96,7 +93,7 @@ def run(input_dir='',
 
         test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
 
-        compute (str): Compute type [cpu|gpu] default is cpu.
+        compute (str): Compute type [cpu|gpu] default is cpu. Note: gpu is supported only in the enterprise version.
 
         verbose (boolean): Verbosity. Default is False.
 
@@ -147,7 +144,7 @@ def run(input_dir='',
 
         bounding_box (str): Optional bouding box to crop images, given as bounding_box='rows=xx,cols=xx,height=xx,width=xx'.
 
-        batch_size (int): Optional batch size when computing inferenc, default = 1. Allowed values < 200.
+        batch_size (int): Optional batch size when computing inferenc, default = 1. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
 
     Returns:
         Status code 0 = success, 1 = error.
@@ -174,6 +171,17 @@ def run(input_dir='',
     elif not os.path.exists(input_dir):
         print("Failed to find input dir ", input_dir, " please check your input");
         return 1
+
+    if os.path.abspath(input_dir) == os.path.abspath(work_dir.strip()):
+        print("Input and work_dir output directories are the same, please point to different directories")
+        return 1
+
+    if (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
+        os.path.exists(os.path.join(work_dir, 'features.dat')))  and (run_mode == 0 or run_mode == 1):
+        print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
+        return 1
+
+
 
     # support for YOLO dataset format
     if (input_dir.endswith('.yaml')):
@@ -278,6 +286,53 @@ def run(input_dir='',
     return 1
 
 
+
+def run_on_webdataset(input_dir='',
+                      work_dir='.',
+                      test_dir='',
+                      compute='cpu',
+                      verbose=False,
+                      num_threads=-1,
+                      num_images=0,
+                      turi_param='nnmodel=0',
+                      distance='cosine',
+                      threshold=0.9,
+                      lower_threshold=0.05,
+                      model_path=model_path_full,
+                      license='CC-BY-NC-ND-4.0',
+                      version=False,
+                      nearest_neighbors_k=2,
+                      d=576,
+                      nn_provider='nnf',
+                      min_offset=0,
+                      max_offset=0,
+                      nnf_mode="HNSW32",
+                      nnf_param="",
+                      bounding_box="",
+                      batch_size = 1):
+    '''
+    Run the FastDup software on a web dataset.
+    This run is composed of two stages. First extract all feature vectors using run_mode=1, then run the nearest neighbor model using run_mode=2.
+    Make sure that work_dir has enough free space for extracting tar files. Tar files are extracted temporarily into work_dir/tmp folder.
+    You can control the free space using the flags turi_param='delete_tar=1|0' and delete_img='1|0'.  When delete_tar=1 the tars are processed one by one and deleted after processing.
+    When delete_img=1 the images are processed one by one and deleted after processing.
+    '''
+
+    ret = run(input_dir=input_dir, work_dir=work_dir, test_dir=test_dir, compute=compute, verbose=verbose, num_threads=num_threads, num_images=num_images,
+              turi_param=turi_param, distance=distance, threshold=threshold,
+              lower_threshold=lower_threshold, license=license, model_path=model_path, version=version, nearest_neighbors_k=nearest_neighbors_k, d=d,
+              nn_provider=nn_provider, min_offset=min_offset, max_offset=max_offset, nnf_mode=nnf_mode, nnf_param=nnf_param, bounding_box=bounding_box,
+                batch_size=batch_size, run_mode=1)
+    if ret != 0:
+        return ret
+
+    return run(input_dir=input_dir, work_dir=work_dir, test_dir=test_dir, compute=compute, verbose=verbose, num_threads=num_threads, num_images=num_images,
+              turi_param=turi_param, distance=distance, threshold=threshold,
+              lower_threshold=lower_threshold, license=license, model_path=model_path, version=version, nearest_neighbors_k=nearest_neighbors_k, d=d,
+              nn_provider=nn_provider, min_offset=min_offset, max_offset=max_offset, nnf_mode=nnf_mode, nnf_param=nnf_param, bounding_box=bounding_box,
+              batch_size=batch_size, run_mode=2)
+
+
 def load_binary_feature(filename, d=576):
     '''
     Python function for loading the stored binary features written by fastdup and their matching filenames and analyzing them in Python.
@@ -359,7 +414,7 @@ def save_binary_feature(save_path, filenames, np_array):
     return 0
 
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
-                              lazy_load=False, get_label_func=None):
+                              lazy_load=False, get_label_func=None, slice=None):
     '''
 
    Function to create and display a gallery of images computed by the similarity metrics
@@ -374,11 +429,19 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
    '''
-    do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func)
+
+    if slice is not None and get_label_func is None:
+        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+        return 1
+
+    if (get_label_func is not None):
+        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+
+    return do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice)
 
 
 def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
-                            how='one'):
+                            how='one', slice=None):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics
@@ -395,13 +458,22 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
         how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
                                                       all = take the image that is far away from all other images. Default is one.
+
+        slice (str): Optional parameter to slice the outliers_file on specific labels.
      '''
 
-    do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how)
+    if slice is not None and get_label_func is None:
+        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+        return 1
+
+    if (get_label_func is not None):
+        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+
+    return do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice)
 
 
 
-def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual'):
+def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual', slice=None):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -419,8 +491,18 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
 
+        slice (str): Optional parameter to slice the components file on specific labels.
+
      '''
-    do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by)
+
+    if slice is not None and get_label_func is None:
+        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+        return 1
+
+    if (get_label_func is not None):
+        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+
+    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice)
 
 def delete_components(top_components: pd.DataFrame, to_delete: list,  how: int = 'one', dry_run: bool = True):
     '''
