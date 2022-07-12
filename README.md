@@ -16,7 +16,6 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-## HotFix: Version 0.104 fixes nearest neighbor stability issue in versions 0.101-0.103, please upgrade!
 
 ## [Identify duplicates](https://bit.ly/3AkSUz1)
 ![alt text](./gallery/mscoco_duplicates-min.png)
