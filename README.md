@@ -1,3 +1,4 @@
+<head>
 <div>
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
    <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
@@ -7,6 +8,15 @@
 <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22" rel="nofollow"><img src="https://camo.githubusercontent.com/771af957ebd52645704462209592c7a0a359feaec816337fee900e4478278219/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4d656469756d2d3132313030453f6c6f676f3d6d656469756d266c6f676f436f6c6f723d7768697465" alt="Medium" data-canonical-src="https://img.shields.io/badge/Medium-12100E?logo=medium&amp;logoColor=white" style="max-width: 100%;"></a>
 <a href="https://share-eu1.hsforms.com/1POrgIy-hTSyMaOTQzgjqhgfglt8" rel="nofollow"><img src="https://camo.githubusercontent.com/5042565e9cc3a40bff3d9be7b59955d984831f594d38297b6efecf804e41b8f7/687474703a2f2f6269742e6c792f324d643972784d" alt="Mailing list" data-canonical-src="http://bit.ly/2Md9rxM" style="max-width: 100%;"></a>
 </div>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z4PQDJZEVM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z4PQDJZEVM');
+</script>
+</head>
 
 FastDup | A tool for gaining insights from a large image collection
 ===================================================================
