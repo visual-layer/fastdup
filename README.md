@@ -1,4 +1,5 @@
 <div>
+   <a href="https://camo.githubusercontent.com/40d08d4012a37b9f33aa9515a916a7f6b17f6945300b9bc06656eb245462b3a4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d332e37253230253743253230332e38253230253743253230332e392d626c75652e737667"></a>
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
    <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
    <a href="https://www.kaggle.com/graphlab/fastdup" rel="nofollow"><img src="https://camo.githubusercontent.com/a08ca511178e691ace596a95d334f73cf4ce06e83a5c4a5169b8bb68cac27bef/68747470733a2f2f6b6167676c652e636f6d2f7374617469632f696d616765732f6f70656e2d696e2d6b6167676c652e737667" alt="Open In Kaggle" data-canonical-src="https://kaggle.com/static/images/open-in-kaggle.svg" style="max-width: 100%;"></a>
@@ -76,10 +77,11 @@ We have thoroughly tested fastdup across various famous visual datasets. Ranging
 * We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
 
 # Quick Installation 
-For Python 3.7 and 3.8 (Ubuntu 20.04 or Ubuntu 18.04 or Mac M1 or Mac Intel Mojave and up)
+For Python 3.7, 3.8, 3.9 (Ubuntu 20.04 or Ubuntu 18.04 or Debian 10 or Mac M1 or Mac Intel Mojave and up)
 ```python
-python3.8 -m pip install fastdup
+python3.XX -m pip install fastdup
 ```
+Where XX is your python version.
 
 # Running the code
 
@@ -95,10 +97,10 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
 
 ## Getting started examples
+- [🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://bit.ly/3ydvtVJ)
 - [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
 - [Finding duplicates, outliers in the Food-101 datadset:](https://bit.ly/3yhoafo)
-- [🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://bit.ly/3ydvtVJ)
-- [🔥Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
+- [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
 - [Kaggle notebook - visualizing the pistachio dataset](https://bit.ly/3ygkg6C)
 
 ![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
