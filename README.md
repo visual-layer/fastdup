@@ -79,6 +79,9 @@ We have thoroughly tested fastdup across various famous visual datasets. Ranging
 # Quick Installation 
 For Python 3.7, 3.8, 3.9 (Ubuntu 20.04 or Ubuntu 18.04 or Debian 10 or Mac M1 or Mac Intel Mojave and up)
 ```python
+# upgrade pip to its latest version
+python3.XX -m pip install -U pip
+# install fastdup
 python3.XX -m pip install fastdup
 ```
 Where XX is your python version.
