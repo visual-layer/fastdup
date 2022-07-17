@@ -456,8 +456,10 @@ Currently we extract frame 1 per sec, please reach out if you need other support
 ## Debugging fastdup <a name="debug"/>
 
 To debug program execution the following is recommended
-- Make sure you have upgraded fastdup to the latest version, we release versions a couple of times a week.
+- Make sure you have upgraded fastdup to the latest version, we release versions a couple of times a week. 
+- In case of installation failure try to upgrade your pip version to the latest using `python3.XX -m pip install -U pip` where XX is your python version.
 - It is recommneded to debug in a python shell (and not in a Jupyter notebook)
 - Run with `verbose=1` to get additional traces
 - Run with `num_images=10` to run on a small subset of your data before running on the full dataset.
+- In a python shell run `import fastdup; help(fastdup)` to see function documentation.
 - If the issue persist please join our [Slack Channel]("https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA")

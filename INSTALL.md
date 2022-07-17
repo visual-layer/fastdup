@@ -15,6 +15,10 @@ sudo apt -y install libgl1-mesa-glx
 python3.8 -m pip install --upgrade pip
 ```
 
+## Mac OS setup
+```bash
+brew install ffmpeg@4
+```
 
 # Pip Package setup
 
@@ -117,3 +121,14 @@ conda install nomkl
 conda install numpy scipy pandas tensorflow
 conda remove mkl mkl-service # may fail, don't worry
 ```
+
+Error on Mac M1: `AttributeError: partially initialized module 'cv2' has no attribute 'gapi_wip_gst_GStreamerPipeline' (most likely due to a circular import)`
+Solution: downgrade your cv2 version to 4.5.5.64 using the command `python.XX -m pip install -U opencv-python==4.5.5.64` where XX is your python version.
+
+Error on Mac M1: library not loaded when trying to import cv2 `ImportError: dlopen(/Users/mikasnoopy/homebrew/lib/python3.9/site-packages/cv2/python-3.9/cv2.cpython-39-darwin.so, 2): Library not loaded: /Users/mikasnoopy/homebrew/opt/dav1d/lib/libdav1d.5.dylib
+  Referenced from: /Users/mikasnoopy/homebrew/opt/ffmpeg@4/lib/libavcodec.58.dylib
+  Reason: image not found
+` or any similar error.
+Solution: Downgrade your ffmpg using `brew remove ffmpeg; brew install ffmpeg@4`
+
+
