@@ -85,6 +85,8 @@ python3.XX -m pip install -U pip
 python3.XX -m pip install fastdup
 ```
 Where XX is your python version.
+For CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructions](./INSTALL.md).
+
 
 # Running the code
 

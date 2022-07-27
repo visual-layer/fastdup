@@ -20,17 +20,32 @@ python3.8 -m pip install --upgrade pip
 brew install ffmpeg@4
 ```
 
+## CentOS 7 Setup
+```bash
+sudo yum -y install epel-release
+sudo yum -y update
+sudo yum -y groupinstall "Development Tools"
+sudo yum -y install openssl-devel bzip2-devel libffi-devel xz-devel
+sudo yum -y install wget
+sudo yum install redhat-lsb-core # for lsb_release
+sudo yum install -y ffmpeg ffmpeg-devel # for video support
+```
+
 # Pip Package setup
 
 ## Using pypi
+This is the recommended installation method for all Mac, Ubuntu 18-20, Debian 10.
+Will not work for Centos 7.9, RedHat 4.8.
 
 ```bash
+python3.8 -m pip install -U pip
 python3.8 -m pip install fastdup
 ```
 
 Note: you may need to upgrade your pip, using the command `python3.8 -m pip install -U pip`.
 
-## Using stable release
+## Using stable release.
+This is mandatory for CentOS 7.9 / RedHat 4.8 and similiar OS.
 
 - download the latest wheel for your system from our [release page](https://github.com/visualdatabase/fastdup/releases). Assuming the wheel file is found in your working folder, run:
 
