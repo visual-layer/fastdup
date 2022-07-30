@@ -11,7 +11,8 @@
 8. [Support for cloud storage](#s3)
 9. [Working with tar/zip files as input](#tar)
 10. [Working with video](#video)
-11. [Debugging fastdup](#debug)
+11. [Using your own onnx model as feature extractpr](#onnx)
+12. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
 The main function of fastdup is `run`. It works by extracting short feature vectors from each image, clsutering the images together using a nearest neighbor model which computes similarities of pairs of images. Then a graph is formed to deduce the network structure of local similarities. The input/ outputs are described below in the section Input/Output. 
@@ -451,6 +452,14 @@ Note: on Mac 10.14 we encountered brew error, you can download statically compil
 
 Currently we extract frame 1 per sec, please reach out if you need other support. Our video tutorial is found here:
 - [🔥Analyzing video of the MEVA dataset - Google Colab](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_video.ipynb)
+
+## Using your own onnx model as feature extractor <a name="onnx">
+
+It is possible to replace fastdup's default onnx model with your own. To support running your own onnx model you need two changes
+- Use `model_path` parameter to point to the location of the onnx model
+- Set `d` to be the feature vector output width.
+
+Detailed example you can run is found [here](https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup_model_support.ipynb).
 
 
 ## Debugging fastdup <a name="debug"/>
