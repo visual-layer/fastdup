@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorboard.plugins import projector
-from tqdm import tqdm
 from PIL import Image
+import cv2
 IMAGE_SIZE = 100
-
+from .image import my_resize
 
 
 def register_embedding(embedding_tensor_name, meta_data_fname, log_dir, sprite_path, with_images=True):
@@ -31,7 +31,7 @@ def save_labels_tsv(labels, filepath, log_dir):
         for label in labels:
             f.write('{}\n'.format(label))
 
-def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None, h = 0, w = 0):
+def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None, h = 0, w = 0, alternative_filename = None, alternative_width=None, max_width=None):
     # Generate sprite image
     images_pil = []
 
@@ -39,13 +39,38 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
     H = IMAGE_SIZE if h == 0 else h
     W = IMAGE_SIZE if w == 0 else w
 
-    for i  in tqdm(img_path[:sample_size], total=min(len(img_path),sample_size)):
+    if max_width is not None and h != 0 and w != 0:
+        if W > max_width:
+            scale = 1.0*W/max_width
+            H = int(1.0*H/scale)
+            W = int(1.0*w/scale)
+    else:
+        if W > 320:
+            scale = 1.0*W/320
+            H = int(1.0*H/scale)
+            W = int(1.0*W/scale)
+
+    if alternative_width is not None:
+        NUM_IMAGES_WIDTH = alternative_width
+        if (alternative_width < sample_size):
+            sample_size = alternative_width
+        height = 1
+    else:
+        NUM_IMAGES_WIDTH = int(np.ceil(np.sqrt(min(sample_size, len(img_path)))))
+        divs = int(np.ceil(min(sample_size,len(img_path)) / NUM_IMAGES_WIDTH))
+        height = min(divs, NUM_IMAGES_WIDTH)
+
+    for i  in img_path[:sample_size]:
         # Save both tf image for prediction and PIL image for sprite
         if isinstance(i, str):
-            img_pil = Image.open(i).resize((W,H))
+            img_pil = cv2.imread(i)
+            img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
+            img_pil = cv2.resize(img_pil, (W, H))
         else:
-            img_pil = i.resize((W,H))
-        images_pil.append(img_pil)
+            img_pil = cv2.resize(i, (W, H))
+            img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
+        images_pil.append(Image.fromarray(img_pil))
+
         # Assuming your output data is directly the label
         if callable(get_label_func):
             label = get_label_func(i)
@@ -53,12 +78,12 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
             label = "N/A"
         labels.append(label)
 
-    NUM_IMAGES_WIDTH = int(np.ceil(np.sqrt(min(sample_size, len(img_path)))))
 
-    # Create a sprite image
+    # Create a sprite imagei
+
     spriteimage = Image.new(
         mode='RGB',
-        size=(W*NUM_IMAGES_WIDTH, H*NUM_IMAGES_WIDTH),
+        size=(W*NUM_IMAGES_WIDTH, H*height),
         color=(0,0,0) # fully transparent
     )
     for count, image in enumerate(images_pil):
@@ -66,19 +91,26 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
         w_loc = count % NUM_IMAGES_WIDTH
         spriteimage.paste(image, (w_loc*W, h_loc*H))
 
+
+    if max_width is not None and alternative_width is not None:
+        spriteimage = spriteimage.resize((max_width*alternative_width, max_width))
+
     if isinstance(img_path[0], str):
-    	SPRITE_PATH= f'{log_dir}/sprite.png'
-    	spriteimage.convert('RGB').save(SPRITE_PATH)
-    	return SPRITE_PATH, labels
+        if alternative_filename is not None:
+            SPRITE_PATH =alternative_filename
+        else:
+            SPRITE_PATH= f'{log_dir}/sprite.png'
+        spriteimage.convert('RGB').save(SPRITE_PATH)
+        return SPRITE_PATH, labels
     else:
-        return spriteimage.convert('RGB'), labels
+        return np.array(spriteimage.convert('RGB')), labels
 
 
 
 
 def export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_size,
                                           sample_method='random', with_images=True,
-                                          get_label_func=None):
+                                          get_label_func=None,d = 576):
 
 
     try:
@@ -109,7 +141,7 @@ def export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_siz
 
     ids = sample['index'].values
     assert len(ids)
-    assert features.shape[1] == 576
+    assert features.shape[1] == d, "Wrong share for the feature vectors exected {} got {}".format(d, features.shape[1])
 
     tensor_embeddings = tf.Variable(features[ids,:], name=EMBEDDINGS_TENSOR_NAME)
     saver = tf.compat.v1.train.Saver([tensor_embeddings])  # Must pass list or dict

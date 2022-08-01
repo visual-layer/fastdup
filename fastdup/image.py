@@ -28,8 +28,11 @@ def image_base64(im):
     io_buf = io.BytesIO(buffer)
     return base64.b64encode(io_buf.getvalue()).decode()
 
-def imageformatter(im):
-    return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
+def imageformatter(im, max_width=None):
+    if max_width is not None:
+        return f'<img src="data:image/jpeg;base64,{image_base64(im)}" width="{max_width}">'
+    else:
+        return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
 
 def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
     h_min = min(im.shape[0] for im in im_list)
@@ -45,6 +48,25 @@ def get_optimal_font_scale(text, width):
         if (new_width <= width):
             return scale/100, text_size
     return 1, text_size
+
+def my_resize(img, max_width):
+    h, w, c = img.shape
+    w1 = 320
+    if max_width is not None and w > max_width:
+        w1 = max_width
+    if h > w1 or w > w1:
+        img = cv2.resize(img, (w1, w1))
+    return img
+
+def plot_bounding_box(img, get_bounding_box_func, filename):
+    if callable(get_bounding_box_func):
+        bbox_list = get_bounding_box_func(filename)
+        for i in bbox_list:
+            cur_bbox = i
+            cur_bbox = [int(x) for x in cur_bbox]
+            img = cv2.rectangle(img, (cur_bbox[0], cur_bbox[1]), (cur_bbox[2], cur_bbox[3]), (0, 255, 0), 3)
+    return img
+
 
 def draw_text(img, text,
           font= cv2.FONT_HERSHEY_TRIPLEX,
@@ -69,10 +91,15 @@ def draw_text(img, text,
 
     return text_size, img
 
-def create_triplet_img(img1_path, img2_path, ptype, distance, save_path):
+def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None):
     assert os.path.exists(img1_path) and os.path.exists(img2_path)
     img1 = cv2.imread(img1_path)
     img2 = cv2.imread(img2_path)
+    assert img1 is not None
+    assert img2 is not None
+
+    img1 = plot_bounding_box(img1, get_bounding_box_func, img1_path)
+    img2 = plot_bounding_box(img2, get_bounding_box_func, img2_path)
 
     h1, w1, c1 = img1.shape
     h2, w2, c2 = img2.shape

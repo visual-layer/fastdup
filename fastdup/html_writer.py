@@ -23,6 +23,7 @@ border-collapse: collapse !important;
 border:none !important; 
 outline:none !important; 
 text-align: left;
+max-width: 1200px !important;
 }
 table td { 
 padding: 15px;

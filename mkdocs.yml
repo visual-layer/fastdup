@@ -1,0 +1,17 @@
+site_name: Fastdup documentation
+
+theme:
+  name: "material"
+
+markdown_extensions:
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - def_list
+  - nl2br
+  - sane_lists
+plugins:
+  - mkdocstrings
+
