@@ -21,7 +21,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 ## Compute Image Statistics
 ![akt text](./gallery/image_stats.jpg)
-*Compute image statistics and visualize the results, using food-101 dataset*
+*[Compute image statistics and visualize the results](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_image_stats.ipynb), using food-101 dataset*
 
 ## [Identify duplicates](https://bit.ly/3AkSUz1)
 ![alt text](./gallery/mscoco_duplicates-min.png)
