@@ -16,79 +16,9 @@
 13. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
-The main function of fastdup is `run`. It works by extracting short feature vectors from each image, clsutering the images together using a nearest neighbor model which computes similarities of pairs of images. Then a graph is formed to deduce the network structure of local similarities. The input/ outputs are described below in the section Input/Output. 
 
-```
-    Run fastdup tool for find duplicate, near duplicate images, outlier images and clusters of similar iamges in a corpus of images. 
-    The only mandatory argument is image_dir. Given an image directory it will compare all pairs of images and store the most similar ones in the output file output_similarity.
+[Documentation pages](https://visualdatabase.github.io/fastdup/)
 
-    Parameters:
-        input_dir (str): Location of the images/videos to analyze.
-        - A local folder
-        - A remote folder (s3 or minio starting with minio://)
-        - A file containing absolute filenames each on its own row
-        - A python list with absolute filenames
-        - yolov5 yaml input file containing train and test folders (single folder supported for now)
-        We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
-        If you have other image extensions that are readable by opencv imread() you can give them in a file and then we do not check for the
-        known extnsions.
-        Note: it is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files in case your folders are mixed.
-
-        work_dir (str): Working directory for saving intermediate results and outputs. Default is local folder ('.').
-
-	test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
-
-        compute (str): Compute type [cpu|gpu] default is cpu.
-
-        verbose (boolean): Verbosity. Default is False.
-
-        num_threads (int): Number of threads. Default is -1 to be auto configured by the number of cores.
-
-        num_images (int): Number of images to run on. Default is -1 which means run on all the images in the image_dir folder.
-
-        turi_param (str): Optional additional parameters for turi. Supported paramets are:
-        - nnmodel=0|1|2 Nearest Neighbor model for clustering the features together, when using turi (has no effect when using nnf). Supported options are 0=brute_force (exact), 1=ball_tree and 2=lsh (both approximate). Default is brute_force.
-        - ccthreshold=XX where XX in the range [0,1]. Construct similarities graph when the similarity > XX.
-        - run_cc=0|1 Distable/enable connected components computation on the graph of similarities.
-        - run_pagerank=0|1 Disable/enable pagerank computation on the graph of similarities.
-        - run_degree=0|1 Distable/enable degree distribution computation on the graph of similarities
-   	- store_int=0|1 store the similarity as string filenames or string index of the file id (to save space)
-        - tar_only=0|1 run only on tar files and ignore images in folders. Default is 0.
-        - delete_tar=0|1 when working with tar files obtained from cloud storage delete the tar after download
-        - delete_img=0|1 when working with images obtained from cloud storage delete the image after download
-	Example run: turi_param='nnmodel=0,ccthreshold=0.99'
-
-        distance (str): Distance metric for the Nearest Neighbors algorithm. Default is cosine. Other distances are euclidean, squared_euclidean, manhattan.
-
-        threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical, and 0.85 and above is very similar. Default is 0.85 which means that only image pairs with similarity larger than 0.85 are stored.
-
-        lower_threshold (float): Similarity measure to outline images that are far away (outliers) vs. the total distribution. Default value is 0.3.
-
-        model_path(str): Optional location of ONNX model file, should not be used.
-
-        version(bool): Print out the version number. This function takes no argument.
-
-        nearest_neighbors_k (int): For each image, how many similar images to look for. Default is 2.
-
-        run_mode (int): This software can run for either feature vector extraction and similarity measurement (0), or just feature vector extraction (1), or just similarity measure computation (2). 
- 
-   nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|nnf.
-
-        min_offset (int): Optional min offset to start iterating on the full file list. Default is -1.
-
-        max_offset (int): Optional max offset to start iterating on the full file list. Default is -1.
-
- 	nnf_mode (str): When nn_provider='nnf' selects the nnf mode. Supported options are HNSW32 and any other nnf string.
-
-   	nnf_param (str): When nn_provider='nnf' assigns optional nnf parameters. For example efSearch=175. Multiple params are supported - for example 'efSearch=175,nprobes=200'
-
-	bounding_box (str): Optional bounding box for cropping images before the fastdup tool is applied. For example bounding_box='rows=100,cols=100,width=250,height=310'. Rows and cols gives the top left corner coordinates, and width and height the bounding box dimensions. (Row is the y axis and col is the x axis. The box is cropped in the range [rows:rows+height, cols:cols+width].
-
-       
-        
-    Returns:
-        Status code 0 = success, 1 = error.
-```
 
 ## Input / output formats <a name="input"/>  
 
