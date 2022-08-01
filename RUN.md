@@ -36,29 +36,7 @@ The intermediate outputs and final outputs are stored in the folder `work_dir`.
 Binary numpy array containing `n` rows (where `n` is the number of images) of 576 columns with the feature vectors. (Default filename is `features.dat`)
 An additional csv file containing the full paths to the image names corresponding to the feature vectors (default filename is `features.dat.csv`). Both those files are linked to each other. The reason we save the list of filenaes is that theh order of extraction may change depends on the file system listing. In addition, in case of corrupted images, its feature vector is skipped and not generated. In that case an additional output file is provided ( `features.bad.csv`). This file lists all the bad or corrupted images that were skipped. 
 
-Note: for using the binary features we provide the following function in Python:
-
-```
-def load_binary_feature(filename):
-
-    Example Python function for loading the stored binary features and their matching filenames.
-
-    Parameters:
-        filename(str):The binary feature file location
-
-    Returns:
-        A list of with all image file names of length X.
-        An np matrix of shape X rows x 576 cols. Each row conform to feature vector os a single image.
-
-    Note: 
-       When using tar, tgz, tar.gz or zip files, for each file a different features.dat and feature.dat.csv are created.
-
-    Example:
-        import fastdup
-        file_list, mat_features = fastdup.load_binary('features.dat')
-
-```
-
+Note: for using the binary features we provide the [following function](https://visualdatabase.github.io/fastdup/#fastdup.load_binary_feature).
 
 ### Similarity pair list
 
