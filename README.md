@@ -19,7 +19,7 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
 
-## Compute Image Statistics
+## [Compute Image Statistics](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_image_stats.ipynb)
 ![akt text](./gallery/image_stats.jpg)
 *[Compute image statistics and visualize the results](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_image_stats.ipynb), using food-101 dataset*
 
