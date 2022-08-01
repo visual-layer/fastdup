@@ -111,6 +111,9 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 
 ## Getting started examples
 - [🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://bit.ly/3ydvtVJ)
+- [Finding wrong lables via image similarity](./examples/fastdup_wrong_labels.ipynb)
+- [Computing image statistics](./examples/fastdup_image_stats.ipynb)
+- [Using your own onnx model for extractiom](./examples/fastdup_model_support.ipynb)
 - [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
 - [Finding duplicates, outliers in the Food-101 datadset:](https://bit.ly/3yhoafo)
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
