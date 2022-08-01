@@ -231,6 +231,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fastdup.export_to_tensorboard_projector" class="md-nav__link">
+    fastdup.export_to_tensorboard_projector
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fastdup-utilities" class="md-nav__link">
     Fastdup utilities
   </a>
@@ -344,6 +351,13 @@
         <li class="md-nav__item">
   <a href="#fastdup.create_similarity_gallery" class="md-nav__link">
     fastdup.create_similarity_gallery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastdup.export_to_tensorboard_projector" class="md-nav__link">
+    fastdup.export_to_tensorboard_projector
   </a>
   
 </li>
@@ -2632,6 +2646,214 @@ The input is an absolute path to the image and the output is the string to displ
 
     <span class="k">return</span> <span class="n">do_create_similarity_gallery</span><span class="p">(</span><span class="n">similarity_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="p">,</span> <span class="n">lazy_load</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> 
         <span class="nb">slice</span><span class="p">,</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">descending</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="p">,</span> <span class="n">get_reformat_filename_func</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div><p><code>fastdup.export_to_tensorboard_projector</code><br />
+</p>
+
+
+<div class="doc doc-object doc-function">
+
+
+<a id="fastdup.export_to_tensorboard_projector"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Export feature vector embeddings to be visualized using tensorboard projector app.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>work_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>work_dir where fastdup results are stored</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>log_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>output dir where tensorboard will read from</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>sample_size</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>how many images to view. Default is 900.</p></td>
+          <td>
+                <code>900</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>sample_method</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>how to sample, currently 'random' is supported.</p></td>
+          <td>
+                <code>&#39;random&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>with_images</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>add images to the visualization (default True)</p></td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_label_func</code></td>
+          <td>
+                <code>callable</code>
+          </td>
+          <td><p>Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>d</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>dimension of the embedding vector. Default is 576.</p></td>
+          <td>
+                <code>576</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>file_list</code></td>
+          <td>
+                <code>list</code>
+          </td>
+          <td><p>Optional parameter to specify a list of files to be used for the visualization. If not specified, filenames are taken from the work_dir/atrain_features.dat.csv file<br />
+          Note: be careful here as the order of the file_list matters, need to keep the exact same order as the atrain_features.dat.csv file!</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>ret</code></td>          <td>
+                <code>int</code>
+          </td>
+          <td><p>0 in case of success, 1 in case of failure</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>fastdup/__init__.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_tensorboard_projector</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">sample_size</span> <span class="o">=</span> <span class="mi">900</span><span class="p">,</span>
+                                    <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">with_images</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">,</span> <span class="n">file_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Export feature vector embeddings to be visualized using tensorboard projector app.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        work_dir (str): work_dir where fastdup results are stored</span>
+
+<span class="sd">        log_dir (str): output dir where tensorboard will read from</span>
+
+<span class="sd">        sample_size (int): how many images to view. Default is 900.</span>
+
+<span class="sd">        sample_method (str): how to sample, currently &#39;random&#39; is supported.</span>
+
+<span class="sd">        with_images (bool): add images to the visualization (default True)</span>
+
+<span class="sd">        get_label_func (callable): Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</span>
+
+<span class="sd">        d (int): dimension of the embedding vector. Default is 576.</span>
+
+<span class="sd">        file_list (list): Optional parameter to specify a list of files to be used for the visualization. If not specified, filenames are taken from the work_dir/atrain_features.dat.csv file</span>
+<span class="sd">                      Note: be careful here as the order of the file_list matters, need to keep the exact same order as the atrain_features.dat.csv file!</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ret (int): 0 in case of success, 1 in case of failure</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+    <span class="kn">from</span> <span class="nn">.tensorboard_projector</span> <span class="kn">import</span> <span class="n">export_to_tensorboard_projector_inner</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">work_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">work_dir</span><span class="p">),</span> <span class="s1">&#39;Failed to create work_dir &#39;</span> <span class="o">+</span> <span class="n">work_dir</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s1">&#39;atrain_features.dat&#39;</span><span class="p">)),</span> <span class="sa">f</span><span class="s1">&#39;Faild to find fastdup output </span><span class="si">{</span><span class="n">work_dir</span><span class="si">}</span><span class="s1">atrain_features.dat&#39;</span>
+    <span class="k">assert</span> <span class="n">sample_size</span> <span class="o">&lt;=</span> <span class="mi">5000</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Tensorboard projector is limited by 5000 images&#39;</span>
+
+    <span class="n">imglist</span><span class="p">,</span> <span class="n">features</span> <span class="o">=</span> <span class="n">load_binary_feature</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s1">&#39;atrain_features.dat&#39;</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s1">&#39;file_list should be a list of absolute file names given in the same order&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">imglist</span><span class="p">),</span> <span class="s2">&quot;file_list should be the same length as imglist got &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imglist</span><span class="p">))</span>
+    <span class="n">export_to_tensorboard_projector_inner</span><span class="p">(</span><span class="n">imglist</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">sample_method</span><span class="p">,</span> <span class="n">with_images</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
