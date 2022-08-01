@@ -45,6 +45,10 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
 
+## [Find confusing labels report](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_wrong_labels.ipynb)
+![alt test](./gallery/confusing_labels.jpg)
+*Identify wrong / confusing labels using k-nearest neighbor visual classifier*
+
 
 ## [Find image with contradicting labels](https://bit.ly/3yE5kAI)
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
