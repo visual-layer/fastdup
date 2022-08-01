@@ -148,84 +148,12 @@ Example command line:
 
 ## Visualizing the outputs <a name="visualization"/>
 
-The following command creates the html report:
-```
-def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None, slice=None):
+[Documentation pages](https://visualdatabase.github.io/fastdup/#fastdup-visualization-of-results)
 
-    Function to create and display a gallery of images computed by the similarity metrics
 
-    Parameters:
-        similarity_file (str): csv file with the computed similarities by the fastdup tool
-        save_path (str): output folder location for the visuals
-        num_images(int): Max number of images to display (deafult = 50)
-        descending (boolean): If False, print the similarities from the least similar to the most similar. Default is True.
-	lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
-	slice (str): Optional parameter to select a slice of the duplicates based on a specific label.
-```
+## Exporting to tensorboard projects
 
-The html generated had 3 images in each row. To the left and middle are the two similar images, and the third image to the right is a superposition of both images on top of each other to show the differnces more easy.
 
-A second function create an html report gallery of outliers:
-```
-def create_outliers_gallery(similarity_file, save_path, num_images=20, descending=True, lazy_load=False, get_label_func=None, slice=None):
-
-    Function to create and display a gallery of images computed by the outliers metrics
-
-    Parameters:
-        outliers_file (str): csv file with the computed outliers by the fastdup tool
-        save_path (str): output folder location for the visuals
-        num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
-        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
-
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
-	how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
-                                                      all = take the image that is far away from all other images. Default is one.
-        slice (str): Optional parameter to select a slice of the outliers file based on a specific label.
-```
-
-Another function creates an html report gallery of components. Components are clusters of similar images (more than two).
-```
-def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None, group_by='visual', slice=None):
-
-    Function to create and display a gallery of images for the largest graph components
-
-    Parameters:
-        work_dir (str): path to fastdup work_dir
-        save_path (str): output folder location for the visuals
-        num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
-
-        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
-        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
-        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
-	 slice(str) : optional label to draw only a subset of the components conforming to this label.
-```
-     
-
-Command line example for the html report generation:
-```
-import fastdup
-fastdup.create_duplicates_gallery('/path/to/similarity.csv', save_path='/path/to/report/')
-```
-
-Note: the report should be generated on the same machine since we assume that the input folder for reading the images exists under the same location.
-
-Another form of visualization is using TensorBoard Projector as shown in [this notebook](https://bit.ly/3ydvtVJ). 
-
-The following function saves the data in a ready format for TensorBoard projector:
-
-```
-def export_to_tensorboard_projector(work_dir:str, log_dir:str, sample_size:int = 900,
-                                    sample_method:str='random', with_images=True, get_label_func=None):
-    Export feature vector embeddings to be visualized using tensorboard projector app.
-    work_dir: work_dir where fastdup results are stored
-    log_dir: output dir where tensorboard will read from
-    sample_size: how many images to view
-    sample_method: how to sample, currently 'random' is supported
-    with_images:bool add images to the visualization (default True)
-    get_label_func (callable): Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
-    :return:
-```
 
 After storing the data you should run (in a Jupyter notebook)
 ```
