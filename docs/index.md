@@ -23,8 +23,6 @@ Visualization of the output data is done using the following functions:
 `fastdup.create_similarity_gallery`
 :::fastdup.create_similarity_gallery
 
-`fastdup.export_to_tensorboard_projector`
-:::fastdup.export_to_tensorboard_projector
 
 ## Fastdup utilities
 Loading the binary feature resulting in fastdup run can be done by `fastdup.load_binary_features`.
@@ -38,9 +36,16 @@ Loading the binary feature resulting in fastdup run can be done by `fastdup.load
 `fastdup.generate_sprite_image`
 :::fastdup.generate_sprite_image
 
-`fastdup.create_similarity_gallery`
-:::fastdup.find_top_components
+`fastdup.export_to_tensorboard_projector`
+:::fastdup.export_to_tensorboard_projector
 
+## Fastdup utilities to remove images
+
+`fastdup.delete_components`
+:::fastdup.delete_components
+
+`fastdup.delete_stats_outliers`
+:::fastdup.delete_stats_outliers
 
 
 

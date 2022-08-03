@@ -311,7 +311,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 
 
-def visualize_top_components(work_dir:str, save_path:str, num_components:int, get_label_func=None, group_by='visual', slice=None,
+def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None):
     '''
     Visualize the top connected components
@@ -364,6 +364,7 @@ def visualize_top_components(work_dir:str, save_path:str, num_components:int, ge
                 try:
                     img = cv2.imread(f)
                     img = plot_bounding_box(img, get_bounding_box_func, f)
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     tmp_images.append(img)
                     w.append(img.shape[1])
                     h.append(img.shape[0])
@@ -756,9 +757,9 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 
-        metric (str): Optional metric selection. One of blur, size, mean_value
+        metric (str): Optional metric selection. One of blur, size, mean, min, max, unique.
 
-        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels. A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors.
 
         max_width (int): Optional param to limit the image width
 
@@ -770,7 +771,11 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         get_extra_col_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 
-     '''
+
+
+    Returns:
+        ret (pd.DataFrame): Dataframe with the image statistics
+    '''
 
 
     from fastdup import generate_sprite_image
@@ -778,39 +783,61 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     img_paths2 = []
     info0 = []
     info = []
+    label_score = []
+    lengths = []
 
     df = pd.read_csv(similarity_file)
-    assert len(df), "Failed to read stats file " + stats_file
+    assert len(df), "Failed to read stats file " + similarity_file
 
     if callable(get_label_func):
         df['label'] = df['from'].apply(lambda x: get_label_func(x))
         df['label2'] = df['to'].apply(lambda x: get_label_func(x))
-        df = slice_df(df, slice)
+        if slice != 'label_score':
+            df = slice_df(df, slice)
 
-    df = df.sort_values(['from','distance'], ascending=not descending)
+    df = df.sort_values(['from','distance'], ascending= not descending)
     if 'label' in df.columns:
         top_labels = df.groupby('from')['label2'].apply(list)
 
     tos = df.groupby('from')['to'].apply(list)
     distances = df.groupby('from')['distance'].apply(list)
-    
+
     if 'label' in df.columns:
         subdf = pd.DataFrame({'to':tos, 'label':top_labels,'distance':distances}).reset_index()
     else:
         subdf = pd.DataFrame({'to':tos, 'distance':distances}).reset_index()
 
-    subdf = subdf.head(num_images)    
+    if slice is None or slice != 'label_score':
+        df2 = subdf.copy()
+        subdf = subdf.head(num_images)
+    else:
+        for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
+            filename = row['from']
+            label = get_label_func(filename)
+            similar = [x==label for x in list(row['label'])]
+            similar = 100.0*sum(similar)/(1.0*len(row['label']))
+            lengths.append(len(row['label']))
+            label_score.append(similar)
+        subdf['score'] = label_score
+        subdf['length'] = lengths
+        print(subdf['score'].describe())
+        subdf = subdf[subdf['length'] > 1]
+        subdf = subdf.sort_values(['score','length'], ascending=not descending)
+        df2 = subdf.copy()
+        subdf = subdf.head(num_images)
+
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
             filename = row['from']
-
+            if callable(get_label_func):
+                label = get_label_func(filename)
             if callable(get_reformat_filename_func):
                 new_filename = get_reformat_filename_func(filename)
             else:
                 new_filename = filename
 
-            if 'label' in row:
-                info0_df = pd.DataFrame({'label':[get_label_func(filename)],'from':[new_filename]}).T
+            if callable(get_label_func):
+                info0_df = pd.DataFrame({'label':[label],'from':[new_filename]}).T
             else:
                 info0_df = pd.DataFrame({'from':[new_filename]}).T
 
@@ -841,6 +868,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
             if 'label2' in df.columns:
                 info_df['label'] = row['label'][:MAX_IMAGES]
+            info_df = info_df.sort_values('distance',ascending=False)
             info.append(info_df.to_html(escape=False).replace('\n',''))
 
             h = max_width if max_width is not None else 0
@@ -866,9 +894,9 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         img_paths4 = ["<img src=\"" + os.path.join(save_path, os.path.basename(x)) + "\" loading=\"lazy\">" for x in img_paths2]
         subdf.insert(0, 'Image', img_paths3)
         subdf.insert(0, 'Similar', img_paths4)
+
     subdf['info_to'] = info
     subdf['info_from'] = info0
-
 
     out_file = os.path.join(save_path, 'topk_similarity.html')
     title = 'Fastdup Tool - Similarity Image Report'
@@ -876,6 +904,8 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         title += ", " + str(slice)
 
     cols = ['info_from','info_to', 'Image','Similar']
+    if slice is not None and slice == 'label_score':
+        cols = ['score'] + cols
     if callable(get_extra_col_func):
         subdf['extra'] = subdf['from'].apply(lambda x: get_extra_col_func(x))
         cols.append('extra')
@@ -892,3 +922,4 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             except Exception as ex:
                 print("Failed to delete image file ", i, ex)
 
+    return df2

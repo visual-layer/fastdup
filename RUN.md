@@ -153,6 +153,7 @@ Example command line:
 
 ## Exporting to tensorboard projects
 
+Use the function `fastup.export_to_tensorboard_projector` descrbed [here](https://visualdatabase.github.io/fastdup/#fastdup.export_to_tensorboard_projector).
 
 
 After storing the data you should run (in a Jupyter notebook)

@@ -63,9 +63,9 @@ def run(input_dir='',
         num_threads=-1,     
         num_images=0,        
         turi_param='nnmodel=0',  
-        distance='cosine',     #distance metric for the nearest neighbor model. Default "cosine".
-        threshold=0.9,         #threshold for finding simiar images. Default is 0.85 (values 0->1)
-        lower_threshold=0.05,   #lower threshold for finding simiar images. Default is 0.05 (values 0->1)
+        distance='cosine',     #distance metric for the nearest neighbor model.
+        threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
+        lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
         model_path=model_path_full,
         license='CC-BY-NC-ND-4.0',            #license string
         version=False,          #show version and exit      
@@ -98,17 +98,17 @@ def run(input_dir='',
             known extensions.
             Note: it is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files.
 
-        work_dir (str): Optional path for storing intermediate files and results. Default is "."
+        work_dir (str): Optional path for storing intermediate files and results.
 
         test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
 
-        compute (str): Compute type [cpu|gpu] default is cpu. Note: gpu is supported only in the enterprise version.
+        compute (str): Compute type [cpu|gpu] Note: gpu is supported only in the enterprise version.
 
-        verbose (boolean): Verbosity. Default is False.
+        verbose (boolean): Verbosity.
 
-        num_threads (int): Number of threads. Default is -1 to be auto configured by the number of cores.
+        num_threads (int): Number of threads. If no value is specified num threads is auto configured by the number of cores.
 
-        num_images (unsigned long long): Number of images to run on. Default is 0 which means run on all the images in the image_dir folder.
+        num_images (unsigned long long): Number of images to run on. On default, run on all the images in the image_dir folder.
 
         turi_param (str): Optional turi parameters seperated by command. \
             ==nnmodel=xx==, Nearest Neighbor model for clustering the features together. Supported options are 0 = brute_force (exact),
@@ -121,19 +121,19 @@ def run(input_dir='',
             ==tar_only=0|1== run only on tar files and ignore images in folders. Default is 0.\
 	        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
 
-        distance (str): Distance metric for the Nearest Neighbors algorithm. Default is cosine. Other distances are euclidean, squared_euclidean, manhattan.
+        distance (str): Distance metric for the Nearest Neighbors algorithm. Other distances are euclidean, squared_euclidean, manhattan.
 
-        threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical, and 0.85 and above is very similar. Default is 0.85 which means that only image pairs with similarity larger than 0.85 are stored.
+        threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical.
 
-        lower_threshold (float): Similarity measure to outline images that are far away (outliers) vs. the total distribution. Default value is 0.05 (means 5% out of the total similarities computed).
+        lower_threshold (float): Similarity percentile measure to outline images that are far away (outliers) vs. the total distribution. (means 5% out of the total similarities computed).
 
         model_path (str): Optional location of ONNX model file, should not be used.
 
         version (bool): Print out the version number. This function takes no argument.
 
-        nearest_neighbors_k (int): For each image, how many similar images to look for. Default is 2.
+        nearest_neighbors_k (int): For each image, how many similar images to look for.
 
-        d (int): Length of the feature vector. Default is 576. Change this parameter only when providing precomputed features instead of images.
+        d (int): Length of the feature vector. Change this parameter only when providing precomputed features instead of images.
 
         run_mode (int):
             ==run_mode=0== (the default) does the feature extraction and NN embedding to compute all pairs similarities.
@@ -169,7 +169,7 @@ def run(input_dir='',
 
         bounding_box (str): Optional bouding box to crop images, given as bounding_box='rows=xx,cols=xx,height=xx,width=xx'.
 
-        batch_size (int): Optional batch size when computing inference, default = 1. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
+        batch_size (int): Optional batch size when computing inference. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
 
         resume (int): Optional flag to resume from a previous run.
 
@@ -641,6 +641,20 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
                                         get_reformat_filename_func, get_extra_col_func)
 
 
+def inner_delete(files, dry_run):
+    count = 0
+    for f in files:
+        if (dry_run):
+            print(f'rm -f {f}')
+        else:
+            try:
+                os.unlink(f)
+                count+=1
+            except Exception as ex:
+                print('Failed to remove file', f, ' with exception', ex)
+    print('total deleted', count, 'files')
+    return 0
+
 def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
     '''
     function to automate deletion of duplicate images using the connected components analysis.
@@ -651,7 +665,11 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
         how (int): either 'all' (deletes all the component) or 'one' (leaves one image and delete the rest of the duplicates)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-
+    Example:
+        import fastdup
+        fastdup.run('/path/to/data', '/path/to/output')
+        top_components = fastdup.find_top_components('/path/to/data', '/path/to/output')
+        delete_components(top_components, None, how = 'one', dry_run = False)
 
     '''
 
@@ -677,19 +695,118 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
         if (how == 'one'):
             files = files[1:]
 
-        for f in files:
-            if (dry_run):
-                print(f'rm -f {f}')
-            else:
-                try:
-                    os.unlink(f)
-                except Exception as ex:
-                    print('Failed to remove file', f, ' with exception', ex)
+        inner_delete(files, dry_run)
+
+
+
+def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_percentile=None, upper_percentile=None,
+                          lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True):
+    '''
+      function to automate deletion of outlier files based on computed statistics.
+      Example:
+
+          import fastdup
+          fastdup.run('/my/data/", work_dir="out")
+          # delete 5% of the brightest images and delete 2% of the darkest images
+          fastdup.delete_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
+
+          It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.
+
+	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
+
+      Args:
+          stats_file (str) folder pointing to fastdup workdir, or file pointing to work_dir/atrain_stats.csv file. Alternatively pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+          metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
+          filename_col (str): column name in the stats_file to use as the filename
+          lower_percentile (float): lower percentile to use for the threshold.
+          upper_percentile (float): upper percentile to use for the threshold.
+          lower_threshold (float): lower threshold to use for the threshold
+          upper_threshold (float): upper threshold to use for the threshold
+          get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
+          dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
+
+	
+
+
+      Returns
+          None
+
+    '''
+    assert isinstance(dry_run, bool)
+    if lower_threshold is not None and lower_percentile is not None:
+        print('You should only specify one of lower_threshold or lower_percentile')
+        return 1
+    if upper_threshold is not None and upper_percentile is not None:
+        print('You should only specify one of upper_threshold or upper_percentile')
+        return 1
+
+    if isinstance(stats_file, pd.DataFrame):
+        df = stats_file
+    else:
+        assert os.path.exists(stats_file)
+        if (os.path.isdir(stats_file)):
+            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+        df = pd.read_csv(stats_file)
+
+    assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
+    assert filename_col in df.columns
+
+    orig_df = df.copy()
+    orig_len = len(df)
+    assert len(df), "Failed to find any data in " + stats_file
+
+    if metric == 'size':
+        df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
+
+
+    if lower_percentile is not None:
+        assert lower_percentile >= 0 and lower_percentile <= 1, "lower_percentile should be between 0 and 1"
+        lower_threshold = df[metric].quantile(lower_percentile)
+    if upper_percentile is not None:
+        assert upper_percentile >= 0 and upper_percentile <= 1, "upper_percentile should be between 0 and 1"
+        upper_threshold = df[metric].quantile(upper_percentile)
+
+    if (lower_percentile is not None or lower_threshold is not None):
+        print(f"Going to delete any images with {metric} < {lower_threshold}")
+        df = orig_df[orig_df[metric] < lower_threshold]
+        if (upper_percentile is not None or upper_threshold is not None):
+            print(f"Going to delete any images with {metric} > {upper_threshold}")
+            df = pd.concat([df, orig_df[orig_df[metric] > upper_threshold]], axis=0)
+        elif (upper_percentile is not None or upper_threshold is not None):
+            print(f"Going to delete any images with {metric} > {upper_threshold}")
+            df = orig_df[orig_df[metric] > upper_threshold]
+
+    if orig_len == len(df):
+        print('Warning: current request to delete all files, please select a subset of files to delete.')
+        return 0
+    elif len(df) == 0:
+        print('Did not find any items to delete, please check your selection')
+        return 0
+
+
+    if get_reformat_filename_func is None:
+        files = df[filename_col].values
+    else:
+        files = df[filename_col].apply(get_reformat_filename_func).values
+    return inner_delete(files, dry_run)
+
+
+
+
 
 def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
                                     sample_method='random', with_images=True, get_label_func=None, d=576, file_list=None):
     '''
     Export feature vector embeddings to be visualized using tensorboard projector app.
+
+    Example:
+        >>> import fastdup
+        >>> fastdup.run('/my/data/', work_dir='out')
+        >>> fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')
+
+        # after data is exporeted run tensorboard projector
+        >>> %load_ext tensorboard
+        >>> %tensorboard --logdir=logs
 
     Args:
         work_dir (str): work_dir where fastdup results are stored
@@ -912,7 +1029,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
     assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
     if os.path.isdir(stats_file):
-        stats_file = os.path.join(stats_file, 'similarity.csv')
+        stats_file = os.path.join(stats_file, 'atrain_stats.csv')
 
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
