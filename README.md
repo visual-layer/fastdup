@@ -18,10 +18,6 @@ FastDup is a tool for gaining insights from a large image collection. It can fin
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-## User community contributions
-![alt text](./gallery/anime.jpg)
-*[FsstDup based Anime Search Engine by Dorothy Walker](https://fbfa0c789b41e75.s3.amazonaws.com)
-
 ## [Compute Image Statistics](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_image_stats.ipynb)
 ![alt text](./gallery/image_stats.jpg)
 *[Compute image statistics and visualize the results](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_image_stats.ipynb), using food-101 dataset*
@@ -127,6 +123,11 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](https://bit.ly/3yDc2qw)
 - [Detailed running instructions](https://bit.ly/3OFLlY5)
+
+## User community contributions
+![alt text](./gallery/anime.jpg)
+*[FsstDup based Anime Search Engine by Dorothy Walker](https://fbfa0c789b41e75.s3.amazonaws.com/visual-search-engine-anime.html)
+
 
 # Support 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
