@@ -25,7 +25,7 @@ except:
 	tqdm = (lambda x: x)
 
 
-__version__="0.112"
+__version__="0.125"
 CONTACT_EMAIL="info@databasevisual.com"
 if platform.system() == "Darwin":
 	SO_SUFFIX=".dylib"
@@ -44,9 +44,9 @@ if not os.path.exists(so_file):
 dll = CDLL(so_file)
 
 
-model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.onnx')
+model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.ort')
 if not os.path.exists(model_path_full):
-    print("Failed to find onnx file", model_path_full);
+    print("Failed to find onnx/ort file", model_path_full);
     print("Current init file is on", __file__);
     sys.exit(1)
 
@@ -79,7 +79,8 @@ def run(input_dir='',
         nnf_param="",
         bounding_box="",
         batch_size = 1,
-        resume = 0):
+        resume = 0,
+        high_accuracy=False):
 
     '''
     Run fastdup tool for finding duplicate, near duplicates, outliers and clusters of related images in a corpus of images.
@@ -119,6 +120,7 @@ def run(input_dir='',
             ==delete_tar=0|1== when working with tar files obtained from cloud storage delete the tar after download\
             ==delete_img=0|1== when working with images obtained from cloud storage delete the image after download\
             ==tar_only=0|1== run only on tar files and ignore images in folders. Default is 0.\
+            ==run_stats=0|1== compute image statistics. Default is 1.\
 	        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Other distances are euclidean, squared_euclidean, manhattan.
@@ -172,6 +174,8 @@ def run(input_dir='',
         batch_size (int): Optional batch size when computing inference. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
 
         resume (int): Optional flag to resume from a previous run.
+
+        high_accuracy (bool): Compute a more accurate model. Runtime is increased about 15% and feature vector storage size/ memory is increased about 60%. The upside is the model can distinguish better of minute details in images with many objects.
 
     Returns:
         ret (int): Status code 0 = success, 1 = error.
@@ -255,6 +259,16 @@ def run(input_dir='',
     if (run_mode == 3 and test_dir == ''):
         print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
         return 1
+
+    if high_accuracy:
+        if model_path !=  model_path_full:
+            print("Can not run high accuracy model when using user provided model_path")
+            return 1
+        if d != 576:
+            print("Can not run high accuracy model when using user provided d")
+            return 1
+        model_path = model_path_full.replace('l.ort', 'l2.ort')
+        d = 960
 
     #Calling the C++ side
     dll.do_main.restype = c_int
@@ -387,8 +401,8 @@ def load_binary_feature(filename, d=576):
         np_array (np.array): An np matrix of shape rows x d cols (default d is 576). Each row conform to feature vector os a single image.
 
     Example:
-        import fastdup
-        file_list, mat_features = fastdup.load_binary('features.dat')
+        >>> import fastdup
+        >>> file_list, mat_features = fastdup.load_binary('features.dat')
 
     '''
 	
@@ -461,10 +475,10 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
     Function to create and display a gallery of images computed by the similarity metrics
 
-        Example:
-	 	import fastdup
-		fastdup.run('input_folder', 'output_folder')
-		fastdup.create_duplicates_gallery('output_folder', save_path='.', get_label_func = lambda x: x.split('/')[1], slice='hamburger')
+    Example:
+	 	>>> import fastdup
+		>>> fastdup.run('input_folder', 'output_folder')
+		>>> fastdup.create_duplicates_gallery('output_folder', save_path='.', get_label_func = lambda x: x.split('/')[1], slice='hamburger')
 
     Regarding get_label_func, this example assumes that the second folder name is the class name for example my_data/hamburger/image001.jpg. You can change it to match your own labeling convention.
 
@@ -586,7 +600,8 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
 def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                               group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
-                              get_reformat_filename_func=None, get_extra_col_func=None):
+                              get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
+                              descending=True, min_items=None, keyword=None):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -616,6 +631,15 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         get_extra_col_func (callable): Optional parameter to allow adding more information to the report.
 
+        threshold (float): Optional parameter to set the treshold for chosing components. Default is None.
+
+        metric (str): Optional parameter to set the metric to use (like blur) for chose components. Default is None.
+
+        descending (boolean): Optional parameter to set the order of the components. Default is True namely list components from largest to smallest.
+
+        min_items (int): Optional parameter to select components with min_items or more items. Default is None.
+
+        keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
 
     Returns:
         ret (int): 0 in case of success, otherwise 1
@@ -638,26 +662,66 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                         max_width, max_items, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func)
+                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
+                                        descending=descending, min_items=min_items, keyword=keyword)
 
 
-def inner_delete(files, dry_run):
+def inner_delete(files, dry_run, how, save_path=None):
+    if how == 'move':
+        assert save_path is not None and os.path.exists(save_path)
+
     count = 0
     for f in files:
         if (dry_run):
-            print(f'rm -f {f}')
+            if how == 'delete':
+                print(f'rm -f {f}')
+            elif how == 'move':
+                print(f'mv {f} {save_path}')
         else:
             try:
-                os.unlink(f)
+                if how == 'delete':
+                    os.unlink(f)
+                elif how == 'move':
+                    os.rename(f, os.path.join(save_path, os.path.basename(f)))
+                else:
+                    assert False, "Wrong argument to how=[delete|move]"
                 count+=1
+
             except Exception as ex:
-                print('Failed to remove file', f, ' with exception', ex)
-    print('total deleted', count, 'files')
+                print(f'Failed to {how} file', f, ' with exception', ex)
+    if not dry_run:
+        print(f'total {how}d', count, 'files')
+    return 0
+
+
+
+def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
+
+    assert len(files)
+    assert how == 'retag=labelImg' or how == 'retag=cvat', "Currently only retag=labelImg is supported"
+    if save_path:
+        assert os.path.exists(save_path)
+
+    from fastdup.label_img import do_export_to_labelimg
+    from fastdup.cvat import do_export_to_cvat
+
+
+    if how == 'retag=labelImg':
+        do_export_to_labelimg(files, labels, save_path)
+    elif how == 'retag=cvat':
+        do_export_to_cvat(files, labels, save_path)
+
     return 0
 
 def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
     '''
     function to automate deletion of duplicate images using the connected components analysis.
+
+        Example:
+        >>> import fastdup
+        >>> fastdup.run('/path/to/data', '/path/to/output')
+        >>> top_components = fastdup.find_top_components('/path/to/data', '/path/to/output')
+        >>> delete_components(top_components, None, how = 'one', dry_run = False)
 
     Args:
         top_components (pd.DataFrame): largest components as found by the function find_top_components().
@@ -665,11 +729,7 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
         how (int): either 'all' (deletes all the component) or 'one' (leaves one image and delete the rest of the duplicates)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-    Example:
-        import fastdup
-        fastdup.run('/path/to/data', '/path/to/output')
-        top_components = fastdup.find_top_components('/path/to/data', '/path/to/output')
-        delete_components(top_components, None, how = 'one', dry_run = False)
+
 
     '''
 
@@ -695,18 +755,68 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
         if (how == 'one'):
             files = files[1:]
 
-        inner_delete(files, dry_run)
+        inner_delete(files, how='delete', dry_run=dry_run)
+
+
+def delete_components_by_label(top_components_file,  min_items=10, min_distance=0.96,  how = 'majority', dry_run = True):
+    '''
+    function to automate deletion of duplicate images using the connected components analysis.
+
+    Args:
+        top_components (pd.DataFrame): largest components as found by the function find_top_components().
+        to_delete (list): a list of integer component ids to delete
+        how (int): either 'all' (deletes all the component) or 'majority' (leaves one image with the dominant label count and delete the rest)
+        dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
 
 
-def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_percentile=None, upper_percentile=None,
-                          lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True):
+    '''
+    assert os.path.exists(top_components_file), "top_components_file should be a path to a file"
+
+    # label is ,component_id,files,labels,to,distance,blur,len
+    df = pd.read_pickle(top_components_file)
+    df = df[df['distance'] >= min_distance]
+    df = df[df['len'] >= min_items]
+
+    total = []
+
+    for i, comp in (df.iterrows()):
+        files = comp['files']
+        labels = comp['labels']
+        assert len(files) == len(labels)
+        assert len(files)>= min_items
+        subdf = pd.DataFrame({'files':files, 'labels':labels})
+        unique, counts = np.unique(np.array(labels), return_counts=True)
+        counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
+        if (how == 'majority'):
+            if (np.max(counts) >= len(subdf)/ 2):
+                sample = counts_df.index.values[0]
+                files = subdf[subdf['labels'] == sample]['files'].values
+                assert len(files)
+                subfile = files[1:]
+                inner_delete(subfile, how='delete', dry_run=dry_run)
+                total.extend(subfile)
+            else:
+                inner_delete(files, how='delete', dry_run=dry_run)
+                total.extend(files)
+        elif (how == 'all'):
+            inner_delete(files, how='delete', dry_run=dry_run)
+            total.extend(files)
+        else:
+            assert False, "how should be one of 'majority'|'all'"
+
+    pd.DataFrame({'filename':total}).to_csv('deleted.csv')
+    print('list of deleted files is on deleted.csv, total of ', len(total))
+
+def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename', label_col=None, lower_percentile=None, upper_percentile=None,
+                          lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True,
+                          how='delete', save_path=None):
     '''
       function to automate deletion of outlier files based on computed statistics.
-      Example:
 
-          import fastdup
-          fastdup.run('/my/data/", work_dir="out")
+      Example:
+          >>> import fastdup
+          >>> fastdup.run('/my/data/", work_dir="out")
           # delete 5% of the brightest images and delete 2% of the darkest images
           fastdup.delete_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
 
@@ -715,7 +825,7 @@ def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_p
 	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
       Args:
-          stats_file (str) folder pointing to fastdup workdir, or file pointing to work_dir/atrain_stats.csv file. Alternatively pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+          stats_file (str): folder pointing to fastdup workdir, or file pointing to work_dir/atrain_stats.csv file. Alternatively pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
           metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
           filename_col (str): column name in the stats_file to use as the filename
           lower_percentile (float): lower percentile to use for the threshold.
@@ -724,6 +834,8 @@ def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_p
           upper_threshold (float): upper threshold to use for the threshold
           get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
           dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
+          how (str): either 'delete' or 'move' or 'retag'. In case of retag allowed value is retag=labelImg or retag=cvat
+          save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
 
 	
 
@@ -742,18 +854,22 @@ def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_p
 
     if isinstance(stats_file, pd.DataFrame):
         df = stats_file
+        assert len(df), "Empty dataframe"
     else:
         assert os.path.exists(stats_file)
         if (os.path.isdir(stats_file)):
             stats_file = os.path.join(stats_file, 'atrain_stats.csv')
         df = pd.read_csv(stats_file)
+        assert len(df), "Failed to find any data in " + stats_file
 
     assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
     assert filename_col in df.columns
+    if label_col:
+        assert label_col in df.columns, f"{label_col} column should be in the stats_file"
 
     orig_df = df.copy()
     orig_len = len(df)
-    assert len(df), "Failed to find any data in " + stats_file
+
 
     if metric == 'size':
         df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
@@ -777,7 +893,8 @@ def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_p
             df = orig_df[orig_df[metric] > upper_threshold]
 
     if orig_len == len(df):
-        print('Warning: current request to delete all files, please select a subset of files to delete.')
+        print('Warning: current request to delete all files, please select a subset of files to delete.', orig_len, len(df))
+        print(df[metric].describe(), lower_threshold, upper_threshold)
         return 0
     elif len(df) == 0:
         print('Did not find any items to delete, please check your selection')
@@ -788,8 +905,15 @@ def delete_stats_outliers(stats_file, metric, filename_col = 'filename', lower_p
         files = df[filename_col].values
     else:
         files = df[filename_col].apply(get_reformat_filename_func).values
-    return inner_delete(files, dry_run)
 
+    if how == 'delete':
+        return inner_delete(files, how='delete', dry_run=dry_run)
+    elif how.startswith('retag'):
+        if label_col is not None:
+            label = df[label_col].values
+        else:
+            label = None
+        return inner_retag(files, label, how, save_path)
 
 
 
@@ -830,7 +954,7 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
     '''
 
 
-    from .tensorboard_projector import export_to_tensorboard_projector_inner
+    from fastdup.tensorboard_projector import export_to_tensorboard_projector_inner
     if not os.path.exists(work_dir):
         os.mkdir(work_dir)
         assert os.path.exists(work_dir), 'Failed to create work_dir ' + work_dir
@@ -883,7 +1007,7 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
     assert len(img_list), "Image list is empty"
     assert sample_size > 0
-    from .tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
+    from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
     return tgenerate_sprite_image(img_list, sample_size, log_dir, get_label_func, h=h, w=w,
                                   alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
 
@@ -1040,6 +1164,14 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
     assert num_images >= 1, "Please select one or more images"
 
+    try:
+        import matplotlib
+    except Exception as ex:
+        print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
+        print("Exception was: ", ex)
+        return 1
+
+
     return do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
                                    descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
 
@@ -1094,3 +1226,46 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
     return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func, 
         slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
+
+
+
+def export_to_cvat(files, labels, save_path):
+    """
+    Function to export a collection of files that needs to be annotated again to cvat batch job format.
+    This creates a file named fastdup_label.zip in the directory save_path.
+    The files can be retagged in cvat using Tasks -> Add (plus button) -> Create from backup -> choose the location of the fastdup_label.zip file.
+
+    Args:
+        files (str):
+        labels (str):
+        save_path (str):
+
+    Returns:
+        ret (int): 0 in case of success, otherwise 1.
+    """
+    assert len(files), "Please provide a list of files"
+    assert labels is None or isinstance(labels, list), "Please provide a list of labels"
+
+    from fastdup.cvat import do_export_to_cvat
+    return do_export_to_cvat(files, labels, save_path)
+
+
+def export_to_labelImg(files, labels, save_path):
+    """
+    Function to export a collection of files that needs to be annotated again to cvat batch job format.
+    This creates a file named fastdup_label.zip in the directory save_path.
+    The files can be retagged in cvat using Tasks -> Add (plus button) -> Create from backup -> choose the location of the fastdup_label.zip file.
+
+    Args:
+        files (str):
+        labels (str):
+        save_path (str):
+
+    Returns:
+        ret (int): 0 in case of success, otherwise 1.
+    """
+    assert len(files), "Please provide a list of files"
+    assert labels is None or isinstance(labels, list), "Please provide a list of labels"
+
+    from fastdup.label_img import do_export_to_labelimg
+    return do_export_to_labelimg(files, labels, save_path)

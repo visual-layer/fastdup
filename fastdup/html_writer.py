@@ -3,9 +3,9 @@
 # 4.0 International license. Please reach out to info@databasevisual.com for licensing options.
 
 #https://stackoverflow.com/questions/47704441/applying-styling-to-pandas-dataframe-saved-to-html-file
-import pandas as pd 
 
-def write_to_html_file(df, title='', filename='out.html'): 
+
+def write_to_html_file(df, title='', filename='out.html', stats_info = None, subtitle=None):
     ''' Write an entire dataframe to an HTML file with nice formatting. ''' 
     result = ''' 
 <html> <head> <style>
@@ -45,8 +45,13 @@ background-color: #f9fafb;
 table tbody tr:nth-child(odd) { 
 background-color: #ffffff;
 }
-    </style> </head> <body> ''' 
-    result += '<center><h2> %s </h2></center>\n' % title 
+    </style> </head> <body> '''
+
+    result += '<center><h2> %s </h2></center><br>' % title
+    if subtitle is not None:
+        result += '<center><h3> %s </h3></center><br>' % subtitle
+    if stats_info is not None:
+        result += '<left>' + stats_info + '</left><br>'
     result += df.to_html(classes='wide', escape=False) 
     result += ''' </body> 
         </html> '''

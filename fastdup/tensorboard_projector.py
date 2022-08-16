@@ -12,7 +12,7 @@ from tensorboard.plugins import projector
 from PIL import Image
 import cv2
 IMAGE_SIZE = 100
-from .image import my_resize
+from fastdup.image import my_resize
 
 
 def register_embedding(embedding_tensor_name, meta_data_fname, log_dir, sprite_path, with_images=True):
