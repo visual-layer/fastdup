@@ -45,7 +45,7 @@ Loading the binary feature resulting in fastdup run can be done by `fastdup.load
 :::fastdup.delete_components
 
 `fastdup.delete_or_retag_stats_outliers`
-:::fastdup.delete_stats_outliers
+:::fastdup.delete_or_retag_stats_outliers
 
 
 
