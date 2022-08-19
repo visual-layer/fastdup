@@ -107,7 +107,7 @@ fastdup.create_stats_gallery('out', save_path='.', metric='blur')          #crea
 fastdup.create_similarity_gallery('out', save_path='.',get_label_func=lambda x: x.split('/')[-2])     #create visualization of top_k similar images assuming data have labels which are in the folder name
 fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #create aspect ratio gallery
 ```
-
+[Full documentation is here](https://visualdatabase.github.io/fastdup/)
 
 
 ![alt text](./gallery/fastdup_clip_24s_crop.gif)
