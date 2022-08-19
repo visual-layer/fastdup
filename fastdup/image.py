@@ -54,8 +54,9 @@ def my_resize(img, max_width):
     w1 = 320
     if max_width is not None and w > max_width:
         w1 = max_width
+    aspect = h/w
     if h > w1 or w > w1:
-        img = cv2.resize(img, (w1, w1))
+        img = cv2.resize(img, (int(w1/aspect), w1))
     return img
 
 def plot_bounding_box(img, get_bounding_box_func, filename):

@@ -14,7 +14,7 @@ import pandas as pd
 pd.set_option('display.max_colwidth', None)
 import numpy as np
 import platform
-from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, do_create_components_gallery, do_create_duplicates_gallery
+from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
 import contextlib
 from fastdup import coco
 from fastdup.version_check import check_for_update
@@ -468,6 +468,34 @@ def save_binary_feature(save_path, filenames, np_array):
 
     return 0
 
+
+
+def check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width):
+    assert num_images >= 1, "Please select one or more images"
+    if num_images > 1000 and not lazy_load:
+        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
+
+    if (get_label_func is not None):
+        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+
+    if slice is not None and get_label_func is None:
+        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+        return 1
+
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+        if not os.path.exists(save_path):
+            print(f"Failed to generate save_path directory {save_path}")
+            return 1
+
+    if max_width is not None:
+        assert isinstance(max_width, int), "html image width should be an integer"
+        assert max_width > 0, "html image width should be > 0"
+
+
+    return 0
+
+
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
                               get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
@@ -514,23 +542,18 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         get_extra_col_func (callable): Optional parameter to allow adding additional column to the report
    '''
 
-    assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
-    if os.path.isdir(similarity_file):
-        similarity_file = os.path.join(similarity_file, 'similarity.csv')
+    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret;
 
-    assert num_images >= 1, "Please select one or more images"
-    if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
-
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-        assert os.path.exists(save_path), "Failed to find save_path " + save_path
-
-    if (get_label_func is not None):
-        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
-
-    if slice is not None and get_label_func is None:
-        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+    if isinstance(similarity_file, pd.DataFrame):
+        pass
+    elif isinstance(similarity_file, str):
+        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
+        if os.path.isdir(similarity_file):
+            similarity_file = os.path.join(similarity_file, 'similarity.csv')
+    else:
+        print('wrong type of similarity file', type(similarity_file))
         return 1
 
     return do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
@@ -572,26 +595,22 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
      '''
 
-    assert os.path.exists(outliers_file), "Failed to find outliers file " + outliers_file
-    if os.path.isdir(outliers_file):
-        outliers_file = os.path.join(outliers_file, 'outliers.csv')
 
-    if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
+    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret;
 
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-        assert os.path.exists(save_path), "Failed to find save_path " + save_path
-
-    assert num_images >= 1, "Please select one or more images"
-    assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
-
-    if slice is not None and get_label_func is None:
-        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
+    if isinstance(outliers_file, pd.DataFrame):
+        pass
+    elif isinstance(outliers_file, str):
+        assert os.path.exists(outliers_file), "Failed to find similarity file " + outliers_file
+        if os.path.isdir(outliers_file):
+            outliers_file = os.path.join(outliers_file, 'outliers.csv')
+    else:
+        print('wrong type of similarity file', type(outliers_file))
         return 1
 
-    if (get_label_func is not None):
-        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+    assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
     return do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
                                       max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
@@ -645,17 +664,10 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         ret (int): 0 in case of success, otherwise 1
     '''
 
-    if slice is not None and get_label_func is None:
-        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
-        return 1
-
-    if (get_label_func is not None):
-        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
-
-    if max_width is not None:
-        assert isinstance(max_width, int), "html image width should be an integer"
-        assert max_width > 0, "html image width should be > 0"
-
+    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret;
+    
     if max_items is not None:
         assert isinstance(max_items, int), "max items should be an integer"
         assert max_items > 0, "html image width should be > 0"
@@ -826,15 +838,25 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 
       Args:
           stats_file (str): folder pointing to fastdup workdir, or file pointing to work_dir/atrain_stats.csv file. Alternatively pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+
           metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
+
           filename_col (str): column name in the stats_file to use as the filename
+
           lower_percentile (float): lower percentile to use for the threshold.
+
           upper_percentile (float): upper percentile to use for the threshold.
+
           lower_threshold (float): lower threshold to use for the threshold
+
           upper_threshold (float): upper threshold to use for the threshold
+
           get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
+
           dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
+
           how (str): either 'delete' or 'move' or 'retag'. In case of retag allowed value is retag=labelImg or retag=cvat
+
           save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
 
 	
@@ -845,6 +867,8 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 
     '''
     assert isinstance(dry_run, bool)
+    assert how == 'delete' or how == 'move' or how == 'retag', "how should be one of 'delete'|'move'|'retag'"
+
     if lower_threshold is not None and lower_percentile is not None:
         print('You should only specify one of lower_threshold or lower_percentile')
         return 1
@@ -867,13 +891,8 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
     if label_col:
         assert label_col in df.columns, f"{label_col} column should be in the stats_file"
 
-    orig_df = df.copy()
-    orig_len = len(df)
-
-
     if metric == 'size':
         df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
-
 
     if lower_percentile is not None:
         assert lower_percentile >= 0 and lower_percentile <= 1, "lower_percentile should be between 0 and 1"
@@ -882,15 +901,21 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
         assert upper_percentile >= 0 and upper_percentile <= 1, "upper_percentile should be between 0 and 1"
         upper_threshold = df[metric].quantile(upper_percentile)
 
-    if (lower_percentile is not None or lower_threshold is not None):
+    orig_df = df.copy()
+    orig_len = len(df)
+
+    if (lower_threshold is not None):
         print(f"Going to delete any images with {metric} < {lower_threshold}")
         df = orig_df[orig_df[metric] < lower_threshold]
-        if (upper_percentile is not None or upper_threshold is not None):
+        if (upper_threshold is not None):
             print(f"Going to delete any images with {metric} > {upper_threshold}")
             df = pd.concat([df, orig_df[orig_df[metric] > upper_threshold]], axis=0)
-        elif (upper_percentile is not None or upper_threshold is not None):
+    elif (upper_threshold is not None):
             print(f"Going to delete any images with {metric} > {upper_threshold}")
             df = orig_df[orig_df[metric] > upper_threshold]
+    else:
+        assert(False), "You should specify either lower_threshold or upper_threshold or lower_percetiel or upper_percentile"
+
 
     if orig_len == len(df):
         print('Warning: current request to delete all files, please select a subset of files to delete.', orig_len, len(df))
@@ -906,14 +931,16 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
     else:
         files = df[filename_col].apply(get_reformat_filename_func).values
 
-    if how == 'delete':
-        return inner_delete(files, how='delete', dry_run=dry_run)
+    if how == 'delete' or how == 'move':
+        return inner_delete(files, how=how, dry_run=dry_run)
     elif how.startswith('retag'):
         if label_col is not None:
             label = df[label_col].values
         else:
             label = None
         return inner_retag(files, label, how, save_path)
+    else:
+        assert(False), "How should be one of 'delete'|'move'|'retag'"
 
 
 
@@ -1110,7 +1137,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
     For example, most blurry images, most dark images etc.
 
     Args:
-        stats_file (str): csv file with the computed image statistics by the fastdup tool
+        stats_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe.
 
         save_path (str): output folder location for the visuals
 
@@ -1138,31 +1165,19 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
     Returns:
         ret (int): 0 in case of success, otherwise 1.
     '''
-    if slice is not None and get_label_func is None:
-        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
-        return 1
 
-    if (get_label_func is not None):
-        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
-
-    if max_width is not None:
-        assert isinstance(max_width, int), "html image width should be an integer"
-        assert max_width > 0, "html image width should be > 0"
+    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret
 
     assert metric in ['blur','size','mean','min','max','unique','stdv'], "Unknown metric value"
 
-    assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
-    if os.path.isdir(stats_file):
-        stats_file = os.path.join(stats_file, 'atrain_stats.csv')
-
-    if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
-
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-        assert os.path.exists(save_path), "Failed to find save_path " + save_path
-
-    assert num_images >= 1, "Please select one or more images"
+    if isinstance(stats_file, pd.DataFrame):
+        pass
+    else:
+        assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
+        if os.path.isdir(stats_file):
+            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
 
     try:
         import matplotlib
@@ -1184,7 +1199,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
     Function to create and display a gallery of images computed by the outliers metrics
 
     Args:
-        similarity_file (str): csv file with the computed image statistics by the fastdup tool
+        similarity_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe.
 
         save_path (str): output folder location for the visuals
 
@@ -1211,23 +1226,63 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
      '''
 
-    assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
-    if os.path.isdir(similarity_file):
-        similarity_file = os.path.join(similarity_file, 'similarity.csv')
 
-    if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
+    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret
 
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-        assert os.path.exists(save_path), "Failed to find save_path " + save_path
+    if isinstance(similarity_file, pd.DataFrame):
+        pass
+    else:
+        assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
+        if os.path.isdir(similarity_file):
+            similarity_file = os.path.join(similarity_file, 'similarity.csv')
 
-    assert num_images >= 1, "Please select one or more images"
-
-    return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func, 
+    return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
         slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
 
 
+
+def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_filename_reformat_func=None):
+    '''
+
+    :param stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
+
+    :param get_label_func (callable): optional label function to get the label for each image.
+
+    :param max_width (int): optional parameter to limit the plot image width
+
+    :param save_path (str): output folder location for the visuals
+
+    :param num_images (int): optional number of images to compute the statistics on (default computes on all images)
+
+    :param slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
+
+    :param get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
+
+    :return:
+    '''
+
+    ret = check_params(1, False, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret
+
+    if isinstance(stats_file, pd.DataFrame):
+        pass
+    else:
+        assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
+        if os.path.isdir(stats_file):
+            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+
+    try:
+        import matplotlib
+    except Exception as ex:
+        print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
+        print("Exception was: ", ex)
+        return 1
+
+
+    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice)
 
 def export_to_cvat(files, labels, save_path):
     """
@@ -1269,3 +1324,106 @@ def export_to_labelImg(files, labels, save_path):
 
     from fastdup.label_img import do_export_to_labelimg
     return do_export_to_labelimg(files, labels, save_path)
+
+
+
+def top_k_label(labels_col, distance_col, k=10, threshold = None,  min_count=None, unknown_class=None):
+    '''
+    Function to classify examples based on their label using the top k nearest neighbors.
+    Decision is made by accounting for the majority of the neighbors.
+
+    :param labels_col (list): list of labels
+    :param distance_col (list): list of distances
+    :param k (int): optional parameter
+    :param threshold (float): optional parameter to consder neighbors with simiarity larger than threshold
+    :param min_count (int): optional parameter to consider only examples with at least min_count neighbors with the same label
+    :param unknown_class: optional parameter to add decisions to unknown class in cases there is no majority
+    :return: computed label
+    '''
+    assert len(labels_col), "Empty dataframe recevieved"
+    df = pd.DataFrame({'labels':labels_col, 'distance':distance_col})
+
+    if threshold is not None:
+        df = df[df['distance'] >= threshold]
+
+    ret = df.groupby('labels').agg('count')[['distance']]
+    ret = ret.rename({'distance':'count'}, axis=1)
+    ret2 = df.groupby('labels')['distance'].apply(list).to_frame()
+    ret2 = ret2.rename({'distance':'distance_list'},axis=1)
+
+    #print(ret)
+    #print(ret2)
+    ret = ret.join(ret2)
+    ret = ret.sort_values('count', ascending=False)
+    #print(ret)
+
+    label = ret.index.values[0]
+    count = ret['count'].values[0]
+    if len(ret) == 1:
+        return label
+    else:
+        second_label = ret.index.values[1]
+        second_count = ret['count'].values[1]
+        if min_count is not None and count >= min_count:
+            return label
+
+        if count > second_count:
+            return label
+
+        if unknown_class is None:
+            return label
+
+
+        return unknown_class
+
+
+
+
+def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
+    '''
+    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.
+
+    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
+    :param k: (unused)
+    :param get_label_func: function to get the label of an image given its filename
+    :param threshold: optional threshld to consider neighbors with simiarity larger than threshold
+    :return: prediction per image to one of the given classes.
+    '''
+
+    from fastdup.confusion_matrix import classification_report
+
+    assert os.path.exists(work_dir), "Failed to find work directory " + work_dir
+    assert callable(get_label_func), "Please provide a valid get_label_func, given a filename returns its label"
+    if threshold is not None:
+        assert threshold >= 0 and threshold <= 1, "Please provide a valid threshold 0->1"
+
+    if isinstance(work_dir, pd.DataFrame):
+        df = work_dir
+        assert len(df), "Empty dataframe received"
+    else:
+        if os.path.isdir(work_dir):
+            similarity_file = os.path.join(work_dir, 'similarity.csv')
+        df = pd.read_csv(similarity_file)
+
+    df['to_label'] = df['to'].apply(get_label_func)
+
+    from_list = df.groupby(by='from', axis=0)['to'].apply(list)
+    distance_list = df.groupby(by='from', axis=0)['distance'].apply(list)
+    to_label_list = df.groupby(by='from', axis=0)['to_label'].apply(list)
+
+    df_from = from_list.to_frame()
+    df_dist = distance_list.to_frame()
+    df_label = to_label_list.to_frame()
+
+    df_merge = df_from.merge(df_dist, on='from')
+    df_merge = df_merge.merge(df_label, on='from')
+    df_merge['from_label'] = df_merge.index.map(get_label_func)
+
+    df_merge['top_k'] = df_merge.apply(lambda x:
+                                       top_k_label(x['to_label'], x['distance'], k, threshold), axis=1)
+
+    y_values = df_merge['from_label'].tolist()
+    p1_values = df_merge['top_k'].tolist()
+    print(classification_report(y_values, p1_values))
+
+    return p1_values

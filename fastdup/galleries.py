@@ -69,9 +69,12 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     Function to create and display a gallery of images computed by the similarity metrics
 
     Parameters:
-        similarity_file (str): csv file with the computed similarities by the fastdup tool
+        similarity_file (str): csv file with the computed similarities by the fastdup tool, alternatively it can be a pandas dataframe with the computed similarities.
+
         save_path (str): output folder location for the visuals
+
         num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
         descending (boolean): If False, print the similarities from the least similar to the most similar. Default is True.
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
@@ -95,7 +98,10 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
     img_paths = []
-    df = pd.read_csv(similarity_file)
+    if isinstance(similarity_file, pd.DataFrame):
+        df = similarity_file
+    else:
+        df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read similarity file"
 
     if slice is not None and callable(get_label_func):
@@ -190,7 +196,8 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     Function to create and display a gallery of images computed by the outliers metrics
 
     Parameters:
-        outliers_file (str): csv file with the computed outliers by the fastdup tool
+        outliers_file (str): csv file with the computed outliers by the fastdup tool. Altenriously, this can be a pandas dataframe with the computed outliers.
+
         save_path (str): output folder location for the visuals
 
         num_images(int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
@@ -219,7 +226,10 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 
     img_paths = []
-    df = pd.read_csv(outliers_file)
+    if isinstance(outliers_file, pd.DataFrame):
+        df = outliers_file
+    else:
+        df = pd.read_csv(outliers_file)
     assert len(df), "Failed to read outliers file " + outliers_file
 
     if (how == 'all'):
@@ -313,20 +323,45 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
-                             min_items=None, keyword=None):
+                             min_items=None, keyword=None, return_stats=True):
     '''
     Visualize the top connected components
 
     Args:
         work_dir (str): directory with the output of fastdup run
+
+        save_path (str): directory to save the output to
+
         num_components (int): number of top components to plot
+
         get_label_func (callable): option function to get label for each image given image filename
+
         group_by (str): 'visual' or 'label'
-        slice (str): slice the datafrmae based on the label or a list of labels
+
+        slice (str): slice the dataframe based on the label or a list of labels
+
+        get_bounding_box_func (callable): option function to get bounding box for each image given image filename
+
+        max_width (int): optional maximum width of the image
+
+        threshold (float): optional threshold to filter out components with similarity less than this value
+
+        metric (str): optional metric to use for sorting the components
+
+        descending (bool): optional sort in descending order
+
+        min_items (int): optional minimum number of items to include in the component, namely show only components with at least this many items
+
+        keyword (str): optional keyword to filter out components with labels that do not contain this keyword
+
+        return_stats (bool): optional return the stats of the components namely statistics about component sizes
+
+
 
     Returns:
         ret (pd.DataFrame): with the top components
         img_list (list): of the top components images
+        stats (pd.DataFrame): optional return value of the stats of the components namely statistics about component sizes
     '''
 
     try:
@@ -342,9 +377,15 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
     MAX_IMAGES_IN_GRID = 49
 
-    top_components = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
+    ret = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
                                             slice=slice, threshold=threshold, metric=metric, descending=descending,
-                                            min_items=min_items, keyword=keyword).head(num_components)
+                                            min_items=min_items, keyword=keyword, save_path=save_path, return_stats=return_stats)
+    if not return_stats:
+        top_components = ret
+    else:
+        top_components, stats_html = ret
+    top_components = top_components.head(num_components)
+
     if (top_components is None or len(top_components) == 0):
         print('Failed to find top components, try to reduce grouping threshold by running with turi_param="cchreshold=0.8" where 0.8 is an exmple value.')
         return None, None
@@ -407,10 +448,10 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             return None, None
 
     print(f'Finished OK. Components are stored as image files {save_path}/components_index_id.jpg')
-    return top_components.head(num_components), img_paths
+    return top_components.head(num_components), img_paths, stats_html
 
 def do_find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
-                           descending=True, min_items=None, keyword=None):
+                           descending=True, min_items=None, keyword=None, return_stats=False, save_path=None):
     '''
     Function to find the largest components of duplicate images
 
@@ -431,17 +472,23 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
         min_items (int): optional minimum number of items to consider a component.
 
+        return_stats (bool): optional flag to return the statistics about sizes of the components
+
+        save_path (str): optional path to save the top components statistics
+
     	Returns:
         ret (pd.DataFrame): of top components. The column component_id includes the component name.
         	The column files includes a list of all image files in this component.
 
+        stats (str): HTML statistics about the sizes of the components (only when return_stats=True)
+
 
     '''
+
 
     assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
     assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file"
     assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file"
-
 
     # read fastdup connected components, for each image id we get component id
     components = pd.read_csv(os.path.join(work_dir, 'connected_components.csv'))
@@ -516,6 +563,10 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         comps = pd.DataFrame(dict_cols).reset_index()
 
     comps['len'] = comps['files'].apply(lambda x: len(x))
+    stat_info = None
+    if return_stats:
+        stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None)
+
 
     if metric is None:
         comps = comps.sort_values('len', ascending=not descending)
@@ -545,8 +596,10 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     if threshold is not None or metric is not None or keyword is not None:
         comps.to_pickle(f'{work_dir}/top_components.pkl')
 
-    return comps
-
+    if not return_stats:
+        return comps
+    else:
+        return comps, stat_info
 
 
 def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
@@ -597,11 +650,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     assert os.path.exists(work_dir), "Failed to find work_dir " + work_dir
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-        if not os.path.exists(save_path):
-            print(f"Failed to generate save_path directory {save_path}")
-            return None
+
 
     assert num_images >= 1, "Please select one or more images"
     assert group_by == 'label' or group_by == 'visual', "Allowed values for group_by=[visual|label], got " + group_by
@@ -609,9 +658,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         assert callable(get_label_func), "missing get_label_func, when grouping by labels need to set get_label_func"
 
 
-    subdf, img_paths = visualize_top_components(work_dir, save_path, num_images,
+    subdf, img_paths, stats_html = visualize_top_components(work_dir, save_path, num_images,
                                                 get_label_func, group_by, slice,
-                                                get_bounding_box_func, max_width, threshold, metric, descending, min_items, keyword)
+                                                get_bounding_box_func, max_width, threshold, metric, descending, min_items, keyword, return_stats=True)
     if subdf is None or len(img_paths) == 0:
         return None
 
@@ -703,7 +752,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     if metric is not None:
         subtitle = "Sorted by " + metric + " descending" if descending else "Sorted by " + metric + " ascending"
 
-    fastdup.html_writer.write_to_html_file(ret[columns], title, out_file, None, subtitle)
+    fastdup.html_writer.write_to_html_file(ret[columns], title, out_file, stats_html, subtitle)
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print("Stored components visual view in ", os.path.join(out_file))
@@ -731,9 +780,16 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None):
         line = maxx2
 
     xlabel = None
-    if metric in ['mean','meax','stdv','min']:
-        xlabel = 'Color 0-255'
-    ax = df[metric].plot.hist(bins=100, alpha=1, title=metric,fontsize=15,xlim=(minx,maxx),xlabel=xlabel)
+    if metric in ['mean','max','stdv','min']:
+        xlabel = metric +  ' (Color 0-255, larger is brighter)'
+    elif metric == 'blur':
+        xlabel = 'Blur (lower is blurry, higher is sharper)'
+    elif metric == 'unique':
+        xlabel = 'Number of unique colors 0-255, higher is better'
+    elif metric == 'size':
+        xlabel = 'Size (number of pixels - width x height)'
+
+    ax = df[metric].plot.hist(bins=100, alpha=1, title=metric, fontsize=15, xlim=(minx,maxx), xlabel=xlabel)
     if line is not None:
         plt.axvline(line, color='r', linestyle='dashed', linewidth=2)
     fig = ax.get_figure()
@@ -750,10 +806,12 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
                             get_reformat_filename_func=None, get_extra_col_func=None):
     '''
 
-    Function to create and display a gallery of images computed by the outliers metrics
+    Function to create and display a gallery of images computed by the outliers metrics.
+    Note that fastdup generates a histogram of all the encountred valued for the specific metric. The red dashed line on this plot resulting in the number of images displayed in the report.
+    For example, assume you have unique image values between 30-250, and the report displays 100 images with values betwewen 30-50. We plot a red line on the value 50.
 
     Parameters:
-        stats_file (str): csv file with the computed image statistics by the fastdup tool
+        stats_file (str): csv file with the computed image statistics by the fastdup tool. alternatively, a pandas dataframe can be passed in directly with the stats computed by fastdup.
 
         save_path (str): output folder location for the visuals
 
@@ -781,7 +839,10 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
 
     img_paths = []
-    df = pd.read_csv(stats_file)
+    if isinstance(stats_file, pd.DataFrame):
+        df = stats_file
+    else:
+        df = pd.read_csv(stats_file)
     assert len(df), "Failed to read stats file " + stats_file
 
     if callable(get_label_func):
@@ -875,7 +936,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     Function to create and display a gallery of images computed by the outliers metrics
 
     Parameters:
-        stats_file (str): csv file with the computed image statistics by the fastdup tool
+        similarity_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe can be passed in directly.
 
         save_path (str): output folder location for the visuals
 
@@ -914,7 +975,10 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     label_score = []
     lengths = []
 
-    df = pd.read_csv(similarity_file)
+    if isinstance(similarity_file, pd.DataFrame):
+        df = similarity_file
+    else:
+        df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read stats file " + similarity_file
 
     if callable(get_label_func):
@@ -1055,3 +1119,100 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 print("Failed to delete image file ", i, ex)
 
     return df2
+
+
+def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_reformat_filename_func=None):
+    '''
+    Create an html gallery of images with aspect ratio
+    :param stats_file:
+    :param save_path:
+    :param get_label_func:
+    :param max_width:
+    :param num_images:
+    :param slice:
+    :param get_reformat_filename_func:
+    :return:
+    '''
+
+    import matplotlib.pyplot as plt
+    from .html_writer import write_to_html_file
+    from .image import imageformatter
+
+    if isinstance(stats_file, pd.DataFrame):
+        df = stats_file
+    else:
+        df = pd.read_csv(stats_file)
+    assert len(df), "Failed to read stats file " + stats_file
+
+    if num_images is not None and num_images>0:
+        df = df.head(num_images)
+
+    if callable(get_label_func):
+        df['label'] = df['filename'].apply(lambda x: get_label_func(x))
+        if slice is not None:
+            df = df[df['label'] == slice]
+
+    assert len(df), "Empty stats file " + stats_file
+
+    shape = df[['width','height']].to_numpy()
+
+    max_width_ = np.max(shape[:,0])
+    max_height_ = np.max(shape[:,1])
+    ret = shape[:,0]/shape[:,1]
+    max_dim = max(max_height_, max_width_)
+
+    fig, axs = plt.subplots(2, 1, figsize=(10, 10))
+
+    axs[0].scatter(shape[:,0], shape[:, 1])
+    axs[0].plot(range(0, max_dim), range(0, max_dim), 'k')
+    axs[0].set_ylabel('Width', fontsize=13)
+    axs[0].set_xlabel('Height', fontsize=13)
+    axs[0].grid()
+    axs[0].set_title('Scatter of images shapes', fontsize=18)
+    axs[0].set_xlim([0, max_width_])
+    axs[0].set_ylim([0, max_height_])
+
+    axs[1].hist(shape[:, 0]/shape[:, 1], bins=100)
+    axs[1].grid()
+    axs[1].set_xlabel('Aspect Ratio', fontsize=13)
+    axs[1].set_ylabel('Frequency', fontsize=13)
+    axs[1].set_title('Histogram of aspect ration for images', fontsize=18)
+    axs[1].set_xlim([0, 2])
+
+    local_fig = f"{save_path}/aspect_ratio.jpg"
+    fig.savefig(local_fig ,dpi=100)
+    img = cv2.imread(local_fig)
+
+    max_width_img = df[df['width'] == max_width_]['filename'].values[0]
+    max_height_img = df[df['height'] == max_height_]['filename'].values[0]
+
+    try:
+        img_max_width = cv2.imread(max_width_img)
+        img_max_height = cv2.imread(max_height_img)
+        if max_width is not None:
+            img_max_width = my_resize(img_max_width, max_width)
+            img_max_height = my_resize(img_max_height, max_width)
+    except:
+        print("Failed to read images ", max_width_img, max_height_img)
+        img_max_width = None
+        img_max_height = None
+
+    if get_reformat_filename_func is not None:
+        max_width_img = get_reformat_filename_func(max_width_img)
+        max_height_img = get_reformat_filename_func(max_height_img)
+
+    aspect_ratio_info = pd.DataFrame({'Number of images':[len(df)],
+                                      'Avg width':[np.mean(shape[0, :])],
+                                      'Avg height':[np.mean(shape[1, :])],
+                                      'Max width': [max_width_],
+                                      'Max height': [max_height_],
+                                      'Plot':[imageformatter(img, None)],
+                                      'Max width Image<br>' + max_width_img+ f'<br>width: {max_width_}':[imageformatter(img_max_width, max_width)],
+                                      'Max height Image<br>' + max_height_img + f'<br>height: {max_height_}':[imageformatter(img_max_height, max_width)]
+                                      }).T
+
+    ret = pd.DataFrame({'stats':[aspect_ratio_info.to_html(escape=False,index=False).replace('\n','')]})
+
+    title = 'Fastdup tool - Aspect ratio report'
+    out_file = os.path.join(save_path, 'aspect_ratio.html')
+    return write_to_html_file(ret, title, out_file, None)
