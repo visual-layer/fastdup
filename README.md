@@ -99,7 +99,7 @@ For CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructio
 
 ```python
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder", work_dir='out', nearest_neighbor_k=5, turi_param='ccthreshold=0.96')    #main running function.
+fastdup.run(input_dir="/path/to/your/folder", work_dir='out', nearest_neighbors_k=5, turi_param='ccthreshold=0.96')    #main running function.
 fastdup.create_duplicates_gallery('out/similarity.csv', save_path='.')     #create a visual gallery of found duplicates
 fastdup.create_outliers_gallery('out/outliers.csv',   save_path='.')       #create a visual gallery of anomalies
 fastdup.create_components_gallery('out', save_path='.')                    #create visualiaiton of connected components
