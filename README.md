@@ -99,11 +99,16 @@ For CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructio
 
 ```python
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder", work_dir='out')                            #main running function
-fastdup.create_duplicates_gallery('out/similarity.csv', save_path='.')       #create a visual gallery of found duplicates
+fastdup.run(input_dir="/path/to/your/folder", work_dir='out', nearest_neighbor_k=5, turi_param='ccthreshold=0.96')    #main running function.
+fastdup.create_duplicates_gallery('out/similarity.csv', save_path='.')     #create a visual gallery of found duplicates
 fastdup.create_outliers_gallery('out/outliers.csv',   save_path='.')       #create a visual gallery of anomalies
 fastdup.create_components_gallery('out', save_path='.')                    #create visualiaiton of connected components
+fastdup.create_stats_gallery('out', save_path='.', metric='blur')          #create visualization of images stastics (for example blur)
+fastdup.create_similarity_gallery('out', save_path='.',get_label_func=lambda x: x.split('/')[-2])     #create visualization of top_k similar images assuming data have labels which are in the folder name
+fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #create aspect ratio gallery
 ```
+
+
 
 ![alt text](./gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
@@ -134,7 +139,7 @@ fastdup.create_components_gallery('out', save_path='.')                    #crea
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
 # Technology
-We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli), [TensorBoard](https://github.com/tensorflow/tensorboard).
+We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli), [TensorBoard](https://github.com/tensorflow/tensorboard), [scikit-learn](https://github.com/scikit-learn/scikit-learn).
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
