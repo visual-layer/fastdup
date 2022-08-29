@@ -1,5 +1,5 @@
 # Installation
-fastdup is currently only supported on Ubuntu 20.04 or 18.04 OS.
+fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip.
 
 
 ## Ubuntu 20.04/18.04 LTS Machine Setup
@@ -104,9 +104,10 @@ Operating system
 - `Ubuntu 18.04 LTS`
 - `Mac OSX M1 Chip` (tested on Big Sur)
 - `Mac Intel Chip` (tested on Mojave)
+- `CentOS 7.9` (via stable release)
 
 Software versions
-- `Python 3.8` (via pip) or `Python 3.7` (via pip or conda) or a `debian package` (Python is not required)
+- `Python 3.7, 3.8, 3.9` (via pip) 
 
 Hardware support
 - CPU (GPU not needed!)
