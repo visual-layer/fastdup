@@ -65,7 +65,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 
 ## Results on Key Datasets ([full results here](https://bit.ly/3nyQ3ef))
-We have thoroughly tested fastdup across various famous visual datasets. Ranging from pilar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits (this amounts to 20% of the validation set). This is a new unknown result! Full results are below. * train/val splits are taken from https://github.com/Alibaba-MIIL/ImageNet21 .
+We have thoroughly tested fastdup across various famous visual datasets. Ranging from pillar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits (this amounts to 20% of the validation set). This is a new unknown result! Full results are below. * train/val splits are taken from https://github.com/Alibaba-MIIL/ImageNet21 .
 
 |Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
 |-----------------------|---------------|--------|-------------|----------------|---------------|---------|
@@ -118,7 +118,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [🔥🔥 Visualizing and understanding a new dataset, looking at dats outliers and label outliers, Training a baseline KNN classifier and getting to accuracy of 0.99 by removing confusing labels](https://www.kaggle.com/code/graphlab/horse-pork-meat-fastdup)  
 - [Finding wrong lables via image similarity](./examples/fastdup_wrong_labels.ipynb)
 - [Computing image statistics](./examples/fastdup_image_stats.ipynb)
-- [Using your own onnx model for extractiom](./examples/fastdup_model_support.ipynb)
+- [Using your own onnx model for extraction](./examples/fastdup_model_support.ipynb)
 - [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
 - [Finding duplicates, outliers in the Food-101 datadset:](https://bit.ly/3yhoafo)
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
@@ -132,7 +132,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 
 ## User community contributions
 ![alt text](./gallery/anime.jpg)
-*[FsstDup based Anime Search Engine by Dorothy Walker](https://fbfa0c789b41e75.s3.amazonaws.com/visual-search-engine-anime.html)
+*[FastDup based Anime Search Engine by Dorothy Walker](https://fbfa0c789b41e75.s3.amazonaws.com/visual-search-engine-anime.html)
 
 
 # Support 
