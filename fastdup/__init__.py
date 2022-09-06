@@ -9,16 +9,19 @@
 
 import sys
 import os
+import json
 from ctypes import *
 import pandas as pd
 pd.set_option('display.max_colwidth', None)
 import numpy as np
 import platform
-from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
+from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, \
+    do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
 import contextlib
 from fastdup import coco
 from fastdup.version_check import check_for_update
-
+from fastdup.definitions import *
+from fastdup.utilts import download_from_s3
 try:
 	from tqdm import tqdm
 except:
@@ -90,8 +93,9 @@ def run(input_dir='',
         input_dir (str):
             Location of the images/videos to analyze.
                 * A folder
-                * A remote folder (s3 or minio starting with s3:// or minio://)
+                * A remote folder (s3 or minio starting with s3:// or minio://). When using minio append the minio server name for example minio://google/visual_db/sku110k.
                 * A file containing absolute filenames each on its own row.
+                * A file containing s3 full paths each on its own row.
                 * A python list with absolute filenames
                 * yolov5 yaml input file containing train and test folders (single folder supported for now)
                 * We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
@@ -102,6 +106,11 @@ def run(input_dir='',
         work_dir (str): Optional path for storing intermediate files and results.
 
         test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
+            The following options are supported.
+            * test_dir can be a local folder path
+            * An s3:// or minio:// path.
+            * A python list with absolute filenames
+            * A file containing absolute filenames each on its own row.
 
         compute (str): Compute type [cpu|gpu] Note: gpu is supported only in the enterprise version.
 
@@ -121,6 +130,7 @@ def run(input_dir='',
             ==delete_img=0|1== when working with images obtained from cloud storage delete the image after download\
             ==tar_only=0|1== run only on tar files and ignore images in folders. Default is 0.\
             ==run_stats=0|1== compute image statistics. Default is 1.\
+            ==sync_s3_to_local=0|1== In case of using s3 bucket sync s3 to local folder to improve performance. Assumes there is enough local disk space to contain the dataDefault is 0.\
 	        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Other distances are euclidean, squared_euclidean, manhattan.
@@ -182,7 +192,38 @@ def run(input_dir='',
 
     '''
 
-    print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.");
+    print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
+
+    if 'sync_s3_to_local=1' in turi_param:
+        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
+        if 'delete_img=1' in turi_param:
+            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            turi_param = turi_param.replace('delete_img=1', '')
+        if 'delete_img=0' not in turi_param:
+            turi_param += ',delete_img=0'
+
+    config = {"input_dir": input_dir, "work_dir": work_dir, "test_dir": test_dir, "compute": compute, "verbose": verbose, "num_threads": num_threads,
+              "num_images": num_images, "turi_param": turi_param, "distance": distance, "threshold": threshold, "lower_threshold": lower_threshold,
+              "model_path": model_path, "version": version, "nearest_neighbors_k": nearest_neighbors_k, "d": d, "run_mode": run_mode,
+              "nn_provider": nn_provider, "min_offset": min_offset, "max_offset": max_offset, "nnf_mode": nnf_mode, "nnf_param": nnf_param,
+              "bounding_box": bounding_box, "batch_size": batch_size, "resume": resume, "high_accuracy": high_accuracy}
+
+    if (work_dir.startswith('./')):
+        work_dir = work_dir[2:]
+    if (input_dir.startswith('./')):
+        input_dir = input_dir[2:]
+
+    cwd = os.getcwd()
+    if (work_dir.startswith(cwd + '/')):
+        work_dir = work_dir.replace(cwd + '/', '')
+
+    try:
+        if not os.path.exists(work_dir):
+            os.mkdir(work_dir)
+        with open(f"{work_dir}/config.json", "w") as f:
+            json.dump(config, f, indent=4)
+    except Exception as ex:
+        print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
 
     if (version):
         print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
@@ -199,7 +240,7 @@ def run(input_dir='',
         print("Found an empty input directory, please point to the directory where you are images are found");
         return 1
 
-    elif not os.path.exists(input_dir):
+    elif not os.path.exists(input_dir) and not input_dir.startswith('s3://') and not input_dir.startswith('minio://'):
         print("Failed to find input dir ", input_dir, " please check your input");
         return 1
 
@@ -208,22 +249,15 @@ def run(input_dir='',
         return 1
 
     if (resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
-        os.path.exists(os.path.join(work_dir, 'features.dat')))  and (run_mode == 0 or run_mode == 1)):
+        os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and (run_mode == 0 or run_mode == 1)):
         print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
         print("If you like to resume a prevuously stopped run, please run with resume=1.")
         return 1
 
-    if (work_dir.startswith('./')):
-        work_dir = work_dir[2:]
-    if (input_dir.startswith('./')):
-        input_dir = input_dir[2:]
 
-    cwd = os.getcwd()
-    if (work_dir.startswith(cwd + '/')):
-        work_dir = work_dir.replace(cwd + '/', '')
 
-    if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, 'index.nnf'))):
-        print("An index.nnf file is required for run_mode=3, please run with run_mode=0 to generate this file")
+    if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
+        print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
         return 1
 
     # support for YOLO dataset format
@@ -256,6 +290,12 @@ def run(input_dir='',
         print("Allowed values for batch size 1->200.")
         return 1
 
+    if isinstance(test_dir, list):
+        files = pd.DataFrame({'filenames':test_dir})
+        files.to_csv(INPUT_TEST_FILE_LOCATION)
+        test_dir = INPUT_TEST_FILE_LOCATION
+
+
     if (run_mode == 3 and test_dir == ''):
         print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
         return 1
@@ -264,11 +304,24 @@ def run(input_dir='',
         if model_path !=  model_path_full:
             print("Can not run high accuracy model when using user provided model_path")
             return 1
-        if d != 576:
+        if d != DEFAULT_MODEL_FEATURE_WIDTH:
             print("Can not run high accuracy model when using user provided d")
             return 1
         model_path = model_path_full.replace('l.ort', 'l2.ort')
-        d = 960
+        d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
+
+    # When working with s3 remote folder allow loading it first to disk to improve performance
+    if 'sync_s3_to_local=1' in turi_param:
+        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
+        if 'delete_img=1' in turi_param:
+            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            turi_param = turi_param.replace('delete_img=1', '')
+        if 'delete_img=0' not in turi_param:
+            turi_param += ',delete_img=0'
+        input_dir = download_from_s3(input_dir, work_dir, verbose, False)
+
+        if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
+            test_dir = download_from_s3(test_dir, work_dir, verbose, True)
 
     #Calling the C++ side
     dll.do_main.restype = c_int
@@ -334,6 +387,7 @@ def run(input_dir='',
 
         if hasattr(c, 'stdout'):
             print(c.stdout)
+        if hasattr(c, 'stderr'):
             print(c.stderr)
 
         return ret
@@ -402,7 +456,7 @@ def load_binary_feature(filename, d=576):
 
     Example:
         >>> import fastdup
-        >>> file_list, mat_features = fastdup.load_binary('features.dat')
+        >>> file_list, mat_features = fastdup.load_binary(FILENAME_FEATURES)
 
     '''
 	
@@ -469,8 +523,15 @@ def save_binary_feature(save_path, filenames, np_array):
     return 0
 
 
+def load_config(work_dir):
+    try:
+        with open(f'{work_dir}/config.json') as f:
+            return json.load(f)
+    except:
+        print(f"Failed to read config file {work_dir}/config.json")
+        return None
 
-def check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width):
+def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width):
     assert num_images >= 1, "Please select one or more images"
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
@@ -487,6 +548,26 @@ def check_params(num_images, lazy_load, get_label_func, slice, save_path, max_wi
         if not os.path.exists(save_path):
             print(f"Failed to generate save_path directory {save_path}")
             return 1
+
+    if isinstance(work_dir, str):
+        if work_dir.endswith('.csv'):
+            path_work_dir = os.path.dirname(os.path.abspath(work_dir))
+        else:
+            path_work_dir = work_dir
+        if not os.path.exists(path_work_dir):
+            print("Failed to find work_dir (__init__) " + path_work_dir)
+            return 1
+
+        config = load_config(path_work_dir)
+        if config is not None and 'input_dir' in config:
+            if config['input_dir'].startswith('s3://') or config['input_dir'].startswith('minio://'):
+                if 'delete_img=0' not in config['turi_param']:
+                    print('You asked to create a gallery of images/video obtrained from s3/minio but images where removed since '
+                          'default run mode removes images downloaded from s3/minio to save space. For creating a gallery of images'
+                          'from s3/minion run with "turi_param=\'delete_img=0\'". Note that you need to have local disk space to download the full dataset.'
+                          'Please reach out to our slack channel if you have disk space limitations.')
+                    return 1
+
 
     if max_width is not None:
         assert isinstance(max_width, int), "html image width should be an integer"
@@ -542,7 +623,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         get_extra_col_func (callable): Optional parameter to allow adding additional column to the report
    '''
 
-    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret;
 
@@ -551,7 +632,9 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
     elif isinstance(similarity_file, str):
         assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
         if os.path.isdir(similarity_file):
-            similarity_file = os.path.join(similarity_file, 'similarity.csv')
+            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+
+
     else:
         print('wrong type of similarity file', type(similarity_file))
         return 1
@@ -596,7 +679,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
      '''
 
 
-    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    ret = check_params(outliers_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret;
 
@@ -605,7 +688,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
     elif isinstance(outliers_file, str):
         assert os.path.exists(outliers_file), "Failed to find similarity file " + outliers_file
         if os.path.isdir(outliers_file):
-            outliers_file = os.path.join(outliers_file, 'outliers.csv')
+            outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
     else:
         print('wrong type of similarity file', type(outliers_file))
         return 1
@@ -664,7 +747,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         ret (int): 0 in case of success, otherwise 1
     '''
 
-    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret;
     
@@ -1166,7 +1249,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
         ret (int): 0 in case of success, otherwise 1.
     '''
 
-    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    ret = check_params(stats_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret
 
@@ -1227,7 +1310,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
      '''
 
 
-    ret = check_params(num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret
 
@@ -1236,7 +1319,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
     else:
         assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
         if os.path.isdir(similarity_file):
-            similarity_file = os.path.join(similarity_file, 'similarity.csv')
+            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
 
     return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
         slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
@@ -1263,7 +1346,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
     :return:
     '''
 
-    ret = check_params(1, False, get_label_func, slice, save_path, max_width)
+    ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret
 
@@ -1402,7 +1485,7 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
         assert len(df), "Empty dataframe received"
     else:
         if os.path.isdir(work_dir):
-            similarity_file = os.path.join(work_dir, 'similarity.csv')
+            similarity_file = os.path.join(work_dir, FILENAME_SIMILARITY)
         df = pd.read_csv(similarity_file)
 
     df['to_label'] = df['to'].apply(get_label_func)

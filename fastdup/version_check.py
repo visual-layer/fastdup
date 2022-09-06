@@ -3,6 +3,8 @@ import pandas as pd
 import os
 from urllib import request
 import sys
+import hashlib
+import uuid
 
 # limit the number of times we check for updates to at most once per day
 def need_to_check_for_update():
@@ -30,13 +32,16 @@ def check_for_update(version):
     if not need_update:
         return
 
+    #create a unique random request string
+    uniq = hashlib.sha1(hex(uuid.getnode()).encode('utf-8')).hexdigest()
+
     # check for the latest fastdup version based on the system version
     # (fastdup package c++ code thus platform like libc version is critical for getting the right fastdup version.
     # Currently we support PEP 2_31 and 2_27 platforms via pypi and 2_17 via our release page.
     # Read more about paltforms and PEP standard here: https://github.com/pypa/auditwheel
     ver = sys.version
     ver = ''.join(ch for ch in ver if (ch.isalnum() or ch  == '.' or ch == ',' or ch == ':'))
-    url = f"https://databasevisual.com/_functions/latestfastdupversion?sys={ver}"
+    url = f"https://databasevisual.com/_functions/latestfastdupversion?sys={ver}&uuid={uniq}&curversion={version}"
 
     try:
         req = request.Request(url)

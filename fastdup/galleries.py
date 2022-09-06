@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 import traceback
 from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img
-
+from fastdup.definitions import *
 try:
     from tqdm import tqdm
 except:
@@ -23,7 +23,6 @@ def get_label(filename, get_label_func):
     except Exception as ex:
         ret += "<br>Failed to get label for " + filename + " with error " + ex
     return ret
-
 
 
 
@@ -43,9 +42,18 @@ def slice_df(df, slice):
     return df
 
 
-def extract_filenames(row):
-    impath1 = row['from']
-    impath2 = row['to']
+def lookup_filename(filename, work_dir):
+    if filename.startswith(S3_TEMP_FOLDER + '/')  or filename.startswith(S3_TEST_TEMP_FOLDER + '/'):
+        assert work_dir is not None, "Failed to find work_dir on remote_fs"
+        filename = os.path.join(work_dir, filename)
+    return filename
+
+
+def extract_filenames(row, work_dir = None):
+
+    impath1 = lookup_filename(row['from'], work_dir)
+    impath2 = lookup_filename(row['to'], work_dir)
+
     dist = row['distance']
     os.path.exists(impath1), "Failed to find image file " + impath1
     os.path.exists(impath2), "Failed to find image file " + impath2
@@ -98,10 +106,12 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
     img_paths = []
+    work_dir = None
     if isinstance(similarity_file, pd.DataFrame):
         df = similarity_file
     else:
         df = pd.read_csv(similarity_file)
+        work_dir = os.path.dirname(similarity_file)
     assert len(df), "Failed to read similarity file"
 
     if slice is not None and callable(get_label_func):
@@ -128,8 +138,8 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     subdf = df.head(num_images) if descending else df.tail(num_images)
     subdf = subdf.reset_index()
     indexes = []
-    for i, row in tqdm(subdf.iterrows(), total=num_images):
-        impath1, impath2, dist, ptype = extract_filenames(row)
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+        impath1, impath2, dist, ptype = extract_filenames(row, work_dir)
         if impath1 + '_' + impath2 in sets:
             continue
         try:
@@ -188,6 +198,8 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
             except Exception as e:
                 print("Warning, failed to remove image file ", i, " with error ", e)
 
+    return 0
+
 
 def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             how='one', slice=None, max_width=None, get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
@@ -226,14 +238,16 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 
     img_paths = []
+    work_dir = None
     if isinstance(outliers_file, pd.DataFrame):
         df = outliers_file
     else:
         df = pd.read_csv(outliers_file)
+        work_dir = os.path.dirname(outliers_file)
     assert len(df), "Failed to read outliers file " + outliers_file
 
     if (how == 'all'):
-        dups_file = os.path.join(os.path.dirname(outliers_file), 'similarity.csv')
+        dups_file = os.path.join(os.path.dirname(outliers_file), FILENAME_SIMILARITY)
         if not os.path.exists(dups_file):
             print('Failed to find input file ', dups_file, ' which is needed for computing how=all similarities')
 
@@ -259,7 +273,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
     subdf = subdf.drop_duplicates(subset='from').sort_values(by='distance', ascending=True).head(num_images)
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
-        impath1, impath2, dist, ptype = extract_filenames(row)
+        impath1, impath2, dist, ptype = extract_filenames(row, work_dir)
         try:
             img = cv2.imread(impath1)
 
@@ -372,7 +386,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         print(ex)
         return None, None
 
-    assert os.path.exists(work_dir), "Failed to find work_dir " + work_dir
+    assert os.path.exists(work_dir), "Failed to find work_dir (vtp) " + work_dir
     assert num_components > 0, "Number of components should be larger than zero"
 
     MAX_IMAGES_IN_GRID = 49
@@ -647,7 +661,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         keyword (str): optional parameter to select only components with a keyword as a substring in the label. Default is None.
 
      '''
-    assert os.path.exists(work_dir), "Failed to find work_dir " + work_dir
+    assert os.path.exists(work_dir), "Failed to find work_dir (ccg) " + work_dir
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
@@ -821,7 +835,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 
-        metric (str): Optional metric selection. One of blur, size, mean_value
+        metric (str): Optional metric selection. One of blur, size, mean, min, max, unique, stdv. Default is blur.
 
         slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
 
@@ -839,9 +853,11 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
 
     img_paths = []
+    work_dir = None
     if isinstance(stats_file, pd.DataFrame):
         df = stats_file
     else:
+        work_dir = os.path.dirname(os.path.abspath(stats_file))
         df = pd.read_csv(stats_file)
     assert len(df), "Failed to read stats file " + stats_file
 
@@ -864,11 +880,17 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         df['size'] = df['width'] * df['height']
 
     assert metric in df.columns, "Failed to find metric " + metric + " in " + str(df.columns)
+
+    if metric in ['unique', 'width', 'height']:
+        df = df[df[metric] > DEFUALT_METRIC_ZERO]
+    elif metric in ['blur', 'mean', 'min', 'max', 'stdv']:
+        df = df[df[metric] != DEFAULT_METRIC_MINUS_ONE]
+
     subdf = df.sort_values(metric, ascending=not descending).head(num_images)
     stat_info = get_stats_df(df, subdf, metric, save_path, max_width)
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
-            filename = row['filename']
+            filename = lookup_filename(row['filename'], work_dir)
             img = cv2.imread(filename)
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
@@ -946,7 +968,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 
-        metric (str): Optional metric selection. One of blur, size, mean, min, max, unique.
+        metric (str): Optional metric selection. One of blur, size, mean, min, max, width, height, unique.
 
         slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels. A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors.
 
@@ -975,9 +997,11 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     label_score = []
     lengths = []
 
+    work_dir = None
     if isinstance(similarity_file, pd.DataFrame):
         df = similarity_file
     else:
+        work_dir = os.path.dirname(os.path.abspath(similarity_file))
         df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read stats file " + similarity_file
 
@@ -1007,7 +1031,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         stat_info = None
     else:
         for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
-            filename = row['from']
+            filename = lookup_filename(row['from'], work_dir)
             label = get_label_func(filename)
             similar = [x==label for x in list(row['label'])]
             similar = 100.0*sum(similar)/(1.0*len(row['label']))
@@ -1024,7 +1048,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
-            filename = row['from']
+            filename = lookup_filename(row['from'], work_dir)
             if callable(get_label_func):
                 label = get_label_func(filename)
             if callable(get_reformat_filename_func):
@@ -1056,7 +1080,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             imgs = row['to'][:MAX_IMAGES]
             distances = row['distance'][:MAX_IMAGES]
             imgpath2 = f"{save_path}/to_image_{i}.jpg"
-            info_df = pd.DataFrame({'distance':distances, 'to':imgs})
+            info_df = pd.DataFrame({'distance':distances, 'to':[lookup_filename(im, work_dir) for im in imgs]})
 
 
             if callable(get_reformat_filename_func):
@@ -1138,11 +1162,13 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     from .html_writer import write_to_html_file
     from .image import imageformatter
 
+    work_dir = None
     if isinstance(stats_file, pd.DataFrame):
         df = stats_file
     else:
+        work_dir = os.path.dirname(os.path.abspath(stats_file))
         df = pd.read_csv(stats_file)
-    assert len(df), "Failed to read stats file " + stats_file
+    assert len(df), "Zero rows found in " + stats_file
 
     if num_images is not None and num_images>0:
         df = df.head(num_images)
@@ -1153,6 +1179,8 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
             df = df[df['label'] == slice]
 
     assert len(df), "Empty stats file " + stats_file
+    df = df[df['width'] > DEFUALT_METRIC_ZERO]
+    df = df[df['height'] > DEFUALT_METRIC_ZERO]
 
     shape = df[['width','height']].to_numpy()
 
@@ -1184,7 +1212,9 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     img = cv2.imread(local_fig)
 
     max_width_img = df[df['width'] == max_width_]['filename'].values[0]
+    max_width_img = lookup_filename(max_width_img, work_dir)
     max_height_img = df[df['height'] == max_height_]['filename'].values[0]
+    max_height_img = lookup_filename(max_height_img, work_dir)
 
     try:
         img_max_width = cv2.imread(max_width_img)
@@ -1215,4 +1245,5 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
 
     title = 'Fastdup tool - Aspect ratio report'
     out_file = os.path.join(save_path, 'aspect_ratio.html')
+    print(f'Saved aspect ratio report to {out_file}')
     return write_to_html_file(ret, title, out_file, None)
