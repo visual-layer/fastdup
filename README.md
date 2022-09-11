@@ -44,14 +44,6 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
 *Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
 
-## [Find confusing labels report](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_wrong_labels.ipynb)
-![alt test](./gallery/confusing_labels.jpg)
-*Identify wrong / confusing labels using k-nearest neighbor visual classifier*
-
-
-## [Find image with contradicting labels](https://bit.ly/3yE5kAI)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/red_wine.png)
-*Cluster of wrong labels in the [Imagenet-21K](https://www.image-net.org) . No human can tell those red wines from their image.*
 
 ![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
 *Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
@@ -131,8 +123,15 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [Detailed running instructions](https://bit.ly/3OFLlY5)
 
 ## User community contributions
-![alt text](./gallery/anime.jpg)
-*[FastDup based Anime Search Engine by Dorothy Walker](https://fbfa0c789b41e75.s3.amazonaws.com/visual-search-engine-anime.html)
+[Stroke AIS Data](https://www.kaggle.com/code/mpwolke/stroke-ais-fastdup)
+[Tire Data](https://www.kaggle.com/code/taranmarley/fastdup-image-insights)
+[Butterfly Mimics](https://www.kaggle.com/code/mpwolke/butterfly-mimics-fastdup)
+[Drugs and Vitamins](https://www.kaggle.com/code/mpwolke/drugs-and-vitamins-fastdup)
+[Plastic Bottles](https://www.kaggle.com/code/mpwolke/plastic-bottles-fastdup)
+[Micro Organisms](https://www.kaggle.com/code/mpwolke/micro-organism-fastdup)
+[PCB Boards](https://www.kaggle.com/code/mpwolke/pcb-boards-fastdup)
+[ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
+
 
 
 # Support 
