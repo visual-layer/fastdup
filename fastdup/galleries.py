@@ -32,7 +32,7 @@ def slice_df(df, slice):
             if slice not in df['label'].unique():
                 print(f"Failed to find {slice} in the list of available labels, can not visualize this label class")
                 print("Example labels", df['label'].unique()[:10])
-                return 1
+                return None
             df = df[df['label'] == slice]
         elif isinstance(slice, list):
             df = df[df['label'].isin(slice)]
@@ -268,8 +268,10 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         subdf = df.sort_values(by='distance', ascending=True)
 
     if callable(get_label_func):
-        subdf['label'] = subdf['from'].apply(lambda x: get_label(x, get_label_func))
+        subdf['label'] = subdf['from'].apply(lambda x: get_label_func(x))
         subdf = slice_df(subdf, slice)
+        if subdf is None:
+            return 1
 
     subdf = subdf.drop_duplicates(subset='from').sort_values(by='distance', ascending=True).head(num_images)
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
@@ -881,7 +883,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
     assert metric in df.columns, "Failed to find metric " + metric + " in " + str(df.columns)
 
-    if metric in ['unique', 'width', 'height']:
+    if metric in ['unique', 'width', 'height', 'size']:
         df = df[df[metric] > DEFUALT_METRIC_ZERO]
     elif metric in ['blur', 'mean', 'min', 'max', 'stdv']:
         df = df[df[metric] != DEFAULT_METRIC_MINUS_ONE]
@@ -1010,6 +1012,8 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df['label2'] = df['to'].apply(lambda x: get_label_func(x))
         if slice != 'label_score':
             df = slice_df(df, slice)
+            if df is None:
+                return 1
 
     df = df.sort_values(['from','distance'], ascending= not descending)
     if 'label' in df.columns:

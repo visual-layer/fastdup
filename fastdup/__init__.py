@@ -107,10 +107,10 @@ def run(input_dir='',
 
         test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
             The following options are supported.
-            * test_dir can be a local folder path
-            * An s3:// or minio:// path.
-            * A python list with absolute filenames
-            * A file containing absolute filenames each on its own row.
+                * test_dir can be a local folder path
+                * An s3:// or minio:// path.
+                * A python list with absolute filenames
+                * A file containing absolute filenames each on its own row.
 
         compute (str): Compute type [cpu|gpu] Note: gpu is supported only in the enterprise version.
 
@@ -354,9 +354,18 @@ def run(input_dir='',
     cm = contextlib.nullcontext()
 
     if 'JPY_PARENT_PID' in os.environ:
-        print("On Jupyter notebook running on large datasets, there may be delay getting the console output. We recommend running using python shell.")
-        from IPython.utils.capture import capture_output
-        cm = capture_output(stdout=True, stderr=True,display=True)
+        try:
+            from IPython import get_ipython
+            ip = get_ipython()
+            extension = ip.extension_manager.loaded
+            if 'wurlitzer' not in extension:
+                import wurlitzer
+                cm = wurlitzer.sys_pipes()
+        except:
+            print("On Jupyter notebook running on large datasets, there may be delay getting the console output\n"
+                  "A recommended way to fixing this is to run: \n"
+                  "%pip install wurlitzer\n"
+                  "%load_ext wurlitzer\n")
 
     with cm as c:
         ret = dll.do_main(bytes(input_dir, 'utf-8'),
@@ -384,11 +393,6 @@ def run(input_dir='',
         bytes(bounding_box, 'utf-8'),
         batch_size,
         resume)
-
-        if hasattr(c, 'stdout'):
-            print(c.stdout)
-        if hasattr(c, 'stderr'):
-            print(c.stderr)
 
         return ret
 
@@ -647,7 +651,13 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
                             how='one', slice=None, max_width=None, get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
     '''
 
-    Function to create and display a gallery of images computed by the outliers metrics
+    Function to create and display a gallery of images computed by the outliers metrics.
+    Outliers are computed using the fastdup tool, by embedding each image to a short feature vector, finding top k similar neighbors
+    and finding images that are further away from all other images, i.e. outliers.
+    On default fastdup saves the outliers into a file called `outliers.csv` inside the `work_dir` folder.
+    It is possible to load this file using pandas to get the list of outlir images.
+    Note that the number of images included in the outliers file depends on the `lower_threshold` parameter in the fastdup run. This command line argument is a percentile
+    i.e. 0.05 means top 5% of the images that are further away from the rest of the images are considered outliers.
 
     Parameters:
         outliers_file (str): csv file with the computed outliers by the fastdup tool
@@ -913,26 +923,37 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
           >>> import fastdup
           >>> fastdup.run('/my/data/", work_dir="out")
           # delete 5% of the brightest images and delete 2% of the darkest images
-          fastdup.delete_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
+          >>> fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
 
           It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.
+
+      Examople:
+            This example first find wrong labels using similarity gallery and then deletes anything with score < 51.
+            Score is in range 0-100 where 100 means this image is similar only to images from the same class label.
+            Score 0 means this image is only similar to images from other class labels.
+            >>> import fastdup
+            >>> df2 = create_similarity_gallery(..., get_label_func=...)
+            >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
 
 	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
       Args:
-          stats_file (str): folder pointing to fastdup workdir, or file pointing to work_dir/atrain_stats.csv file. Alternatively pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+            stats_file (str):
+                * folder pointing to fastdup workdir or
+                * file pointing to work_dir/atrain_stats.csv file or
+                * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
 
           metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
 
           filename_col (str): column name in the stats_file to use as the filename
 
-          lower_percentile (float): lower percentile to use for the threshold.
+          lower_percentile (float): lower percentile to use for the threshold. Values are 0->1, where 0.05 means remove 5% of the lowest values.
 
-          upper_percentile (float): upper percentile to use for the threshold.
+          upper_percentile (float): upper percentile to use for the threshold. Values are 0->1, where 0.95 means remove 5% of the upper values.
 
-          lower_threshold (float): lower threshold to use for the threshold
+          lower_threshold (float): lower threshold to use for the threshold. Only used if lower_percentile is None.
 
-          upper_threshold (float): upper threshold to use for the threshold
+          upper_threshold (float): upper threshold to use for the threshold. Only used if upper_percentile is None.
 
           get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
 
@@ -960,6 +981,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
         return 1
 
     if isinstance(stats_file, pd.DataFrame):
+
         df = stats_file
         assert len(df), "Empty dataframe"
     else:
@@ -968,6 +990,11 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
             stats_file = os.path.join(stats_file, 'atrain_stats.csv')
         df = pd.read_csv(stats_file)
         assert len(df), "Failed to find any data in " + stats_file
+
+    if metric == "score" and metric not in df.columns:
+        print("For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where"
+              "df is the output of create_similarity_gallery()")
+        return 1
 
     assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
     assert filename_col in df.columns
@@ -1216,11 +1243,15 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
                             metric='blur', slice=None, max_width=None, descending= False, get_bounding_box_func=None,
                          get_reformat_filename_func=None, get_extra_col_func=None):
     '''
-    Function to create and display a gallery of images computed by the outliers metrics.
-    For example, most blurry images, most dark images etc.
+    Function to create and display a gallery of images computed by the statistics metrics.
+    Supported metrics are: mean (color), max (color), min (color), stdv (color), unique (number of unique colors), bluriness (computed by the variance of the laplpacian method
+    see https://theailearner.com/2021/10/30/blur-detection-using-the-variance-of-the-laplacian-method/.
+    The metrics are created by fastdup.run() and stored into the `work_dir` into a file named `atrain_stats.csv`. Note that the metrics are computed
+    on the fly fastdup loads and resizes every image only once.
 
     Args:
-        stats_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe.
+        stats_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe. Default stats file is saved by fastdup.run()
+        into the folder `work_dir` as `atrain_stats.csv`.
 
         save_path (str): output folder location for the visuals
 
@@ -1279,7 +1310,13 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
                                  get_reformat_filename_func=None, get_extra_col_func=None):
     '''
 
-    Function to create and display a gallery of images computed by the outliers metrics
+    Function to create and display a gallery of images computed by the similarity metric. In each table row one query image is
+    displayed and `num_images` most similar images are displayed next to it on the right.
+
+    In case the dataset is labeled, the user can specify the label using the function `get_label_func`. In this case a `score` metric is computed to reflect how similar the query image to the most similar images in terms of class label.
+    Score 100 means that out of the top k num_images similar images, all similar images are from the same class. Score 0 means that the image is similar only to images which are from different class.
+    Score 50 means that the query image is similar to the same number of images from the same class and from other classes. The report is sorted by the score metric.
+    For high quality labeled dataset we expect the score to be high, low score may indicate class label issues.
 
     Args:
         similarity_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe.
