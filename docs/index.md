@@ -17,6 +17,9 @@ Visualization of the output data is done using the following functions:
 `fastdup.create_components_gallery`
 :::fastdup.create_components_gallery
 
+`fastdup.create_kmeans_clusters_gallery`
+:::fastdup.create_kmeans_clusters_gallery
+
 `fastdup.create_stats_gallery`
 :::fastdup.create_stats_gallery
 
@@ -31,6 +34,8 @@ Given fastdup output compute a baseline lightweight classifier
 `fastdup.create_knn_classifier`
 :::fastdup.create_knn_classifier
 
+`fastdup.create_kmeans_classifier`
+:::fastdup.create_kmeans_classifier
 
 ## Fastdup utilities
 Loading the binary feature resulting in fastdup run can be done by `fastdup.load_binary_features`.
