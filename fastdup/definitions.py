@@ -8,6 +8,13 @@ FILENANE_BAD_IMAGE_LIST = "features.bad.csv"
 FILENAME_COMPONENT_INFO = "component_info.csv"
 FILENAME_CONNECTED_COMPONENTS = "connected_components.csv"
 FILENAME_LABELS = "labels.csv"
+FILENAME_KMEANS_CENTROIDS = "kmeans_centroids.csv"
+FILENAME_KMEANS_ASSIGNMENTS = "kmeans_assignments.csv"
+
+FILENAME_TOP_COMPONENTS = "top_components.pkl"
+FILENAME_TOP_CLUSTERS = "top_clusters.pkl"
+
+
 S3_TEMP_FOLDER = "tmp"
 S3_TEST_TEMP_FOLDER = "testtmp"
 INPUT_FILE_LOCATION = "files.txt"

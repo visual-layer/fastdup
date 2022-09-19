@@ -339,7 +339,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
-                             min_items=None, keyword=None, return_stats=True):
+                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component"):
     '''
     Visualize the top connected components
 
@@ -366,12 +366,15 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
         descending (bool): optional sort in descending order
 
-        min_items (int): optional minimum number of items to include in the component, namely show only components with at least this many items
+        max_items (int): optional max number of items to include in the component, namely show only components with less than max_items items
+
+        min_items (int): optional min number of items to include in the component, namely show only components with at least this many items
 
         keyword (str): optional keyword to filter out components with labels that do not contain this keyword
 
         return_stats (bool): optional return the stats of the components namely statistics about component sizes
 
+        component_type (str): comp type, should be one of component|cluster
 
 
     Returns:
@@ -388,14 +391,14 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         print(ex)
         return None, None
 
-    assert os.path.exists(work_dir), "Failed to find work_dir (vtp) " + work_dir
     assert num_components > 0, "Number of components should be larger than zero"
 
     MAX_IMAGES_IN_GRID = 49
 
     ret = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
                                             slice=slice, threshold=threshold, metric=metric, descending=descending,
-                                            min_items=min_items, keyword=keyword, save_path=save_path, return_stats=return_stats)
+                                            max_items=max_items,  min_items=min_items, keyword=keyword, save_path=save_path, return_stats=return_stats,
+                                            comp_type=comp_type)
     if not return_stats:
         top_components = ret
     else:
@@ -406,13 +409,15 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         print('Failed to find top components, try to reduce grouping threshold by running with turi_param="cchreshold=0.8" where 0.8 is an exmple value.')
         return None, None
 
+    comp_col = "component_id" if comp_type == "component" else "cluster"
+
     # iterate over the top components
     index = 0
     img_paths = []
     for i,row in tqdm(top_components.iterrows(), total = len(top_components)):
         try:
             # find the component id
-            component_id = row['component_id']
+            component_id = row[comp_col]
             # find all the image filenames linked to this id
             files = row['files'][:MAX_IMAGES_IN_GRID]
             if (len(files) == 0):
@@ -466,8 +471,48 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     print(f'Finished OK. Components are stored as image files {save_path}/components_index_id.jpg')
     return top_components.head(num_components), img_paths, stats_html
 
+
+def read_clusters_from_file(work_dir):
+    if isinstance(work_dir, str):
+        if os.path.isdir(work_dir):
+            work_dir = os.path.join(work_dir, FILENAME_KMEANS_ASSIGNMENTS)
+        if not os.path.exists(work_dir):
+            print('Failed to find work_dir {work_dir')
+            return None
+
+        df = pd.read_csv(work_dir)
+    elif isinstance(work_dir, pd.DataFrame):
+        assert "filename" in df.columns, "Failed to find filename in dataframe columns"
+        assert "cluster" in df.columns
+        assert "distance" in df.columns
+        df = work_dir
+        assert len(df), f"Failed to read dataframe from {work_dir} or empty dataframe"
+
+    return df
+
+
+def read_components_from_file(work_dir):
+    assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
+    assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file"
+    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file"
+
+    # read fastdup connected components, for each image id we get component id
+    components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS))
+
+    filenames = pd.read_csv(os.path.join(work_dir, 'atrain_features.dat.csv'))
+    if (len(components) != len(filenames)):
+        print(f"Error: number of rows in components file {work_dir}/connected_components.csv and number of rows in image file {work_dir}/atrain_features.dat.csv are not equal")
+        print("This may occur if multiple runs where done on the same working folder overriding those files. Please rerun on a clen folder")
+        return None
+    # now join the two tables to get both id and image name
+    components['filename'] = filenames['filename']
+
+    return components
+
+
 def do_find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
-                           descending=True, min_items=None, keyword=None, return_stats=False, save_path=None):
+                           descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
+                           comp_type="component"):
     '''
     Function to find the largest components of duplicate images
 
@@ -488,9 +533,13 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
         min_items (int): optional minimum number of items to consider a component.
 
+        max_items (int): optional maximum number of items to consider a component.
+
         return_stats (bool): optional flag to return the statistics about sizes of the components
 
         save_path (str): optional path to save the top components statistics
+
+        comp_type (str): component type should be coponent | cluster.
 
     	Returns:
         ret (pd.DataFrame): of top components. The column component_id includes the component name.
@@ -501,25 +550,24 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
     '''
 
+    if comp_type == "component":
+        components = read_components_from_file(work_dir)
+        comp_col = "component_id"
+        distance_col = "min_distance"
+    elif comp_type == "cluster":
+        components = read_clusters_from_file(work_dir)
+        comp_col = "cluster"
+        distance_col = "distance"
+    else:
+        assert False, f"Wrong component type {comp_type}"
 
-    assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
-    assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file"
-    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file"
-
-    # read fastdup connected components, for each image id we get component id
-    components = pd.read_csv(os.path.join(work_dir, 'connected_components.csv'))
-
-    filenames = pd.read_csv(os.path.join(work_dir, 'atrain_features.dat.csv'))
-    if (len(components) != len(filenames)):
-        print(f"Error: number of rows in components file {work_dir}/connected_components.csv and number of rows in image file {work_dir}/atrain_features.dat.csv are not equal")
-        print("This may occur if multiple runs where done on the same working folder overriding those files. Please rerun on a clen folder")
+    if components is None or len(components) == 0:
+        print(f"Failed to read components file {work_dir} or empty dataframe read")
         return None
-    # now join the two tables to get both id and image name
-    components['filename'] = filenames['filename']
 
     if metric is not None:
         stats = pd.read_csv(os.path.join(work_dir, 'atrain_stats.csv'))
-        assert len(stats) == len(filenames), "Number of rows in stats file and number of rows in components file are not equal"
+        assert len(stats) == len(components), "Number of rows in stats file and number of rows in components file are not equal"
         if metric == 'size':
             stats['size'] = stats.apply(lambda x: x['width']*x['height'], axis=1)
         components[metric] = stats[metric]
@@ -543,23 +591,23 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
 
         if group_by == 'visual':
-            top_labels = components.groupby('component_id')['labels'].apply(list)
-            top_files = components.groupby('component_id')['filename'].apply(list)
+            top_labels = components.groupby(comp_col)['labels'].apply(list)
+            top_files = components.groupby(comp_col)['filename'].apply(list)
             dict_cols = {'files':top_files, 'labels':top_labels}
-            if threshold is not None or metric is not None:
-                distance = components.groupby('component_id')['min_distance'].apply(np.min)
-                dict_cols['distance'] = distance
+            #if threshold is not None or metric is not None:
+            distance = components.groupby(comp_col)[distance_col].apply(np.min)
+            dict_cols['distance'] = distance
             if metric is not None:
-                top_metric = components.groupby('component_id')[metric].apply(np.mean)
+                top_metric = components.groupby(comp_col)[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
             comps = pd.DataFrame(dict_cols).reset_index()
         elif group_by == 'label':
             top_files = components.groupby('labels')['filename'].apply(list)
-            top_components = components.groupby('labels')['component_id'].apply(list)
-            dict_cols = {'files':top_files, 'component_id':top_components}
-            if threshold is not None or metric is not None:
-                distance = components.groupby('labels')['min_distance'].apply(np.min)
-                dict_cols['distance'] = distance
+            top_components = components.groupby('labels')[comp_col].apply(list)
+            dict_cols = {'files':top_files, comp_col:top_components}
+            #if threshold is not None or metric is not None:
+            distance = components.groupby('labels')[distance_col].apply(np.min)
+            dict_cols['distance'] = distance
             if metric is not None:
                 top_metric = components.groupby('labels')[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
@@ -568,13 +616,13 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
             assert(False), "group_by should be visual or label, got " + group_by
 
     else:
-        top_components = components.groupby('component_id')['filename'].apply(list)
+        top_components = components.groupby(comp_col)['filename'].apply(list)
         dict_cols = {'files':top_components}
-        if threshold is not None or metric is not None:
-            distance = components.groupby('component_id')['min_distance'].apply(np.min)
-            dict_cols['distance'] = distance
+        #if threshold is not None or metric is not None:
+        distance = components.groupby(comp_col)[distance_col].apply(np.min)
+        dict_cols['distance'] = distance
         if metric is not None:
-            top_metric = components.groupby('component_id')[metric].apply(np.mean)
+            top_metric = components.groupby(comp_col)[metric].apply(np.mean)
             dict_cols[metric] = top_metric
         comps = pd.DataFrame(dict_cols).reset_index()
 
@@ -606,11 +654,21 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         if len(comps) == 0:
             print(f"Failed to find any components with {min_items} or more items, try lowering the min_items threshold")
             return None
+
+    if max_items is not None:
+        assert max_items > 1, "min_items should be a positive integer larger than 1"
+        comps = comps[comps['len'] <= max_items]
+        if len(comps) == 0:
+            print(f"Failed to find any components with {max_items} or less items, try lowering the max_items threshold")
+            return None
         else:
             comps = comps[comps['len'] > 1] # remove any singleton components
 
     if threshold is not None or metric is not None or keyword is not None:
-        comps.to_pickle(f'{work_dir}/top_components.pkl')
+        if comp_type == "component":
+            comps.to_pickle(f'{work_dir}/{FILENAME_TOP_COMPONENTS}')
+        else:
+            comps.to_pickle(f'{work_dir}/{FILENAME_TOP_CLUSTERS}')
 
     if not return_stats:
         return comps
@@ -619,9 +677,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
 
 def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
-                                 group_by='visual', slice=None, max_width=None, max_items=None,
+                                 group_by='visual', slice=None, max_width=None, max_items=None, min_items=None,
                                  get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_info_func=None,
-                                 threshold=None ,metric=None, descending=True, min_items=None, keyword=None):
+                                 threshold=None ,metric=None, descending=True, keyword=None, comp_type="component"):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -646,6 +704,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         max_items (int): optional parameter to control th number of items displayed in statistics: top max_items labels (for group_by='visual')
             or top max_items components (for group_by='label'). Default is None namely show all items.
 
+        min_items (int): optional parameter to select only components with at least min_items items. Default is None.
+
         get_bounding_box_func (callable): optional function to get bounding box of an image and add them to the report
 
         get_reformat_filename_func (callable): optional function to reformat the filename to be displayed in the report
@@ -658,12 +718,12 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
         descending (boolean): optional parameter to specify the order of the components. Default is True namely components are given from largest to smallest.
 
-        min_items (int): optional parameter to select only components with at least min_items items. Default is None.
-
         keyword (str): optional parameter to select only components with a keyword as a substring in the label. Default is None.
 
+        comp_type (str): optional parameter, default is "component" (for visualizing connected components) other option is "cluster" (for visualizing kmeans)
+
      '''
-    assert os.path.exists(work_dir), "Failed to find work_dir (ccg) " + work_dir
+
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
@@ -672,18 +732,24 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     assert group_by == 'label' or group_by == 'visual', "Allowed values for group_by=[visual|label], got " + group_by
     if group_by == 'label':
         assert callable(get_label_func), "missing get_label_func, when grouping by labels need to set get_label_func"
+    assert comp_type in ['component','cluster']
 
 
     subdf, img_paths, stats_html = visualize_top_components(work_dir, save_path, num_images,
                                                 get_label_func, group_by, slice,
-                                                get_bounding_box_func, max_width, threshold, metric, descending, min_items, keyword, return_stats=True)
+                                                get_bounding_box_func, max_width, threshold, metric,
+                                                descending, max_items, min_items, keyword,
+                                                return_stats=True, comp_type=comp_type)
     if subdf is None or len(img_paths) == 0:
         return None
 
     assert len(subdf) == len(img_paths), "Number of components and number of images do not match"
 
     import fastdup.html_writer
-    cols_dict = {'component_id':subdf['component_id'].values,
+
+    comp_col = "component_id" if comp_type == "component" else "cluster"
+
+    cols_dict = {comp_col:subdf[comp_col].values,
                  'num_images':subdf['len'].apply(lambda x: "{:,}".format(x)).values}
     if 'distance' in subdf.columns:
         cols_dict['distance'] = subdf['distance'].values
@@ -697,7 +763,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     info_list = []
     for i,row in ret2.iterrows():
         if group_by == 'visual':
-            comp = row['component_id']
+            comp = row[comp_col]
             num = row['num_images']
             dict_rows = {'component':[comp], 'num_images':[num]}
             if threshold is not None:
@@ -737,7 +803,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         else:
             comp_table = []
             for i,row in subdf.iterrows():
-                unique, counts = np.unique(np.array(row['component_id']), return_counts=True)
+                unique, counts = np.unique(np.array(row[comp_col]), return_counts=True)
                 lencount = len(counts)
                 if max_items is not None and max_items < lencount:
                     lencount = max_items;
@@ -759,9 +825,11 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         elif group_by == 'label':
             columns.append('components')
 
+    if comp_type == "component":
+        title = 'Fastdup Tool - Components Report'
+    else:
+        title = "Fastdup Tool - KMeans Cluster Report"
 
-
-    title = 'Fastdup Tool - Components Report'
     subtitle = None
     if slice is not None:
         subtitle = "slice: " + str(slice)
@@ -771,7 +839,11 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     fastdup.html_writer.write_to_html_file(ret[columns], title, out_file, stats_html, subtitle)
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
-    print("Stored components visual view in ", os.path.join(out_file))
+    if comp_type == "component":
+        print("Stored components visual view in ", os.path.join(out_file))
+    else:
+        print("Stored KMeans clusters visual view in ", os.path.join(out_file))
+
     if not lazy_load and threshold is None:
         for i in img_paths:
             try:
@@ -818,7 +890,7 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None):
     return ret.to_html(escape=False,index=False).replace('\n','')
 
 def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
-                               metric='blur', slice=None, max_width=None, descending=False, get_bounding_box_func=None,
+                            metric='blur', slice=None, max_width=None, descending=False, get_bounding_box_func=None,
                             get_reformat_filename_func=None, get_extra_col_func=None):
     '''
 

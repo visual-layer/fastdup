@@ -169,7 +169,7 @@ def run(input_dir='',
             \
             ==run_mode=4== reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by run_mode=1.\
 
-        nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|nnf.
+        nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|nnf. Default is nnf.
 
         min_offset (unsigned long long): Optional min offset to start iterating on the full file list.
 
@@ -177,7 +177,9 @@ def run(input_dir='',
 
         nnf_mode (str): When nn_provider='nnf' selects the nnf model mode.
 
-        nnf_param (str): When nn_provider='nnf' selects assigns optional parameters. 
+        nnf_param (str): When nn_provider='nnf' selects assigns optional parameters.
+            ==num_em_iter=XX==, number of KMeans EM iterations to run. Default is 20.\
+            ==num_clusters=XX==, number of KMeans clusters to use. Default is 100.\
 
         bounding_box (str): Optional bouding box to crop images, given as bounding_box='rows=xx,cols=xx,height=xx,width=xx'.
 
@@ -566,7 +568,7 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
         if config is not None and 'input_dir' in config:
             if config['input_dir'].startswith('s3://') or config['input_dir'].startswith('minio://'):
                 if 'delete_img=0' not in config['turi_param']:
-                    print('You asked to create a gallery of images/video obtrained from s3/minio but images where removed since '
+                    print('You asked to create a gallery of images/video obtained from s3/minio but images where removed since '
                           'default run mode removes images downloaded from s3/minio to save space. For creating a gallery of images'
                           'from s3/minion run with "turi_param=\'delete_img=0\'". Note that you need to have local disk space to download the full dataset.'
                           'Please reach out to our slack channel if you have disk space limitations.')
@@ -766,9 +768,22 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         assert max_items > 0, "html image width should be > 0"
 
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
-                                        max_width, max_items, get_bounding_box_func,
+                                        max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, min_items=min_items, keyword=keyword)
+                                        descending=descending, keyword=keyword, comp_type="component")
+
+
+
+def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
+                            slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
+                              get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
+                              descending=True, min_items=None, keyword=None):
+
+    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
+                                        max_width, max_items, min_items, get_bounding_box_func,
+                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
+                                        descending=descending, keyword=keyword, comp_type="cluster")
+
 
 
 def inner_delete(files, dry_run, how, save_path=None):
@@ -938,10 +953,10 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
       Args:
-            stats_file (str):
-                * folder pointing to fastdup workdir or
-                * file pointing to work_dir/atrain_stats.csv file or
-                * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+          stats_file (str):
+              * folder pointing to fastdup workdir or
+              * file pointing to work_dir/atrain_stats.csv file or
+              * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
 
           metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
 
@@ -1149,8 +1164,9 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
                                   alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
 
 
-
-def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None):
+def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
+                        descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
+                        comp_type="component"):
     '''
     Function to find the largest components of duplicate images
 
@@ -1164,6 +1180,24 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
 
         slice (str): optional parameter to slice the results by a specific label. For example, if you want to slice by 'car' then pass 'car' as the slice parameter.
 
+        threshold (float): optional threshold to select only distances larger than the treshold
+
+        metric (str): optional metric to sort by. Valid values are mean,min,max,unique,blur,size
+
+        descending (bool): optional value to sort the components, default is True
+
+        min_items (int): optional value, select only components with at least min_items
+
+        max_items (int) optional value, select only components with at most max_items
+
+        keyword (str): optional, select labels with keyword  value inside
+
+        return_stats (bool): optional, return statistics about the components size
+
+        save_path (str): optional, save path
+
+        comp_type (str): optional, either component or cluster
+
     Returns:
         df (pd.DataFrame): of top components. The column component_id includes the component name.
             The column files includes a list of all image files in this component.
@@ -1171,9 +1205,9 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
 
     '''
     from .galleries import do_find_top_components
-    return do_find_top_components(work_dir, get_label_func, group_by, slice)
-
-
+    return do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
+                                  metric=metric, descending=descending, min_items=min_items, max_items = max_items,
+                                  keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type)
 
 def init_search(k, work_dir, d = 576, model_path = model_path_full):
     '''
@@ -1250,8 +1284,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
     on the fly fastdup loads and resizes every image only once.
 
     Args:
-        stats_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe. Default stats file is saved by fastdup.run()
-        into the folder `work_dir` as `atrain_stats.csv`.
+        stats_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe. Default stats file is saved by fastdup.run() into the folder `work_dir` as `atrain_stats.csv`.
 
         save_path (str): output folder location for the visuals
 
@@ -1547,3 +1580,148 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     print(classification_report(y_values, p1_values))
 
     return p1_values
+
+
+
+
+def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
+    '''
+    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.
+
+    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
+    :param k: (unused)
+    :param get_label_func: function to get the label of an image given its filename
+    :param threshold: (unused)
+    :return: dataframe with filename, label and predicted label. Row per each image
+    '''
+
+    from fastdup.confusion_matrix import classification_report
+
+    assert callable(get_label_func), "Please provide a valid get_label_func, given a filename returns its label"
+
+    comps = find_top_components(work_dir, get_label_func, 'visual', slice=None, comp_type='cluster')
+    print(comps.columns)
+    comps['top_k'] = comps.apply(lambda x:
+                                       top_k_label(x['labels'], x['distance'], k, threshold=threshold), axis=1)
+    files = []
+    y_values = []
+    p1_values = []
+    for i,row in comps.iterrows():
+        cluster_label = row['top_k']
+        for f,l in zip(row['files'], row['labels']):
+            files.append(f)
+            y_values.append(l)
+            p1_values.append(cluster_label)
+
+    print(classification_report(y_values, p1_values))
+
+    return pd.DataFrame({'prediction':p1_values, 'label':y_values, 'filename':files})
+
+
+def run_kmeans(input_dir='',
+               work_dir='.',
+               verbose=False,
+               num_clusters=100,
+               num_em_iter=20,
+               num_threads=-1,
+               num_images=0,
+               model_path=model_path_full,
+               license='CC-BY-NC-ND-4.0',            #license string
+               nearest_neighbors_k=2,
+               d=576,
+               bounding_box="",
+               high_accuracy=False):
+    """
+    Run KMeans algorithm on a folder of images given by `input_dir` and save the results to `work_dir`.
+    Fastdup will extract feature vectors using the model specified by `model_path` and then run KMeans to cluster the vectors.
+    The results will be saved to `work_dir` in the following format:
+    - `kmeans_centroids.csv`: a csv file containing the centroids of the clusters.
+    - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`).
+    After running kmeans you can use `create_kmeans_clusters_gallery` to view the results.
+
+    :param input_dir: path to the folder containing the images to be clustered. See fastup:::run for more details.
+    :param work_dir: path to the folder where the results will be saved.
+    :param verbose: verbosity level, default False
+    :param num_clusters: Number of KMeans clusters to use
+    :param num_em_iter: Number of em iterations
+    :param num_threads: Number of threads for performing the feature vector extraction
+    :param num_images: Limit the number of images
+    :param model_path: Model path for the model to be used for feature vector extraction
+    :param license: License string
+    :param nearest_neighbors_k: When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
+    :param d: Dimension of the feature vector
+    :param bounding_box: Optional bounding box see fastdup:::run for more details
+    :param high_accuracy: Use higher accuracy model for the feature extraction
+    :return:
+    """
+
+    assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
+    assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
+
+    return run(input_dir=input_dir,
+            work_dir=work_dir,
+            verbose=verbose,
+            num_threads=num_threads,
+            num_images=num_images,
+            model_path=model_path,
+            license=license,            #license string
+            nearest_neighbors_k=nearest_neighbors_k,
+            d=d,
+            run_mode=5,
+            nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
+            bounding_box=bounding_box,
+            high_accuracy=high_accuracy)
+
+
+def run_kmeans_on_extracted(input_dir='',
+               work_dir='.',
+               verbose=False,
+               num_clusters=100,
+               num_em_iter=20,
+               num_threads=-1,
+               num_images=0,
+               model_path=model_path_full,
+               license='CC-BY-NC-ND-4.0',            #license string
+               nearest_neighbors_k=2,
+               d=576,
+               bounding_box="",
+               high_accuracy=False):
+    """
+    Run KMeans algorithm on a folder of extracted feature vectors (created on default when running fastdup:::run).
+    The results will be saved to `work_dir` in the following format:
+    - `kmeans_centroids.csv`: a csv file containing the centroids of the clusters. In each row one centroid. In total `num_clusters` rows.
+    - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`). In each row the image filename is listed, centoid id (starting from zero) and the L2 distance to the centroid.
+    After running kmeans you can use `fastdup:::create_kmeans_clusters_gallery` to view the results.
+
+    :param input_dir: path to the folder containing the images to be clustered. See fastup:::run for more details.
+    :param work_dir: path to the folder where the results will be saved.
+    :param verbose: verbosity level, default False
+    :param num_clusters: Number of KMeans clusters to use
+    :param num_em_iter: Number of em iterations
+    :param num_threads: Number of threads for performing the feature vector extraction
+    :param num_images: Limit the number of images
+    :param model_path: Model path for the model to be used for feature vector extraction
+    :param license: License string
+    :param nearest_neighbors_k: When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
+    :param d: Dimension of the feature vector
+    :param bounding_box: Optional bounding box see fastdup:::run for more details
+    :param high_accuracy: Use higher accuracy model for the feature extraction
+    :return:
+    """
+
+    assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
+    assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
+
+    return run(input_dir=input_dir,
+               work_dir=work_dir,
+               verbose=verbose,
+               num_threads=num_threads,
+               num_images=num_images,
+               model_path=model_path,
+               license=license,            #license string
+               nearest_neighbors_k=nearest_neighbors_k,
+               d=d,
+               run_mode=6,
+               nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
+               bounding_box=bounding_box,
+               high_accuracy=high_accuracy)
