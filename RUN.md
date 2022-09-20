@@ -164,6 +164,7 @@ After storing the data you should run (in a Jupyter notebook)
 
 ## Advanced topics: resuming a stored run <a name="resume"/>
 
+[See run_mode=2 documentation](https://visualdatabase.github.io/fastdup/#fastdup.run)
 There are several supported running modes:
 - `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
 It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
