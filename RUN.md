@@ -6,14 +6,15 @@
 3. [Error handling](#error)
 4. [Nearest neighbors](#nn)
 5. [Visualization](#visualization)
-6. [Resuming a stored run](#resume)
-7. [Performing vector search](#external)
-8. [Support for cloud storage](#s3)
-9. [Working with tar/zip files as input](#tar)
-10. [Working with video](#video)
-11. [Using your own onnx model as feature extractpr](#onnx)
-12. [Extracting statistics about image dataset](#stats)
-13. [Debugging fastdup](#debug)
+6. [Clustering](#clustering)
+7. [Resuming a stored run](#resume)
+8. [Performing vector search](#external)
+9. [Support for cloud storage](#s3)
+10. [Working with tar/zip files as input](#tar)
+11. [Working with video](#video)
+12. [Using your own onnx model as feature extractpr](#onnx)
+13. [Extracting statistics about image dataset](#stats)
+14. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
 
@@ -149,6 +150,11 @@ Example command line:
 ## Visualizing the outputs <a name="visualization"/>
 
 [Documentation pages](https://visualdatabase.github.io/fastdup/#fastdup-visualization-of-results)
+
+
+## Clustering <a name="clustering"/>
+
+[Clustering images using kmeans and connected components algorithm](https://www.kaggle.com/graphlab/fastdup-kmeans)
 
 
 ## Exporting to tensorboard projects
