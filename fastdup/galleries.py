@@ -1224,14 +1224,14 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_reformat_filename_func=None):
     '''
     Create an html gallery of images with aspect ratio
-    :param stats_file:
-    :param save_path:
-    :param get_label_func:
-    :param max_width:
-    :param num_images:
-    :param slice:
-    :param get_reformat_filename_func:
-    :return:
+     stats_file:
+     save_path:
+     get_label_func:
+     max_width:
+     num_images:
+     slice:
+     get_reformat_filename_func:
+    Returns:
     '''
 
     import matplotlib.pyplot as plt

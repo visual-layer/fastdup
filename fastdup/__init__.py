@@ -1398,22 +1398,24 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
 def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_filename_reformat_func=None):
     '''
+    Function to create and display a gallery of aspect ratio distribution.
 
-    :param stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
+    Args:
+         stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
 
-    :param get_label_func (callable): optional label function to get the label for each image.
+         get_label_func (callable): optional label function to get the label for each image.
 
-    :param max_width (int): optional parameter to limit the plot image width
+         max_width (int): optional parameter to limit the plot image width
 
-    :param save_path (str): output folder location for the visuals
+         save_path (str): output folder location for the visuals
 
-    :param num_images (int): optional number of images to compute the statistics on (default computes on all images)
+         num_images (int): optional number of images to compute the statistics on (default computes on all images)
 
-    :param slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
+         slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
 
-    :param get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
+         get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
 
-    :return:
+    Returns:
     '''
 
     ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
@@ -1485,13 +1487,15 @@ def top_k_label(labels_col, distance_col, k=10, threshold = None,  min_count=Non
     Function to classify examples based on their label using the top k nearest neighbors.
     Decision is made by accounting for the majority of the neighbors.
 
-    :param labels_col (list): list of labels
-    :param distance_col (list): list of distances
-    :param k (int): optional parameter
-    :param threshold (float): optional parameter to consder neighbors with simiarity larger than threshold
-    :param min_count (int): optional parameter to consider only examples with at least min_count neighbors with the same label
-    :param unknown_class: optional parameter to add decisions to unknown class in cases there is no majority
-    :return: computed label
+    Args:
+        labels_col (list): list of labels
+        distance_col (list): list of distances
+        k (int): optional parameter
+        threshold (float): optional parameter to consder neighbors with simiarity larger than threshold
+        min_count (int): optional parameter to consider only examples with at least min_count neighbors with the same label
+        unknown_class: optional parameter to add decisions to unknown class in cases there is no majority
+    Returns:
+        computed label
     '''
     assert len(labels_col), "Empty dataframe recevieved"
     df = pd.DataFrame({'labels':labels_col, 'distance':distance_col})
@@ -1536,11 +1540,15 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     '''
     Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.
 
-    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
-    :param k: (unused)
-    :param get_label_func: function to get the label of an image given its filename
-    :param threshold: optional threshld to consider neighbors with simiarity larger than threshold
-    :return: prediction per image to one of the given classes.
+    Args:
+        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
+        k (int): (unused)
+        get_label_func (callable): function to get the label of an image given its filename
+        threshold (float): optional threshold to consider neighbors with similarity larger than threshold
+            prediction per image to one of the given classes.
+
+    Returns:
+        List of predictions using knn method
     '''
 
     from fastdup.confusion_matrix import classification_report
@@ -1577,9 +1585,10 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
 
     y_values = df_merge['from_label'].tolist()
     p1_values = df_merge['top_k'].tolist()
+    filenames = df_merge.index.tolist()
     print(classification_report(y_values, p1_values))
 
-    return p1_values
+    return pd.DataFrame({'filename':filenames, 'prediction':p1_values, 'label':y_values})
 
 
 
@@ -1588,11 +1597,14 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
     '''
     Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.
 
-    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
-    :param k: (unused)
-    :param get_label_func: function to get the label of an image given its filename
-    :param threshold: (unused)
-    :return: dataframe with filename, label and predicted label. Row per each image
+    Args:
+        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
+        k (int): (unused)
+        get_label_func (callable): function to get the label of an image given its filename
+        threshold (float): (unused)
+
+    Returns:
+         dataframe with filename, label and predicted label. Row per each image
     '''
 
     from fastdup.confusion_matrix import classification_report
@@ -1639,20 +1651,23 @@ def run_kmeans(input_dir='',
     - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`).
     After running kmeans you can use `create_kmeans_clusters_gallery` to view the results.
 
-    :param input_dir: path to the folder containing the images to be clustered. See fastup:::run for more details.
-    :param work_dir: path to the folder where the results will be saved.
-    :param verbose: verbosity level, default False
-    :param num_clusters: Number of KMeans clusters to use
-    :param num_em_iter: Number of em iterations
-    :param num_threads: Number of threads for performing the feature vector extraction
-    :param num_images: Limit the number of images
-    :param model_path: Model path for the model to be used for feature vector extraction
-    :param license: License string
-    :param nearest_neighbors_k: When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
-    :param d: Dimension of the feature vector
-    :param bounding_box: Optional bounding box see fastdup:::run for more details
-    :param high_accuracy: Use higher accuracy model for the feature extraction
-    :return:
+    Args:
+        input_dir (str): path to the folder containing the images to be clustered. See `fastdup.run` for more details.
+        work_dir (str): path to the folder where the results will be saved.
+        verbose (bool): verbosity level, default False
+        num_clusters (int): Number of KMeans clusters to use
+        num_em_iter (int): Number of em iterations
+        num_threads (int): Number of threads for performing the feature vector extraction
+        num_images (int): Limit the number of images
+        model_path (str): Model path for the model to be used for feature vector extraction
+        license (str): License string
+        nearest_neighbors_k (int): When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
+        d (int): Dimension of the feature vector
+        bounding_box (str): Optional bounding box see fastdup:::run for more details
+        high_accuracy (bool): Use higher accuracy model for the feature extraction
+
+    Returns:
+        0 in case of success, 1 in case of error
     """
 
     assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
@@ -1683,9 +1698,7 @@ def run_kmeans_on_extracted(input_dir='',
                model_path=model_path_full,
                license='CC-BY-NC-ND-4.0',            #license string
                nearest_neighbors_k=2,
-               d=576,
-               bounding_box="",
-               high_accuracy=False):
+               d=576):
     """
     Run KMeans algorithm on a folder of extracted feature vectors (created on default when running fastdup:::run).
     The results will be saved to `work_dir` in the following format:
@@ -1693,20 +1706,21 @@ def run_kmeans_on_extracted(input_dir='',
     - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`). In each row the image filename is listed, centoid id (starting from zero) and the L2 distance to the centroid.
     After running kmeans you can use `fastdup:::create_kmeans_clusters_gallery` to view the results.
 
-    :param input_dir: path to the folder containing the images to be clustered. See fastup:::run for more details.
-    :param work_dir: path to the folder where the results will be saved.
-    :param verbose: verbosity level, default False
-    :param num_clusters: Number of KMeans clusters to use
-    :param num_em_iter: Number of em iterations
-    :param num_threads: Number of threads for performing the feature vector extraction
-    :param num_images: Limit the number of images
-    :param model_path: Model path for the model to be used for feature vector extraction
-    :param license: License string
-    :param nearest_neighbors_k: When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
-    :param d: Dimension of the feature vector
-    :param bounding_box: Optional bounding box see fastdup:::run for more details
-    :param high_accuracy: Use higher accuracy model for the feature extraction
-    :return:
+    Args:
+        input_dir (str): path to the folder containing the images to be clustered. See fastup:::run for more details.
+        work_dir (str): path to the folder where the results will be saved.
+        verbose (bool): verbosity level, default False
+        num_clusters (int): Number of KMeans clusters to use
+        num_em_iter (int): Number of em iterations
+        num_threads (int): Number of threads for performing the feature vector extraction
+        num_images (int): Limit the number of images
+        model_path (str): Model path for the model to be used for feature vector extraction
+        license (str): License string
+        nearest_neighbors_k (int): When assigning an image into a cluster, how many clusters to assign to (starting from the closest)
+        d (int): Dimension of the feature vector
+
+    Returns:
+        0 in case of success, 1 in case of error
     """
 
     assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
@@ -1722,6 +1736,4 @@ def run_kmeans_on_extracted(input_dir='',
                nearest_neighbors_k=nearest_neighbors_k,
                d=d,
                run_mode=6,
-               nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
-               bounding_box=bounding_box,
-               high_accuracy=high_accuracy)
+               nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}")

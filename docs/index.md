@@ -4,6 +4,10 @@ The main function is `fastdup.run`. It runs on a folder or list of images and co
 
 :::fastdup.run
 
+:::fastdup.run_kmeans
+
+:::fastdup.run_kmeans_on_extracted
+
 
 ## Fastdup visualization of results
 Visualization of the output data is done using the following functions:

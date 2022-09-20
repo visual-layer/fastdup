@@ -5,11 +5,11 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     """
     Download files from S3 to local disk (called only in case of turi_param='sync_s3_to_local=1')
     Note: we assume there is enough local disk space otherwise the download may fail
-    :param input_dir: input directory on s3 or minio
-    :param work_dir: local working directory
-    :param verbose: if verbose show progress
-    :param is_test: If this is a test folder save it on S3_TEST_TEMP_FOLDER otherwise on S3_TEMP_FOLDER
-    :return: The local download directory
+     input_dir: input directory on s3 or minio
+     work_dir: local working directory
+     verbose: if verbose show progress
+     is_test: If this is a test folder save it on S3_TEST_TEMP_FOLDER otherwise on S3_TEMP_FOLDER
+    Returns: The local download directory
     """
     print(f'Going to download s3 files from {input_dir} to local {work_dir}')
 
