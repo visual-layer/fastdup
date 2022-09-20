@@ -2,10 +2,13 @@
 
 The main function is `fastdup.run`. It runs on a folder or list of images and computes the artifacts needed to compute image similrity, outliers, componetns etc.
 
+`fastdup.run`
 :::fastdup.run
 
+`fastdup.run_kmeans`
 :::fastdup.run_kmeans
 
+`fastdup.run_kmeans_on_extracted`
 :::fastdup.run_kmeans_on_extracted
 
 
