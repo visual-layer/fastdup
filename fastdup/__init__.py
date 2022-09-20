@@ -720,7 +720,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
     Function to create and display a gallery of images for the largest graph components
 
-    Parameters:
+    Args:
         work_dir (str): path to fastdup work_dir
 
         save_path (str): output folder location for the visuals
@@ -778,6 +778,46 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
                             slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
                               get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
                               descending=True, min_items=None, keyword=None):
+    '''
+    Function to visualize the kmeans clusters.
+    
+        work_dir (str): path to fastdup work_dir
+
+        save_path (str): output folder location for the visuals
+
+        num_images (int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+
+        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
+
+        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
+
+        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+
+        max_width (int): Optional parameter to set the max html width of images in the gallery. Default is None.
+
+        max_items (int): Optional parameter to limit the number of items displayed (labels for group_by='visual' or components for group_by='label'). Default is None.
+
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.  The input is an absolute path to the image and the output is a list of bounding boxes.  Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+
+        get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.  The input is an absolute path to the image and the output is the string to display instead of the filename.
+
+        get_extra_col_func (callable): Optional parameter to allow adding more information to the report.
+
+        threshold (float): Optional parameter to set the treshold for chosing components. Default is None.
+
+        metric (str): Optional parameter to set the metric to use (like blur) for chose components. Default is None.
+
+        descending (boolean): Optional parameter to set the order of the components. Default is True namely list components from largest to smallest.
+
+        min_items (int): Optional parameter to select components with min_items or more items. Default is None.
+
+        keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
+
+    Returns:
+         0 in case of success, otherwise 1
+    '''
 
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
