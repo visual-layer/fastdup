@@ -780,6 +780,8 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
                               descending=True, min_items=None, keyword=None):
     '''
     Function to visualize the kmeans clusters.
+
+    Args:
     
         work_dir (str): path to fastdup work_dir
 
