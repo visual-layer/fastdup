@@ -189,6 +189,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fastdup.run_kmeans" class="md-nav__link">
+    fastdup.run_kmeans
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastdup.run_kmeans_on_extracted" class="md-nav__link">
+    fastdup.run_kmeans_on_extracted
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fastdup-visualization-of-results" class="md-nav__link">
     Fastdup visualization of results
   </a>
@@ -386,6 +400,20 @@
         <li class="md-nav__item">
   <a href="#fastdup.run" class="md-nav__link">
     fastdup.run
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastdup.run_kmeans" class="md-nav__link">
+    fastdup.run_kmeans
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastdup.run_kmeans_on_extracted" class="md-nav__link">
+    fastdup.run_kmeans_on_extracted
   </a>
   
 </li>
@@ -1571,6 +1599,557 @@ This mode is used for scoring similarities on a new test dataset given a precomp
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">return</span> <span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<a id="fastdup.run_kmeans"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Run KMeans algorithm on a folder of images given by <code>input_dir</code> and save the results to <code>work_dir</code>.<br />
+Fastdup will extract feature vectors using the model specified by <code>model_path</code> and then run KMeans to cluster the vectors.<br />
+The results will be saved to <code>work_dir</code> in the following format:<br />
+- <code>kmeans_centroids.csv</code>: a csv file containing the centroids of the clusters.<br />
+- <code>kmeans_assignments.csv</code>: assignment of each data point to the closet centroids (number of centroids given by <code>nearest_neighbors_k</code>).<br />
+After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to view the results.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>input_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>path to the folder containing the images to be clustered. See <code>fastdup.run</code> for more details.</p></td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>work_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>path to the folder where the results will be saved.</p></td>
+          <td>
+                <code>&#39;.&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>verbose</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>verbosity level, default False</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_clusters</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of KMeans clusters to use</p></td>
+          <td>
+                <code>100</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_em_iter</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of em iterations</p></td>
+          <td>
+                <code>20</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_threads</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of threads for performing the feature vector extraction</p></td>
+          <td>
+                <code>-1</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_images</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Limit the number of images</p></td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>model_path</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Model path for the model to be used for feature vector extraction</p></td>
+          <td>
+                <code>model_path_full</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>license</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>License string</p></td>
+          <td>
+                <code>&#39;CC-BY-NC-ND-4.0&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nearest_neighbors_k</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>When assigning an image into a cluster, how many clusters to assign to (starting from the closest)</p></td>
+          <td>
+                <code>2</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>d</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Dimension of the feature vector</p></td>
+          <td>
+                <code>576</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>bounding_box</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Optional bounding box see fastdup:::run for more details</p></td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>high_accuracy</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Use higher accuracy model for the feature extraction</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+          </td>
+          <td><p>0 in case of success, 1 in case of error</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>fastdup/__init__.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span>
+<span class="normal">1670</span>
+<span class="normal">1671</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span>
+<span class="normal">1676</span>
+<span class="normal">1677</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span>
+<span class="normal">1684</span>
+<span class="normal">1685</span>
+<span class="normal">1686</span>
+<span class="normal">1687</span>
+<span class="normal">1688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="n">work_dir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">num_clusters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+               <span class="n">num_em_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+               <span class="n">num_threads</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">model_path</span><span class="o">=</span><span class="n">model_path_full</span><span class="p">,</span>
+               <span class="n">license</span><span class="o">=</span><span class="s1">&#39;CC-BY-NC-ND-4.0&#39;</span><span class="p">,</span>            <span class="c1">#license string</span>
+               <span class="n">nearest_neighbors_k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+               <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">,</span>
+               <span class="n">bounding_box</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+               <span class="n">high_accuracy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run KMeans algorithm on a folder of images given by `input_dir` and save the results to `work_dir`.</span>
+<span class="sd">    Fastdup will extract feature vectors using the model specified by `model_path` and then run KMeans to cluster the vectors.</span>
+<span class="sd">    The results will be saved to `work_dir` in the following format:</span>
+<span class="sd">    - `kmeans_centroids.csv`: a csv file containing the centroids of the clusters.</span>
+<span class="sd">    - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`).</span>
+<span class="sd">    After running kmeans you can use `create_kmeans_clusters_gallery` to view the results.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_dir (str): path to the folder containing the images to be clustered. See `fastdup.run` for more details.</span>
+<span class="sd">        work_dir (str): path to the folder where the results will be saved.</span>
+<span class="sd">        verbose (bool): verbosity level, default False</span>
+<span class="sd">        num_clusters (int): Number of KMeans clusters to use</span>
+<span class="sd">        num_em_iter (int): Number of em iterations</span>
+<span class="sd">        num_threads (int): Number of threads for performing the feature vector extraction</span>
+<span class="sd">        num_images (int): Limit the number of images</span>
+<span class="sd">        model_path (str): Model path for the model to be used for feature vector extraction</span>
+<span class="sd">        license (str): License string</span>
+<span class="sd">        nearest_neighbors_k (int): When assigning an image into a cluster, how many clusters to assign to (starting from the closest)</span>
+<span class="sd">        d (int): Dimension of the feature vector</span>
+<span class="sd">        bounding_box (str): Optional bounding box see fastdup:::run for more details</span>
+<span class="sd">        high_accuracy (bool): Use higher accuracy model for the feature extraction</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        0 in case of success, 1 in case of error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">num_clusters</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Number of clusters must be at least 2, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_clusters</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">num_em_iter</span> <span class="o">&gt;=</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Number of EM iterations must be at least 1, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_em_iter</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="n">input_dir</span><span class="p">,</span>
+            <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
+            <span class="n">num_images</span><span class="o">=</span><span class="n">num_images</span><span class="p">,</span>
+            <span class="n">model_path</span><span class="o">=</span><span class="n">model_path</span><span class="p">,</span>
+            <span class="n">license</span><span class="o">=</span><span class="n">license</span><span class="p">,</span>            <span class="c1">#license string</span>
+            <span class="n">nearest_neighbors_k</span><span class="o">=</span><span class="n">nearest_neighbors_k</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">run_mode</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">nnf_param</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;num_clusters=</span><span class="si">{</span><span class="n">num_clusters</span><span class="si">}</span><span class="s2">,num_em_iter=</span><span class="si">{</span><span class="n">num_em_iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">bounding_box</span><span class="o">=</span><span class="n">bounding_box</span><span class="p">,</span>
+            <span class="n">high_accuracy</span><span class="o">=</span><span class="n">high_accuracy</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<a id="fastdup.run_kmeans_on_extracted"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Run KMeans algorithm on a folder of extracted feature vectors (created on default when running fastdup:::run).<br />
+The results will be saved to <code>work_dir</code> in the following format:<br />
+- <code>kmeans_centroids.csv</code>: a csv file containing the centroids of the clusters. In each row one centroid. In total <code>num_clusters</code> rows.<br />
+- <code>kmeans_assignments.csv</code>: assignment of each data point to the closet centroids (number of centroids given by <code>nearest_neighbors_k</code>). In each row the image filename is listed, centoid id (starting from zero) and the L2 distance to the centroid.<br />
+After running kmeans you can use <code>fastdup:::create_kmeans_clusters_gallery</code> to view the results.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>input_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>path to the folder containing the images to be clustered. See fastup:::run for more details.</p></td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>work_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>path to the folder where the results will be saved.</p></td>
+          <td>
+                <code>&#39;.&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>verbose</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>verbosity level, default False</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_clusters</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of KMeans clusters to use</p></td>
+          <td>
+                <code>100</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_em_iter</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of em iterations</p></td>
+          <td>
+                <code>20</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_threads</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of threads for performing the feature vector extraction</p></td>
+          <td>
+                <code>-1</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_images</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Limit the number of images</p></td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>model_path</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Model path for the model to be used for feature vector extraction</p></td>
+          <td>
+                <code>model_path_full</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>license</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>License string</p></td>
+          <td>
+                <code>&#39;CC-BY-NC-ND-4.0&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nearest_neighbors_k</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>When assigning an image into a cluster, how many clusters to assign to (starting from the closest)</p></td>
+          <td>
+                <code>2</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>d</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Dimension of the feature vector</p></td>
+          <td>
+                <code>576</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+          </td>
+          <td><p>0 in case of success, 1 in case of error</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>fastdup/__init__.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1691</span>
+<span class="normal">1692</span>
+<span class="normal">1693</span>
+<span class="normal">1694</span>
+<span class="normal">1695</span>
+<span class="normal">1696</span>
+<span class="normal">1697</span>
+<span class="normal">1698</span>
+<span class="normal">1699</span>
+<span class="normal">1700</span>
+<span class="normal">1701</span>
+<span class="normal">1702</span>
+<span class="normal">1703</span>
+<span class="normal">1704</span>
+<span class="normal">1705</span>
+<span class="normal">1706</span>
+<span class="normal">1707</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span>
+<span class="normal">1710</span>
+<span class="normal">1711</span>
+<span class="normal">1712</span>
+<span class="normal">1713</span>
+<span class="normal">1714</span>
+<span class="normal">1715</span>
+<span class="normal">1716</span>
+<span class="normal">1717</span>
+<span class="normal">1718</span>
+<span class="normal">1719</span>
+<span class="normal">1720</span>
+<span class="normal">1721</span>
+<span class="normal">1722</span>
+<span class="normal">1723</span>
+<span class="normal">1724</span>
+<span class="normal">1725</span>
+<span class="normal">1726</span>
+<span class="normal">1727</span>
+<span class="normal">1728</span>
+<span class="normal">1729</span>
+<span class="normal">1730</span>
+<span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span>
+<span class="normal">1734</span>
+<span class="normal">1735</span>
+<span class="normal">1736</span>
+<span class="normal">1737</span>
+<span class="normal">1738</span>
+<span class="normal">1739</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans_on_extracted</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="n">work_dir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">num_clusters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+               <span class="n">num_em_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+               <span class="n">num_threads</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">model_path</span><span class="o">=</span><span class="n">model_path_full</span><span class="p">,</span>
+               <span class="n">license</span><span class="o">=</span><span class="s1">&#39;CC-BY-NC-ND-4.0&#39;</span><span class="p">,</span>            <span class="c1">#license string</span>
+               <span class="n">nearest_neighbors_k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+               <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run KMeans algorithm on a folder of extracted feature vectors (created on default when running fastdup:::run).</span>
+<span class="sd">    The results will be saved to `work_dir` in the following format:</span>
+<span class="sd">    - `kmeans_centroids.csv`: a csv file containing the centroids of the clusters. In each row one centroid. In total `num_clusters` rows.</span>
+<span class="sd">    - `kmeans_assignments.csv`: assignment of each data point to the closet centroids (number of centroids given by `nearest_neighbors_k`). In each row the image filename is listed, centoid id (starting from zero) and the L2 distance to the centroid.</span>
+<span class="sd">    After running kmeans you can use `fastdup:::create_kmeans_clusters_gallery` to view the results.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_dir (str): path to the folder containing the images to be clustered. See fastup:::run for more details.</span>
+<span class="sd">        work_dir (str): path to the folder where the results will be saved.</span>
+<span class="sd">        verbose (bool): verbosity level, default False</span>
+<span class="sd">        num_clusters (int): Number of KMeans clusters to use</span>
+<span class="sd">        num_em_iter (int): Number of em iterations</span>
+<span class="sd">        num_threads (int): Number of threads for performing the feature vector extraction</span>
+<span class="sd">        num_images (int): Limit the number of images</span>
+<span class="sd">        model_path (str): Model path for the model to be used for feature vector extraction</span>
+<span class="sd">        license (str): License string</span>
+<span class="sd">        nearest_neighbors_k (int): When assigning an image into a cluster, how many clusters to assign to (starting from the closest)</span>
+<span class="sd">        d (int): Dimension of the feature vector</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        0 in case of success, 1 in case of error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">num_clusters</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Number of clusters must be at least 2, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_clusters</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">num_em_iter</span> <span class="o">&gt;=</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Number of EM iterations must be at least 1, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_em_iter</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="n">input_dir</span><span class="p">,</span>
+               <span class="n">work_dir</span><span class="o">=</span><span class="n">work_dir</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+               <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
+               <span class="n">num_images</span><span class="o">=</span><span class="n">num_images</span><span class="p">,</span>
+               <span class="n">model_path</span><span class="o">=</span><span class="n">model_path</span><span class="p">,</span>
+               <span class="n">license</span><span class="o">=</span><span class="n">license</span><span class="p">,</span>            <span class="c1">#license string</span>
+               <span class="n">nearest_neighbors_k</span><span class="o">=</span><span class="n">nearest_neighbors_k</span><span class="p">,</span>
+               <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+               <span class="n">run_mode</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+               <span class="n">nnf_param</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;num_clusters=</span><span class="si">{</span><span class="n">num_clusters</span><span class="si">}</span><span class="s2">,num_em_iter=</span><span class="si">{</span><span class="n">num_em_iter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -3091,14 +3670,91 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <a id="fastdup.create_aspect_ratio_gallery"></a>
   <div class="doc doc-contents first">
   
-      <p>:param stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.</p>
-<p>:param get_label_func (callable): optional label function to get the label for each image.</p>
-<p>:param max_width (int): optional parameter to limit the plot image width</p>
-<p>:param save_path (str): output folder location for the visuals</p>
-<p>:param num_images (int): optional number of images to compute the statistics on (default computes on all images)</p>
-<p>:param slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.</p>
-<p>:param get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.</p>
-<p>:return:</p>
+      <p>Function to create and display a gallery of aspect ratio distribution.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>stats_file</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_label_func</code></td>
+          <td>
+                <code>callable</code>
+          </td>
+          <td><p>optional label function to get the label for each image.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>max_width</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>optional parameter to limit the plot image width</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>save_path</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>output folder location for the visuals</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_images</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>optional number of images to compute the statistics on (default computes on all images)</p></td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>slice</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>optional parameter to slice the stats file based on a specific label or a list of labels.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_filename_reformat_func</code></td>
+          <td>
+                <code>callable</code>
+          </td>
+          <td><p>optional function to reformat the filename before displaying it.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
@@ -3141,24 +3797,28 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <span class="normal">1435</span>
 <span class="normal">1436</span>
 <span class="normal">1437</span>
-<span class="normal">1438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_aspect_ratio_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_filename_reformat_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_aspect_ratio_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_filename_reformat_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Function to create and display a gallery of aspect ratio distribution.</span>
 
-<span class="sd">    :param stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.</span>
+<span class="sd">    Args:</span>
+<span class="sd">         stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.</span>
 
-<span class="sd">    :param get_label_func (callable): optional label function to get the label for each image.</span>
+<span class="sd">         get_label_func (callable): optional label function to get the label for each image.</span>
 
-<span class="sd">    :param max_width (int): optional parameter to limit the plot image width</span>
+<span class="sd">         max_width (int): optional parameter to limit the plot image width</span>
 
-<span class="sd">    :param save_path (str): output folder location for the visuals</span>
+<span class="sd">         save_path (str): output folder location for the visuals</span>
 
-<span class="sd">    :param num_images (int): optional number of images to compute the statistics on (default computes on all images)</span>
+<span class="sd">         num_images (int): optional number of images to compute the statistics on (default computes on all images)</span>
 
-<span class="sd">    :param slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.</span>
+<span class="sd">         slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.</span>
 
-<span class="sd">    :param get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.</span>
+<span class="sd">         get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.</span>
 
-<span class="sd">    :return:</span>
+<span class="sd">    Returns:</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="n">check_params</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">max_width</span><span class="p">)</span>
@@ -3198,19 +3858,82 @@ For high quality labeled dataset we expect the score to be high, low score may i
   <div class="doc doc-contents first">
   
       <p>Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</p>
-<p>:param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities<br />
-:param k: (unused)<br />
-:param get_label_func: function to get the label of an image given its filename<br />
-:param threshold: optional threshld to consider neighbors with simiarity larger than threshold<br />
-:return: prediction per image to one of the given classes.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>work_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>(unused)</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_label_func</code></td>
+          <td>
+                <code>callable</code>
+          </td>
+          <td><p>function to get the label of an image given its filename</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>threshold</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td><p>optional threshold to consider neighbors with similarity larger than threshold<br />
+prediction per image to one of the given classes.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+          </td>
+          <td><p>List of predictions using knn method</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1535</span>
-<span class="normal">1536</span>
-<span class="normal">1537</span>
-<span class="normal">1538</span>
-<span class="normal">1539</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1539</span>
 <span class="normal">1540</span>
 <span class="normal">1541</span>
 <span class="normal">1542</span>
@@ -3253,15 +3976,28 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <span class="normal">1579</span>
 <span class="normal">1580</span>
 <span class="normal">1581</span>
-<span class="normal">1582</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_knn_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_knn_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</span>
 
-<span class="sd">    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
-<span class="sd">    :param k: (unused)</span>
-<span class="sd">    :param get_label_func: function to get the label of an image given its filename</span>
-<span class="sd">    :param threshold: optional threshld to consider neighbors with simiarity larger than threshold</span>
-<span class="sd">    :return: prediction per image to one of the given classes.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
+<span class="sd">        k (int): (unused)</span>
+<span class="sd">        get_label_func (callable): function to get the label of an image given its filename</span>
+<span class="sd">        threshold (float): optional threshold to consider neighbors with similarity larger than threshold</span>
+<span class="sd">            prediction per image to one of the given classes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of predictions using knn method</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="kn">from</span> <span class="nn">fastdup.confusion_matrix</span> <span class="kn">import</span> <span class="n">classification_report</span>
@@ -3298,9 +4034,10 @@ For high quality labeled dataset we expect the score to be high, low score may i
 
     <span class="n">y_values</span> <span class="o">=</span> <span class="n">df_merge</span><span class="p">[</span><span class="s1">&#39;from_label&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">p1_values</span> <span class="o">=</span> <span class="n">df_merge</span><span class="p">[</span><span class="s1">&#39;top_k&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">filenames</span> <span class="o">=</span> <span class="n">df_merge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_values</span><span class="p">,</span> <span class="n">p1_values</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">p1_values</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span><span class="n">filenames</span><span class="p">,</span> <span class="s1">&#39;prediction&#39;</span><span class="p">:</span><span class="n">p1_values</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span><span class="n">y_values</span><span class="p">})</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -3316,24 +4053,81 @@ For high quality labeled dataset we expect the score to be high, low score may i
   <div class="doc doc-contents first">
   
       <p>Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</p>
-<p>:param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities<br />
-:param k: (unused)<br />
-:param get_label_func: function to get the label of an image given its filename<br />
-:param threshold: (unused)<br />
-:return: dataframe with filename, label and predicted label. Row per each image</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>work_dir</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>(unused)</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_label_func</code></td>
+          <td>
+                <code>callable</code>
+          </td>
+          <td><p>function to get the label of an image given its filename</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>threshold</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td><p>(unused)</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+          </td>
+          <td><p>dataframe with filename, label and predicted label. Row per each image</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1587</span>
-<span class="normal">1588</span>
-<span class="normal">1589</span>
-<span class="normal">1590</span>
-<span class="normal">1591</span>
-<span class="normal">1592</span>
-<span class="normal">1593</span>
-<span class="normal">1594</span>
-<span class="normal">1595</span>
-<span class="normal">1596</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1596</span>
 <span class="normal">1597</span>
 <span class="normal">1598</span>
 <span class="normal">1599</span>
@@ -3355,15 +4149,30 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <span class="normal">1615</span>
 <span class="normal">1616</span>
 <span class="normal">1617</span>
-<span class="normal">1618</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</span>
 
-<span class="sd">    :param work_dir: fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
-<span class="sd">    :param k: (unused)</span>
-<span class="sd">    :param get_label_func: function to get the label of an image given its filename</span>
-<span class="sd">    :param threshold: (unused)</span>
-<span class="sd">    :return: dataframe with filename, label and predicted label. Row per each image</span>
+<span class="sd">    Args:</span>
+<span class="sd">        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
+<span class="sd">        k (int): (unused)</span>
+<span class="sd">        get_label_func (callable): function to get the label of an image given its filename</span>
+<span class="sd">        threshold (float): (unused)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">         dataframe with filename, label and predicted label. Row per each image</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="kn">from</span> <span class="nn">fastdup.confusion_matrix</span> <span class="kn">import</span> <span class="n">classification_report</span>
@@ -4250,9 +5059,7 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1440</span>
-<span class="normal">1441</span>
-<span class="normal">1442</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1442</span>
 <span class="normal">1443</span>
 <span class="normal">1444</span>
 <span class="normal">1445</span>
@@ -4268,7 +5075,9 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <span class="normal">1455</span>
 <span class="normal">1456</span>
 <span class="normal">1457</span>
-<span class="normal">1458</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_cvat</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span>
+<span class="normal">1460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_cvat</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to export a collection of files that needs to be annotated again to cvat batch job format.</span>
 <span class="sd">    This creates a file named fastdup_label.zip in the directory save_path.</span>
@@ -4369,9 +5178,7 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1461</span>
-<span class="normal">1462</span>
-<span class="normal">1463</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1463</span>
 <span class="normal">1464</span>
 <span class="normal">1465</span>
 <span class="normal">1466</span>
@@ -4387,7 +5194,9 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <span class="normal">1476</span>
 <span class="normal">1477</span>
 <span class="normal">1478</span>
-<span class="normal">1479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_labelImg</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+<span class="normal">1479</span>
+<span class="normal">1480</span>
+<span class="normal">1481</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_labelImg</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to export a collection of files that needs to be annotated again to cvat batch job format.</span>
 <span class="sd">    This creates a file named fastdup_label.zip in the directory save_path.</span>
