@@ -315,13 +315,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fastdup.export_to_tensorboard_projector--after-data-is-exporeted-run-tensorboard-projector" class="md-nav__link">
-    after data is exporeted run tensorboard projector
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#fastdup.export_to_cvat" class="md-nav__link">
     fastdup.export_to_cvat
   </a>
@@ -352,13 +345,6 @@
         <li class="md-nav__item">
   <a href="#fastdup.delete_or_retag_stats_outliers" class="md-nav__link">
     fastdup.delete_or_retag_stats_outliers
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fastdup.delete_or_retag_stats_outliers--delete-5-of-the-brightest-images-and-delete-2-of-the-darkest-images" class="md-nav__link">
-    delete 5% of the brightest images and delete 2% of the darkest images
   </a>
   
 </li>
@@ -531,13 +517,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fastdup.export_to_tensorboard_projector--after-data-is-exporeted-run-tensorboard-projector" class="md-nav__link">
-    after data is exporeted run tensorboard projector
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#fastdup.export_to_cvat" class="md-nav__link">
     fastdup.export_to_cvat
   </a>
@@ -572,13 +551,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#fastdup.delete_or_retag_stats_outliers--delete-5-of-the-brightest-images-and-delete-2-of-the-darkest-images" class="md-nav__link">
-    delete 5% of the brightest images and delete 2% of the darkest images
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -595,6 +567,8 @@
 
 <h1 id="fastdup-documentation-page">Fastdup documentation page</h1>
 <p>The main function is <code>fastdup.run</code>. It runs on a folder or list of images and computes the artifacts needed to compute image similrity, outliers, componetns etc.</p>
+<p><code>fastdup.run</code><br />
+</p>
 
 
 <div class="doc doc-object doc-function">
@@ -918,7 +892,10 @@ This mode is used for scoring similarities on a new test dataset given a precomp
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 61</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
 <span class="normal"> 62</span>
 <span class="normal"> 63</span>
 <span class="normal"> 64</span>
@@ -1255,10 +1232,7 @@ This mode is used for scoring similarities on a new test dataset given a precomp
 <span class="normal">395</span>
 <span class="normal">396</span>
 <span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>             
+<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>             
         <span class="n">work_dir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> 
         <span class="n">test_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">compute</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">,</span>    
@@ -1603,7 +1577,9 @@ This mode is used for scoring similarities on a new test dataset given a precomp
       </details>
   </div>
 
-</div>
+</div><p><code>fastdup.run_kmeans</code><br />
+</p>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1766,13 +1742,14 @@ After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to 
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>ret</code></td>          <td>
+                <code>int</code>
           </td>
           <td><p>0 in case of success, 1 in case of error</p></td>
         </tr>
@@ -1781,10 +1758,7 @@ After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to 
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1675</span>
-<span class="normal">1676</span>
-<span class="normal">1677</span>
-<span class="normal">1678</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1678</span>
 <span class="normal">1679</span>
 <span class="normal">1680</span>
 <span class="normal">1681</span>
@@ -1836,7 +1810,10 @@ After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to 
 <span class="normal">1727</span>
 <span class="normal">1728</span>
 <span class="normal">1729</span>
-<span class="normal">1730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="normal">1730</span>
+<span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                <span class="n">work_dir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">num_clusters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
@@ -1873,7 +1850,7 @@ After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to 
 <span class="sd">        high_accuracy (bool): Use higher accuracy model for the feature extraction</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        0 in case of success, 1 in case of error</span>
+<span class="sd">        ret (int): 0 in case of success, 1 in case of error</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="n">num_clusters</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Number of clusters must be at least 2, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_clusters</span><span class="p">)</span>
@@ -1896,7 +1873,9 @@ After running kmeans you can use <code>create_kmeans_clusters_gallery</code> to 
       </details>
   </div>
 
-</div>
+</div><p><code>fastdup.run_kmeans_on_extracted</code><br />
+</p>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2038,13 +2017,14 @@ After running kmeans you can use <code>fastdup:::create_kmeans_clusters_gallery<
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>ret</code></td>          <td>
+                <code>int</code>
           </td>
           <td><p>0 in case of success, 1 in case of error</p></td>
         </tr>
@@ -2053,10 +2033,7 @@ After running kmeans you can use <code>fastdup:::create_kmeans_clusters_gallery<
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1733</span>
-<span class="normal">1734</span>
-<span class="normal">1735</span>
-<span class="normal">1736</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1736</span>
 <span class="normal">1737</span>
 <span class="normal">1738</span>
 <span class="normal">1739</span>
@@ -2101,7 +2078,10 @@ After running kmeans you can use <code>fastdup:::create_kmeans_clusters_gallery<
 <span class="normal">1778</span>
 <span class="normal">1779</span>
 <span class="normal">1780</span>
-<span class="normal">1781</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans_on_extracted</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="normal">1781</span>
+<span class="normal">1782</span>
+<span class="normal">1783</span>
+<span class="normal">1784</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_kmeans_on_extracted</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                <span class="n">work_dir</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">num_clusters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
@@ -2133,7 +2113,7 @@ After running kmeans you can use <code>fastdup:::create_kmeans_clusters_gallery<
 <span class="sd">        d (int): Dimension of the feature vector</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        0 in case of success, 1 in case of error</span>
+<span class="sd">        ret (int): 0 in case of success, 1 in case of error</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="n">num_clusters</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Number of clusters must be at least 2, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num_clusters</span><span class="p">)</span>
@@ -2247,8 +2227,7 @@ fastdup.create_duplicates_gallery('output_folder', save_path='.', get_label_func
           <td>
                 <code>callable</code>
           </td>
-          <td><p>Optional parameter to allow adding more image information to the report like the image label.<br />
-This is a function the user implements that gets the full image file path and returns html string with the label or any other metadata desired.</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -2314,7 +2293,10 @@ The input is an absolute path to the image and the output is the string to displ
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">586</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span>
@@ -2373,11 +2355,7 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="normal">642</span>
 <span class="normal">643</span>
 <span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
-<span class="normal">649</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_duplicates_gallery</span><span class="p">(</span><span class="n">similarity_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="normal">645</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_duplicates_gallery</span><span class="p">(</span><span class="n">similarity_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                               <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -2403,8 +2381,7 @@ The input is an absolute path to the image and the output is the string to displ
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label.</span>
-<span class="sd">            This is a function the user implements that gets the full image file path and returns html string with the label or any other metadata desired.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.</span>
 <span class="sd">            slice could be a specific label i.e. slice=&#39;haumburger&#39; and in that case only similarities between hamburger and other classes are presented.</span>
@@ -2519,7 +2496,7 @@ i.e. 0.05 means top 5% of the images that are further away from the rest of the 
           <td>
                 <code>callable</code>
           </td>
-          <td><p>Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -2593,7 +2570,11 @@ The input is an absolute path to the image and the output is the string to displ
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">652</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
 <span class="normal">653</span>
 <span class="normal">654</span>
 <span class="normal">655</span>
@@ -2648,11 +2629,7 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="normal">704</span>
 <span class="normal">705</span>
 <span class="normal">706</span>
-<span class="normal">707</span>
-<span class="normal">708</span>
-<span class="normal">709</span>
-<span class="normal">710</span>
-<span class="normal">711</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_outliers_gallery</span><span class="p">(</span><span class="n">outliers_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">707</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_outliers_gallery</span><span class="p">(</span><span class="n">outliers_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">how</span><span class="o">=</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 
@@ -2673,7 +2650,7 @@ The input is an absolute path to the image and the output is the string to displ
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).</span>
 <span class="sd">                                                      all = take the image that is far away from all other images. Default is one.</span>
@@ -2784,7 +2761,7 @@ The input is an absolute path to the image and the output is the string to displ
           <td>
                 <code>callable</code>
           </td>
-          <td><p>optional label string, given a absolute path to an image return the label for the html report</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -2932,7 +2909,11 @@ The input is an absolute path to the image and the output is the string to displ
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">715</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
 <span class="normal">716</span>
 <span class="normal">717</span>
 <span class="normal">718</span>
@@ -2986,11 +2967,7 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_components_gallery</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">769</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_components_gallery</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">group_by</span><span class="o">=</span><span class="s1">&#39;visual&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keyword</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -3007,7 +2984,7 @@ The input is an absolute path to the image and the output is the string to displ
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.</span>
 
@@ -3121,19 +3098,9 @@ The input is an absolute path to the image and the output is the string to displ
           <td>
                 <code>callable</code>
           </td>
-          <td><p>optional label string, given a absolute path to an image return the label for the html report</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>group_by</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>[visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.</p></td>
-          <td>
-              <em>required</em>
           </td>
         </tr>
         <tr>
@@ -3253,13 +3220,14 @@ The input is an absolute path to the image and the output is the string to displ
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>ret</code></td>          <td>
+                <code>int</code>
           </td>
           <td><p>0 in case of success, otherwise 1</p></td>
         </tr>
@@ -3268,7 +3236,11 @@ The input is an absolute path to the image and the output is the string to displ
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">777</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
 <span class="normal">778</span>
 <span class="normal">779</span>
 <span class="normal">780</span>
@@ -3312,13 +3284,7 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="normal">818</span>
 <span class="normal">819</span>
 <span class="normal">820</span>
-<span class="normal">821</span>
-<span class="normal">822</span>
-<span class="normal">823</span>
-<span class="normal">824</span>
-<span class="normal">825</span>
-<span class="normal">826</span>
-<span class="normal">827</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_clusters_gallery</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">821</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_clusters_gallery</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keyword</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -3335,9 +3301,7 @@ The input is an absolute path to the image and the output is the string to displ
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report</span>
-
-<span class="sd">        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.</span>
 
@@ -3362,7 +3326,7 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="sd">        keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">         0 in case of success, otherwise 1</span>
+<span class="sd">         ret (int): 0 in case of success, otherwise 1</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">return</span> <span class="n">do_create_components_gallery</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="p">,</span> <span class="n">lazy_load</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="s1">&#39;visual&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span>
@@ -3445,7 +3409,7 @@ on the fly fastdup loads and resizes every image only once.</p>
           <td>
                 <code>callable</code>
           </td>
-          <td><p>Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -3544,10 +3508,7 @@ The input is an absolute path to the image and the output is the string to displ
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1318</span>
-<span class="normal">1319</span>
-<span class="normal">1320</span>
-<span class="normal">1321</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1321</span>
 <span class="normal">1322</span>
 <span class="normal">1323</span>
 <span class="normal">1324</span>
@@ -3606,7 +3567,10 @@ The input is an absolute path to the image and the output is the string to displ
 <span class="normal">1377</span>
 <span class="normal">1378</span>
 <span class="normal">1379</span>
-<span class="normal">1380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_stats_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">1380</span>
+<span class="normal">1381</span>
+<span class="normal">1382</span>
+<span class="normal">1383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_stats_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;blur&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -3625,7 +3589,7 @@ The input is an absolute path to the image and the output is the string to displ
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        metric (str): Optional metric selection. One of &#39;blur&#39;,&#39;size&#39;,&#39;mean&#39;,&#39;min&#39;,&#39;max&#39;,&#39;unique&#39;,&#39;stdv&#39;.</span>
 
@@ -3746,7 +3710,7 @@ For high quality labeled dataset we expect the score to be high, low score may i
           <td>
                 <code>callable</code>
           </td>
-          <td><p>Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -3834,10 +3798,7 @@ For high quality labeled dataset we expect the score to be high, low score may i
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1383</span>
-<span class="normal">1384</span>
-<span class="normal">1385</span>
-<span class="normal">1386</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1386</span>
 <span class="normal">1387</span>
 <span class="normal">1388</span>
 <span class="normal">1389</span>
@@ -3888,7 +3849,10 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <span class="normal">1434</span>
 <span class="normal">1435</span>
 <span class="normal">1436</span>
-<span class="normal">1437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_similarity_gallery</span><span class="p">(</span><span class="n">similarity_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">1437</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_similarity_gallery</span><span class="p">(</span><span class="n">similarity_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lazy_load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_bounding_box_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_extra_col_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -3910,7 +3874,7 @@ For high quality labeled dataset we expect the score to be high, low score may i
 
 <span class="sd">        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).</span>
 
-<span class="sd">        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.</span>
 
@@ -3980,75 +3944,24 @@ For high quality labeled dataset we expect the score to be high, low score may i
               <em>required</em>
           </td>
         </tr>
-        <tr>
-          <td><code>get_label_func</code></td>
-          <td>
-                <code>callable</code>
-          </td>
-          <td><p>optional label function to get the label for each image.</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>max_width</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td><p>optional parameter to limit the plot image width</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>save_path</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>output folder location for the visuals</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>num_images</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td><p>optional number of images to compute the statistics on (default computes on all images)</p></td>
-          <td>
-                <code>0</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>slice</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>optional parameter to slice the stats file based on a specific label or a list of labels.</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>get_filename_reformat_func</code></td>
-          <td>
-                <code>callable</code>
-          </td>
-          <td><p>optional function to reformat the filename before displaying it.</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
     </tbody>
   </table>
+      <pre><code>get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+
+ max_width (int): optional parameter to limit the plot image width
+
+ save_path (str): output folder location for the visuals
+
+ num_images (int): optional number of images to compute the statistics on (default computes on all images)
+
+ slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
+
+ get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
+</code></pre>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1441</span>
-<span class="normal">1442</span>
-<span class="normal">1443</span>
-<span class="normal">1444</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1444</span>
 <span class="normal">1445</span>
 <span class="normal">1446</span>
 <span class="normal">1447</span>
@@ -4086,14 +3999,17 @@ For high quality labeled dataset we expect the score to be high, low score may i
 <span class="normal">1479</span>
 <span class="normal">1480</span>
 <span class="normal">1481</span>
-<span class="normal">1482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_aspect_ratio_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_filename_reformat_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_aspect_ratio_gallery</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_filename_reformat_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function to create and display a gallery of aspect ratio distribution.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">         stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.</span>
 
-<span class="sd">         get_label_func (callable): optional label function to get the label for each image.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">         max_width (int): optional parameter to limit the plot image width</span>
 
@@ -4182,7 +4098,7 @@ For high quality labeled dataset we expect the score to be high, low score may i
           <td>
                 <code>callable</code>
           </td>
-          <td><p>function to get the label of an image given its filename</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -4205,13 +4121,14 @@ prediction per image to one of the given classes.</p></td>
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>df</code></td>          <td>
+                <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td><p>List of predictions using knn method</p></td>
         </tr>
@@ -4220,10 +4137,7 @@ prediction per image to one of the given classes.</p></td>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1581</span>
-<span class="normal">1582</span>
-<span class="normal">1583</span>
-<span class="normal">1584</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1584</span>
 <span class="normal">1585</span>
 <span class="normal">1586</span>
 <span class="normal">1587</span>
@@ -4272,19 +4186,22 @@ prediction per image to one of the given classes.</p></td>
 <span class="normal">1630</span>
 <span class="normal">1631</span>
 <span class="normal">1632</span>
-<span class="normal">1633</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_knn_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_knn_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
 <span class="sd">        k (int): (unused)</span>
-<span class="sd">        get_label_func (callable): function to get the label of an image given its filename</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 <span class="sd">        threshold (float): optional threshold to consider neighbors with similarity larger than threshold</span>
 <span class="sd">            prediction per image to one of the given classes.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List of predictions using knn method</span>
+<span class="sd">        df (pd.DataFrame): List of predictions using knn method</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="kn">from</span> <span class="nn">fastdup.confusion_matrix</span> <span class="kn">import</span> <span class="n">classification_report</span>
@@ -4377,7 +4294,7 @@ prediction per image to one of the given classes.</p></td>
           <td>
                 <code>callable</code>
           </td>
-          <td><p>function to get the label of an image given its filename</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -4399,13 +4316,14 @@ prediction per image to one of the given classes.</p></td>
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>df</code></td>          <td>
+                <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td><p>dataframe with filename, label and predicted label. Row per each image</p></td>
         </tr>
@@ -4414,10 +4332,7 @@ prediction per image to one of the given classes.</p></td>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1638</span>
-<span class="normal">1639</span>
-<span class="normal">1640</span>
-<span class="normal">1641</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1641</span>
 <span class="normal">1642</span>
 <span class="normal">1643</span>
 <span class="normal">1644</span>
@@ -4448,18 +4363,21 @@ prediction per image to one of the given classes.</p></td>
 <span class="normal">1669</span>
 <span class="normal">1670</span>
 <span class="normal">1671</span>
-<span class="normal">1672</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_kmeans_classifier</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">get_label_func</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function to create a knn classifier out of fastdup run. We assume there are existing labels to the datapoints.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities</span>
 <span class="sd">        k (int): (unused)</span>
-<span class="sd">        get_label_func (callable): function to get the label of an image given its filename</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 <span class="sd">        threshold (float): (unused)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">         dataframe with filename, label and predicted label. Row per each image</span>
+<span class="sd">        df (pd.DataFrame): dataframe with filename, label and predicted label. Row per each image</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="kn">from</span> <span class="nn">fastdup.confusion_matrix</span> <span class="kn">import</span> <span class="n">classification_report</span>
@@ -4572,7 +4490,10 @@ file_list, mat_features = fastdup.load_binary(FILENAME_FEATURES)</p>
 </details>
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">451</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
 <span class="normal">452</span>
 <span class="normal">453</span>
 <span class="normal">454</span>
@@ -4601,10 +4522,7 @@ file_list, mat_features = fastdup.load_binary(FILENAME_FEATURES)</p>
 <span class="normal">477</span>
 <span class="normal">478</span>
 <span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_binary_feature</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">):</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_binary_feature</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Python function for loading the stored binary features written by fastdup and their matching filenames and analyzing them in Python.</span>
 
@@ -4719,7 +4637,10 @@ nearest neighbor model on the feature vectors.</p>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">487</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
@@ -4758,10 +4679,7 @@ nearest neighbor model on the feature vectors.</p>
 <span class="normal">523</span>
 <span class="normal">524</span>
 <span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save_binary_feature</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">np_array</span><span class="p">):</span>
+<span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save_binary_feature</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">np_array</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Function for saving data to be used by fastdup. Given a list of images and their matching feature vectors in a numpy array,</span>
 <span class="sd">    function saves data in a format readable by fastdup. This saves the image extraction step, to be used with run_mode=1 namely perform</span>
@@ -4866,7 +4784,7 @@ nearest neighbor model on the feature vectors.</p>
           <td>
                 <code>callable</code>
           </td>
-          <td><p>optional function given a full path filename outputs its label</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -4950,10 +4868,7 @@ nearest neighbor model on the feature vectors.</p>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1173</span>
-<span class="normal">1174</span>
-<span class="normal">1175</span>
-<span class="normal">1176</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1176</span>
 <span class="normal">1177</span>
 <span class="normal">1178</span>
 <span class="normal">1179</span>
@@ -4983,7 +4898,10 @@ nearest neighbor model on the feature vectors.</p>
 <span class="normal">1203</span>
 <span class="normal">1204</span>
 <span class="normal">1205</span>
-<span class="normal">1206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_sprite_image</span><span class="p">(</span><span class="n">img_list</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alternative_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alternative_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1206</span>
+<span class="normal">1207</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_sprite_image</span><span class="p">(</span><span class="n">img_list</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alternative_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alternative_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Generate a sprite image of images for tensorboard projector. A sprite image is a large image composed of grid of smaller images.</span>
 
@@ -4994,7 +4912,7 @@ nearest neighbor model on the feature vectors.</p>
 
 <span class="sd">        log_dir (str): directory to save the sprite image</span>
 
-<span class="sd">        get_label_func (callable): optional function given a full path filename outputs its label</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        h (int): optional requested hight of each subimage</span>
 
@@ -5044,7 +4962,7 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
 </blockquote>
 </blockquote>
 </blockquote>
-<h2 id="fastdup.export_to_tensorboard_projector--after-data-is-exporeted-run-tensorboard-projector">after data is exporeted run tensorboard projector</h2>
+<p>After data is exporeted run tensorboard projector</p>
 <blockquote>
 <blockquote>
 <blockquote>
@@ -5120,7 +5038,7 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
           <td>
                 <code>callable</code>
           </td>
-          <td><p>Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</p></td>
+          <td><p>optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</p></td>
           <td>
                 <code>None</code>
           </td>
@@ -5169,10 +5087,7 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1115</span>
-<span class="normal">1116</span>
-<span class="normal">1117</span>
-<span class="normal">1118</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1118</span>
 <span class="normal">1119</span>
 <span class="normal">1120</span>
 <span class="normal">1121</span>
@@ -5216,7 +5131,10 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
 <span class="normal">1159</span>
 <span class="normal">1160</span>
 <span class="normal">1161</span>
-<span class="normal">1162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_tensorboard_projector</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">sample_size</span> <span class="o">=</span> <span class="mi">900</span><span class="p">,</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_tensorboard_projector</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">sample_size</span> <span class="o">=</span> <span class="mi">900</span><span class="p">,</span>
                                     <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">with_images</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">get_label_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">576</span><span class="p">,</span> <span class="n">file_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Export feature vector embeddings to be visualized using tensorboard projector app.</span>
@@ -5226,7 +5144,7 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
 <span class="sd">        &gt;&gt;&gt; fastdup.run(&#39;/my/data/&#39;, work_dir=&#39;out&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; fastdup.export_to_tensorboard_projector(work_dir=&#39;out&#39;, log_dir=&#39;logs&#39;)</span>
 
-<span class="sd">        # after data is exporeted run tensorboard projector</span>
+<span class="sd">        After data is exporeted run tensorboard projector</span>
 <span class="sd">        &gt;&gt;&gt; %load_ext tensorboard</span>
 <span class="sd">        &gt;&gt;&gt; %tensorboard --logdir=logs</span>
 
@@ -5241,7 +5159,7 @@ fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')</p>
 
 <span class="sd">        with_images (bool): add images to the visualization (default True)</span>
 
-<span class="sd">        get_label_func (callable): Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.</span>
+<span class="sd">        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.</span>
 
 <span class="sd">        d (int): dimension of the embedding vector. Default is 576.</span>
 
@@ -5346,10 +5264,7 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1484</span>
-<span class="normal">1485</span>
-<span class="normal">1486</span>
-<span class="normal">1487</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1487</span>
 <span class="normal">1488</span>
 <span class="normal">1489</span>
 <span class="normal">1490</span>
@@ -5364,7 +5279,10 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <span class="normal">1499</span>
 <span class="normal">1500</span>
 <span class="normal">1501</span>
-<span class="normal">1502</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_cvat</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+<span class="normal">1502</span>
+<span class="normal">1503</span>
+<span class="normal">1504</span>
+<span class="normal">1505</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_cvat</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to export a collection of files that needs to be annotated again to cvat batch job format.</span>
 <span class="sd">    This creates a file named fastdup_label.zip in the directory save_path.</span>
@@ -5465,10 +5383,7 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1505</span>
-<span class="normal">1506</span>
-<span class="normal">1507</span>
-<span class="normal">1508</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1508</span>
 <span class="normal">1509</span>
 <span class="normal">1510</span>
 <span class="normal">1511</span>
@@ -5483,7 +5398,10 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <span class="normal">1520</span>
 <span class="normal">1521</span>
 <span class="normal">1522</span>
-<span class="normal">1523</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_labelImg</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span>
+<span class="normal">1526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">export_to_labelImg</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to export a collection of files that needs to be annotated again to cvat batch job format.</span>
 <span class="sd">    This creates a file named fastdup_label.zip in the directory save_path.</span>
@@ -5551,9 +5469,9 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
           <td>
                 <code>list</code>
           </td>
-          <td><p>a list of integer component ids to delete</p></td>
+          <td><p>a list of integer component ids to delete. On default None which means delete duplicates from all components.</p></td>
           <td>
-              <em>required</em>
+                <code>None</code>
           </td>
         </tr>
         <tr>
@@ -5579,9 +5497,33 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
     </tbody>
   </table>
 
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>ret</code></td>          <td>
+                <code>list</code>
+          </td>
+          <td><p>list of deleted files</p></td>
+        </tr>
+    </tbody>
+  </table>
+
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">878</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
+<span class="normal">875</span>
+<span class="normal">876</span>
+<span class="normal">877</span>
+<span class="normal">878</span>
 <span class="normal">879</span>
 <span class="normal">880</span>
 <span class="normal">881</span>
@@ -5623,7 +5565,10 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <span class="normal">917</span>
 <span class="normal">918</span>
 <span class="normal">919</span>
-<span class="normal">920</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_components</span><span class="p">(</span><span class="n">top_components</span><span class="p">,</span> <span class="n">to_delete</span><span class="p">,</span>  <span class="n">how</span> <span class="o">=</span> <span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_components</span><span class="p">(</span><span class="n">top_components</span><span class="p">,</span> <span class="n">to_delete</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">how</span> <span class="o">=</span> <span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    function to automate deletion of duplicate images using the connected components analysis.</span>
 
@@ -5635,21 +5580,27 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 
 <span class="sd">    Args:</span>
 <span class="sd">        top_components (pd.DataFrame): largest components as found by the function find_top_components().</span>
-<span class="sd">        to_delete (list): a list of integer component ids to delete</span>
+<span class="sd">        to_delete (list): a list of integer component ids to delete. On default None which means delete duplicates from all components.</span>
 <span class="sd">        how (int): either &#39;all&#39; (deletes all the component) or &#39;one&#39; (leaves one image and delete the rest of the duplicates)</span>
 <span class="sd">        dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes</span>
 
-
+<span class="sd">    Returns:</span>
+<span class="sd">        ret (list): list of deleted files</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">top_components</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">),</span> <span class="s2">&quot;top_components should be a pandas dataframe&quot;</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">top_components</span><span class="p">),</span> <span class="s2">&quot;top_components should not be enpty&quot;</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s2">&quot;to_delete should be a list of integer component ids&quot;</span>
+    <span class="k">assert</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="s2">&quot;to_delete should be a list of integer component ids&quot;</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">),</span> <span class="s2">&quot;to_delete should not be empty&quot;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="s2">&quot;to_delete should be a list of integer component ids&quot;</span>
     <span class="k">assert</span> <span class="n">how</span> <span class="o">==</span> <span class="s1">&#39;one&#39;</span> <span class="ow">or</span> <span class="n">how</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s2">&quot;how should be one of &#39;one&#39;|&#39;all&#39;&quot;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dry_run</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">to_delete</span> <span class="o">=</span> <span class="n">top_components</span><span class="p">[</span><span class="s1">&#39;component_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="n">total_deleted</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="p">(</span><span class="n">to_delete</span><span class="p">):</span>
         <span class="n">subdf</span> <span class="o">=</span> <span class="n">top_components</span><span class="p">[</span><span class="n">top_components</span><span class="p">[</span><span class="s1">&#39;component_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">comp</span><span class="p">]</span>
@@ -5666,6 +5617,9 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
             <span class="n">files</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="n">inner_delete</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">)</span>
+        <span class="n">total_deleted</span> <span class="o">+=</span> <span class="n">files</span>
+
+    <span class="k">return</span> <span class="n">total_deleted</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -5688,22 +5642,16 @@ The files can be retagged in cvat using Tasks -&gt; Add (plus button) -&gt; Crea
 <blockquote>
 <blockquote>
 <p>import fastdup<br />
-fastdup.run('/my/data/", work_dir="out")</p>
-</blockquote>
-</blockquote>
-</blockquote>
-<h2 id="fastdup.delete_or_retag_stats_outliers--delete-5-of-the-brightest-images-and-delete-2-of-the-darkest-images">delete 5% of the brightest images and delete 2% of the darkest images</h2>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)</p>
+fastdup.run('/my/data/", work_dir="out")<br />
+delete 5% of the brightest images and delete 2% of the darkest images<br />
+fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)</p>
 </blockquote>
 </blockquote>
 </blockquote>
 <p>It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.</p>
 </details>
-<details class="examople">
-  <summary>Examople</summary>
+<details class="example">
+  <summary>Example</summary>
   <p>This example first find wrong labels using similarity gallery and then deletes anything with score &lt; 51.<br />
 Score is in range 0-100 where 100 means this image is similar only to images from the same class label.<br />
 Score 0 means this image is only similar to images from other class labels.</p>
@@ -5716,9 +5664,8 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
 </blockquote>
 </blockquote>
 </blockquote>
-</details>      <pre><code>Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
-</code></pre>
-
+<p>Note: it is possible to run with both <code>lower_percentile</code> and <code>upper_percentile</code> at once. It is not possible to run with <code>lower_percentile</code> and <code>lower_threshold</code> at once since they may be conflicting.</p>
+</details>
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -5846,15 +5793,28 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
         </tr>
     </tbody>
   </table>
-      <p>Returns<br />
-    None</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>ret</code></td>          <td>
+                <code>list</code>
+          </td>
+          <td><p>list of deleted files (or moved or retagged files)</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>fastdup/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 973</span>
-<span class="normal"> 974</span>
-<span class="normal"> 975</span>
-<span class="normal"> 976</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 976</span>
 <span class="normal"> 977</span>
 <span class="normal"> 978</span>
 <span class="normal"> 979</span>
@@ -5988,7 +5948,13 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
 <span class="normal">1107</span>
 <span class="normal">1108</span>
 <span class="normal">1109</span>
-<span class="normal">1110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_or_retag_stats_outliers</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">filename_col</span> <span class="o">=</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">label_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="normal">1110</span>
+<span class="normal">1111</span>
+<span class="normal">1112</span>
+<span class="normal">1113</span>
+<span class="normal">1114</span>
+<span class="normal">1115</span>
+<span class="normal">1116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_or_retag_stats_outliers</span><span class="p">(</span><span class="n">stats_file</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">filename_col</span> <span class="o">=</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">label_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper_percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">lower_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">get_reformat_filename_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                           <span class="n">how</span><span class="o">=</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -5997,18 +5963,18 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
 <span class="sd">      Example:</span>
 <span class="sd">          &gt;&gt;&gt; import fastdup</span>
 <span class="sd">          &gt;&gt;&gt; fastdup.run(&#39;/my/data/&quot;, work_dir=&quot;out&quot;)</span>
-<span class="sd">          # delete 5% of the brightest images and delete 2% of the darkest images</span>
+<span class="sd">          delete 5% of the brightest images and delete 2% of the darkest images</span>
 <span class="sd">          &gt;&gt;&gt; fastdup.delete_or_retag_stats_outliers(&quot;out&quot;, metric=&quot;mean&quot;, lower_percentile=0.05, dry_run=False)</span>
 
 <span class="sd">          It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.</span>
 
-<span class="sd">      Examople:</span>
-<span class="sd">            This example first find wrong labels using similarity gallery and then deletes anything with score &lt; 51.</span>
-<span class="sd">            Score is in range 0-100 where 100 means this image is similar only to images from the same class label.</span>
-<span class="sd">            Score 0 means this image is only similar to images from other class labels.</span>
-<span class="sd">            &gt;&gt;&gt; import fastdup</span>
-<span class="sd">            &gt;&gt;&gt; df2 = create_similarity_gallery(..., get_label_func=...)</span>
-<span class="sd">            &gt;&gt;&gt;fastdup.delete_or_retag_stats_outliers(df2, metric=&#39;score&#39;, filename_col = &#39;from&#39;, lower_threshold=51, dry_run=True)</span>
+<span class="sd">      Example:</span>
+<span class="sd">          This example first find wrong labels using similarity gallery and then deletes anything with score &lt; 51.</span>
+<span class="sd">          Score is in range 0-100 where 100 means this image is similar only to images from the same class label.</span>
+<span class="sd">          Score 0 means this image is only similar to images from other class labels.</span>
+<span class="sd">          &gt;&gt;&gt; import fastdup</span>
+<span class="sd">          &gt;&gt;&gt; df2 = create_similarity_gallery(..., get_label_func=...)</span>
+<span class="sd">          &gt;&gt;&gt;fastdup.delete_or_retag_stats_outliers(df2, metric=&#39;score&#39;, filename_col = &#39;from&#39;, lower_threshold=51, dry_run=True)</span>
 
 <span class="sd">	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.</span>
 
@@ -6041,8 +6007,8 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
 
 
 
-<span class="sd">      Returns</span>
-<span class="sd">          None</span>
+<span class="sd">      Returns:</span>
+<span class="sd">          ret (list): list of deleted files (or moved or retagged files)</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dry_run</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
@@ -6126,6 +6092,9 @@ fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from
         <span class="k">return</span> <span class="n">inner_retag</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">how</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="s2">&quot;How should be one of &#39;delete&#39;|&#39;move&#39;|&#39;retag&#39;&quot;</span>
+
+
+    <span class="k">return</span> <span class="n">files</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
