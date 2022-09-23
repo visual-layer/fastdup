@@ -19,7 +19,6 @@ from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_g
     do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
 import contextlib
 from fastdup import coco
-from fastdup.version_check import check_for_update
 from fastdup.definitions import *
 from fastdup.utilts import download_from_s3
 try:
@@ -35,8 +34,6 @@ if platform.system() == "Darwin":
 else:
 	SO_SUFFIX=".so"
 
-# check if more recent fastdup version is available
-check_for_update(__version__)
 
 LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
@@ -609,8 +606,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label.
-            This is a function the user implements that gets the full image file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
             slice could be a specific label i.e. slice='haumburger' and in that case only similarities between hamburger and other classes are presented.
@@ -670,7 +666,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
                                                       all = take the image that is far away from all other images. Default is one.
@@ -729,7 +725,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
 
@@ -791,9 +787,7 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
-
-        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
 
@@ -818,7 +812,7 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
         keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
 
     Returns:
-         0 in case of success, otherwise 1
+         ret (int): 0 in case of success, otherwise 1
     '''
 
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
@@ -875,7 +869,7 @@ def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
 
     return 0
 
-def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
+def delete_components(top_components, to_delete = None,  how = 'one', dry_run = True):
     '''
     function to automate deletion of duplicate images using the connected components analysis.
 
@@ -887,21 +881,27 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
 
     Args:
         top_components (pd.DataFrame): largest components as found by the function find_top_components().
-        to_delete (list): a list of integer component ids to delete
+        to_delete (list): a list of integer component ids to delete. On default None which means delete duplicates from all components.
         how (int): either 'all' (deletes all the component) or 'one' (leaves one image and delete the rest of the duplicates)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-
+    Returns:
+        ret (list): list of deleted files
 
     '''
 
     assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
     assert len(top_components), "top_components should not be enpty"
-    assert isinstance(to_delete, list), "to_delete should be a list of integer component ids"
+    assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
     assert len(to_delete), "to_delete should not be empty"
     assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
     assert how == 'one' or how == 'all', "how should be one of 'one'|'all'"
     assert isinstance(dry_run, bool)
+
+    if to_delete is None:
+        to_delete = top_components['component_id'].tolist()
+
+    total_deleted = []
 
     for comp in (to_delete):
         subdf = top_components[top_components['component_id'] == comp]
@@ -918,6 +918,9 @@ def delete_components(top_components, to_delete,  how = 'one', dry_run = True):
             files = files[1:]
 
         inner_delete(files, how='delete', dry_run=dry_run)
+        total_deleted += files
+
+    return total_deleted
 
 
 def delete_components_by_label(top_components_file,  min_items=10, min_distance=0.96,  how = 'majority', dry_run = True):
@@ -930,7 +933,8 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
         how (int): either 'all' (deletes all the component) or 'majority' (leaves one image with the dominant label count and delete the rest)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-
+    Returns:
+        ret (list): list of deleted files
 
     '''
     assert os.path.exists(top_components_file), "top_components_file should be a path to a file"
@@ -967,8 +971,7 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
         else:
             assert False, "how should be one of 'majority'|'all'"
 
-    pd.DataFrame({'filename':total}).to_csv('deleted.csv')
-    print('list of deleted files is on deleted.csv, total of ', len(total))
+    return total
 
 def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename', label_col=None, lower_percentile=None, upper_percentile=None,
                           lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True,
@@ -979,18 +982,18 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
       Example:
           >>> import fastdup
           >>> fastdup.run('/my/data/", work_dir="out")
-          # delete 5% of the brightest images and delete 2% of the darkest images
+          delete 5% of the brightest images and delete 2% of the darkest images
           >>> fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
 
           It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.
 
-      Examople:
-            This example first find wrong labels using similarity gallery and then deletes anything with score < 51.
-            Score is in range 0-100 where 100 means this image is similar only to images from the same class label.
-            Score 0 means this image is only similar to images from other class labels.
-            >>> import fastdup
-            >>> df2 = create_similarity_gallery(..., get_label_func=...)
-            >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
+      Example:
+          This example first find wrong labels using similarity gallery and then deletes anything with score < 51.
+          Score is in range 0-100 where 100 means this image is similar only to images from the same class label.
+          Score 0 means this image is only similar to images from other class labels.
+          >>> import fastdup
+          >>> df2 = create_similarity_gallery(..., get_label_func=...)
+          >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
 
 	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
@@ -1023,8 +1026,8 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 	
 
 
-      Returns
-          None
+      Returns:
+          ret (list): list of deleted files (or moved or retagged files)
 
     '''
     assert isinstance(dry_run, bool)
@@ -1110,7 +1113,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
         assert(False), "How should be one of 'delete'|'move'|'retag'"
 
 
-
+    return files
 
 def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
                                     sample_method='random', with_images=True, get_label_func=None, d=576, file_list=None):
@@ -1122,7 +1125,7 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
         >>> fastdup.run('/my/data/', work_dir='out')
         >>> fastdup.export_to_tensorboard_projector(work_dir='out', log_dir='logs')
 
-        # after data is exporeted run tensorboard projector
+        After data is exporeted run tensorboard projector
         >>> %load_ext tensorboard
         >>> %tensorboard --logdir=logs
 
@@ -1137,7 +1140,7 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
 
         with_images (bool): add images to the visualization (default True)
 
-        get_label_func (callable): Optional parameter to allow adding class label name to the image. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         d (int): dimension of the embedding vector. Default is 576.
 
@@ -1181,7 +1184,7 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
         log_dir (str): directory to save the sprite image
 
-        get_label_func (callable): optional function given a full path filename outputs its label
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         h (int): optional requested hight of each subimage
 
@@ -1215,7 +1218,7 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
     Args:
         work_dir (str): working directory where fastdup.run was run.
 
-        get_label_func (callable): optional function given a full path filename outputs its label
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         group_by (str): optional parameter to group by 'visual' or 'label'. When grouping by visual fastdup aggregates visually similar images together.
             When grouping by 'label' fastdup aggregates images with the same label together.
@@ -1334,7 +1337,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         metric (str): Optional metric selection. One of 'blur','size','mean','min','max','unique','stdv'.
 
@@ -1402,7 +1405,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
 
@@ -1445,7 +1448,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
     Args:
          stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
 
-         get_label_func (callable): optional label function to get the label for each image.
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
          max_width (int): optional parameter to limit the plot image width
 
@@ -1585,12 +1588,12 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     Args:
         work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
         k (int): (unused)
-        get_label_func (callable): function to get the label of an image given its filename
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
         threshold (float): optional threshold to consider neighbors with similarity larger than threshold
             prediction per image to one of the given classes.
 
     Returns:
-        List of predictions using knn method
+        df (pd.DataFrame): List of predictions using knn method
     '''
 
     from fastdup.confusion_matrix import classification_report
@@ -1642,11 +1645,11 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
     Args:
         work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
         k (int): (unused)
-        get_label_func (callable): function to get the label of an image given its filename
+        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
         threshold (float): (unused)
 
     Returns:
-         dataframe with filename, label and predicted label. Row per each image
+        df (pd.DataFrame): dataframe with filename, label and predicted label. Row per each image
     '''
 
     from fastdup.confusion_matrix import classification_report
@@ -1709,7 +1712,7 @@ def run_kmeans(input_dir='',
         high_accuracy (bool): Use higher accuracy model for the feature extraction
 
     Returns:
-        0 in case of success, 1 in case of error
+        ret (int): 0 in case of success, 1 in case of error
     """
 
     assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
@@ -1762,7 +1765,7 @@ def run_kmeans_on_extracted(input_dir='',
         d (int): Dimension of the feature vector
 
     Returns:
-        0 in case of success, 1 in case of error
+        ret (int): 0 in case of success, 1 in case of error
     """
 
     assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)

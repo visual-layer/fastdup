@@ -29,13 +29,25 @@ def get_label(filename, get_label_func):
 def slice_df(df, slice):
     if slice is not None:
         if isinstance(slice, str):
-            if slice not in df['label'].unique():
+            # cover the case labels are string or lists of strings
+            labels = df['label'].values
+            is_list = isinstance(labels[0], list)
+            if is_list:
+                labels = [item for sublist in labels for item in sublist]
+            unique, counts = np.unique(np.array(labels), return_counts=True)
+            if slice not in unique:
                 print(f"Failed to find {slice} in the list of available labels, can not visualize this label class")
-                print("Example labels", df['label'].unique()[:10])
+                print("Example labels", df['label'].values[:10])
                 return None
-            df = df[df['label'] == slice]
+            if not is_list:
+                df = df[df['label'] == slice]
+            else:
+                df = df[df['label'].apply(lambda x: slice in x)]
         elif isinstance(slice, list):
-            df = df[df['label'].isin(slice)]
+            if isinstance(df['label'].values[0], list):
+                df = df[df['label'].apply(lambda x: len(set(x)&set(slice)) > 0)]
+            else:
+                df = df[df['label'].isin(slice)]
         else:
             assert False, "slice must be a string or a list of strings"
 
@@ -102,6 +114,9 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the gallery.
 
+    Returns:
+        ret (int): 0 if success, 1 if failed
+        
     '''
 
 
@@ -233,7 +248,10 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
             The input is an absolute path to the image and the output is the string to display instead of the filename.
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the gallery.
-     '''
+
+    Returns:
+        ret (int): 0 if successful, 1 otherwise
+    '''
 
 
 
@@ -336,6 +354,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
                 print("Failed to delete image file ", i, ex)
 
 
+    return 0
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
@@ -574,26 +593,17 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
     # find the components that have the largest number of images included
     if callable(get_label_func):
-        components['labels'] = components['filename'].apply(get_label_func)
-        if slice is not None:
-            if isinstance(slice, str):
-                if slice not in components['labels'].unique():
-                    print(f"Slice {slice} is not a valid label in the components file ")
-                    return None
-                components = components[components['labels'] == slice]
-            elif isinstance(slice, list):
-                components = components[components['labels'].isin(slice)]
-            else:
-                assert(False), "slice should be a string or list of strings"
+        components['label'] = components['filename'].apply(get_label_func)
+        components = slice_df(components, slice)
 
         if 'path' in group_by:
             components['path'] = components['filename'].apply(lambda x: os.path.dirname(x))
 
 
         if group_by == 'visual':
-            top_labels = components.groupby(comp_col)['labels'].apply(list)
+            top_labels = components.groupby(comp_col)['label'].apply(list)
             top_files = components.groupby(comp_col)['filename'].apply(list)
-            dict_cols = {'files':top_files, 'labels':top_labels}
+            dict_cols = {'files':top_files, 'label':top_labels}
             #if threshold is not None or metric is not None:
             distance = components.groupby(comp_col)[distance_col].apply(np.min)
             dict_cols['distance'] = distance
@@ -602,14 +612,14 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
                 dict_cols[metric] = top_metric
             comps = pd.DataFrame(dict_cols).reset_index()
         elif group_by == 'label':
-            top_files = components.groupby('labels')['filename'].apply(list)
-            top_components = components.groupby('labels')[comp_col].apply(list)
+            top_files = components.groupby('label')['filename'].apply(list)
+            top_components = components.groupby('label')[comp_col].apply(list)
             dict_cols = {'files':top_files, comp_col:top_components}
             #if threshold is not None or metric is not None:
-            distance = components.groupby('labels')[distance_col].apply(np.min)
+            distance = components.groupby('label')[distance_col].apply(np.min)
             dict_cols['distance'] = distance
             if metric is not None:
-                top_metric = components.groupby('labels')[metric].apply(np.mean)
+                top_metric = components.groupby('label')[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
             comps = pd.DataFrame(dict_cols).reset_index()
         else:
@@ -626,10 +636,24 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
             dict_cols[metric] = top_metric
         comps = pd.DataFrame(dict_cols).reset_index()
 
+    if len(comps) == 0:
+        print("No components found")
+        return None
+
     comps['len'] = comps['files'].apply(lambda x: len(x))
     stat_info = None
     if return_stats:
         stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None)
+
+        # in case labels are list of lists, namely list of attributes per image, flatten the list
+    if 'label' in comps.columns:
+        try:
+            print(comps['label'].values[0][0])
+            if isinstance(comps['label'].values[0][0], list):
+                comps['label'] = comps['label'].apply(lambda x: [item for sublist in x for item in sublist])
+        except Exception as ex:
+            print('Failed to flatten labels', ex)
+            pass
 
 
     if metric is None:
@@ -643,7 +667,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     if keyword is not None:
         assert callable(get_label_func), "keyword can only be used with a callable get_label_func"
         assert group_by == 'visual', "keyword can only be used with group_by=visual"
-        comps = comps[comps['labels'].apply(lambda x: sum([1 if keyword in y else 0 for y in x]) > 0)]
+        comps = comps[comps['label'].apply(lambda x: sum([1 if keyword in y else 0 for y in x]) > 0)]
         if len(comps) == 0:
             print("Failed to find any components with label keyword " + keyword)
             return None
@@ -693,7 +717,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the label for the html report
+        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
 
@@ -753,8 +777,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                  'num_images':subdf['len'].apply(lambda x: "{:,}".format(x)).values}
     if 'distance' in subdf.columns:
         cols_dict['distance'] = subdf['distance'].values
-    if 'labels' in subdf.columns:
-    	cols_dict['labels'] = subdf['labels'].values
+    if 'label' in subdf.columns:
+    	cols_dict['label'] = subdf['label'].values
     if metric in subdf.columns:
         cols_dict[metric] = subdf[metric].apply(lambda x: round(x,2)).values
 
@@ -775,7 +799,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             info_df = pd.DataFrame(dict_rows).T
             info_list.append(info_df.to_html(escape=True, header=False).replace('\n',''))
         elif group_by == 'label':
-            label = row['labels']
+            label = row['label']
             num = row['num_images']
             dict_rows = {'label':[label], 'num_images':[num]}
 
@@ -789,17 +813,17 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             info_list.append(info_df.to_html(escape=True, header=False).replace('\n',''))
     ret = pd.DataFrame({'info': info_list})
 
-    if 'labels' in subdf.columns:
+    if 'label' in subdf.columns:
         if group_by == 'visual':
             labels_table = []
             for i,row in subdf.iterrows():
-                unique, counts = np.unique(np.array(row['labels']), return_counts=True)
+                unique, counts = np.unique(np.array(row['label']), return_counts=True)
                 lencount = len(counts)
                 if max_items is not None and max_items < lencount:
                     lencount = max_items;
                 counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False).head(lencount).to_html(escape=False).replace('\n','')
                 labels_table.append(counts_df)
-            ret.insert(0, 'labels', labels_table)
+            ret.insert(0, 'label', labels_table)
         else:
             comp_table = []
             for i,row in subdf.iterrows():
@@ -819,9 +843,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
     out_file = os.path.join(save_path, 'components.html')
     columns = ['info','image']
-    if 'labels' in subdf.columns:
+    if 'label' in subdf.columns:
         if group_by == 'visual':
-            columns.append('labels')
+            columns.append('label')
         elif group_by == 'label':
             columns.append('components')
 
@@ -851,7 +875,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             except Exception as e:
                 print("Warning, failed to remove image file ", i, " with error ", e)
 
-
+    return 0
 
 def get_stats_df(df, subdf, metric, save_path, max_width=None):
     stats_info = df[metric].describe().to_frame()
@@ -907,7 +931,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         metric (str): Optional metric selection. One of blur, size, mean, min, max, unique, stdv. Default is blur.
 
@@ -1040,7 +1064,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
 
         metric (str): Optional metric selection. One of blur, size, mean, min, max, width, height, unique.
 
