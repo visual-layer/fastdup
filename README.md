@@ -112,9 +112,8 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [Computing image statistics](./examples/fastdup_image_stats.ipynb)
 - [Using your own onnx model for extraction](./examples/fastdup_model_support.ipynb)
 - [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
-- [Finding duplicates, outliers in the Food-101 datadset:](https://bit.ly/3yhoafo)
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
-- [Kaggle notebook - visualizing the pistachio dataset](https://bit.ly/3ygkg6C)
+- [Working with multipe labels per image](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_peta.ipynb)
 
 ![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
