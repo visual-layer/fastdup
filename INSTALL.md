@@ -1,8 +1,18 @@
 # Installation
+
+##### Table of Contents  
+
+1. [Ubuntu 20.04/18.04 Preliminaries](#ubuntu)  
+2. [Mac OSX Preliminaries](#macosx)
+3. [CentOS 7 Preliminaries](#centos7)
+4. [Windows Server 10 Preliminaries](#windows10)
+5. [Pypi setup](#pypi)
+6. [Preinstalled docker](#docker)
+
 fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip, Windows 10 Server (via WSL).
 
 
-## Ubuntu 20.04/18.04 LTS Machine Setup
+## Ubuntu 20.04/18.04 LTS Machine Setup <a name="ubuntu">
 Required machine setup
 ```bash
 sudo apt update
@@ -15,12 +25,12 @@ sudo apt -y install libgl1-mesa-glx
 python3.8 -m pip install --upgrade pip
 ```
 
-## Mac OS setup
+## Mac OS setup <a name="macosx">
 ```bash
 brew install ffmpeg@4
 ```
 
-## CentOS 7 Setup
+## CentOS 7 Setup <a name="centos7">
 ```bash
 sudo yum -y install epel-release
 sudo yum -y update
@@ -31,7 +41,7 @@ sudo yum install redhat-lsb-core # for lsb_release
 sudo yum install -y ffmpeg ffmpeg-devel # for video support
 ```
 
-## Windows 10 Server Setup
+## Windows 10 Server Setup <a name="windows10">
 
 ### Setting up WSL. The below instructions are for Windows Server 10. More detailed instructions are [here](https://learn.microsoft.com/en-us/windows/wsl/install-on-server).
 For Windows 10+11 follow the instructions [here](https://learn.microsoft.com/en-us/windows/wsl/install).
@@ -92,8 +102,8 @@ In case python fails to find fastdup, do the following:
 
 # Pip Package setup
 
-## Using pypi
-This is the recommended installation method for all Mac, Ubuntu 18-20, Debian 10.
+## Using pypi <a name="pypi">
+This is the recommended installation method for all Mac, Ubuntu 18-20, Debian 10, Windows Server 10.
 Will not work for Centos 7.9, RedHat 4.8.
 
 ```bash
@@ -122,7 +132,7 @@ sudo dpkg -i fastdup-<VERSION>-ubuntu-20.04.deb
 ```
 Application name is fastdup.
 
-# Docker
+# Docker <a name="docker">
 
 ##Pull from docker hub the latest ubuntu
 
