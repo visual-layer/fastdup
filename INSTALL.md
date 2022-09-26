@@ -8,6 +8,7 @@
 4. [Windows Server 10 Preliminaries](#windows10)
 5. [Pypi setup](#pypi)
 6. [Preinstalled docker](#docker)
+7. [Common installation errors](#common)
 
 fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip, Windows 10 Server (via WSL).
 
@@ -169,7 +170,7 @@ Hardware support
 
 
 
-# Common installation issues and their solution
+# Common installation issues and their solution <a name="common">
 
 ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel on this platform.
 - Check that you are on ubuntu 20.04 or 18.04 (via the command `lsb_release -r`). Alternatively on Mac M1 Big Sur or Mac Intel Mojave (use the command `sw_vers`) 
