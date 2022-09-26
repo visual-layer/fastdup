@@ -33,7 +33,7 @@ sudo yum install -y ffmpeg ffmpeg-devel # for video support
 
 ## Windows 10 Server Setup
 
-### Setting up WSL. The below instructions are for Windows Server 10. 
+### Setting up WSL. The below instructions are for Windows Server 10. More detailed instructions are [here](https://learn.microsoft.com/en-us/windows/wsl/install-on-server).
 For Windows 10+11 follow the instructions [here](https://learn.microsoft.com/en-us/windows/wsl/install).
 
 - Enable WSL on your machine (Search -> powershell-> right click -> run as administrator)
