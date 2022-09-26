@@ -148,6 +148,7 @@ Operating system
 - `Mac OSX M1 Chip` (tested on Big Sur)
 - `Mac Intel Chip` (tested on Mojave)
 - `CentOS 7.9` (via stable release)
+- `Windows 10 Server` (via WSL)
 
 Software versions
 - `Python 3.7, 3.8, 3.9` (via pip) 
