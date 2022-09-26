@@ -125,7 +125,7 @@ ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel
 - If that does not work, please open an issue with the otuput of `python3.8 -m pip debug --verbose` or join our slack channel.
 
 ERROR on Ubuntu: `libGL.so.1: cannot open shared object file: No such file or directory`
-- Need to install depedency: `sudo apt -y nstall libgl1-mesa-glx`
+- Need to install depedency: `sudo apt -y install libgl1-mesa-glx`
 
 Error on Mac+conda: `OMP: Error #15: Initializing libomp.dylib, but found libomp.dylib already initialized.
 OMP: Hint This means that multiple copies of the OpenMP runtime have been linked into the program. That is dangerous, since it can degrade performance or cause incorrect results. The best thing to do is to ensure that only a single OpenMP runtime is linked into the process, e.g. by avoiding static linking of the OpenMP runtime in any library. As an unsafe, unsupported, undocumented workaround you can set the environment variable KMP_DUPLICATE_LIB_OK=TRUE to allow the program to continue to execute, but that may cause crashes or silently produce incorrect results. For more information, please see http://openmp.llvm.org/
