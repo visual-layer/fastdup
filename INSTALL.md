@@ -79,6 +79,11 @@ To run a command as administrator (user "root"), use "sudo <command>".
 See "man sudo_root" for details.
 ```
 
+### Optional: Update WSL to version 2 (recommended, significant performance wins!)
+
+- Download the installer from https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
+- Run the installer and follow the instructions
+
 ### Once WSL and Ubuntu 18.04 are set up, continue with the below instructions
 
 - Inside the Ubuntu shell, run the following installers (you will be asked for password you entered before).
