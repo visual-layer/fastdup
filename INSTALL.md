@@ -50,6 +50,7 @@ For Windows 10+11 follow the instructions [here](https://learn.microsoft.com/en-
 - Enable WSL on your machine (Search -> powershell-> right click -> run as administrator)
 ```
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
 ```
 - Reboot your machine
 - Check that wsl is enabled using the command:
