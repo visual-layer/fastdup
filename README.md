@@ -76,7 +76,9 @@ We have thoroughly tested fastdup across various famous visual datasets. Ranging
 * We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
 
 # Quick Installation 
-For Python 3.7, 3.8, 3.9 (Ubuntu 20.04 or Ubuntu 18.04 or Debian 10 or Mac M1 or Mac Intel Mojave and up)
+- Python 3.7, 3.8, 3.9 
+- Supported OS: Ubuntu 20.04, Ubuntu 18.04, Debian 10, Mac OSX M1,  Mac OSX Intel, Windows 10 Server.
+
 ```python
 # upgrade pip to its latest version
 python3.XX -m pip install -U pip
