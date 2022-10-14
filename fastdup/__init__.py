@@ -876,7 +876,7 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
         Example:
         >>> import fastdup
         >>> fastdup.run('/path/to/data', '/path/to/output')
-        >>> top_components = fastdup.find_top_components('/path/to/data', '/path/to/output')
+        >>> top_components = fastdup.find_top_components('/path/to/output')
         >>> delete_components(top_components, None, how = 'one', dry_run = False)
 
     Args:
