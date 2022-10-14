@@ -8,6 +8,80 @@ import cv2
 import numpy as np
 import base64
 import io
+from fastdup.definitions import *
+import tarfile
+
+
+def download_minio(path, save_path):
+    ret = os.system(f"mc cp {path} {save_path}")
+    assert ret == 0, f"Failed to download from minio {path} to {save_path}"
+
+def download_s3(path, save_path):
+    ret = os.system(f"aws s3 cp {path} {save_path}")
+    assert ret == 0, f"Failed to download from s3 {path} to {save_path}"
+
+def truncate_folder_name(path):
+    pos = path.find(S3_TEMP_FOLDER)
+    if pos != -1:
+        return path[pos+len(S3_TEMP_FOLDER)+1:]
+    pos = path.find(S3_TEST_TEMP_FOLDER)
+    if pos != -1:
+        return path[pos+len(S3_TEST_TEMP_FOLDER)+1:]
+    return None
+
+def fastdup_imread(img1_path, input_dir):
+    """
+    Read an image from local file, or from a tar file, or from s3/minio path using minio client mc
+    Parameters:
+    img1_path (str): path to the image
+    input_dir (str): optional directory path in case the image is found on a webdataset in another path or found in s3
+
+    Returns:
+        img1 (np.array): the image
+    """
+
+    is_minio_or_s3 = False
+    if input_dir is not None:
+        if not input_dir.startswith("s3://") and not input_dir.startswith("minio://"):
+            assert os.path.exists(input_dir), "Failed to find input_dir: " + input_dir
+        else:
+            is_minio_or_s3 = True
+
+    #print('Got fastdup_imread', img1_path, input_dir)
+
+    if os.path.exists(img1_path):
+        return cv2.imread(img1_path)
+    elif ('/' +S3_TEMP_FOLDER + '/' in img1_path or '/' + S3_TEST_TEMP_FOLDER + '/' in img1_path) and \
+         '.tar/' in img1_path:
+        assert os.path.exists(input_dir), "Failed to find input dir " + input_dir
+        pos = os.path.dirname(img1_path).find(input_dir.replace('/',''))
+        tar_file = os.path.dirname(img1_path)[pos+len(input_dir.replace('/','')):]
+        tar_file = os.path.join(input_dir, tar_file)
+        print('Found tar file', tar_file)
+        img_name = os.path.basename(img1_path)
+        try:
+            with tarfile.open(tar_file, "r") as tar:
+                f = tar.extractfile(img_name)
+                return cv2.imdecode(np.frombuffer(f.read(), np.uint8), cv2.IMREAD_COLOR)
+        except Exception as ex:
+            print("Error reading from tar file: ", tar_file, ex)
+            return None
+    elif is_minio_or_s3:
+        if input_dir.startswith("minio://"):
+            local_dir_no_temp = truncate_folder_name(os.path.dirname(img1_path))
+            minio_prefix = "/".join(input_dir.replace("minio://", "").split('/')[:2])
+            #print('minio_prefix', minio_prefix)
+            download_minio(minio_prefix + '/' + local_dir_no_temp + '/' + os.path.basename(img1_path), S3_TEMP_FOLDER)
+            return cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+        elif input_dir.startswith("s3://"):
+            local_dir_no_temp = truncate_folder_name(os.path.dirname(img1_path))
+            s3_prefix = 's3://' + "/".join(input_dir.replace("s3://", "").split('/')[:1])
+            #print('s3_prefix', s3_prefix)
+            download_s3(s3_prefix + '/' + local_dir_no_temp + '/' + os.path.basename(img1_path), S3_TEMP_FOLDER)
+            return cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+
+    print('Failed to read image from img_path', img1_path)
+    return None
 
 
 def get_type(str):
@@ -92,10 +166,11 @@ def draw_text(img, text,
 
     return text_size, img
 
-def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None):
-    assert os.path.exists(img1_path) and os.path.exists(img2_path)
-    img1 = cv2.imread(img1_path)
-    img2 = cv2.imread(img2_path)
+def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None, input_dir=None):
+
+    img1 = fastdup_imread(img1_path, input_dir)
+    img2 = fastdup_imread(img2_path, input_dir)
+
     assert img1 is not None
     assert img2 is not None
 

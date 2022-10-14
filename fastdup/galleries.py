@@ -8,7 +8,7 @@ import pandas as pd
 import cv2
 import numpy as np
 import traceback
-from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img
+from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread
 from fastdup.definitions import *
 try:
     from tqdm import tqdm
@@ -67,8 +67,10 @@ def extract_filenames(row, work_dir = None):
     impath2 = lookup_filename(row['to'], work_dir)
 
     dist = row['distance']
-    os.path.exists(impath1), "Failed to find image file " + impath1
-    os.path.exists(impath2), "Failed to find image file " + impath2
+    if ~impath1.startswith(S3_TEMP_FOLDER) and ~impath1.startswith(S3_TEST_TEMP_FOLDER):
+        os.path.exists(impath1), "Failed to find image file " + impath1
+    if ~impath2.startswith(S3_TEMP_FOLDER) and ~impath2.startswith(S3_TEST_TEMP_FOLDER):
+        os.path.exists(impath2), "Failed to find image file " + impath2
 
     if 'label' in row:
         type1 = row['label']
@@ -83,7 +85,8 @@ def extract_filenames(row, work_dir = None):
 
 def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                                 get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
+                                 get_bounding_box_func=None, get_reformat_filename_func=None,
+                                 get_extra_col_func=None, input_dir=None, work_dir=None):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -114,9 +117,11 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the gallery.
 
+        input_dir (str): Optional parameter to allow reading images from a different path, or from webdataset tar files which are found on a different path
+
     Returns:
         ret (int): 0 if success, 1 if failed
-        
+
     '''
 
 
@@ -158,7 +163,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         if impath1 + '_' + impath2 in sets:
             continue
         try:
-            img, imgpath = create_triplet_img(impath1, impath2, ptype, dist, save_path, get_bounding_box_func)
+            img, imgpath = create_triplet_img(impath1, impath2, ptype, dist, save_path, get_bounding_box_func, input_dir)
             sets[impath1 +'_' + impath2] = True
             sets[impath2 +'_' + impath1] = True
             indexes.append(i)
@@ -217,7 +222,8 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
 def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
-                            how='one', slice=None, max_width=None, get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
+                            how='one', slice=None, max_width=None, get_bounding_box_func=None, get_reformat_filename_func=None,
+                               get_extra_col_func=None, input_dir= None):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics
@@ -248,6 +254,9 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
             The input is an absolute path to the image and the output is the string to display instead of the filename.
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the gallery.
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
     Returns:
         ret (int): 0 if successful, 1 otherwise
@@ -295,7 +304,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         impath1, impath2, dist, ptype = extract_filenames(row, work_dir)
         try:
-            img = cv2.imread(impath1)
+            img = fastdup_imread(impath1, input_dir=input_dir)
 
             img = plot_bounding_box(img, get_bounding_box_func, impath1)
             img = my_resize(img, max_width=max_width)
@@ -358,7 +367,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
-                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component"):
+                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component", input_dir=None):
     '''
     Visualize the top connected components
 
@@ -394,6 +403,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         return_stats (bool): optional return the stats of the components namely statistics about component sizes
 
         component_type (str): comp type, should be one of component|cluster
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
 
     Returns:
@@ -446,7 +458,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             w,h = [], []
             for f in files:
                 try:
-                    img = cv2.imread(f)
+                    img = fastdup_imread(f, input_dir)
                     img = plot_bounding_box(img, get_bounding_box_func, f)
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     tmp_images.append(img)
@@ -471,7 +483,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             else:
                 img, labels = generate_sprite_image(images,  len(images), '', None, h=avg_h, w=avg_w, max_width=max_width)
 
-            local_file = os.path.join(save_path, f'component_{i}_{component_id}.jpg')
+            local_file = os.path.join(save_path, f'component_{i}.jpg')
             cv2.imwrite(local_file, img)
             img_paths.append(local_file)
             index+=1
@@ -487,7 +499,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             traceback.print_exc()
             return None, None
 
-    print(f'Finished OK. Components are stored as image files {save_path}/components_index_id.jpg')
+    print(f'Finished OK. Components are stored as image files {save_path}/components_[index].jpg')
     return top_components.head(num_components), img_paths, stats_html
 
 
@@ -531,7 +543,7 @@ def read_components_from_file(work_dir):
 
 def do_find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
                            descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
-                           comp_type="component"):
+                           comp_type="component", input_dir=None):
     '''
     Function to find the largest components of duplicate images
 
@@ -559,6 +571,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         save_path (str): optional path to save the top components statistics
 
         comp_type (str): component type should be coponent | cluster.
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
     	Returns:
         ret (pd.DataFrame): of top components. The column component_id includes the component name.
@@ -612,6 +627,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
                 dict_cols[metric] = top_metric
             comps = pd.DataFrame(dict_cols).reset_index()
         elif group_by == 'label':
+            is_list = isinstance(components['label'].values[0], list)
+            if is_list:
+                 components = components.explode(column='label', ignore_index=True).reset_index()
             top_files = components.groupby('label')['filename'].apply(list)
             top_components = components.groupby('label')[comp_col].apply(list)
             dict_cols = {'files':top_files, comp_col:top_components}
@@ -643,7 +661,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     comps['len'] = comps['files'].apply(lambda x: len(x))
     stat_info = None
     if return_stats:
-        stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None)
+        stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None, input_dir=input_dir)
 
         # in case labels are list of lists, namely list of attributes per image, flatten the list
     if 'label' in comps.columns:
@@ -703,7 +721,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  group_by='visual', slice=None, max_width=None, max_items=None, min_items=None,
                                  get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_info_func=None,
-                                 threshold=None ,metric=None, descending=True, keyword=None, comp_type="component"):
+                                 threshold=None ,metric=None, descending=True, keyword=None, comp_type="component", input_dir=None):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -746,6 +764,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
         comp_type (str): optional parameter, default is "component" (for visualizing connected components) other option is "cluster" (for visualizing kmeans)
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
      '''
 
     if num_images > 1000 and not lazy_load:
@@ -763,7 +784,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
                                                 descending, max_items, min_items, keyword,
-                                                return_stats=True, comp_type=comp_type)
+                                                return_stats=True, comp_type=comp_type, input_dir=input_dir)
     if subdf is None or len(img_paths) == 0:
         return None
 
@@ -790,9 +811,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             comp = row[comp_col]
             num = row['num_images']
             dict_rows = {'component':[comp], 'num_images':[num]}
-            if threshold is not None:
-                dist = row['distance']
-                dict_rows['mean_distance'] = [np.mean(dist)]
+
+            dist = row['distance']
+            dict_rows['mean_distance'] = [np.mean(dist)]
             if metric is not None:
                 dict_rows[metric] = [row[metric]]
 
@@ -803,9 +824,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             num = row['num_images']
             dict_rows = {'label':[label], 'num_images':[num]}
 
-            if threshold is not None:
-                dist = row['distance']
-                dict_rows['mean_distance'] = [np.mean(dist)]
+
+            dist = row['distance']
+            dict_rows['mean_distance'] = [np.mean(dist)]
             if metric is not None:
                 dict_rows[metric] = [row[metric]]
 
@@ -877,7 +898,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
     return 0
 
-def get_stats_df(df, subdf, metric, save_path, max_width=None):
+def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None):
     stats_info = df[metric].describe().to_frame()
     import matplotlib.pyplot as plt
     plt.rcParams['axes.xmargin'] = 0
@@ -908,14 +929,14 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None):
 
     local_fig = f"{save_path}/stats.jpg"
     fig.savefig(local_fig ,dpi=100)
-    img = cv2.imread(local_fig)
+    img = fastdup_imread(local_fig, input_dir)
 
     ret = pd.DataFrame({'stats':[stats_info.to_html(escape=False,index=True).replace('\n','')], 'image':[imageformatter(img, max_width)]})
     return ret.to_html(escape=False,index=False).replace('\n','')
 
 def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                            get_reformat_filename_func=None, get_extra_col_func=None):
+                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics.
@@ -947,6 +968,9 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         get_reformat_filename_func (callable): Optional parameter to allow reformatting the image file name. This is a function the user implements that gets the full file path and returns a new file name.
 
         get_extra_col_func (callable): Optional parameter to allow adding extra column to the report.
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
      '''
 
 
@@ -1050,7 +1074,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
 def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func =None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None):
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics
@@ -1080,6 +1104,8 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         get_extra_col_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
 
     Returns:
@@ -1164,7 +1190,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             info0.append(info0_df.to_html(header=False,escape=False).replace('\n',''))
 
 
-            img = cv2.imread(filename)
+            img = fastdup_imread(filename, input_dir=input_dir)
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
 
@@ -1245,7 +1271,8 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     return df2
 
 
-def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_reformat_filename_func=None):
+def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
+                                   get_reformat_filename_func=None, input_dir=None):
     '''
     Create an html gallery of images with aspect ratio
      stats_file:
@@ -1317,8 +1344,8 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     max_height_img = lookup_filename(max_height_img, work_dir)
 
     try:
-        img_max_width = cv2.imread(max_width_img)
-        img_max_height = cv2.imread(max_height_img)
+        img_max_width = fastdup_imread(max_width_img, input_dir)
+        img_max_height = fastdup_imread(max_height_img, input_dir)
         if max_width is not None:
             img_max_width = my_resize(img_max_width, max_width)
             img_max_height = my_resize(img_max_height, max_width)

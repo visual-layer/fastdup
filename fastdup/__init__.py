@@ -51,6 +51,10 @@ if not os.path.exists(model_path_full):
     sys.exit(1)
 
 
+if 'conda' in sys.version.lower() and 'clang' in sys.version.lower():
+    print("Warning: detected conda environment on Mac, this may lead to unstable behavior. It is recommended to switch to python. You can install python using 'brew install python@3.8'")
+
+
 """
 This is a wrapper function to call the fastdup c++ code
 """
@@ -117,18 +121,21 @@ def run(input_dir='',
 
         num_images (unsigned long long): Number of images to run on. On default, run on all the images in the image_dir folder.
 
-        turi_param (str): Optional turi parameters seperated by command. \
-            ==nnmodel=xx==, Nearest Neighbor model for clustering the features together. Supported options are 0 = brute_force (exact),
-            1 = ball_tree and 2 = lsh (both approximate).\
-            ==ccthreshold=xx==, Threshold for running conected components to find clusters of similar images. Allowed values 0->1.\
-            ==run_cc=0|1== run connected components on the resulting similarity graph. Default is 1.\
-            ==run_pagerank=0|1== run pagerank on the resulting similarity graph. Default is 1.\
-            ==delete_tar=0|1== when working with tar files obtained from cloud storage delete the tar after download\
-            ==delete_img=0|1== when working with images obtained from cloud storage delete the image after download\
-            ==tar_only=0|1== run only on tar files and ignore images in folders. Default is 0.\
-            ==run_stats=0|1== compute image statistics. Default is 1.\
-            ==sync_s3_to_local=0|1== In case of using s3 bucket sync s3 to local folder to improve performance. Assumes there is enough local disk space to contain the dataDefault is 0.\
-	        Example run: turi_param='nnmodel=0,ccthreshold=0.99'
+        turi_param (str): Optional turi parameters seperated by command. Example run: turi_param='nnmodel=0,ccthreshold=0.99'
+            The following parameters are supported.
+                * nnmodel=xx, Nearest Neighbor model for clustering the features together. Supported options are 0 = brute_force (exact), 1 = ball_tree and 2 = lsh (both approximate).
+                * ccthreshold=xx, Threshold for running connected components to find clusters of similar images. Allowed values 0->1. The default ccthreshold is 0.96. This groups very similar images together, for example identical images or images that went
+                    simple transformations like scaling, flip, zoom in. As higher the score the more similar images are grouped by and you will get \
+                    smaller clusters. Score 0.9 is pretty broad and will clsuter images together even if they fine details are not similar. \
+                    It is recommended to experiment with this parameter based on your dataset and then visualize the results using `fastdup.create_components_gallery()`.
+                * run_cc=0|1 run connected components on the resulting similarity graph. Default is 1.
+                * run_pagerank=0|1 run pagerank on the resulting similarity graph. Default is 1.
+                * delete_tar=0|1 when working with tar files obtained from cloud storage delete the tar after download
+                * delete_img=0|1 when working with images obtained from cloud storage delete the image after download
+                * tar_only=0|1 run only on tar files and ignore images in folders. Default is 0.
+                * run_stats=0|1 compute image statistics. Default is 1.
+                * sync_s3_to_local=0|1 In case of using s3 bucket sync s3 to local folder to improve performance. Assumes there is enough local disk space to contain the dataDefault is 0.\
+
 
         distance (str): Distance metric for the Nearest Neighbors algorithm. Other distances are euclidean, squared_euclidean, manhattan.
 
@@ -173,6 +180,7 @@ def run(input_dir='',
         max_offset (unsigned long long): Optional max offset to start iterating on the full file list.
 
         nnf_mode (str): When nn_provider='nnf' selects the nnf model mode.
+            default is HSNW32. More accurate is Flat.
 
         nnf_param (str): When nn_provider='nnf' selects assigns optional parameters.
             ==num_em_iter=XX==, number of KMeans EM iterations to run. Default is 20.\
@@ -239,9 +247,12 @@ def run(input_dir='',
         print("Found an empty input directory, please point to the directory where you are images are found");
         return 1
 
-    elif not os.path.exists(input_dir) and not input_dir.startswith('s3://') and not input_dir.startswith('minio://'):
-        print("Failed to find input dir ", input_dir, " please check your input");
-        return 1
+    elif not os.path.exists(input_dir):
+        if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
+            pass
+        else:
+            print("Failed to find input dir", input_dir, " please check your input");
+            return 1
 
     if os.path.abspath(input_dir) == os.path.abspath(work_dir.strip()):
         print("Input and work_dir output directories are the same, please point to different directories")
@@ -528,6 +539,8 @@ def save_binary_feature(save_path, filenames, np_array):
 
 def load_config(work_dir):
     try:
+        if work_dir == '':
+            work_dir = '.'
         with open(f'{work_dir}/config.json') as f:
             return json.load(f)
     except:
@@ -561,16 +574,6 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
             print("Failed to find work_dir (__init__) " + path_work_dir)
             return 1
 
-        config = load_config(path_work_dir)
-        if config is not None and 'input_dir' in config:
-            if config['input_dir'].startswith('s3://') or config['input_dir'].startswith('minio://'):
-                if 'delete_img=0' not in config['turi_param']:
-                    print('You asked to create a gallery of images/video obtained from s3/minio but images where removed since '
-                          'default run mode removes images downloaded from s3/minio to save space. For creating a gallery of images'
-                          'from s3/minion run with "turi_param=\'delete_img=0\'". Note that you need to have local disk space to download the full dataset.'
-                          'Please reach out to our slack channel if you have disk space limitations.')
-                    return 1
-
 
     if max_width is not None:
         assert isinstance(max_width, int), "html image width should be an integer"
@@ -582,7 +585,7 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
 
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -623,6 +626,9 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
             The input is an absolute path to the image and the output is the string to display instead of the filename.
 
         get_extra_col_func (callable): Optional parameter to allow adding additional column to the report
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
    '''
 
     ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
@@ -635,6 +641,9 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
         if os.path.isdir(similarity_file):
             similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+        config = load_config(os.path.dirname(similarity_file))
+        if input_dir is None and config is not None and 'input_dir' in config:
+            input_dir = config['input_dir']
 
 
     else:
@@ -642,11 +651,12 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         return 1
 
     return do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func)
+                                        get_reformat_filename_func, get_extra_col_func, input_dir)
 
 
 def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
-                            how='one', slice=None, max_width=None, get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None):
+                            how='one', slice=None, max_width=None, get_bounding_box_func=None,
+                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir =None):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics.
@@ -684,6 +694,9 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
         get_extra_col_func (callable): Optional parameter to allow adding additional column to the report
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
      '''
 
 
@@ -697,6 +710,9 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         assert os.path.exists(outliers_file), "Failed to find similarity file " + outliers_file
         if os.path.isdir(outliers_file):
             outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
+        config = load_config(os.path.dirname(outliers_file))
+        if input_dir is None and config is not None  and 'input_dir' in config:
+            input_dir = config['input_dir']
     else:
         print('wrong type of similarity file', type(outliers_file))
         return 1
@@ -704,14 +720,14 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
     assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
     return do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
-                                      max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
+                                      max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
 
 
 
 def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                               group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
                               get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
-                              descending=True, min_items=None, keyword=None):
+                              descending=True, min_items=None, keyword=None, input_dir=None):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -751,6 +767,9 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
     Returns:
         ret (int): 0 in case of success, otherwise 1
     '''
@@ -763,17 +782,22 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         assert isinstance(max_items, int), "max items should be an integer"
         assert max_items > 0, "html image width should be > 0"
 
+    if isinstance(work_dir, str):
+        config = load_config(os.path.dirname(work_dir))
+        if input_dir is None and config is not None and 'input_dir' in config:
+            input_dir = config['input_dir']
+
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="component")
+                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir)
 
 
 
 def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
                               get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
-                              descending=True, min_items=None, keyword=None):
+                              descending=True, min_items=None, keyword=None, input_dir=None):
     '''
     Function to visualize the kmeans clusters.
 
@@ -811,14 +835,22 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
 
         keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
     Returns:
          ret (int): 0 in case of success, otherwise 1
     '''
 
+    if isinstance(work_dir, str):
+        config = load_config(os.path.dirname(work_dir))
+        if input_dir is None and config is not None and 'input_dir' in config:
+            input_dir = config['input_dir']
+
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="cluster")
+                                        descending=descending, keyword=keyword, comp_type="cluster", input_dir=input_dir)
 
 
 
@@ -1320,7 +1352,7 @@ def search(img, size, verbose=0):
 
 def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending= False, get_bounding_box_func=None,
-                         get_reformat_filename_func=None, get_extra_col_func=None):
+                         get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
     '''
     Function to create and display a gallery of images computed by the statistics metrics.
     Supported metrics are: mean (color), max (color), min (color), stdv (color), unique (number of unique colors), bluriness (computed by the variance of the laplpacian method
@@ -1354,6 +1386,9 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the gallery.
 
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
     Returns:
         ret (int): 0 in case of success, otherwise 1.
     '''
@@ -1380,12 +1415,12 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 
     return do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
-                                   descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
+                                   descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
 
 
 def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None):
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
     '''
 
     Function to create and display a gallery of images computed by the similarity metric. In each table row one query image is
@@ -1407,7 +1442,9 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
         get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
 
-        slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+        A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors. The score values are 0->100 where
+        0 means the query image is only similar to images outside its class, 100 means the query image is only similar to images from the same class.
 
         max_width (int): Optional param to limit the image width
 
@@ -1418,6 +1455,9 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
 
         get_extra_col_func (callable): Optional parameter to allow adding extra columns to the report
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
     Returns:
         ret (int): 0 in case of success, otherwise 1.
@@ -1437,11 +1477,12 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
             similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
 
     return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
-        slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func)
+        slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
 
 
 
-def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None, get_filename_reformat_func=None):
+def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
+                                get_filename_reformat_func=None, input_dir=None):
     '''
     Function to create and display a gallery of aspect ratio distribution.
 
@@ -1459,6 +1500,9 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
          slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
 
          get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
     Returns:
     '''
@@ -1482,7 +1526,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
         return 1
 
 
-    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice)
+    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir)
 
 def export_to_cvat(files, labels, save_path):
     """
