@@ -924,14 +924,15 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
 
     assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
     assert len(top_components), "top_components should not be enpty"
-    assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
-    assert len(to_delete), "to_delete should not be empty"
-    assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
     assert how == 'one' or how == 'all', "how should be one of 'one'|'all'"
     assert isinstance(dry_run, bool)
 
     if to_delete is None:
         to_delete = top_components['component_id'].tolist()
+    else:
+        assert isinstance(to_delete, list), "to_delete should be a list of integer component ids"
+        assert len(to_delete), "to_delete should not be empty"
+        assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
 
     total_deleted = []
 
