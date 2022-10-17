@@ -16,15 +16,38 @@ except:
     tqdm = (lambda x: x)
 
 
-def get_label(filename, get_label_func):
-    ret = filename
-    try:
-        ret += "<br>" + "Label: " + get_label_func(filename)
-    except Exception as ex:
-        ret += "<br>Failed to get label for " + filename + " with error " + ex
-    return ret
+# def get_label(filename, get_label_func):
+#     ret = filename
+#     try:
+#         if isinstance(get_label_func, dict):
+#             ret += "<br>" + "Label: " + get_label_func.get(filename, MISSING_LABEL)
+#         elif callable(get_label_func):
+#             ret += "<br>" + "Label: " + get_label_func(filename)
+#         else:
+#             assert False, f"Failed to understand get_label_func type {type(get_label_func)}"
+#     except Exception as ex:
+#         ret += "<br>Failed to get label for " + filename + " with error " + ex
+#     return ret
 
-
+def find_label(get_label_func, df, in_col, out_col):
+    if (get_label_func is not None):
+        if isinstance(get_label_func, str):
+            assert os.path.exists(get_label_func), f"Failed to find get_label_func file {get_label_func}"
+            df_labels = pd.read_csv(get_label_func)
+            if len(df_labels) != len(df):
+                print(f"Error: wrong length of labels file {get_label_func} expected {len(df)} got {len(df_labels)}")
+                return None
+            if 'label' not in df_labels.columns:
+                print(f"Error: wrong columns in labels file {get_label_func} expected 'label' column")
+                return None
+            df[out_col] = df_labels['label']
+        elif isinstance(get_label_func, dict):
+            df[out_col] = df[in_col].apply(lambda x: get_label_func.get(x, MISSING_LABEL))
+        elif callable(get_label_func):
+            df[out_col] = df[in_col].apply(lambda x: get_label_func(x))
+        else:
+            assert False, f"Failed to understand get_label_func type {type(get_label_func)}"
+    return df
 
 def slice_df(df, slice):
     if slice is not None:
@@ -102,7 +125,9 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         slice (str): Optional parameter to select a slice of the outliers file based on a specific label.
 
@@ -134,14 +159,14 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         work_dir = os.path.dirname(similarity_file)
     assert len(df), "Failed to read similarity file"
 
-    if slice is not None and callable(get_label_func):
-        df['label'] = df['from'].apply(lambda x: get_label_func(x))
+    if slice is not None and get_label_func is not None:
+        df = find_label(get_label_func, df, 'from', 'label')
         if isinstance(slice, str):
             if slice == "diff":
-                df['label2'] = df['to'].apply(lambda x: get_label_func(x))
+                df = find_label(get_label_func, df, 'to', 'label2')
                 df = df[df['label'] != df['label2']]
             elif slice == "same":
-                df['label2'] = df['to'].apply(lambda x: get_label_func(x))
+                df = find_label(get_label_func, df, 'to', 'label2')
                 df = df[df['label'] == df['label2']]
             else:
                 if slice not in df['label'].unique():
@@ -183,9 +208,11 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         img_paths2 = ["<img src=\"" + os.path.basename(x) + "\" loading=\"lazy\">" for x in img_paths]
         subdf.insert(0, 'Image', img_paths2)
     out_file = os.path.join(save_path, 'similarity.html')
-    if get_label_func is not None and callable(get_label_func):
-        subdf.insert(2, 'From', subdf['from'].apply(lambda x: get_label(x, get_label_func)))
-        subdf.insert(3, 'To', subdf['to'].apply(lambda x: get_label(x, get_label_func)))
+    if get_label_func is not None:
+        #subdf.insert(2, 'From', subdf['from'].apply(lambda x: get_label(x, get_label_func)))
+        subdf = find_label(get_label_func, subdf, 'from', 'From')
+        #subdf.insert(3, 'To', subdf['to'].apply(lambda x: get_label(x, get_label_func)))
+        subdf = find_label(get_label_func, subdf, 'to', 'To')
     else:
         subdf = subdf.rename(columns={'from':'From', 'to':'To'}, inplace=False)
     subdf = subdf.rename(columns={'distance':'Distance'}, inplace=False)
@@ -237,7 +264,9 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): Optional parameter to allow adding more image information to the report like the image label. This is a function the user implements that gets the full file path and returns html string with the label or any other metadata desired.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
                                                       all = take the image that is far away from all other images. Default is one.
@@ -294,8 +323,8 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     else:
         subdf = df.sort_values(by='distance', ascending=True)
 
-    if callable(get_label_func):
-        subdf['label'] = subdf['from'].apply(lambda x: get_label_func(x))
+    if get_label_func is not None:
+        subdf = find_label(get_label_func, subdf, 'from', 'label')
         subdf = slice_df(subdf, slice)
         if subdf is None:
             return 1
@@ -332,8 +361,9 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         img_paths2 = ["<img src=\"" + os.path.join(save_path, os.path.basename(x)) + "\" loading=\"lazy\">" for x in img_paths]
         subdf.insert(0, 'Image', img_paths2)
 
-    if get_label_func is not None and callable(get_label_func):
-        subdf.insert(2, 'Path', subdf['from'].apply(lambda x: get_label(x, get_label_func)))
+    if get_label_func is not None:
+        #subdf.insert(2, 'Path', subdf['from'].apply(lambda x: get_label(x, get_label_func)))
+        subdf = find_label(get_label_func, subdf, 'from', 'Path')
         subdf = subdf.rename(columns={'distance':'Distance'}, inplace=False)
     else:
         subdf = subdf.rename(columns={'from':'Path', 'distance':'Distance'}, inplace=False)
@@ -378,7 +408,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
         num_components (int): number of top components to plot
 
-        get_label_func (callable): option function to get label for each image given image filename
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         group_by (str): 'visual' or 'label'
 
@@ -503,7 +535,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     return top_components.head(num_components), img_paths, stats_html
 
 
-def read_clusters_from_file(work_dir):
+def read_clusters_from_file(work_dir, get_label_func):
     if isinstance(work_dir, str):
         if os.path.isdir(work_dir):
             work_dir = os.path.join(work_dir, FILENAME_KMEANS_ASSIGNMENTS)
@@ -519,25 +551,36 @@ def read_clusters_from_file(work_dir):
         df = work_dir
         assert len(df), f"Failed to read dataframe from {work_dir} or empty dataframe"
 
+    if get_label_func is not None:
+        df = find_label(get_label_func, df, 'filename', 'label')
+
     return df
 
 
-def read_components_from_file(work_dir):
+def read_components_from_file(work_dir, get_label_func):
     assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
     assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file"
     assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file"
 
     # read fastdup connected components, for each image id we get component id
     components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS))
+    if 'min_distance' not in components.columns:
+        print('Error: Failed to find min_distance column in connected_components.csv, please re-run fastdup')
+        return None
 
-    filenames = pd.read_csv(os.path.join(work_dir, 'atrain_features.dat.csv'))
+    filenames = pd.read_csv(os.path.join(work_dir, 'atrain_' + FILENAME_IMAGE_LIST))
     if (len(components) != len(filenames)):
         print(f"Error: number of rows in components file {work_dir}/connected_components.csv and number of rows in image file {work_dir}/atrain_features.dat.csv are not equal")
         print("This may occur if multiple runs where done on the same working folder overriding those files. Please rerun on a clen folder")
         return None
+    if 'filename' not in filenames.columns:
+        print(f"Error: Failed to find filename column in {work_dir}/atrain_features.dat.csv")
+        return None
+
     # now join the two tables to get both id and image name
     components['filename'] = filenames['filename']
 
+    components = find_label(get_label_func,components, 'filename', 'label')
     return components
 
 
@@ -550,7 +593,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     Args:
         work_dir (str): working directory where fastdup.run was run.
 
-        get_label_func (callable): optional function to get label for each image
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         group_by (str): 'visual' or 'label'
 
@@ -585,11 +630,11 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     '''
 
     if comp_type == "component":
-        components = read_components_from_file(work_dir)
+        components = read_components_from_file(work_dir, get_label_func)
         comp_col = "component_id"
         distance_col = "min_distance"
     elif comp_type == "cluster":
-        components = read_clusters_from_file(work_dir)
+        components = read_clusters_from_file(work_dir, get_label_func)
         comp_col = "cluster"
         distance_col = "distance"
     else:
@@ -607,13 +652,13 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         components[metric] = stats[metric]
 
     # find the components that have the largest number of images included
-    if callable(get_label_func):
-        components['label'] = components['filename'].apply(get_label_func)
-        components = slice_df(components, slice)
 
+
+    if (get_label_func is not None):
+        assert 'label' in components.columns, "Failed to find label column in components dataframe"
+        components = slice_df(components, slice)
         if 'path' in group_by:
             components['path'] = components['filename'].apply(lambda x: os.path.dirname(x))
-
 
         if group_by == 'visual':
             top_labels = components.groupby(comp_col)['label'].apply(list)
@@ -683,7 +728,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         comps = comps[comps['distance'] > threshold]
 
     if keyword is not None:
-        assert callable(get_label_func), "keyword can only be used with a callable get_label_func"
+        assert get_label_func is not None, "keyword can only be used with a callable get_label_func"
         assert group_by == 'visual', "keyword can only be used with group_by=visual"
         comps = comps[comps['label'].apply(lambda x: sum([1 if keyword in y else 0 for y in x]) > 0)]
         if len(comps) == 0:
@@ -735,7 +780,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
 
@@ -776,7 +823,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     assert num_images >= 1, "Please select one or more images"
     assert group_by == 'label' or group_by == 'visual', "Allowed values for group_by=[visual|label], got " + group_by
     if group_by == 'label':
-        assert callable(get_label_func), "missing get_label_func, when grouping by labels need to set get_label_func"
+        assert get_label_func is not None, "missing get_label_func, when grouping by labels need to set get_label_func"
     assert comp_type in ['component','cluster']
 
 
@@ -952,7 +999,9 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         metric (str): Optional metric selection. One of blur, size, mean, min, max, unique, stdv. Default is blur.
 
@@ -983,8 +1032,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         df = pd.read_csv(stats_file)
     assert len(df), "Failed to read stats file " + stats_file
 
-    if callable(get_label_func):
-        df['label'] = df['filename'].apply(lambda x: get_label_func(x))
+    df = find_label(get_label_func, df, 'filename', 'label')
 
     if slice is not None:
         if isinstance(slice, str):
@@ -1058,7 +1106,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         cols.append('width')
         cols.append('height')
 
-    if callable(get_label_func):
+    if 'label' in df.columns:
         cols.append('label')
 
     fastdup.html_writer.write_to_html_file(subdf[cols], title, out_file, stat_info)
@@ -1088,7 +1136,9 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given a absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         metric (str): Optional metric selection. One of blur, size, mean, min, max, width, height, unique.
 
@@ -1129,9 +1179,10 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read stats file " + similarity_file
 
-    if callable(get_label_func):
-        df['label'] = df['from'].apply(lambda x: get_label_func(x))
-        df['label2'] = df['to'].apply(lambda x: get_label_func(x))
+    if get_label_func is not None:
+        df = find_label(get_label_func, df, 'from', 'label')
+        df = find_label(get_label_func, df, 'to', 'label2')
+
         if slice != 'label_score':
             df = slice_df(df, slice)
             if df is None:
@@ -1158,7 +1209,13 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     else:
         for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
             filename = lookup_filename(row['from'], work_dir)
-            label = get_label_func(filename)
+            label = None
+            if isinstance(get_label_func, dict):
+                label = get_label_func.get(filename, MISSING_LABEL)
+            elif callable(get_label_func):
+                label = get_label_func(filename)
+            else:
+                assert False, "not implemented yet"
             similar = [x==label for x in list(row['label'])]
             similar = 100.0*sum(similar)/(1.0*len(row['label']))
             lengths.append(len(row['label']))
@@ -1174,15 +1231,21 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
+            label = None
             filename = lookup_filename(row['from'], work_dir)
             if callable(get_label_func):
                 label = get_label_func(filename)
+            elif isinstance(get_label_func, dict):
+                label = get_label_func.get(filename, MISSING_LABEL)
+            elif isinstance(get_label_func, str):
+                assert False, "Not implemented yet"
+
             if callable(get_reformat_filename_func):
                 new_filename = get_reformat_filename_func(filename)
             else:
                 new_filename = filename
 
-            if callable(get_label_func):
+            if label is not None:
                 info0_df = pd.DataFrame({'label':[label],'from':[new_filename]}).T
             else:
                 info0_df = pd.DataFrame({'from':[new_filename]}).T
@@ -1300,8 +1363,8 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     if num_images is not None and num_images>0:
         df = df.head(num_images)
 
-    if callable(get_label_func):
-        df['label'] = df['filename'].apply(lambda x: get_label_func(x))
+    if get_label_func is not None:
+        df = find_label(get_label_func, df, 'filename', 'label')
         if slice is not None:
             df = df[df['label'] == slice]
 

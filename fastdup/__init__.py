@@ -217,7 +217,16 @@ def run(input_dir='',
 
     if (work_dir.startswith('./')):
         work_dir = work_dir[2:]
-    if (input_dir.startswith('./')):
+
+    if isinstance(input_dir, list):
+        files = pd.DataFrame({'filenames':input_dir})
+        files.to_csv('files.txt')
+        input_dir = 'files.txt'
+    elif (input_dir.strip() == '' and run_mode != 2):
+        print("Found an empty input directory, please point to the directory where you are images are found")
+        return 1
+
+    if input_dir.startswith('./'):
         input_dir = input_dir[2:]
 
     cwd = os.getcwd()
@@ -237,15 +246,7 @@ def run(input_dir='',
                 "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
         return 0
 
-    if isinstance(input_dir, list):
-        files = pd.DataFrame({'filenames':input_dir})
-        files.to_csv('files.txt')
-        input_dir = 'files.txt'
 
-
-    elif (input_dir.strip() == '' and run_mode != 2):
-        print("Found an empty input directory, please point to the directory where you are images are found");
-        return 1
 
     elif not os.path.exists(input_dir):
         if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
@@ -553,7 +554,10 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
     if (get_label_func is not None):
-        assert callable(get_label_func), "get_label_func has to be a collable function, given the filename returns the label of the file"
+        assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and \
+        os.path.exists(get_label_func)), "get_label_func has to be a callable function or a dictionary, given the filename returns the "
+        "label of the file. Alternatively get_label_func can be a file with header of index,label and a single line of labels per"
+        "image. The label file has to have the `atrain_features.dat.csv`"
 
     if slice is not None and get_label_func is None:
         print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
@@ -599,7 +603,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
 
     Args:
-        similarity_file (str): csv file with the computed similarities by the fastdup tool
+        similarity_file (str): csv file with the computed similarities by the fastdup tool, or a work_dir path, or a pandas dataframe containing the similarities.
 
         save_path (str): output folder location for the visuals
 
@@ -609,7 +613,9 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
             slice could be a specific label i.e. slice='haumburger' and in that case only similarities between hamburger and other classes are presented.
@@ -668,7 +674,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
     i.e. 0.05 means top 5% of the images that are further away from the rest of the images are considered outliers.
 
     Parameters:
-        outliers_file (str): csv file with the computed outliers by the fastdup tool
+        outliers_file (str): csv file with the computed outliers by the fastdup tool, or a work_dir path, or a pandas dataframe contraining the outliers
 
         save_path (str): output folder location for the visuals
 
@@ -676,7 +682,9 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         how (str): Optional outlier selection method. one = take the image that is far away from any one image (but may have other images close to it).
                                                       all = take the image that is far away from all other images. Default is one.
@@ -741,7 +749,9 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
 
@@ -776,7 +786,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
     ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
-        return ret;
+        return ret
     
     if max_items is not None:
         assert isinstance(max_items, int), "max items should be an integer"
@@ -811,7 +821,9 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
 
@@ -846,6 +858,10 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
         config = load_config(os.path.dirname(work_dir))
         if input_dir is None and config is not None and 'input_dir' in config:
             input_dir = config['input_dir']
+
+    ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret
 
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
@@ -925,8 +941,9 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
     assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
     assert len(top_components), "top_components should not be enpty"
     assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
-    assert len(to_delete), "to_delete should not be empty"
-    assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
+    if isinstance(to_delete, list):
+        assert len(to_delete), "to_delete should not be empty"
+        assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
     assert how == 'one' or how == 'all', "how should be one of 'one'|'all'"
     assert isinstance(dry_run, bool)
 
@@ -1172,7 +1189,9 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
 
         with_images (bool): add images to the visualization (default True)
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         d (int): dimension of the embedding vector. Default is 576.
 
@@ -1216,7 +1235,9 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
         log_dir (str): directory to save the sprite image
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         h (int): optional requested hight of each subimage
 
@@ -1250,7 +1271,9 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
     Args:
         work_dir (str): working directory where fastdup.run was run.
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         group_by (str): optional parameter to group by 'visual' or 'label'. When grouping by visual fastdup aggregates visually similar images together.
             When grouping by 'label' fastdup aggregates images with the same label together.
@@ -1369,7 +1392,9 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         metric (str): Optional metric selection. One of 'blur','size','mean','min','max','unique','stdv'.
 
@@ -1432,7 +1457,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
     For high quality labeled dataset we expect the score to be high, low score may indicate class label issues.
 
     Args:
-        similarity_file (str): csv file with the computed image statistics by the fastdup tool, alternatively a pandas dataframe.
+        similarity_file (str): csv file with the computed image statistics by the fastdup tool, or a path to the work_dir, alternatively a pandas dataframe.
 
         save_path (str): output folder location for the visuals
 
@@ -1440,7 +1465,9 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
         lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
         slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
         A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors. The score values are 0->100 where
@@ -1489,7 +1516,9 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
     Args:
          stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
 
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
          max_width (int): optional parameter to limit the plot image width
 
@@ -1632,7 +1661,9 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     Args:
         work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
         k (int): (unused)
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
         threshold (float): optional threshold to consider neighbors with similarity larger than threshold
             prediction per image to one of the given classes.
 
@@ -1643,7 +1674,11 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     from fastdup.confusion_matrix import classification_report
 
     assert os.path.exists(work_dir), "Failed to find work directory " + work_dir
-    assert callable(get_label_func), "Please provide a valid get_label_func, given a filename returns its label"
+    assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
+        "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
+        "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
+        "each row is a label corresponding to the image in the atrain_features_data.csv file"
+
     if threshold is not None:
         assert threshold >= 0 and threshold <= 1, "Please provide a valid threshold 0->1"
 
@@ -1655,7 +1690,23 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
             similarity_file = os.path.join(work_dir, FILENAME_SIMILARITY)
         df = pd.read_csv(similarity_file)
 
-    df['to_label'] = df['to'].apply(get_label_func)
+    labels_dict = None
+    if callable(get_label_func):
+        df['to_label'] = df['to'].apply(get_label_func)
+    elif isinstance(get_label_func, dict):
+        df['to_label'] = df['to'].apply(lambda x: get_label_func.get(x, MISSING_LABEL))
+    elif isinstance(get_label_func, str):
+        labels_df = pd.read_csv(get_label_func)
+        filenames_df = pd.read_csv(os.path.join(work_dir, FILENAME_IMAGE_LIST))
+        if len(labels_df) != len(filenames_df):
+            print('Error: labels file length does not match the number of images in the similarity file', get_label_func, len(labels_df), len(df))
+            return None
+        if 'label' not in labels_df.columns:
+            print('Error: labels file does not contain a label column', get_label_func)
+            return None
+        filenames_df['label'] = labels_df['label']
+        labels_dict = pd.Series(filenames_df.label.values,index=filenames_df.filename).to_dict()
+        df['to_label'] = df['to'].apply(lambda x: labels_dict.get(x, MISSING_LABEL))
 
     from_list = df.groupby(by='from', axis=0)['to'].apply(list)
     distance_list = df.groupby(by='from', axis=0)['distance'].apply(list)
@@ -1667,7 +1718,15 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
 
     df_merge = df_from.merge(df_dist, on='from')
     df_merge = df_merge.merge(df_label, on='from')
-    df_merge['from_label'] = df_merge.index.map(get_label_func)
+
+    if callable(get_label_func):
+        df_merge['from_label'] = df_merge.index.map(get_label_func)
+    elif isinstance(get_label_func, dict):
+        df_merge['from_label'] = df_merge.index.map(lambda x: get_label_func.get(x, MISSING_LABEL))
+    elif isinstance(get_label_func, str):
+        assert labels_dict is not None
+        df_merge['from_label'] = df_merge.index.map(lambda x: labels_dict.get(x, MISSING_LABEL))
+
 
     df_merge['top_k'] = df_merge.apply(lambda x:
                                        top_k_label(x['to_label'], x['distance'], k, threshold), axis=1)
@@ -1689,7 +1748,9 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
     Args:
         work_dir (str): fastdup work_dir, or location of a similarity file, or a pandas DataFrame with the computed similarities
         k (int): (unused)
-        get_label_func (callable): optional label string, given an absolute path to an image return the image label. Image label can be a string or a list of strings.
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
         threshold (float): (unused)
 
     Returns:
@@ -1698,7 +1759,10 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
 
     from fastdup.confusion_matrix import classification_report
 
-    assert callable(get_label_func), "Please provide a valid get_label_func, given a filename returns its label"
+    assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
+        "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
+        "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
+        "each row is a label corresponding to the image in the atrain_features_data.csv file"
 
     comps = find_top_components(work_dir, get_label_func, 'visual', slice=None, comp_type='cluster')
     print(comps.columns)

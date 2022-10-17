@@ -13,7 +13,7 @@ FILENAME_KMEANS_ASSIGNMENTS = "kmeans_assignments.csv"
 
 FILENAME_TOP_COMPONENTS = "top_components.pkl"
 FILENAME_TOP_CLUSTERS = "top_clusters.pkl"
-
+MISSING_LABEL = "N/A"
 
 S3_TEMP_FOLDER = "tmp"
 S3_TEST_TEMP_FOLDER = "testtmp"
