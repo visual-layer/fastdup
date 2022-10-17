@@ -128,7 +128,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [Micro Organisms](https://www.kaggle.com/code/mpwolke/micro-organism-fastdup)
 [PCB Boards](https://www.kaggle.com/code/mpwolke/pcb-boards-fastdup)
 [ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
-
+[Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
 
 # Support 
