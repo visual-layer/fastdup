@@ -56,7 +56,7 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
             sample_size = alternative_width
         height = 1
     else:
-        NUM_IMAGES_WIDTH = int(np.ceil(np.sqrt(min(sample_size, len(img_path)))))
+        NUM_IMAGES_WIDTH = int(1.4*np.ceil(np.sqrt(min(sample_size, len(img_path)))))
         divs = int(np.ceil(min(sample_size,len(img_path)) / NUM_IMAGES_WIDTH))
         height = min(divs, NUM_IMAGES_WIDTH)
 
@@ -84,7 +84,7 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
     spriteimage = Image.new(
         mode='RGB',
         size=(W*NUM_IMAGES_WIDTH, H*height),
-        color=(0,0,0) # fully transparent
+        color=(255,255,255)
     )
     for count, image in enumerate(images_pil):
         h_loc = count // NUM_IMAGES_WIDTH

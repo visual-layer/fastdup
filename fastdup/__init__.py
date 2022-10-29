@@ -27,7 +27,7 @@ except:
 	tqdm = (lambda x: x)
 
 
-__version__="0.125"
+__version__="0.151"
 CONTACT_EMAIL="info@databasevisual.com"
 if platform.system() == "Darwin":
 	SO_SUFFIX=".dylib"
@@ -587,9 +587,70 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
     return 0
 
 
+
+def find_similarity_file(similarity_file, input_dir, kwargs):
+
+    nrows = None
+    if 'nrows' in kwargs:
+        nrows = kwargs['nrows']
+
+    if isinstance(similarity_file, pd.DataFrame):
+        if nrows is not None and len(similarity_file) > nrows:
+            similarity_file = similarity_file.head(nrows)
+        return similarity_file, input_dir
+
+    elif isinstance(similarity_file, str):
+        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
+        if os.path.isdir(similarity_file):
+            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+
+        df = pd.read_csv(similarity_file, nrows=nrows)
+        config = load_config(os.path.dirname(similarity_file))
+        if input_dir is None and config is not None  and 'input_dir' in config:
+            input_dir = config['input_dir']
+        return df, input_dir
+    else:
+        print('wrong type of similarity file', type(similarity_file))
+        return None, None
+
+
+def remove_duplicate_video_distances(df, kwargs):
+
+    #remove duplicate indications into the same video
+    df['subfolder1'] = df['from'].apply(lambda x: os.path.dirname(x))
+    df['subfolder2'] = df['to'].apply(lambda x: os.path.dirname(x))
+    df = df[df['subfolder1'] != df['subfolder2']]
+    if len(df) == 0:
+        print("Error: failed to find links pointing between videos")
+        return None
+
+    if 'debug_video_size' in kwargs:
+        print(df.head())
+
+    #sort the dataframe by similarity
+    df = df.sort_values(by=['distance'], ascending=False)
+    assert len(df), "Empty dataframe"
+    if 'debug_video_size' in kwargs:
+        print(df.head())
+
+
+    sizes = df.groupby(['subfolder1', 'subfolder2']).size().reset_index(name='counts')
+
+    #keep only one example image across videos
+    df = df.drop_duplicates(subset=['subfolder1','subfolder2'], keep='first')
+    df = df.merge(sizes, how='left', left_on=['subfolder1', 'subfolder2'], right_on=['subfolder1', 'subfolder2'])
+    if 'debug_video_size' in kwargs:
+        print('Video size', df.head())
+
+    if len(df) == 0:
+        print("Error, failed to find any duplicate videos")
+        return None
+
+    return df
+
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, threshold=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -635,34 +696,102 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
+        threshold (float): Optional parameter to specify the threshold for similarity score to be considered as duplicate. Values above the threshold will be considered as duplicate.
+            Allowed values are between 0 and 1.
+
+        save_artifacts (boolean): Optional parameter to allow saving the intermediate artifacts (raw images, csv with results) to the output folder
+
    '''
 
     ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
     if ret != 0:
         return ret;
 
-    if isinstance(similarity_file, pd.DataFrame):
-        pass
-    elif isinstance(similarity_file, str):
-        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
-        if os.path.isdir(similarity_file):
-            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
-        config = load_config(os.path.dirname(similarity_file))
-        if input_dir is None and config is not None and 'input_dir' in config:
-            input_dir = config['input_dir']
-
-
-    else:
-        print('wrong type of similarity file', type(similarity_file))
-        return 1
+    similarity_file, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
 
     return do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func, input_dir)
+                                        get_reformat_filename_func, get_extra_col_func, input_dir, threshold, kwargs)
+
+
+
+
+def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, descending=True,
+                              lazy_load=False, get_label_func=None, slice=None, max_width=None,
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, threshold=None, **kwargs):
+    '''
+
+    Function to create and display a gallery of duplicaate videos computed by the similarity metrics
+
+    Example:
+	 	>>> import fastdup
+		>>> fastdup.run('input_folder', 'output_folder', run_mode=1)  # extract frames from videos
+		>>> fastdup.run('input_folder', 'output_folder', run_mode=2)  # run fastdup
+		>>> fastdup.create_duplicates_videos_gallery('output_folder', save_path='.')
+
+
+    Args:
+        similarity_file (str): csv file with the computed similarities by the fastdup tool, or a work_dir path, or a pandas dataframe containing the similarities.
+
+        save_path (str): output folder location for the visuals
+
+        num_images (int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
+        descending (boolean): If False, print the similarities from the least similar to the most similar. Default is True.
+
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
+
+        slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+            slice could be a specific label i.e. slice='haumburger' and in that case only similarities between hamburger and other classes are presented.
+            Two reserved arguments for slice are "diff" and "same". When using "diff" the report only shows similarities between classes. When using "same" the report will show only similarities inside same class.
+            Note that when using slice, the function get_label_function should be implmeneted.
+
+        max_width (int): Optional parameter to set the max width of the gallery.
+
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+
+        get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
+            The input is an absolute path to the image and the output is the string to display instead of the filename.
+
+        get_extra_col_func (callable): Optional parameter to allow adding additional column to the report
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
+        threshold (float): Optional parameter to specify the threshold for similarity score to be considered as duplicate. Values above the threshold will be considered as duplicate.
+            Allowed values are between 0 and 1.
+
+        save_artifacts (boolean): Optional parameter to allow saving the intermediate artifacts (raw images, csv with results) to the output folder
+
+   '''
+
+    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+    if ret != 0:
+        return ret
+
+    if threshold:
+        assert threshold >= 0 and threshold <= 1, "threshold should be between 0 and 1"
+
+    df, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
+    if threshold is not None:
+        df = df[df['distance'] >= threshold]
+
+    df = remove_duplicate_video_distances(df, kwargs)
+    kwargs['is_video'] = True
+
+    return create_duplicates_gallery(df, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
+                                            get_reformat_filename_func, get_extra_col_func, input_dir, threshold, **kwargs)
 
 
 def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             how='one', slice=None, max_width=None, get_bounding_box_func=None,
-                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir =None):
+                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir =None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics.
@@ -715,9 +844,10 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
     if isinstance(outliers_file, pd.DataFrame):
         pass
     elif isinstance(outliers_file, str):
-        assert os.path.exists(outliers_file), "Failed to find similarity file " + outliers_file
+        assert os.path.exists(outliers_file), "Failed to find outliers file " + outliers_file
         if os.path.isdir(outliers_file):
             outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
+
         config = load_config(os.path.dirname(outliers_file))
         if input_dir is None and config is not None  and 'input_dir' in config:
             input_dir = config['input_dir']
@@ -725,17 +855,18 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         print('wrong type of similarity file', type(outliers_file))
         return 1
 
+
     assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
     return do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
-                                      max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
+                                      max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
 
 
 
 def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                               group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
                               get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
-                              descending=True, min_items=None, keyword=None, input_dir=None):
+                              descending=True, min_items=None, keyword=None, input_dir=None, **kwargs):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -800,14 +931,77 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir)
+                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
 
+
+def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
+                              group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
+                              get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
+                              descending=True, min_items=None, keyword=None, input_dir=None, **kwargs):
+    '''
+
+    Function to create and display a gallery of similar videos based on the graph components
+
+    Args:
+        work_dir (str): path to fastdup work_dir
+
+        save_path (str): output folder location for the visuals
+
+        num_images (int): Max number of images to display (default = 50). Be careful not to display too many images at once otherwise the notebook may go out of memory.
+
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+
+        get_label_func (callable): optional function given an absolute path to an image return the image label.
+            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
+            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
+
+        group_by (str): [visual|label]. Group the report using the visual properties of the image or using the labels of the images. Default is visual.
+
+        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+
+        max_width (int): Optional parameter to set the max html width of images in the gallery. Default is None.
+
+        max_items (int): Optional parameter to limit the number of items displayed (labels for group_by='visual' or components for group_by='label'). Default is None.
+
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.  The input is an absolute path to the image and the output is a list of bounding boxes.  Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+
+        get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.  The input is an absolute path to the image and the output is the string to display instead of the filename.
+
+        get_extra_col_func (callable): Optional parameter to allow adding more information to the report.
+
+        threshold (float): Optional parameter to set the treshold for chosing components. Default is None.
+
+        metric (str): Optional parameter to set the metric to use (like blur) for chose components. Default is None.
+
+        descending (boolean): Optional parameter to set the order of the components. Default is True namely list components from largest to smallest.
+
+        min_items (int): Optional parameter to select components with min_items or more items. Default is None.
+
+        keyword (str): Optional parameter to select components with keyword asa subset of the label. Default is None.
+
+        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
+            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
+    Returns:
+        ret (int): 0 in case of success, otherwise 1
+    '''
+
+    kwargs['is_video'] = True
+    df = find_similarity_file(work_dir)
+    df = remove_duplicate_video_distances(df, kwargs)
+    if df is None:
+        return 1
+
+    return create_components_gallery(df, save_path, num_images, lazy_load, get_label_func, group_by, slice,
+                                        max_width, max_items, min_items, get_bounding_box_func,
+                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
+                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
 
 
 def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
                               get_reformat_filename_func=None, get_extra_col_func=None, threshold=None, metric=None,
-                              descending=True, min_items=None, keyword=None, input_dir=None):
+                              descending=True, min_items=None, keyword=None, input_dir=None, **kwargs):
     '''
     Function to visualize the kmeans clusters.
 
@@ -866,7 +1060,7 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
     return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
                                         max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="cluster", input_dir=input_dir)
+                                        descending=descending, keyword=keyword, comp_type="cluster", input_dir=input_dir, kwargs=kwargs)
 
 
 
@@ -1264,7 +1458,7 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
 def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
                         descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
-                        comp_type="component"):
+                        comp_type="component", **kwargs):
     '''
     Function to find the largest components of duplicate images
 
@@ -1307,7 +1501,7 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
     from .galleries import do_find_top_components
     return do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
                                   metric=metric, descending=descending, min_items=min_items, max_items = max_items,
-                                  keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type)
+                                  keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
 
 def init_search(k, work_dir, d = 576, model_path = model_path_full):
     '''
@@ -1375,7 +1569,7 @@ def search(img, size, verbose=0):
 
 def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending= False, get_bounding_box_func=None,
-                         get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
+                         get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
     '''
     Function to create and display a gallery of images computed by the statistics metrics.
     Supported metrics are: mean (color), max (color), min (color), stdv (color), unique (number of unique colors), bluriness (computed by the variance of the laplpacian method
@@ -1440,12 +1634,12 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 
     return do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
-                                   descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
+                                   descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
 
 
 def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None):
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the similarity metric. In each table row one query image is
@@ -1504,12 +1698,12 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
             similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
 
     return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
-        slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir)
+        slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
 
 
 
 def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
-                                get_filename_reformat_func=None, input_dir=None):
+                                get_filename_reformat_func=None, input_dir=None, **kwargs):
     '''
     Function to create and display a gallery of aspect ratio distribution.
 
@@ -1555,7 +1749,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
         return 1
 
 
-    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir)
+    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir, kwargs=kwargs)
 
 def export_to_cvat(files, labels, save_path):
     """
