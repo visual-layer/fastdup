@@ -987,15 +987,17 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
     '''
 
     kwargs['is_video'] = True
-    df = find_similarity_file(work_dir)
+    df, input_dir = find_similarity_file(work_dir, input_dir, kwargs)
     df = remove_duplicate_video_distances(df, kwargs)
     if df is None:
         return 1
 
-    return create_components_gallery(df, save_path, num_images, lazy_load, get_label_func, group_by, slice,
-                                        max_width, max_items, min_items, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
+    return create_components_gallery(work_dir, save_path=save_path, num_images=num_images, lazy_load=lazy_load,
+                                     get_label_func=get_label_func, group_by=group_by, slice=slice,
+                                     max_width=max_width, max_items=max_items, get_bounding_box_func=get_bounding_box_func,
+                                     get_reformat_filename_func=get_reformat_filename_func, get_extra_col_func=get_extra_col_func, threshold=threshold, metric=metric,
+                                     descending=descending, min_items=min_items, keyword=keyword, comp_type="component",
+                                     input_dir=input_dir, **kwargs)
 
 
 def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
@@ -1057,10 +1059,11 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
     if ret != 0:
         return ret
 
-    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, 'visual', slice,
-                                        max_width, max_items, min_items, get_bounding_box_func,
+    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func,
+                                        'visual', slice, max_width, max_items, min_items, get_bounding_box_func,
                                         get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="cluster", input_dir=input_dir, kwargs=kwargs)
+                                        descending=descending, keyword=keyword, comp_type="cluster",
+                                        input_dir=input_dir, kwargs=kwargs)
 
 
 

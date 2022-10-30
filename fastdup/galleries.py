@@ -515,7 +515,8 @@ def load_one_image(args):
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
-                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component", input_dir=None, **kwargs):
+                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component",
+                             input_dir=None, kwargs=None):
     '''
     Visualize the top connected components
 
@@ -689,6 +690,7 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     nrows = None
     if len(kwargs) and 'nrows' in kwargs:
         nrows = kwargs['nrows']
+
     # read fastdup connected components, for each image id we get component id
     components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS), nrows=nrows)
     if 'min_distance' not in components.columns:
@@ -707,13 +709,40 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     # now join the two tables to get both id and image name
     components['filename'] = filenames['filename']
 
+    if 'is_video' in kwargs:
+        components['dirname'] = components['filename'].apply(os.path.dirname)
+
     components = find_label(get_label_func,components, 'filename', 'label', kwargs)
     return components
 
 
+def remove_frames_from_overlapping_videos(comps):
+    short_files = []
+    short_videos = []
+    assert 'video' in comps.columns
+
+    comps['orig_len'] = comps['len']
+    for i,row in comps.iterrows():
+        row_files = row['files']
+        row_videos = row['video']
+        assert len(row_files) == len(row_videos), str(row_files) + str(row_videos)
+        temp = pd.DataFrame({'files':row_files, 'video':row_videos})
+        temp = temp.drop_duplicates(subset='video')
+        short_files.append(temp['files'].values)
+        short_videos.append(temp['video'].values)
+    comps['files'] = short_files
+    comps['video'] = short_videos
+    comps['len'] = comps['video'].apply(lambda x:len(set(x)))
+    comps = comps[comps['len'] > 1]
+    if len(comps) == 0:
+        print("Failed to find duplicate videos")
+        return None
+
+    return comps
+
 def do_find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
                            descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
-                           comp_type="component", input_dir=None, **kwargs):
+                           comp_type="component", input_dir=None, kwargs=None):
     '''
     Function to find the largest components of duplicate images
 
@@ -791,20 +820,35 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
             top_labels = components.groupby(comp_col)['label'].apply(list)
             top_files = components.groupby(comp_col)['filename'].apply(list)
             dict_cols = {'files':top_files, 'label':top_labels}
+
+            if kwargs and 'is_video' in kwargs:
+                top_dirs = components.groupby(comp_col)['dirname'].apply(list)
+                dict_cols['video'] = top_dirs
+
             #if threshold is not None or metric is not None:
             distance = components.groupby(comp_col)[distance_col].apply(np.min)
             dict_cols['distance'] = distance
             if metric is not None:
                 top_metric = components.groupby(comp_col)[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
+
+
+
             comps = pd.DataFrame(dict_cols).reset_index()
+
         elif group_by == 'label':
             is_list = isinstance(components['label'].values[0], list)
             if is_list:
                  components = components.explode(column='label', ignore_index=True).reset_index()
+
             top_files = components.groupby('label')['filename'].apply(list)
             top_components = components.groupby('label')[comp_col].apply(list)
             dict_cols = {'files':top_files, comp_col:top_components}
+
+            if kwargs and 'is_video' in kwargs:
+                top_dirs = components.groupby('label')['dirname'].apply(list)
+                dict_cols['video'] = top_dirs
+
             #if threshold is not None or metric is not None:
             distance = components.groupby('label')[distance_col].apply(np.min)
             dict_cols['distance'] = distance
@@ -816,7 +860,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
             assert(False), "group_by should be visual or label, got " + group_by
 
     else:
+
         top_components = components.groupby(comp_col)['filename'].apply(list)
+
         dict_cols = {'files':top_components}
         #if threshold is not None or metric is not None:
         distance = components.groupby(comp_col)[distance_col].apply(np.min)
@@ -824,13 +870,31 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         if metric is not None:
             top_metric = components.groupby(comp_col)[metric].apply(np.mean)
             dict_cols[metric] = top_metric
+
+        if kwargs and 'is_video' in kwargs:
+            top_dirs = components.groupby(comp_col)['dirname'].apply(list)
+            dict_cols['video'] = top_dirs
+
         comps = pd.DataFrame(dict_cols).reset_index()
+
+
 
     if len(comps) == 0:
         print("No components found")
         return None
 
     comps['len'] = comps['files'].apply(lambda x: len(x))
+    comps = comps[comps['len'] > 1]
+    if len(comps) == 0:
+        print("No components found with more than one image/video")
+        return None
+
+    # keep a single frame from each video
+    if kwargs and 'is_video' in kwargs:
+        comps = remove_frames_from_overlapping_videos(comps)
+        if comps is None:
+            return None
+
     stat_info = None
     if return_stats:
         stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None, input_dir=input_dir)
@@ -893,7 +957,8 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  group_by='visual', slice=None, max_width=None, max_items=None, min_items=None,
                                  get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_info_func=None,
-                                 threshold=None ,metric=None, descending=True, keyword=None, comp_type="component", input_dir=None, kwargs=None):
+                                 threshold=None ,metric=None, descending=True, keyword=None, comp_type="component", input_dir=None,
+                                 kwargs=None):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -951,14 +1016,15 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     if num_images > 1000 and not lazy_load:
         print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
-
     assert num_images >= 1, "Please select one or more images"
     assert group_by == 'label' or group_by == 'visual', "Allowed values for group_by=[visual|label], got " + group_by
     if group_by == 'label':
         assert get_label_func is not None, "missing get_label_func, when grouping by labels need to set get_label_func"
     assert comp_type in ['component','cluster']
+    num_items_title = 'num_images' if 'is_video' not in kwargs else 'num_videos'
 
     start = time.time()
+
     subdf, img_paths, stats_html = visualize_top_components(work_dir, save_path, num_images,
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
@@ -975,11 +1041,15 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     comp_col = "component_id" if comp_type == "component" else "cluster"
 
     cols_dict = {comp_col:subdf[comp_col].values,
-                 'num_images':subdf['len'].apply(lambda x: "{:,}".format(x)).values}
+                 num_items_title:subdf['len'].apply(lambda x: "{:,}".format(x)).values}
     if 'distance' in subdf.columns:
         cols_dict['distance'] = subdf['distance'].values
     if 'label' in subdf.columns:
         cols_dict['label'] = subdf['label'].values
+    elif 'is_video' in kwargs:
+        cols_dict['num_images'] = subdf['orig_len'].apply(lambda x: "{:,}".format(x)).values
+        subdf['label'] = subdf['video']
+
     if metric in subdf.columns:
         cols_dict[metric] = subdf[metric].apply(lambda x: round(x,2)).values
 
@@ -987,23 +1057,26 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
  
     info_list = []
     counter =0
+
     for i,row in ret2.iterrows():
         if group_by == 'visual':
             comp = row[comp_col]
-            num = row['num_images']
-            dict_rows = {'component':[comp], 'num_images':[num]}
+            num = row[num_items_title]
+            dict_rows = {'component':[comp], num_items_title :[num]}
 
             dist = row['distance']
             dict_rows['mean_distance'] = [np.mean(dist)]
             if metric is not None:
                 dict_rows[metric] = [row[metric]]
+            if kwargs and 'is_video' in kwargs:
+                dict_rows['num_images'] = row['num_images']
 
             info_df = pd.DataFrame(dict_rows).T
             info_list.append(info_df.to_html(escape=True, header=False).replace('\n',''))
         elif group_by == 'label':
             label = row['label']
-            num = row['num_images']
-            dict_rows = {'label':[label], 'num_images':[num]}
+            num = row[num_items_title]
+            dict_rows = {'label':[label], num_items_title :[num]}
 
 
             dist = row['distance']
@@ -1023,7 +1096,11 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             labels_table = []
             counter = 0
             for i,row in subdf.iterrows():
-                unique, counts = np.unique(np.array(row['label']), return_counts=True)
+                labels = list(row['label'])
+                if callable(get_reformat_filename_func) and 'is_video' in kwargs:
+                    labels = [get_reformat_filename_func(x) for x in labels]
+
+                unique, counts = np.unique(np.array(labels), return_counts=True)
                 lencount = len(counts)
                 if max_items is not None and max_items < lencount:
                     lencount = max_items
@@ -1069,7 +1146,10 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             columns.append('components')
 
     if comp_type == "component":
-        title = 'Fastdup Tool - Components Report'
+        if 'is_video' in kwargs:
+            title = 'Fastdup tool - Video Components Report'
+        else:
+            title = 'Fastdup Tool - Components Report'
     else:
         title = "Fastdup Tool - KMeans Cluster Report"
 
