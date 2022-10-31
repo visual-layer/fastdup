@@ -110,6 +110,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [Computing image statistics](./examples/fastdup_image_stats.ipynb)
 - [Using your own onnx model for extraction](./examples/fastdup_model_support.ipynb)
 - [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
+- [Deduplication of videos - Google Colab](https://github.com/visualdatabase/fastdup/tree/main/examples/fastdup_video.ipynb)
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
 - [Working with multipe labels per image](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_peta.ipynb)
 
