@@ -22,11 +22,8 @@
 </div>
 
 
-
-
-
 <a href="https://bit.ly/3NJLxEe">Large Image Datasets Today are a Mess Blog </a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
- <h2> What Problems fastdup Solves?</h2>
+ <h2> What problems fastdup solves?</h2>
  <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="900">
@@ -44,11 +41,11 @@
 # fastdup is: 
 
  - <font size=10> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
- - <font size=10> **Scalable** :</font> <font size=5> handles more than 400M  images </font>
- - <font size=10> **Efficient**:</font> <font size=5> can work on **CPU only** </font>
+ - <font size=10> **Scalable** :</font> <font size=5> handles more than 400M images </font>
+ - <font size=10> **Efficient**:</font> <font size=5> works on **CPU only** </font>
  - <font size=10> **Low Cost**: </font> <font size=5> can process 12M images on a $1 CPU machine </font>
 
-# Quick Installation 
+# Quick installation 
 - Python 3.7, 3.8, 3.9 
 - Supported OS: Ubuntu 20.04, Ubuntu 18.04, Debian 10, Mac OSX M1,  Mac OSX Intel, Windows 10 Server.
 
@@ -61,7 +58,7 @@ python3.XX -m pip install fastdup
 Where XX is your python version.
 For Windows, CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructions](./INSTALL.md).
 
-# Full Documentation
+# Full documentation
 [Full documentation is here](https://visualdatabase.github.io/fastdup/)
 
 
@@ -107,13 +104,13 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
 [Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
-# For Support and Feature Requests 
+# For support and feature requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
-# For fastdup Enterprise Edition
+# For fastdup enterprise edition
  <a href="https://www.visual-layer.com">Visual Layer</a>
 
-# About Us
+# About us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
 </div>
