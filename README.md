@@ -1,4 +1,16 @@
-<div>
+
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="fastdup" width="500">
+  </a>
+  <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
+ </div>
+ 
+ **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
+ 
+ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
+
+ <div>
    <img src="https://camo.githubusercontent.com/40d08d4012a37b9f33aa9515a916a7f6b17f6945300b9bc06656eb245462b3a4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d332e37253230253743253230332e38253230253743253230332e392d626c75652e737667">
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
    <a href="https://colab.research.google.com/github/visualdatabase/fastdup/blob/main/examples/fastdup.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
@@ -10,66 +22,31 @@
 </div>
 
 
-FastDup | A tool for gaining insights from a large image collection
-===================================================================
-> Large Image Datasets Today are a Mess | <a href="https://bit.ly/3NJLxEe">Blog Post</a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
-
-FastDup is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. FastDup scales to millions of images running on CPU only.
-
-From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
-
-## [Identify duplicates](https://bit.ly/3AkSUz1)
-![alt text](./gallery/mscoco_duplicates-min.png)
-*Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
-
-## [Find corrupted and broken images](https://bit.ly/3nD3o5k)
-![alt text](./gallery/imagenet21k_broken.png)
-*Thousands of broken ImageNet images that have confusing labels of real objects.*
-
-## [Find outliers](https://bit.ly/3bNiceX)
-![alt text](./gallery/imdb_outliers-min.png)
-*[IMDB-WIKI](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/) outliers (data goal is for face recognition, gender and age classification)*
 
 
-## [Find similar persons](https://bit.ly/3a9tud4)
-![alt text](./gallery/viz0.png)
-*Can you tell how many different persons?*
 
+<a href="https://bit.ly/3NJLxEe">Large Image Datasets Today are a Mess Blog </a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
+ <h2> What Problems fastdup Solves?</h2>
+ <div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="900">
+  </a>
+ </div>
 
-## [Find wrong labels](https://bit.ly/3bPbVPW)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_wrong_labels-min.png)
-*Wrong labels in the [Imagenet-21K](https://www.image-net.org) dataset*.
+<h2> Just 2 lines of code to get you started:</h2>
+<div align="center" style="display:flex;flex-direction:column;">
+ <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
+  </a>
+  
+  <div align="left" style="display:flex;flex-direction:column;">
+  
+# fastdup is: 
 
-
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/imagenet21k_funny-min.png)
-*Fun labels in the [Imagenet-21K](https://www.image-net.org) dataset*
-
-## [Coming soon: image graph search (please reach out if you like to beta test)](https://bit.ly/3bJlIXC)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz23.png)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz2.png)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/tmp13_viz5.png)
-
-*Upcoming new features: image graph search!*
-
-
-## Results on Key Datasets ([full results here](https://bit.ly/3nyQ3ef))
-We have thoroughly tested fastdup across various famous visual datasets. Ranging from pillar Academic datasets to Kaggle competitions. A key finding we have made using FastDup is that there are ~1.2M (!) duplicate images on the ImageNet-21K dataset, out of which 104K pairs belong both to the train and to the val splits (this amounts to 20% of the validation set). This is a new unknown result! Full results are below. * train/val splits are taken from https://github.com/Alibaba-MIIL/ImageNet21 .
-
-|Dataset	        |Total Images	|cost [$]|spot cost [$]|processing [sec]|Identical pairs|Anomalies|
-|-----------------------|---------------|--------|-------------|----------------|---------------|---------|
-|[imagenet21k-resized](https://www.image-net.org/challenges/LSVRC/)	|11,582,724	|4.98	|1.24	|11,561	|[1,194,059](https://www.databasevisual.com/imagenet-21k-resized-leaks)|[Anomalies](https://bit.ly/3OSJWx6) [Wrong Labels](https://bit.ly/3bMauSm)||
-|[imdb-wiki](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/)	|514,883	|0.65	|0.16	|1,509	|[187,965](https://bit.ly/3OSK5AE)|[View](https://www.databasevisual.com/imdb-wiki-anomalies)|
-|[places365-standard](http://places2.csail.mit.edu/download.html)	|2,168,460	|1.01	|0.25	|2,349|[93,109](https://www.databasevisual.com/places-365-leaks)|[View](https://bit.ly/3R4ceGH)|
-|[herbarium-2022-fgvc9](https://www.kaggle.com/c/herbarium-2022-fgvc9)	|1,050,179	|0.69	|0.17	|1,598	|[33,115](https://www.databasevisual.com/herbarium-leaks)|[View](https://bit.ly/3OETEmT)|
-|[landmark-recognition-2021](https://www.kaggle.com/c/landmark-recognition-2021)|1,590,815|0.96	|0.24	|2,236	|[2,613](https://www.databasevisual.com/landmarks-2021-leaks)|[View](https://bit.ly/3nwQbuN)|
-|[visualgenome](https://visualgenome.org/)		|108,079	|0.05	|0.01	|124	|223|View|
-|[iwildcam2021-fgvc9](https://www.kaggle.com/c/iwildcam2022-fgvc9/)	|261,428	|0.29	|0.07	|682	|[54](https://www.databasevisual.com/iwildcam2022-leaks)|[View](https://bit.ly/3Apwmx0)|
-|[coco](https://cocodataset.org/#home)			|163,957	|0.09	|0.02	|218	|54|View|
-|[sku110k](https://github.com/eg4000/SKU110K_CVPR19)		|11,743	|0.03	|0.01	|77	|[7](https://www.databasevisual.com/sku110k-leaks)|[View](https://bit.ly/3bLWOqa)|
-
-* Experiments presented are on a 32 core Google cloud machine, with 128GB RAM (no GPU required).
-* All experiments could be also reproduced on a 8 core, 32GB machine (excluding Imagenet-21K).
-* We run on the full ImageNet-21K dataset (11.5M images) to compare all pairs of images in less than 3 hours WITHOUT a GPU (with Google cloud cost of 5$).
+ - <font size=10> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
+ - <font size=10> **Scalable** :</font> <font size=5> handles more than 400M  images </font>
+ - <font size=10> **Efficient**:</font> <font size=5> can work on **CPU only** </font>
+ - <font size=10> **Low Cost**: </font> <font size=5> can process 12M images on a $1 CPU machine </font>
 
 # Quick Installation 
 - Python 3.7, 3.8, 3.9 
@@ -84,6 +61,9 @@ python3.XX -m pip install fastdup
 Where XX is your python version.
 For Windows, CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructions](./INSTALL.md).
 
+# Full Documentation
+[Full documentation is here](https://visualdatabase.github.io/fastdup/)
+
 
 # Running the code
 
@@ -97,8 +77,6 @@ fastdup.create_stats_gallery('out', save_path='.', metric='blur')          #crea
 fastdup.create_similarity_gallery('out', save_path='.',get_label_func=lambda x: x.split('/')[-2])     #create visualization of top_k similar images assuming data have labels which are in the folder name
 fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #create aspect ratio gallery
 ```
-[Full documentation is here](https://visualdatabase.github.io/fastdup/)
-
 
 ![alt text](./gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
@@ -113,8 +91,6 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [Deduplication of videos - Google Colab](https://github.com/visualdatabase/fastdup/tree/main/examples/fastdup_video.ipynb)
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
 - [Working with multipe labels per image](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_peta.ipynb)
-
-![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
 
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](https://bit.ly/3yDc2qw)
@@ -131,13 +107,13 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
 [Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
-
-# Support 
+# For Support and Feature Requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
-# Technology
-We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli), [TensorBoard](https://github.com/tensorflow/tensorboard), [scikit-learn](https://github.com/scikit-learn/scikit-learn).
+# For fastdup Enterprise Edition
+ <a href="https://www.visual-layer.com">Visual Layer</a>
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
+</div>
