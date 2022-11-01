@@ -9,8 +9,17 @@
 <a href="https://share-eu1.hsforms.com/1POrgIy-hTSyMaOTQzgjqhgfglt8" rel="nofollow"><img src="https://camo.githubusercontent.com/5042565e9cc3a40bff3d9be7b59955d984831f594d38297b6efecf804e41b8f7/687474703a2f2f6269742e6c792f324d643972784d" alt="Mailing list" data-canonical-src="http://bit.ly/2Md9rxM" style="max-width: 100%;"></a>
 </div>
 
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://lineapy.org/">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="LineaPy" width="500">
+  </a>
+  <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
+</div>
 
-FastDup | A tool for gaining insights from a large image collection
+
+
+
+fastdup | Easily Manage, Clean & Curate Visual Data (images/videos) at Scale 
 ===================================================================
 > Large Image Datasets Today are a Mess | <a href="https://bit.ly/3NJLxEe">Blog Post</a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
 
@@ -22,7 +31,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 ![alt text](./gallery/mscoco_duplicates-min.png)
 *Duplicates and near duplicates identified in [MS-COCO](https://cocodataset.org/#home) and [Imagenet-21K](https://www.image-net.org) dataset*
 
-## [Find corrupted and broken images](https://bit.ly/3nD3o5k)
+#t# [Find corrupted and broken images](https://bit.ly/3nD3o5k)
 ![alt text](./gallery/imagenet21k_broken.png)
 *Thousands of broken ImageNet images that have confusing labels of real objects.*
 
@@ -140,4 +149,3 @@ We build upon several excellent open source tools. [Microsoft's ONNX Runtime](ht
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
-
