@@ -40,7 +40,7 @@
   </a>
   
   <div align="left" style="display:flex;flex-direction:column;">
-<h2> fastdup is: </h2>
+# fastdup is: 
 
  - **Unsupervised**: fits any dataset
  - **Scalable** : handles more than 400M  images
