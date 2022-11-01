@@ -1,7 +1,7 @@
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://lineapy.org/">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="LineaPy" width="500">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="LineaPy" width="700">
   </a>
   <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
 </div>
