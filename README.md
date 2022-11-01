@@ -43,10 +43,10 @@
   
 # fastdup is: 
 
- - **Unsupervised**: fits any dataset
- - **Scalable** : handles more than 400M  images
- - **Efficient**:  can work on **CPU only**
- - **Low Cost**: can process 12M images on a $1 CPU machine
+ - <font size=6> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
+ - <font size=6> **Scalable** :</font> <font size=5> handles more than 400M  images </font>
+ - <font size=6> **Efficient**:</font> <font size=5> can work on **CPU only** </font>
+ - <font size=6> **Low Cost**: </font> <font size=5> can process 12M images on a $1 CPU machine </font>
 
 # Quick Installation 
 - Python 3.7, 3.8, 3.9 
