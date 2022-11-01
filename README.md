@@ -1,15 +1,15 @@
 
 <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://lineapy.org/">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="LineaPy" width="500">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="fastdup" width="500">
   </a>
   <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
+ </div>
+
   
 **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. fastdup scales to more than **400 million  images** running on **CPU only**.
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
-
-</div>
 
 <div>
    <img src="https://camo.githubusercontent.com/40d08d4012a37b9f33aa9515a916a7f6b17f6945300b9bc06656eb245462b3a4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d332e37253230253743253230332e38253230253743253230332e392d626c75652e737667">
