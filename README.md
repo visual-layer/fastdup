@@ -90,8 +90,6 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 - [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
 - [Working with multipe labels per image](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_peta.ipynb)
 
-![Tensorboard Projector integration is explained in our Colab notebook](./gallery/tensorboard_projector.png)
-
 ## Detailed instructions
 - [Detailed instructions, install from stable release and installation issues](https://bit.ly/3yDc2qw)
 - [Detailed running instructions](https://bit.ly/3OFLlY5)
