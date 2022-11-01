@@ -35,8 +35,8 @@
 
 <h2> Just 2 lines of code to get you started:</h2>
 <div align="center" style="display:flex;flex-direction:column;">
- <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
+ <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="900">
   </a>
   
   <div align="left" style="display:flex;flex-direction:column;">
@@ -107,10 +107,11 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
 [Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
-
 # For Support and Feature Requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
+# For fastdup Enterprise Edition
+ <a href="https://www.visual-layer.com">Visual Layer</a>
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
