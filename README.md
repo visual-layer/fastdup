@@ -1,26 +1,33 @@
 
-<div align="center" style="display:flex;flex-direction:column;"> 
+<div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="fastdup" width="500">
   </a>
   <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
  </div>
-
-  
+ 
 **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. fastdup scales to more than **400 million  images** running on **CPU only**.
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
-<div align="left" style="display:flex;flex-direction:column;">
+<div align="center" style="display:flex;flex-direction:column;">
+<a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_valuep.png" alt="fastdup" width="700">
+  </a>
+</div>
+
+
+
+<div align="center" style="display:flex;flex-direction:column;">
 <h3> Just 2 lines of code to get you started</h3>
  <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="500">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
   </a>
 </div>
 
 <div align="center" style="display:flex;flex-direction:column;">
 <h2> How fastdup works </h2>
-bla bla
+
 </div>
 
 <div>
@@ -104,8 +111,6 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 # Support 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
-# Technology
-We build upon several excellent open source tools. [Microsoft's ONNX Runtime](https://github.com/microsoft/onnxruntime), [Facebook's Faiss](https://github.com/facebookresearch/faiss), [Open CV](https://github.com/opencv/opencv), [Pillow Resize](https://github.com/zurutech/pillow-resize), [Apple's Turi Create](https://github.com/apple/turicreate), [Minio](https://github.com/minio/minio), [Amazon's awscli](https://github.com/aws/aws-cli), [TensorBoard](https://github.com/tensorflow/tensorboard), [scikit-learn](https://github.com/scikit-learn/scikit-learn).
 
 # About Us
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
