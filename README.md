@@ -39,7 +39,6 @@
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
   </a>
   
-  <div align="left" style="display:flex;flex-direction:column;">
 # fastdup is: 
 
  - **Unsupervised**: fits any dataset
