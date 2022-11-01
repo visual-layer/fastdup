@@ -107,7 +107,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
 
-# Support 
+# For Support and Feature Requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
 
