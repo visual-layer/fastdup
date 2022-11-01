@@ -8,7 +8,7 @@
  
  **fastdup** is a tool for gaining insights from a large image/video collection. It can find anomalies, duplicate and near duplicate images/videos, clusters of similarity, learn the normal behavior and temporal interactions between images/videos. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
  
-</br> 
+
 **fastdup** is:
 
  - <font size=10> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
