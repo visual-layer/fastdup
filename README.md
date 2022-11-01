@@ -1,5 +1,5 @@
 
-<div align="center" style="display:flex;flex-direction:column;">
+<div align="center" style="display:flex;flex-direction:column;"> 
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="fastdup" width="500">
   </a>
