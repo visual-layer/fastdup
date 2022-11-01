@@ -7,12 +7,12 @@
  </div>
  
 **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
-fastdup is:
+**fastdup** is:
 
--**Unsupervised**: fits **any dataset** <br/>
--**Scalable** : handles more than **400M  images** <br/>
--**Efficient**:  can work on **CPU only**<br/>
--**Low Cost**: can process 12M images on a **$1 CPU machine**<br/>
+ - **Unsupervised**: fits any dataset
+ - **Scalable** : handles more than 400M  images
+ - **Efficient**:  can work on **CPU only**
+ - **Low Cost**: can process 12M images on a $1 CPU machine
 
 <h3> Just 2 lines of code to get you started:</h3>
 <div align="center" style="display:flex;flex-direction:column;">
@@ -20,9 +20,6 @@ fastdup is:
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
   </a>
 </div>
-
-From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
-
 
 <div align="center" style="display:flex;flex-direction:column;">
 <h2> How fastdup works </h2>
@@ -112,4 +109,7 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 
 
 # About Us
+
+From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
+
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
