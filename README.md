@@ -13,7 +13,8 @@
  - **Scalable** : handles more than 400M  images
  - **Efficient**:  can work on **CPU only**
  - **Low Cost**: can process 12M images on a $1 CPU machine
-
+ 
+</br></br>
 <h3> Just 2 lines of code to get you started:</h3>
 <div align="center" style="display:flex;flex-direction:column;">
  <a href="https://www.visual-layer.com">
