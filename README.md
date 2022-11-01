@@ -104,10 +104,10 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 [ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
 [Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
 
-# For support and feature requests 
+# Support and feature requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
-# For fastdup enterprise edition
+# fastdup enterprise edition
  <a href="https://www.visual-layer.com">Visual Layer</a>
 
 # About us
