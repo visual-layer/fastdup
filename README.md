@@ -9,10 +9,10 @@
 **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
 fastdup is:
 
-**Unsupervised**: fits **any dataset**
-**Scalable** : can process more than **400 million  images** 
-**Efficient**:  can work on **CPU only**
-**Low Cost**: can process 12M images on a **$1 CPU machine**
+**Unsupervised**: fits **any dataset** <br/>
+**Scalable** : can process more than **400 million  images** <br/>
+**Efficient**:  can work on **CPU only**<br/>
+**Low Cost**: can process 12M images on a **$1 CPU machine**<br/>
 
 <h3> Just 2 lines of code to get you started:</h3>
 <div align="center" style="display:flex;flex-direction:column;">
