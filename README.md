@@ -60,6 +60,9 @@ python3.XX -m pip install fastdup
 Where XX is your python version.
 For Windows, CentOS 7.X, RedHat 4.8 and other older Linux see our [Insallation instructions](./INSTALL.md).
 
+# Full Documentation
+[Full documentation is here](https://visualdatabase.github.io/fastdup/)
+
 
 # Running the code
 
@@ -73,8 +76,6 @@ fastdup.create_stats_gallery('out', save_path='.', metric='blur')          #crea
 fastdup.create_similarity_gallery('out', save_path='.',get_label_func=lambda x: x.split('/')[-2])     #create visualization of top_k similar images assuming data have labels which are in the folder name
 fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #create aspect ratio gallery
 ```
-[Full documentation is here](https://visualdatabase.github.io/fastdup/)
-
 
 ![alt text](./gallery/fastdup_clip_24s_crop.gif)
 *Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
