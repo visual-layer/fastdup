@@ -6,8 +6,17 @@
   <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
  </div>
  
-**fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
-**fastdup** is:
+ **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
+ 
+ <h3> What Problems fastdup Solves?:</h3>
+ <div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="900">
+  </a>
+  <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
+ </div>
+
+<h3> fastdup is: </h3>
 
  - **Unsupervised**: fits any dataset
  - **Scalable** : handles more than 400M  images
