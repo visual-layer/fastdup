@@ -16,7 +16,7 @@
  
 </br></br>
 <h3> Just 2 lines of code to get you started:</h3>
-<div align="center" style="display:flex;flex-direction:column;">
+<div align="left" style="display:flex;flex-direction:column;">
  <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="300">
   </a>
