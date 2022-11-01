@@ -8,6 +8,8 @@
  
  **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
  
+ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
+
  <div>
    <img src="https://camo.githubusercontent.com/40d08d4012a37b9f33aa9515a916a7f6b17f6945300b9bc06656eb245462b3a4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d332e37253230253743253230332e38253230253743253230332e392d626c75652e737667">
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
@@ -44,8 +46,6 @@
  - **Scalable** : handles more than 400M  images
  - **Efficient**:  can work on **CPU only**
  - **Low Cost**: can process 12M images on a $1 CPU machine
-</div>
-
 
 # Quick Installation 
 - Python 3.7, 3.8, 3.9 
@@ -113,7 +113,6 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 
 
 # About Us
-
-From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
-
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+
+</div>
