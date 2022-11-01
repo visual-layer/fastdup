@@ -21,6 +21,7 @@
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
   </a>
   
+  <div align="left" style="display:flex;flex-direction:column;">
 <h2> fastdup is: </h2>
 
  - **Unsupervised**: fits any dataset
@@ -28,11 +29,6 @@
  - **Efficient**:  can work on **CPU only**
  - **Low Cost**: can process 12M images on a $1 CPU machine
  
-</div>
-
-<div align="center" style="display:flex;flex-direction:column;">
-<h2> How fastdup works </h2>
-
 </div>
 
 <div>
