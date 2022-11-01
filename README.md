@@ -5,7 +5,7 @@
   </a>
   <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
  </div>
-
+ 
   
 **fastdup** is a tool for gaining insights from a large image collection. It can find anomalies, duplicate and near duplicate images, clusters of similarity, learn the normal behavior and temporal interactions between images. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. fastdup scales to more than **400 million  images** running on **CPU only**.
 
