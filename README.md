@@ -11,6 +11,18 @@
 
 From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
 
+<div align="center" style="display:flex;flex-direction:column;">
+<h2> Just 2 lines of code to get you started</h2>
+ <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="500">
+  </a>
+</div>
+
+<div align="center" style="display:flex;flex-direction:column;">
+<h2> How fastdup works </h2>
+bla bla
+</div>
+
 <div>
    <img src="https://camo.githubusercontent.com/40d08d4012a37b9f33aa9515a916a7f6b17f6945300b9bc06656eb245462b3a4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d332e37253230253743253230332e38253230253743253230332e392d626c75652e737667">
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
@@ -26,7 +38,7 @@ From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi
 
 
 
-> Large Image Datasets Today are a Mess | <a href="https://bit.ly/3NJLxEe">Blog Post</a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
+<a href="https://bit.ly/3NJLxEe">Large Image Datasets Today are a Mess Blog </a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
 
 # Quick Installation 
 - Python 3.7, 3.8, 3.9 
