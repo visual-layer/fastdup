@@ -36,7 +36,7 @@
 <h2> Just 2 lines of code to get you started:</h2>
 <div align="center" style="display:flex;flex-direction:column;">
  <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="900">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="600">
   </a>
   
   <div align="left" style="display:flex;flex-direction:column;">
