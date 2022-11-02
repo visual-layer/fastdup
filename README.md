@@ -33,7 +33,7 @@
 
 
 <a href="https://bit.ly/3NJLxEe">Large Image Datasets Today are a Mess Blog </a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
- <h2> What problems fastdup solves?</h2>
+ <h2> Fastdup solves the following problems</h2>
  <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="900">
