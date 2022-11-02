@@ -42,6 +42,7 @@
   </a>
  </div>
 
+</br>
 <h2> Just 2 lines of code to get you started:</h2>
 <div align="center" style="display:flex;flex-direction:column;">
  <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">
