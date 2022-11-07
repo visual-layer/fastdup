@@ -37,10 +37,10 @@
  <h2> Fastdup solves the following problems:</h2>
  <div align="center" style="display:flex;flex-direction:column;">
    <a href="https://www.visual-layer.com">
-    <img src="https://github.com/visualdatabase/fastdup/blob/main/gallery/image_and_video_duplicates.png" alt="fastdup" width="1200">
+    <img src="https://github.com/visualdatabase/fastdup/blob/main/gallery/image_and_video_duplicates.png" alt="fastdup" width="1400">
   </a>
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="1300">
+    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="1400">
   </a>
  </div>
 
