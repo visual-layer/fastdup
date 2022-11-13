@@ -116,6 +116,19 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 # Support and feature requests 
 <a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
 
+## Disclaimer
+
+<details>
+  <summary><b>Usage Tracking</b></summary>
+
+We have added experimental crash report collection on Ubuntu 20.04, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder name, user name, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores etc. Collecting fastdup crashes will help us improve stability. 
+
+It is always possible to opt out of the experimental crash report collection via either of the following two options:
+- Define an environment variable called `SENTRY_OPT_OUT`
+- or run() with `turi_param='run_sentry=0'`
+
+</details>
+
 # fastdup enterprise edition
  <a href="https://www.visual-layer.com">Visual Layer</a>
 
