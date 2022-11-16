@@ -12,9 +12,9 @@
 **fastdup** is:
 
  - <font size=10> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
- - <font size=10> **Scalable** :</font> <font size=5> handles more than 400M images </font>
+ - <font size=10> **Scalable** :</font> <font size=5> handles 400M images on a single machine </font>
  - <font size=10> **Efficient**:</font> <font size=5> works on **CPU only** </font>
- - <font size=10> **Low Cost**: </font> <font size=5> can process 12M images on a $1 CPU machine </font>
+ - <font size=10> **Low Cost**: </font> <font size=5> can process 12M images on a $1 cloud machine budget</font>
 
 
  From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
@@ -121,9 +121,9 @@ fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #crea
 <details>
   <summary><b>Usage Tracking</b></summary>
 
-We have added experimental crash report collection on Ubuntu 20.04, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder name, user name, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores etc. Collecting fastdup crashes will help us improve stability. 
+We have added experimental crash report collection, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder name, user name, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores etc. Collecting fastdup crashes will help us improve stability. 
 
-The code for the data collection is found [here](./src/sentry.hpp).
+The code for the data collection is found [here](./src/sentry.hpp). On MAC we use [Google crashpad](https://chromium.googlesource.com/crashpad/crashpad). 
 
 It is always possible to opt out of the experimental crash report collection via either of the following two options:
 - Define an environment variable called `SENTRY_OPT_OUT`
