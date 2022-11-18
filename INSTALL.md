@@ -177,12 +177,16 @@ Operating system
 - `Ubuntu 20.04 LTS`
 - `Ubuntu 18.04 LTS`
 - `Mac OSX M1 Chip` (tested on Big Sur)
+- `Mac OSX M2 Chip` (tested on Ventura)
 - `Mac Intel Chip` (tested on Mojave)
 - `CentOS 7.9` (via stable release)
+- `Amazon Linux 2 (via stable release)`
 - `Windows 10 Server` (via WSL)
 
 Software versions
 - `Python 3.7, 3.8, 3.9` (via pip) 
+- Note: conda is not recommended
+- pyenv installed python is not working on Mac, install python using `brew install python@3.8`
 
 Hardware support
 - CPU (GPU not needed!)
