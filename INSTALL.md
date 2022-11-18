@@ -5,10 +5,11 @@
 1. [Ubuntu 20.04/18.04 Preliminaries](#ubuntu)  
 2. [Mac OSX Preliminaries](#macosx)
 3. [CentOS 7 Preliminaries](#centos7)
-4. [Windows Server 10 Preliminaries](#windows10)
-5. [Pypi setup](#pypi)
-6. [Preinstalled docker](#docker)
-7. [Common installation errors](#common)
+4. [Amazon Linux 2](#amazon_linux)
+5. [Windows Server 10 Preliminaries](#windows10)
+6. [Pypi setup](#pypi)
+7. [Preinstalled docker](#docker)
+8. [Common installation errors](#common)
 
 fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip, Windows 10 Server (via WSL).
 
