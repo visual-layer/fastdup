@@ -41,6 +41,19 @@ sudo yum -y install wget
 sudo yum install redhat-lsb-core # for lsb_release
 sudo yum install -y ffmpeg ffmpeg-devel # for video support
 ```
+Download and istall CentOS 7 whl image from our [release page](https://github.com/visual-layer/fastdup/releases).
+```
+python3.7 -m pip install <path of the downloaded whl>
+```
+
+## Amazon Linux 2 Setup <a name="amazon_linux">
+```bash
+sudo yum install mesa-libGL -y
+```
+Download and isntall CentOS 7 whl image from our [release page](https://github.com/visual-layer/fastdup/releases).
+```
+python3.7 -m pip install <path of the downloaded whl>
+```
 
 ## Windows 10 Server Setup <a name="windows10">
 
