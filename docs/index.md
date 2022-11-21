@@ -18,11 +18,18 @@ Visualization of the output data is done using the following functions:
 `fastdup.create_duplicates_gallery`
 :::fastdup.create_duplicates_gallery
 
+`fastdup.create_duplicate_videos_gallery`
+:::fastdup.create_duplicate_videos_gallery
+
+
 `fastdup.create_outliers_gallery`
 :::fastdup.create_outliers_gallery
 
 `fastdup.create_components_gallery`
 :::fastdup.create_components_gallery
+
+`fastdup.create_component_videos_gallery`
+:::fastdup.create_component_videos_gallery
 
 `fastdup.create_kmeans_clusters_gallery`
 :::fastdup.create_kmeans_clusters_gallery
@@ -67,6 +74,9 @@ Loading the binary feature resulting in fastdup run can be done by `fastdup.load
 :::fastdup.export_to_labelImg
 
 ## Fastdup utilities to remove images
+
+`fastdup.find_top_components`
+:::fastdup.find_top_components
 
 `fastdup.delete_components`
 :::fastdup.delete_components
