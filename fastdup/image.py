@@ -29,7 +29,7 @@ def truncate_folder_name(path):
         return path[pos+len(S3_TEST_TEMP_FOLDER)+1:]
     return None
 
-def fastdup_imread(img1_path, input_dir):
+def fastdup_imread(img1_path, input_dir, kwargs):
     """
     Read an image from local file, or from a tar file, or from s3/minio path using minio client mc
     Parameters:
@@ -57,6 +57,9 @@ def fastdup_imread(img1_path, input_dir):
         pos = os.path.dirname(img1_path).find(input_dir.replace('/',''))
         tar_file = os.path.dirname(img1_path)[pos+len(input_dir.replace('/','')):]
         tar_file = os.path.join(input_dir, tar_file)
+        if kwargs is not None and "reformat_tar_name" in kwargs and callable(kwargs['reformat_tar_name']):
+            tar_file = kwargs["reformat_tar_name"](tar_file)
+
         print('Found tar file', tar_file)
         img_name = os.path.basename(img1_path)
         try:
@@ -166,10 +169,10 @@ def draw_text(img, text,
 
     return text_size, img
 
-def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None, input_dir=None):
+def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None, input_dir=None, kwargs=None):
 
-    img1 = fastdup_imread(img1_path, input_dir)
-    img2 = fastdup_imread(img2_path, input_dir)
+    img1 = fastdup_imread(img1_path, input_dir, kwargs)
+    img2 = fastdup_imread(img2_path, input_dir, kwargs)
 
     assert img1 is not None
     assert img2 is not None

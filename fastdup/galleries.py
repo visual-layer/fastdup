@@ -13,6 +13,7 @@ from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter
 from fastdup.definitions import *
 import re
 from multiprocessing import Pool
+from fastdup.sentry import *
 
 try:
     from tqdm import tqdm
@@ -98,17 +99,13 @@ def slice_df(df, slice, kwargs=None):
                 df = df2
             else:
                 df = df[df['label'].apply(lambda x: slice in [y.lower() for y in x])]
-            if len(df) == 0:
-                print("Failed to find any labels with str", slice, is_list, )
-                return None
+            assert len(df), f"Failed to find any labels with str {slice}  {is_list}"
         elif isinstance(slice, list):
             if isinstance(df['label'].values[0], list):
                 df = df[df['label'].apply(lambda x: len(set(x)&set(slice)) > 0)]
             else:
                 df = df[df['label'].isin(slice)]
-            if len(df) == 0:
-                print("Failed to find any labels with", slice)
-                return None
+            assert len(df), f"Failed to find any labels with {slice}"
         else:
             assert False, "slice must be a string or a list of strings"
 
@@ -153,7 +150,7 @@ def extract_filenames(row, work_dir = None):
 def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
                                  get_bounding_box_func=None, get_reformat_filename_func=None,
-                                 get_extra_col_func=None, input_dir=None, threshold=None, kwargs=None):
+                                 get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, kwargs=None):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -188,6 +185,8 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
         input_dir (str): Optional parameter to allow reading images from a different path, or from webdataset tar files which are found on a different path
 
+        work_dir (str): Optional parameter to specify fastdup work_dir when the similarity file is a pd.DataFrame
+
         threshold (float): Optional parameter to allow filtering out images with a similarity score above a certain threshold (allowed values 0 -> 1)
 
         save_artifacts (boolean): Optional parameter to allow saving the intermediate artifacts (raw images, csv with results) to the output folder
@@ -199,7 +198,6 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
     img_paths = []
-    work_dir = None
     nrows = None
     if 'nrows' in kwargs:
         nrows = kwargs['nrows']
@@ -207,9 +205,9 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     if isinstance(similarity_file, pd.DataFrame):
         df = similarity_file
     else:
+        assert os.path.exists(similarity_file), f"Failed to find fastdup input file {similarity_file}"
         df = pd.read_csv(similarity_file, nrows=nrows)
-        work_dir = os.path.dirname(similarity_file)
-    assert len(df), "Failed to read similarity file"
+        assert len(df), "Failed to read similarity file " + similarity_file
 
     if threshold is not None:
         df = df[df['distance'] >= threshold]
@@ -238,15 +236,27 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
     sets = {}
 
+    if 'is_video' in kwargs:
+        assert os.path.exists(work_dir), f"Failed to find fastdup work dir {work_dir}"
+        filenames = pd.read_csv(f'{work_dir}/atrain_{FILENAME_IMAGE_LIST}')
+        filenames['dirname'] = filenames['filename'].apply(os.path.dirname)
+        frames = filenames.groupby(['dirname']).size().reset_index(name='num_frames')
+        df = similarity_file.merge(frames, how='left', left_on=['subfolder1'], right_on=['dirname'])
+
     subdf = df.head(num_images) if descending else df.tail(num_images)
     subdf = subdf.reset_index()
+
+    if 'is_video' in kwargs:
+        subdf['ratio'] = subdf['counts'].astype(float) / subdf['num_frames'].astype(float)
+        subdf['ratio'] = subdf['ratio'].apply(lambda x: round(x,3))
+
     indexes = []
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         impath1, impath2, dist, ptype = extract_filenames(row, work_dir)
         if impath1 + '_' + impath2 in sets:
             continue
         try:
-            img, imgpath = create_triplet_img(impath1, impath2, ptype, dist, save_path, get_bounding_box_func, input_dir)
+            img, imgpath = create_triplet_img(impath1, impath2, ptype, dist, save_path, get_bounding_box_func, input_dir, kwargs)
             sets[impath1 +'_' + impath2] = True
             sets[impath2 +'_' + impath1] = True
             indexes.append(i)
@@ -277,8 +287,9 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     fields = ['Image', 'Distance', 'From', 'To']
 
     # for video, show duplicate counts between frames
-    if 'counts' in subdf.columns:
-        fields.append('counts')
+    if 'ratio' in subdf.columns:
+        fields = ['ratio'] + fields
+
 
     if callable(get_extra_col_func):
         subdf['extra'] = subdf['From'].apply(lambda x: get_extra_col_func(x))
@@ -300,9 +311,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         else:
             title += ", for label " + str(slice)
 
-    if len(subdf) == 0:
-        print("Error: failed to find any dupilcates, try to run() with lower threshold")
-        return 1
+    assert len(subdf), "Error: failed to find any dupilcates, try to run() with lower threshold"
 
     fastdup.html_writer.write_to_html_file(subdf[fields], title, out_file)
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
@@ -326,10 +335,10 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
 def load_one_image_for_outliers(args):
-    row, work_dir, input_dir, get_bounding_box_func, max_width, save_path = args
+    row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs = args
     impath1, impath2, dist, ptype = extract_filenames(row, work_dir)
     try:
-        img = fastdup_imread(impath1, input_dir=input_dir)
+        img = fastdup_imread(impath1, input_dir, kwargs)
         img = plot_bounding_box(img, get_bounding_box_func, impath1)
         img = my_resize(img, max_width=max_width)
 
@@ -410,7 +419,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     if isinstance(outliers_file, pd.DataFrame):
         df = outliers_file
     else:
-
+        assert os.path.exists(outliers_file), f"Failed to find fastdup input file {outliers_file}"
         df = pd.read_csv(outliers_file, nrows=nrows)
         print('read outliers', len(df))
         work_dir = os.path.dirname(outliers_file)
@@ -418,8 +427,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
     if (how == 'all'):
         dups_file = os.path.join(os.path.dirname(outliers_file), FILENAME_SIMILARITY)
-        if not os.path.exists(dups_file):
-            print('Failed to find input file ', dups_file, ' which is needed for computing how=all similarities')
+        assert os.path.exists(dups_file), f'Failed to find input file {dups_file} which is needed for computing how=all similarities'
 
         dups = pd.read_csv(dups_file, nrows=nrows)
         assert len(dups), "Error: Failed to locate similarity file file " + dups_file
@@ -429,9 +437,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         joined = df.merge(dups, on='from', how='left')
         joined = joined[pd.isnull(joined['distance_y'])]
 
-        if (len(joined) == 0):
-            print('Failed to find outlier images that are not included in the duplicates similarity files, run with how="one".')
-            return 1
+        assert len(joined), 'Failed to find outlier images that are not included in the duplicates similarity files, run with how="one".'
 
         subdf = joined.rename(columns={"distance_x": "distance", "to_x": "to"}).sort_values('distance', ascending=True)
     else:
@@ -450,7 +456,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     all_args = []
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
 
-        args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_path
+        args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs
         all_args.append(args)
 
     with Pool() as pool:
@@ -501,13 +507,14 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
 def load_one_image(args):
     try:
-        f, input_dir, get_bounding_box_func = args
-        img = fastdup_imread(f, input_dir)
+        f, input_dir, get_bounding_box_func, kwargs = args
+        img = fastdup_imread(f, input_dir, kwargs)
         img = plot_bounding_box(img, get_bounding_box_func, f)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img, img.shape[1], img.shape[0]
     except Exception as ex:
         print("Warning: Failed to load image ", f, "skipping image due to error", ex)
+        fastdup_capture_exception("load_one_image", ex)
         return None,None,None
 
 
@@ -569,8 +576,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         from fastdup.tensorboard_projector import generate_sprite_image
         import traceback
     except Exception as ex:
-        print('Your system is missing some depdencies, please pip install matplotlib matplotlib-inline torchvision')
+        print('Your system is missing some dependencies, please pip install matplotlib matplotlib-inline torchvision')
         print(ex)
+        fastdup_capture_exception("visualize_top_components", ex)
         return None, None
 
     assert num_components > 0, "Number of components should be larger than zero"
@@ -584,16 +592,14 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     if not return_stats:
         top_components = ret
     else:
-        if ret is None:
-            print(f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components")
-            return None, None
-        top_components, stats_html = ret
+        assert ret is not None, f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
+    top_components, stats_html = ret
     top_components = top_components.head(num_components)
+    if 'debug_cc' in kwargs:
+        print(top_components.head())
+    save_arficats = 'save_artifacts' in kwargs and kwargs['save_artifacts']
 
-    if (top_components is None or len(top_components) == 0):
-        print(f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components")
-        return None, None
-
+    assert top_components is not None and len(top_components), f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
     comp_col = "component_id" if comp_type == "component" else "cluster"
 
     # iterate over the top components
@@ -606,6 +612,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             # find all the image filenames linked to this id
             files = row['files'][:MAX_IMAGES_IN_GRID]
             if (len(files) == 0):
+                print(f"Failed to find any files for component_id {component_id}");
                 break
 
             tmp_images = []
@@ -613,8 +620,8 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             val_array = []
             for f in files:
                 #t,w1,h1 = load_one_image(f, input_dir, get_bounding_box_func)
-                val_array.append([f, input_dir, get_bounding_box_func])
-
+                val_array.append([f, input_dir, get_bounding_box_func, kwargs])
+        
             with Pool() as pool:
                 result = pool.map(load_one_image, val_array)
             for x in result:
@@ -624,9 +631,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
                     h.append(x[2])
                 
 
-            if len(tmp_images) == 0:
-                print("Failed to read all images")
-                return None, None
+            assert len(tmp_images),"Failed to read all images"
 
             avg_h = int(np.mean(h))
             avg_w = int(np.mean(w))
@@ -647,14 +652,12 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
 
         except ModuleNotFoundError as ex:
-            print('Your system is missing some dependencies please install then with pip install: ', ex)
-            traceback.print_exc()
-            return None, None
+            print('Your system is missing some dependencies please install then with pip install:')
+            fastdup_capture_exception("visualize_top_components", ex)
 
         except Exception as ex:
             print('Failed on component', i, ex)
-            traceback.print_exc()
-            return None, None
+            fastdup_capture_exception("visualize_top_components", ex)
 
     print(f'Finished OK. Components are stored as image files {save_path}/components_[index].jpg')
     return top_components.head(num_components), img_paths, stats_html
@@ -664,9 +667,7 @@ def read_clusters_from_file(work_dir, get_label_func, kwargs):
     if isinstance(work_dir, str):
         if os.path.isdir(work_dir):
             work_dir = os.path.join(work_dir, FILENAME_KMEANS_ASSIGNMENTS)
-        if not os.path.exists(work_dir):
-            print('Failed to find work_dir {work_dir')
-            return None
+        assert os.path.exists(work_dir), f'Failed to find work_dir {work_dir}'
 
         df = pd.read_csv(work_dir)
     elif isinstance(work_dir, pd.DataFrame):
@@ -691,28 +692,45 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     if len(kwargs) and 'nrows' in kwargs:
         nrows = kwargs['nrows']
 
+    debug_cc = kwargs is not None and "debug_cc" in kwargs and kwargs["debug_cc"]
+
     # read fastdup connected components, for each image id we get component id
     components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS), nrows=nrows)
     if 'min_distance' not in components.columns:
-        print('Error: Failed to find min_distance column in connected_components.csv, please re-run fastdup')
-        return None
+        if kwargs is not None and "squeeze_cc" in kwargs:
+            components["min_distance"] = 0
 
-    filenames = pd.read_csv(os.path.join(work_dir, 'atrain_' + FILENAME_IMAGE_LIST), nrows=nrows)
+    if debug_cc:
+        print(components.head())
+
+    local_filenames = os.path.join(work_dir, 'atrain_' + FILENAME_IMAGE_LIST)
+    assert os.path.exists(local_filenames), "Error: Failed to find fastdup input file " + local_filenames
+    filenames = pd.read_csv(local_filenames, nrows=nrows)
     if (len(components) != len(filenames)):
-        print(f"Error: number of rows in components file {work_dir}/connected_components.csv and number of rows in image file {work_dir}/atrain_features.dat.csv are not equal")
-        print("This may occur if multiple runs where done on the same working folder overriding those files. Please rerun on a clen folder")
-        return None
-    if 'filename' not in filenames.columns:
-        print(f"Error: Failed to find filename column in {work_dir}/atrain_features.dat.csv")
-        return None
+        if kwargs is not None and "squeeze_cc" in kwargs:
+            pass
+        else:
+            assert(False), f"Error: number of rows in components file {work_dir}/connected_components.csv and number of rows in image file {work_dir}/atrain_features.dat.csv are not equal. This may occur if multiple runs where done on the same working folder overriding those files. Please rerun on a clen folder."
 
+    assert 'filename' in filenames.columns, f"Error: Failed to find filename column in {work_dir}/atrain_features.dat.csv"
+
+    if kwargs is not None and "squeeze_cc" in kwargs:
+        components = components.merge(filenames, left_on="component_id", right_on="index", how="left")
     # now join the two tables to get both id and image name
-    components['filename'] = filenames['filename']
+    else:
+        components['filename'] = filenames['filename']
+    if debug_cc:
+        print(components.head())
 
     if 'is_video' in kwargs:
         components['dirname'] = components['filename'].apply(os.path.dirname)
+        sizes = components.groupby(['dirname']).size().reset_index(name='num_frames')
+        components = components.merge(sizes, how='left', left_on=['dirname'], right_on=['dirname'])
+
 
     components = find_label(get_label_func,components, 'filename', 'label', kwargs)
+    if debug_cc:
+        print(components.head())
     return components
 
 
@@ -734,9 +752,7 @@ def remove_frames_from_overlapping_videos(comps):
     comps['video'] = short_videos
     comps['len'] = comps['video'].apply(lambda x:len(set(x)))
     comps = comps[comps['len'] > 1]
-    if len(comps) == 0:
-        print("Failed to find duplicate videos")
-        return None
+    assert len(comps), "Failed to find duplicate videos"
 
     return comps
 
@@ -796,16 +812,22 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     else:
         assert False, f"Wrong component type {comp_type}"
 
-    if components is None or len(components) == 0:
-        print(f"Failed to read components file {work_dir} or empty dataframe read")
-        return None
+    assert components is not None and len(components), f"Failed to read components file {work_dir} or empty dataframe read"
 
     if metric is not None:
-        stats = pd.read_csv(os.path.join(work_dir, 'atrain_stats.csv'))
-        assert len(stats) == len(components), "Number of rows in stats file and number of rows in components file are not equal"
+        cols_to_use = ['index', metric]
+        if metric != 'size':
+            cols_to_use = ['index', 'width', 'height']
+        assert os.path.exists(os.path.join(work_dir, 'atrain_stats.csv')), f"Error: Failed to find stats file {os.path.join(work_dir)}/atrain_stats.csv"
+        stats = pd.read_csv(os.path.join(work_dir, 'atrain_stats.csv'), usecols=cols_to_use)
+
         if metric == 'size':
             stats['size'] = stats.apply(lambda x: x['width']*x['height'], axis=1)
-        components[metric] = stats[metric]
+        if len(stats) != len(components) and 'squeeze_cc' in kwargs:
+            components = components.merge(stats, left_on='__id', right_on='index', how='left')
+        else:
+            components[metric] = stats[metric]
+
 
     # find the components that have the largest number of images included
 
@@ -825,14 +847,13 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
                 top_dirs = components.groupby(comp_col)['dirname'].apply(list)
                 dict_cols['video'] = top_dirs
 
-            #if threshold is not None or metric is not None:
-            distance = components.groupby(comp_col)[distance_col].apply(np.min)
-            dict_cols['distance'] = distance
+            #if threshold is not None or metric is not None
+            if distance_col in components.columns:
+                distance = components.groupby(comp_col)[distance_col].apply(np.min)
+                dict_cols['distance'] = distance
             if metric is not None:
                 top_metric = components.groupby(comp_col)[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
-
-
 
             comps = pd.DataFrame(dict_cols).reset_index()
 
@@ -850,8 +871,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
                 dict_cols['video'] = top_dirs
 
             #if threshold is not None or metric is not None:
-            distance = components.groupby('label')[distance_col].apply(np.min)
-            dict_cols['distance'] = distance
+            if distance_col in components.columns:
+                distance = components.groupby('label')[distance_col].apply(np.min)
+                dict_cols['distance'] = distance
             if metric is not None:
                 top_metric = components.groupby('label')[metric].apply(np.mean)
                 dict_cols[metric] = top_metric
@@ -862,11 +884,15 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     else:
 
         top_components = components.groupby(comp_col)['filename'].apply(list)
+        if 'debug_cc' in kwargs:
+            print(top_components.head())
 
         dict_cols = {'files':top_components}
         #if threshold is not None or metric is not None:
-        distance = components.groupby(comp_col)[distance_col].apply(np.min)
-        dict_cols['distance'] = distance
+
+        if 'distance' in components.columns:
+            distance = components.groupby(comp_col)[distance_col].apply(np.min)
+            dict_cols['distance'] = distance
         if metric is not None:
             top_metric = components.groupby(comp_col)[metric].apply(np.mean)
             dict_cols[metric] = top_metric
@@ -879,15 +905,11 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
 
 
-    if len(comps) == 0:
-        print("No components found")
-        return None
+    assert len(comps), "No components found"
 
     comps['len'] = comps['files'].apply(lambda x: len(x))
     comps = comps[comps['len'] > 1]
-    if len(comps) == 0:
-        print("No components found with more than one image/video")
-        return None
+    assert len(comps), "No components found with more than one image/video"
 
     # keep a single frame from each video
     if kwargs and 'is_video' in kwargs:
@@ -897,7 +919,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
     stat_info = None
     if return_stats:
-        stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None, input_dir=input_dir)
+        stat_info = get_stats_df(comps, comps, 'len', save_path, max_width=None, input_dir=input_dir, kwargs=kwargs)
 
         # in case labels are list of lists, namely list of attributes per image, flatten the list
     if 'label' in comps.columns:
@@ -907,6 +929,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
                 comps['label'] = comps['label'].apply(lambda x: [item for sublist in x for item in sublist])
         except Exception as ex:
             print('Failed to flatten labels', ex)
+            fastdup_capture_exception("find_top_components", e)
             pass
 
 
@@ -922,25 +945,18 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         assert get_label_func is not None, "keyword can only be used with a callable get_label_func"
         assert group_by == 'visual', "keyword can only be used with group_by=visual"
         comps = comps[comps['label'].apply(lambda x: sum([1 if keyword in y else 0 for y in x]) > 0)]
-        if len(comps) == 0:
-            print("Failed to find any components with label keyword " + keyword)
-            return None
+        assert len(comps), "Error: Failed to find any components with label keyword " + keyword
 
     if min_items is not None:
         assert min_items > 1, "min_items should be a positive integer larger than 1"
         comps = comps[comps['len'] >= min_items]
-        if len(comps) == 0:
-            print(f"Failed to find any components with {min_items} or more items, try lowering the min_items threshold")
-            return None
+        assert len(comps), f"Error: Failed to find any components with {min_items} or more items, try lowering the min_items threshold"
 
     if max_items is not None:
         assert max_items > 1, "min_items should be a positive integer larger than 1"
         comps = comps[comps['len'] <= max_items]
-        if len(comps) == 0:
-            print(f"Failed to find any components with {max_items} or less items, try lowering the max_items threshold")
-            return None
-        else:
-            comps = comps[comps['len'] > 1] # remove any singleton components
+        assert len(comps), f"Failed to find any components with {max_items} or less items, try lowering the max_items threshold"
+        comps = comps[comps['len'] > 1] # remove any singleton components
 
     if threshold is not None or metric is not None or keyword is not None:
         if comp_type == "component":
@@ -1014,7 +1030,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
     
     if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
+        print("Warning: When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
     assert num_images >= 1, "Please select one or more images"
     assert group_by == 'label' or group_by == 'visual', "Allowed values for group_by=[visual|label], got " + group_by
@@ -1025,11 +1041,15 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
     start = time.time()
 
-    subdf, img_paths, stats_html = visualize_top_components(work_dir, save_path, num_images,
+    ret = visualize_top_components(work_dir, save_path, num_images,
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
                                                 descending, max_items, min_items, keyword,
                                                 return_stats=True, comp_type=comp_type, input_dir=input_dir, kwargs=kwargs)
+    if len(ret) < 3:
+        return None
+    else:
+        subdf, img_paths, stats_html = ret
     if subdf is None or len(img_paths) == 0:
         return None
 
@@ -1063,9 +1083,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             comp = row[comp_col]
             num = row[num_items_title]
             dict_rows = {'component':[comp], num_items_title :[num]}
-
-            dist = row['distance']
-            dict_rows['mean_distance'] = [np.mean(dist)]
+            if 'distance' in row:
+                dist = row['distance']
+                dict_rows['mean_distance'] = [np.mean(dist)]
             if metric is not None:
                 dict_rows[metric] = [row[metric]]
             if kwargs and 'is_video' in kwargs:
@@ -1078,9 +1098,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             num = row[num_items_title]
             dict_rows = {'label':[label], num_items_title :[num]}
 
-
-            dist = row['distance']
-            dict_rows['mean_distance'] = [np.mean(dist)]
+            if 'distance' in row:
+                dist = row['distance']
+                dict_rows['mean_distance'] = [np.mean(dist)]
             if metric is not None:
                 dict_rows[metric] = [row[metric]]
 
@@ -1174,13 +1194,21 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                 pass
             except Exception as e:
                 print("Warning, failed to remove image file ", i, " with error ", e)
+                fastdup_capture_exception("create_components_gallery", e)
 
     print('Execution time in seconds', round(time.time() - start, 1))
     return 0
 
-def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None):
+def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None, kwargs=None):
+    try:
+        import matplotlib.pyplot as plt
+    except Exception as e:
+        fastdup_capture_exception("get_stats_df", e, True)
+        print("Warning: failed to import matplotlib, aggregate stats plot is not generated. Please pip install matplotlib if you like to view aggregate stats plots.")
+        return ""
+
     stats_info = df[metric].describe().to_frame()
-    import matplotlib.pyplot as plt
+
     plt.rcParams['axes.xmargin'] = 0
     minx = df[metric].min()
     maxx = df[metric].max()
@@ -1209,7 +1237,7 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None):
 
     local_fig = f"{save_path}/stats.jpg"
     fig.savefig(local_fig ,dpi=100)
-    img = fastdup_imread(local_fig, input_dir)
+    img = fastdup_imread(local_fig, input_dir, kwargs)
 
     ret = pd.DataFrame({'stats':[stats_info.to_html(escape=False,index=True).replace('\n','')], 'image':[imageformatter(img, max_width)]})
     return ret.to_html(escape=False,index=False).replace('\n','')
@@ -1261,6 +1289,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     if isinstance(stats_file, pd.DataFrame):
         df = stats_file
     else:
+        assert os.path.exists(stats_file), "Error: failed to find fastdup input file " + stats_file
         work_dir = os.path.dirname(os.path.abspath(stats_file))
         df = pd.read_csv(stats_file)
     assert len(df), "Failed to read stats file " + stats_file
@@ -1269,15 +1298,13 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
     if slice is not None:
         if isinstance(slice, str):
-            if slice not in df['label'].unique():
-                print(f"Failed to find {slice} in the list of available labels, can not visualize this label class")
-                print("Example labels", df['label'].unique()[:10])
-                return 1
+            if len(df) < 1000000:
+                assert slice in df['label'].unique(), f"Failed to find {slice} in the list of available labels, can not visualize this label class. Example labels {df['label'].unique()[:10]}"
             df = df[df['label'] == slice]
         elif isinstance(slice, list):
             df = df[df['label'].isin(slice)]
         else:
-            assert False, "slice must be a string or list"
+            assert False, f"slice must be a string or list got {type(slice)}"
 
     if metric is not None and metric == 'size':
         df['size'] = df['width'] * df['height']
@@ -1352,6 +1379,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
                 os.unlink(i)
             except Exception as ex:
                 print("Failed to delete image file ", i, ex)
+                fastdup_capture_exception("create_stats_gallery", ex)
 
 def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func =None,
@@ -1409,6 +1437,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df = similarity_file
     else:
         work_dir = os.path.dirname(os.path.abspath(similarity_file))
+        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
         df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read stats file " + similarity_file
 
@@ -1460,7 +1489,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         subdf = subdf.sort_values(['score','length'], ascending=not descending)
         df2 = subdf.copy()
         subdf = subdf.head(num_images)
-        stat_info = get_stats_df(df2, subdf, metric='score', save_path=save_path, max_width=max_width)
+        stat_info = get_stats_df(df2, subdf, metric='score', save_path=save_path, max_width=max_width, kwargs=kwargs)
 
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
@@ -1486,7 +1515,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             info0.append(info0_df.to_html(header=False,escape=False).replace('\n',''))
 
 
-            img = fastdup_imread(filename, input_dir=input_dir)
+            img = fastdup_imread(filename, input_dir=input_dir, kwargs=kwargs)
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
 
@@ -1563,6 +1592,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 os.unlink(i)
             except Exception as ex:
                 print("Failed to delete image file ", i, ex)
+                fastdup_capture_exception("create_similarity_gallery", ex)
 
     return df2
 
@@ -1581,7 +1611,13 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     Returns:
     '''
 
-    import matplotlib.pyplot as plt
+    try:
+        import matplotlib.pyplot as plt
+    except Exception as e:
+        fastdup_capture_exception("create_aspect_ratio_gallery", e)
+        print("Error: failed to import matplotlib pip package, can not generate aspect ratio plot without it.")
+        return None
+
     from .html_writer import write_to_html_file
     from .image import imageformatter
 
@@ -1640,8 +1676,8 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
     max_height_img = lookup_filename(max_height_img, work_dir)
 
     try:
-        img_max_width = fastdup_imread(max_width_img, input_dir)
-        img_max_height = fastdup_imread(max_height_img, input_dir)
+        img_max_width = fastdup_imread(max_width_img, input_dir, kwargs)
+        img_max_height = fastdup_imread(max_height_img, input_dir, kwargs)
         if max_width is not None:
             img_max_width = my_resize(img_max_width, max_width)
             img_max_height = my_resize(img_max_height, max_width)

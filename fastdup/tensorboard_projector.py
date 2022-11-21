@@ -7,8 +7,6 @@ import os
 import csv
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from tensorboard.plugins import projector
 from PIL import Image
 import cv2
 IMAGE_SIZE = 100
@@ -16,6 +14,7 @@ from fastdup.image import my_resize
 
 
 def register_embedding(embedding_tensor_name, meta_data_fname, log_dir, sprite_path, with_images=True):
+    from tensorboard.plugins import projector
     config = projector.ProjectorConfig()
     embedding = config.embeddings.add()
     embedding.tensor_name = embedding_tensor_name
@@ -112,7 +111,7 @@ def export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_siz
                                           sample_method='random', with_images=True,
                                           get_label_func=None,d = 576):
 
-
+    
     try:
         if not os.path.exists(log_dir):
             os.mkdir(log_dir)
@@ -143,6 +142,7 @@ def export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_siz
     assert len(ids)
     assert features.shape[1] == d, "Wrong share for the feature vectors exected {} got {}".format(d, features.shape[1])
 
+    import tensorflow as tf
     tensor_embeddings = tf.Variable(features[ids,:], name=EMBEDDINGS_TENSOR_NAME)
     saver = tf.compat.v1.train.Saver([tensor_embeddings])  # Must pass list or dict
     saver.save(sess=None, global_step=STEP, save_path=EMBEDDINGS_FPATH)

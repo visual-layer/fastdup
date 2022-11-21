@@ -10,6 +10,12 @@ FILENAME_CONNECTED_COMPONENTS = "connected_components.csv"
 FILENAME_LABELS = "labels.csv"
 FILENAME_KMEANS_CENTROIDS = "kmeans_centroids.csv"
 FILENAME_KMEANS_ASSIGNMENTS = "kmeans_assignments.csv"
+FILENAME_ERROR_MSG = "error.msg"
+
+IMAGELIST_HEADER="index,filename"
+LABEL_HEADER="index.label"
+STATS_HEADER='index,filename,width,height,unique,blur,mean,min,max,stdv,file_size'
+SIMILARITY_HEADER="from,to,distance"
 
 FILENAME_TOP_COMPONENTS = "top_components.pkl"
 FILENAME_TOP_CLUSTERS = "top_clusters.pkl"

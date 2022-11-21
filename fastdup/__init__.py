@@ -18,7 +18,9 @@ import platform
 from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, \
     do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
 import contextlib
+import time
 from fastdup import coco
+from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture
 from fastdup.definitions import *
 from fastdup.utilts import download_from_s3
 try:
@@ -27,16 +29,24 @@ except:
 	tqdm = (lambda x: x)
 
 
-__version__="0.151"
+__version__="0.158"
 CONTACT_EMAIL="info@databasevisual.com"
+
+init_sentry()
+
+LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 if platform.system() == "Darwin":
 	SO_SUFFIX=".dylib"
+	# https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
+	if os.path.exists(os.path.join(LOCAL_DIR, 'lib/crashpad_handler')):
+		os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
+	else:
+		print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
 else:
 	SO_SUFFIX=".so"
 
-
-LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
+
 if not os.path.exists(so_file):
     print("Failed to find shared object", so_file);
     print("Current init file is on", __file__);
@@ -71,7 +81,7 @@ def run(input_dir='',
         threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
         lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
         model_path=model_path_full,
-        license='CC-BY-NC-ND-4.0',            #license string
+        license='',            #license string
         version=False,          #show version and exit      
         nearest_neighbors_k=2, 
         d=576,
@@ -209,7 +219,10 @@ def run(input_dir='',
         if 'delete_img=0' not in turi_param:
             turi_param += ',delete_img=0'
 
-    config = {"input_dir": input_dir, "work_dir": work_dir, "test_dir": test_dir, "compute": compute, "verbose": verbose, "num_threads": num_threads,
+    input_dir2 = input_dir
+    if isinstance(input_dir, list):
+        input_dir2 = None
+    config = {"input_dir": input_dir2, "work_dir": work_dir, "test_dir": test_dir, "compute": compute, "verbose": verbose, "num_threads": num_threads,
               "num_images": num_images, "turi_param": turi_param, "distance": distance, "threshold": threshold, "lower_threshold": lower_threshold,
               "model_path": model_path, "version": version, "nearest_neighbors_k": nearest_neighbors_k, "d": d, "run_mode": run_mode,
               "nn_provider": nn_provider, "min_offset": min_offset, "max_offset": max_offset, "nnf_mode": nnf_mode, "nnf_param": nnf_param,
@@ -219,7 +232,7 @@ def run(input_dir='',
         work_dir = work_dir[2:]
 
     if isinstance(input_dir, list):
-        files = pd.DataFrame({'filenames':input_dir})
+        files = pd.DataFrame({'filename':input_dir})
         files.to_csv('files.txt')
         input_dir = 'files.txt'
     elif (input_dir.strip() == '' and run_mode != 2):
@@ -262,7 +275,7 @@ def run(input_dir='',
     if (resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
         os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and (run_mode == 0 or run_mode == 1)):
         print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
-        print("If you like to resume a prevuously stopped run, please run with resume=1.")
+        print("If you like to resume a previously stopped run, please run with resume=1.")
         return 1
 
 
@@ -311,9 +324,14 @@ def run(input_dir='',
         print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
         return 1
 
+    if (run_mode == 4 or run_mode == 6):
+        if not os.path.exists(os.path.join(work_dir, "nnf.index")):
+            print(f"Error: Failed to find stored model nnf.index on {work_dir}")
+            return 1
+
     if high_accuracy:
         if model_path !=  model_path_full:
-            print("Can not run high accuracy model when using user provided model_path")
+            print("Error: Can not run high accuracy model when using user provided model_path")
             return 1
         if d != DEFAULT_MODEL_FEATURE_WIDTH:
             print("Can not run high accuracy model when using user provided d")
@@ -333,6 +351,10 @@ def run(input_dir='',
 
         if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
             test_dir = download_from_s3(test_dir, work_dir, verbose, True)
+
+    local_error_file = os.path.join(work_dir, FILENAME_ERROR_MSG)
+    if os.path.exists(local_error_file):
+        os.unlink(local_error_file)
 
     #Calling the C++ side
     dll.do_main.restype = c_int
@@ -405,6 +427,11 @@ def run(input_dir='',
         batch_size,
         resume)
 
+        if ret != 0 and 'JPY_PARENT_PID' in os.environ:
+            if os.path.exists(local_error_file):
+                with open(local_error_file, "r") as f:
+                    print("fastdup C++ error received: ", f.read(), "\n")
+
         return ret
 
     return 1
@@ -423,7 +450,7 @@ def run_on_webdataset(input_dir='',
                       threshold=0.9,
                       lower_threshold=0.05,
                       model_path=model_path_full,
-                      license='CC-BY-NC-ND-4.0',
+                      license='',
                       version=False,
                       nearest_neighbors_k=2,
                       d=576,
@@ -484,6 +511,7 @@ def load_binary_feature(filename, d=576):
         data = np.fromfile(f, dtype='<f')
 
     df = pd.read_csv(filename + '.csv')['filename'].values
+    assert df is not None, "Failed to read input file " + filename
     num_images = len(df);
     print('Read a total of ', num_images, 'images')
 
@@ -511,7 +539,7 @@ def save_binary_feature(save_path, filenames, np_array):
 
     assert isinstance(save_path, str)  and save_path.strip() != "", "Save path should be a non empty string"
     assert isinstance(filenames, list), "filenames should be a list of image files"
-    assert len(filenames), "filenames should be a non empty list"
+    assert filenames is not None and len(filenames), "filenames should be a non empty list"
     assert isinstance(filenames[0], str), 'filenames should contain strings with the image absolute paths'
     assert isinstance(np_array, np.ndarray),  "np_array should be a numpy array"
     assert np_array.dtype == 'float32', "np_array dtype must be float32. You can generate the array using the" \
@@ -594,24 +622,27 @@ def find_similarity_file(similarity_file, input_dir, kwargs):
     if 'nrows' in kwargs:
         nrows = kwargs['nrows']
 
+    print(similarity_file)
     if isinstance(similarity_file, pd.DataFrame):
-        if nrows is not None and len(similarity_file) > nrows:
+        if nrows is not None and similarity_file is not None and len(similarity_file) > nrows:
             similarity_file = similarity_file.head(nrows)
-        return similarity_file, input_dir
 
     elif isinstance(similarity_file, str):
         assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
         if os.path.isdir(similarity_file):
             similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
 
-        df = pd.read_csv(similarity_file, nrows=nrows)
         config = load_config(os.path.dirname(similarity_file))
+        similarity_file = pd.read_csv(similarity_file, nrows=nrows)
         if input_dir is None and config is not None  and 'input_dir' in config:
             input_dir = config['input_dir']
-        return df, input_dir
+
     else:
         print('wrong type of similarity file', type(similarity_file))
         return None, None
+
+    assert isinstance(similarity_file, pd.DataFrame)
+    return similarity_file, input_dir
 
 
 def remove_duplicate_video_distances(df, kwargs):
@@ -650,7 +681,7 @@ def remove_duplicate_video_distances(df, kwargs):
 
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, threshold=None, **kwargs):
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -697,6 +728,8 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+        work_dir (str): Optional parameter to specify fastdup work_dir, when using a pd.DataFrame instead of a duplicate file path
+
         threshold (float): Optional parameter to specify the threshold for similarity score to be considered as duplicate. Values above the threshold will be considered as duplicate.
             Allowed values are between 0 and 1.
 
@@ -704,21 +737,27 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
    '''
 
-    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
-        return ret;
+    try:
+        start_time = time.time()
+        ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret;
 
-    similarity_file, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
-
-    return do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func, input_dir, threshold, kwargs)
+        similarity_file, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
 
 
+        ret = do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
+                                            get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, kwargs)
+        fastdup_performance_capture("create_duplicates_gallery", start_time)
+        return ret
+
+    except Exception as ex:
+        fastdup_capture_exception("create_duplicates_gallery", ex)
 
 
 def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, threshold=None, **kwargs):
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, **kwargs):
     '''
 
     Function to create and display a gallery of duplicaate videos computed by the similarity metrics
@@ -764,6 +803,8 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+        work_dir (str): Optional parameter to specify fastdup work_dir, when using a pd.DataFrame instead of a duplicate file path
+
         threshold (float): Optional parameter to specify the threshold for similarity score to be considered as duplicate. Values above the threshold will be considered as duplicate.
             Allowed values are between 0 and 1.
 
@@ -771,23 +812,34 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
 
    '''
 
-    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+    try:
+        start_time = time.time()
+        ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
+
+        if threshold:
+            assert threshold >= 0 and threshold <= 1, "threshold should be between 0 and 1"
+
+        if work_dir is None and isinstance(similarity_file, str):
+            if  os.path.isdir(similarity_file):
+                work_dir = similarity_file
+            else:
+                work_dir = os.path.dirname(os.path.abspath(similarity_file))
+
+        df, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
+        if threshold is not None:
+            df = df[df['distance'] >= threshold]
+
+        df = remove_duplicate_video_distances(df, kwargs)
+        kwargs['is_video'] = True
+
+        ret = create_duplicates_gallery(df, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
+                                                get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, **kwargs)
+        fastdup_performance_capture("create_duplicates_gallery", start_time)
         return ret
-
-    if threshold:
-        assert threshold >= 0 and threshold <= 1, "threshold should be between 0 and 1"
-
-    df, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
-    if threshold is not None:
-        df = df[df['distance'] >= threshold]
-
-    df = remove_duplicate_video_distances(df, kwargs)
-    kwargs['is_video'] = True
-
-    return create_duplicates_gallery(df, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
-                                            get_reformat_filename_func, get_extra_col_func, input_dir, threshold, **kwargs)
-
+    except Exception as ex:
+        fastdup_capture_exception( "create_duplicates_gallery", ex)
 
 def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             how='one', slice=None, max_width=None, get_bounding_box_func=None,
@@ -836,32 +888,37 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
      '''
 
+    try:
+        start_time = time.time()
+        ret = check_params(outliers_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret;
 
-    ret = check_params(outliers_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
-        return ret;
+        if isinstance(outliers_file, pd.DataFrame):
+            pass
+        elif isinstance(outliers_file, str):
+            assert os.path.exists(outliers_file), "Failed to find outliers file " + outliers_file
+            if os.path.isdir(outliers_file):
+                outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
 
-    if isinstance(outliers_file, pd.DataFrame):
-        pass
-    elif isinstance(outliers_file, str):
-        assert os.path.exists(outliers_file), "Failed to find outliers file " + outliers_file
-        if os.path.isdir(outliers_file):
-            outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
-
-        config = load_config(os.path.dirname(outliers_file))
-        if input_dir is None and config is not None  and 'input_dir' in config:
-            input_dir = config['input_dir']
-    else:
-        print('wrong type of similarity file', type(outliers_file))
-        return 1
-
-
-    assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
-
-    return do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
-                                      max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+            config = load_config(os.path.dirname(outliers_file))
+            if input_dir is None and config is not None  and 'input_dir' in config:
+                input_dir = config['input_dir']
+        else:
+            print('wrong type of similarity file', type(outliers_file))
+            return 1
 
 
+        assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
+
+        ret= do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
+                                          max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_outliers_gallery", start_time)
+        return ret
+
+
+    except Exception as ex:
+            fastdup_capture_exception("create_outliers_gallery", ex)
 
 def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                               group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
@@ -911,27 +968,40 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+         kwargs (dict): Optional parameter to pass additional parameters to the function.
+            split_sentence_to_label_list (boolean): Optional parameter to split the label into a list of labels. Default is False.
+            limit_labels_printed (int): Optional parameter to limit the number of labels printed in the html report. Default is max_items.
+            nrows (int): limit the number of read rows for debugging purposes of the report
+            save_artifacts (bool): Optional param to save intermediate artifacts like image paths used for generating the component
+
     Returns:
         ret (int): 0 in case of success, otherwise 1
     '''
 
-    ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+    try:
+        start_time = time.time()
+        ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
+
+        if max_items is not None:
+            assert isinstance(max_items, int), "max items should be an integer"
+            assert max_items > 0, "html image width should be > 0"
+
+        if isinstance(work_dir, str):
+            config = load_config(os.path.dirname(work_dir))
+            if input_dir is None and config is not None and 'input_dir' in config:
+                input_dir = config['input_dir']
+
+        ret = do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
+                                            max_width, max_items, min_items, get_bounding_box_func,
+                                            get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
+                                            descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_components_gallery", start_time)
         return ret
-    
-    if max_items is not None:
-        assert isinstance(max_items, int), "max items should be an integer"
-        assert max_items > 0, "html image width should be > 0"
 
-    if isinstance(work_dir, str):
-        config = load_config(os.path.dirname(work_dir))
-        if input_dir is None and config is not None and 'input_dir' in config:
-            input_dir = config['input_dir']
-
-    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
-                                        max_width, max_items, min_items, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
+    except Exception as ex:
+        fastdup_capture_exception("create_components_gallery", ex)
 
 
 def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
@@ -986,19 +1056,25 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
         ret (int): 0 in case of success, otherwise 1
     '''
 
-    kwargs['is_video'] = True
-    df, input_dir = find_similarity_file(work_dir, input_dir, kwargs)
-    df = remove_duplicate_video_distances(df, kwargs)
-    if df is None:
-        return 1
+    try:
+        start_time = time.time()
+        kwargs['is_video'] = True
+        df, input_dir = find_similarity_file(work_dir, input_dir, kwargs)
+        df = remove_duplicate_video_distances(df, kwargs)
+        if df is None:
+            return 1
 
-    return create_components_gallery(work_dir, save_path=save_path, num_images=num_images, lazy_load=lazy_load,
-                                     get_label_func=get_label_func, group_by=group_by, slice=slice,
-                                     max_width=max_width, max_items=max_items, get_bounding_box_func=get_bounding_box_func,
-                                     get_reformat_filename_func=get_reformat_filename_func, get_extra_col_func=get_extra_col_func, threshold=threshold, metric=metric,
-                                     descending=descending, min_items=min_items, keyword=keyword, comp_type="component",
-                                     input_dir=input_dir, **kwargs)
+        ret = create_components_gallery(work_dir, save_path=save_path, num_images=num_images, lazy_load=lazy_load,
+                                         get_label_func=get_label_func, group_by=group_by, slice=slice,
+                                         max_width=max_width, max_items=max_items, get_bounding_box_func=get_bounding_box_func,
+                                         get_reformat_filename_func=get_reformat_filename_func, get_extra_col_func=get_extra_col_func, threshold=threshold, metric=metric,
+                                         descending=descending, min_items=min_items, keyword=keyword, comp_type="component",
+                                         input_dir=input_dir, **kwargs)
+        fastdup_performance_capture("create_component_video_gallery", start_time)
+        return ret
 
+    except Exception as ex:
+            fastdup_capture_exception("create_component_videos_gallery", ex)
 
 def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
@@ -1050,22 +1126,27 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
          ret (int): 0 in case of success, otherwise 1
     '''
 
-    if isinstance(work_dir, str):
-        config = load_config(os.path.dirname(work_dir))
-        if input_dir is None and config is not None and 'input_dir' in config:
-            input_dir = config['input_dir']
+    try:
+        start_time = time.time()
+        if isinstance(work_dir, str):
+            config = load_config(os.path.dirname(work_dir))
+            if input_dir is None and config is not None and 'input_dir' in config:
+                input_dir = config['input_dir']
 
-    ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+        ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
+
+        ret = do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func,
+                                            'visual', slice, max_width, max_items, min_items, get_bounding_box_func,
+                                            get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
+                                            descending=descending, keyword=keyword, comp_type="cluster",
+                                            input_dir=input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_components_gallery", start_time)
         return ret
 
-    return do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func,
-                                        'visual', slice, max_width, max_items, min_items, get_bounding_box_func,
-                                        get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                        descending=descending, keyword=keyword, comp_type="cluster",
-                                        input_dir=input_dir, kwargs=kwargs)
-
-
+    except Exception as ex:
+        fastdup_capture_exception("create_kmeans_clusters_gallery", ex)
 
 def inner_delete(files, dry_run, how, save_path=None):
     if how == 'move':
@@ -1098,7 +1179,7 @@ def inner_delete(files, dry_run, how, save_path=None):
 
 def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
 
-    assert len(files)
+    assert files is not None and len(files)
     assert how == 'retag=labelImg' or how == 'retag=cvat', "Currently only retag=labelImg is supported"
     if save_path:
         assert os.path.exists(save_path)
@@ -1108,11 +1189,12 @@ def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
 
 
     if how == 'retag=labelImg':
-        do_export_to_labelimg(files, labels, save_path)
+        return do_export_to_labelimg(files, labels, save_path)
     elif how == 'retag=cvat':
-        do_export_to_cvat(files, labels, save_path)
+        return do_export_to_cvat(files, labels, save_path)
+    else:
+        assert False, "not supported"
 
-    return 0
 
 def delete_components(top_components, to_delete = None,  how = 'one', dry_run = True):
     '''
@@ -1135,38 +1217,43 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
 
     '''
 
-    assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
-    assert len(top_components), "top_components should not be enpty"
-    assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
-    if isinstance(to_delete, list):
-        assert len(to_delete), "to_delete should not be empty"
-        assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
-    assert how == 'one' or how == 'all', "how should be one of 'one'|'all'"
-    assert isinstance(dry_run, bool)
+    try:
+        start_time = time.time()
+        assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
+        assert len(top_components), "top_components should not be enpty"
+        assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
+        if isinstance(to_delete, list):
+            assert len(to_delete), "to_delete should not be empty"
+            assert isinstance(to_delete[0], int) or isinstance(to_delete[0], np.int64), "to_delete should be a list of integer component ids"
+        assert how == 'one' or how == 'all', "how should be one of 'one'|'all'"
+        assert isinstance(dry_run, bool)
 
-    if to_delete is None:
-        to_delete = top_components['component_id'].tolist()
+        if to_delete is None:
+            to_delete = top_components['component_id'].tolist()
 
-    total_deleted = []
+        total_deleted = []
 
-    for comp in (to_delete):
-        subdf = top_components[top_components['component_id'] == comp]
-        if (len(subdf) == 0):
-            print("Warning: failed to find image files for component id", comp)
-            continue
+        for comp in (to_delete):
+            subdf = top_components[top_components['component_id'] == comp]
+            if (len(subdf) == 0):
+                print("Warning: failed to find image files for component id", comp)
+                continue
 
-        files = subdf['files'].values[0]
-        if (len(files) == 1):
-            print('Warning: component id ', comp, ' has no related images, please check..')
-            continue
+            files = subdf['files'].values[0]
+            if (len(files) == 1):
+                print('Warning: component id ', comp, ' has no related images, please check..')
+                continue
 
-        if (how == 'one'):
-            files = files[1:]
+            if (how == 'one'):
+                files = files[1:]
 
-        inner_delete(files, how='delete', dry_run=dry_run)
-        total_deleted += files
+            inner_delete(files, how='delete', dry_run=dry_run)
+            total_deleted += files
 
-    return total_deleted
+        fastdup_performance_capture("delete_components", start_time)
+        return total_deleted
+    except Exception as ex:
+        fastdup_capture_exception("delete_components", e)
 
 
 def delete_components_by_label(top_components_file,  min_items=10, min_distance=0.96,  how = 'majority', dry_run = True):
@@ -1183,41 +1270,46 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
         ret (list): list of deleted files
 
     '''
-    assert os.path.exists(top_components_file), "top_components_file should be a path to a file"
+    try:
+        start_time = time.time()
+        assert os.path.exists(top_components_file), "top_components_file should be a path to a file"
 
-    # label is ,component_id,files,labels,to,distance,blur,len
-    df = pd.read_pickle(top_components_file)
-    df = df[df['distance'] >= min_distance]
-    df = df[df['len'] >= min_items]
+        # label is ,component_id,files,labels,to,distance,blur,len
+        df = pd.read_pickle(top_components_file)
+        df = df[df['distance'] >= min_distance]
+        df = df[df['len'] >= min_items]
 
-    total = []
+        total = []
 
-    for i, comp in (df.iterrows()):
-        files = comp['files']
-        labels = comp['labels']
-        assert len(files) == len(labels)
-        assert len(files)>= min_items
-        subdf = pd.DataFrame({'files':files, 'labels':labels})
-        unique, counts = np.unique(np.array(labels), return_counts=True)
-        counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
-        if (how == 'majority'):
-            if (np.max(counts) >= len(subdf)/ 2):
-                sample = counts_df.index.values[0]
-                files = subdf[subdf['labels'] == sample]['files'].values
-                assert len(files)
-                subfile = files[1:]
-                inner_delete(subfile, how='delete', dry_run=dry_run)
-                total.extend(subfile)
-            else:
+        for i, comp in (df.iterrows()):
+            files = comp['files']
+            labels = comp['labels']
+            assert len(files) == len(labels)
+            assert len(files)>= min_items
+            subdf = pd.DataFrame({'files':files, 'labels':labels})
+            unique, counts = np.unique(np.array(labels), return_counts=True)
+            counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
+            if (how == 'majority'):
+                if (np.max(counts) >= len(subdf)/ 2):
+                    sample = counts_df.index.values[0]
+                    files = subdf[subdf['labels'] == sample]['files'].values
+                    assert len(files)
+                    subfile = files[1:]
+                    inner_delete(subfile, how='delete', dry_run=dry_run)
+                    total.extend(subfile)
+                else:
+                    inner_delete(files, how='delete', dry_run=dry_run)
+                    total.extend(files)
+            elif (how == 'all'):
                 inner_delete(files, how='delete', dry_run=dry_run)
                 total.extend(files)
-        elif (how == 'all'):
-            inner_delete(files, how='delete', dry_run=dry_run)
-            total.extend(files)
-        else:
-            assert False, "how should be one of 'majority'|'all'"
+            else:
+                assert False, "how should be one of 'majority'|'all'"
 
-    return total
+        fastdup_performance_capture("delete_components_by_label", start_time)
+        return total
+    except Exception as e:
+        fastdup_capture_exception("delete_components_by_label", e)
 
 def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename', label_col=None, lower_percentile=None, upper_percentile=None,
                           lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True,
@@ -1276,90 +1368,94 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
           ret (list): list of deleted files (or moved or retagged files)
 
     '''
-    assert isinstance(dry_run, bool)
-    assert how == 'delete' or how == 'move' or how == 'retag', "how should be one of 'delete'|'move'|'retag'"
+    try:
+        start_time = time.time()
+        assert isinstance(dry_run, bool)
+        assert how == 'delete' or how == 'move' or how == 'retag', "how should be one of 'delete'|'move'|'retag'"
 
-    if lower_threshold is not None and lower_percentile is not None:
-        print('You should only specify one of lower_threshold or lower_percentile')
-        return 1
-    if upper_threshold is not None and upper_percentile is not None:
-        print('You should only specify one of upper_threshold or upper_percentile')
-        return 1
+        if lower_threshold is not None and lower_percentile is not None:
+            print('You should only specify one of lower_threshold or lower_percentile')
+            return 1
+        if upper_threshold is not None and upper_percentile is not None:
+            print('You should only specify one of upper_threshold or upper_percentile')
+            return 1
 
-    if isinstance(stats_file, pd.DataFrame):
+        if isinstance(stats_file, pd.DataFrame):
 
-        df = stats_file
-        assert len(df), "Empty dataframe"
-    else:
-        assert os.path.exists(stats_file)
-        if (os.path.isdir(stats_file)):
-            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
-        df = pd.read_csv(stats_file)
-        assert len(df), "Failed to find any data in " + stats_file
-
-    if metric == "score" and metric not in df.columns:
-        print("For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where"
-              "df is the output of create_similarity_gallery()")
-        return 1
-
-    assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
-    assert filename_col in df.columns
-    if label_col:
-        assert label_col in df.columns, f"{label_col} column should be in the stats_file"
-
-    if metric == 'size':
-        df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
-
-    if lower_percentile is not None:
-        assert lower_percentile >= 0 and lower_percentile <= 1, "lower_percentile should be between 0 and 1"
-        lower_threshold = df[metric].quantile(lower_percentile)
-    if upper_percentile is not None:
-        assert upper_percentile >= 0 and upper_percentile <= 1, "upper_percentile should be between 0 and 1"
-        upper_threshold = df[metric].quantile(upper_percentile)
-
-    orig_df = df.copy()
-    orig_len = len(df)
-
-    if (lower_threshold is not None):
-        print(f"Going to delete any images with {metric} < {lower_threshold}")
-        df = orig_df[orig_df[metric] < lower_threshold]
-        if (upper_threshold is not None):
-            print(f"Going to delete any images with {metric} > {upper_threshold}")
-            df = pd.concat([df, orig_df[orig_df[metric] > upper_threshold]], axis=0)
-    elif (upper_threshold is not None):
-            print(f"Going to delete any images with {metric} > {upper_threshold}")
-            df = orig_df[orig_df[metric] > upper_threshold]
-    else:
-        assert(False), "You should specify either lower_threshold or upper_threshold or lower_percetiel or upper_percentile"
-
-
-    if orig_len == len(df):
-        print('Warning: current request to delete all files, please select a subset of files to delete.', orig_len, len(df))
-        print(df[metric].describe(), lower_threshold, upper_threshold)
-        return 0
-    elif len(df) == 0:
-        print('Did not find any items to delete, please check your selection')
-        return 0
-
-
-    if get_reformat_filename_func is None:
-        files = df[filename_col].values
-    else:
-        files = df[filename_col].apply(get_reformat_filename_func).values
-
-    if how == 'delete' or how == 'move':
-        return inner_delete(files, how=how, dry_run=dry_run)
-    elif how.startswith('retag'):
-        if label_col is not None:
-            label = df[label_col].values
+            df = stats_file
+            assert len(df), "Empty dataframe"
         else:
-            label = None
-        return inner_retag(files, label, how, save_path)
-    else:
-        assert(False), "How should be one of 'delete'|'move'|'retag'"
+            assert os.path.exists(stats_file)
+            if (os.path.isdir(stats_file)):
+                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+            df = pd.read_csv(stats_file)
+            assert len(df), "Failed to find any data in " + stats_file
+
+        if metric == "score" and metric not in df.columns:
+            print("For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where"
+                  "df is the output of create_similarity_gallery()")
+            return 1
+
+        assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
+        assert filename_col in df.columns
+        if label_col:
+            assert label_col in df.columns, f"{label_col} column should be in the stats_file"
+
+        if metric == 'size':
+            df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
+
+        if lower_percentile is not None:
+            assert lower_percentile >= 0 and lower_percentile <= 1, "lower_percentile should be between 0 and 1"
+            lower_threshold = df[metric].quantile(lower_percentile)
+        if upper_percentile is not None:
+            assert upper_percentile >= 0 and upper_percentile <= 1, "upper_percentile should be between 0 and 1"
+            upper_threshold = df[metric].quantile(upper_percentile)
+
+        orig_df = df.copy()
+        orig_len = len(df)
+
+        if (lower_threshold is not None):
+            print(f"Going to delete any images with {metric} < {lower_threshold}")
+            df = orig_df[orig_df[metric] < lower_threshold]
+            if (upper_threshold is not None):
+                print(f"Going to delete any images with {metric} > {upper_threshold}")
+                df = pd.concat([df, orig_df[orig_df[metric] > upper_threshold]], axis=0)
+        elif (upper_threshold is not None):
+                print(f"Going to delete any images with {metric} > {upper_threshold}")
+                df = orig_df[orig_df[metric] > upper_threshold]
+        else:
+            assert(False), "You should specify either lower_threshold or upper_threshold or lower_percetiel or upper_percentile"
 
 
-    return files
+        if orig_len == len(df):
+            print('Warning: current request to delete all files, please select a subset of files to delete.', orig_len, len(df))
+            print(df[metric].describe(), lower_threshold, upper_threshold)
+            return 0
+        elif len(df) == 0:
+            print('Did not find any items to delete, please check your selection')
+            return 0
+
+
+        if get_reformat_filename_func is None:
+            files = df[filename_col].values
+        else:
+            files = df[filename_col].apply(get_reformat_filename_func).values
+
+        if how == 'delete' or how == 'move':
+            return inner_delete(files, how=how, dry_run=dry_run)
+        elif how.startswith('retag'):
+            if label_col is not None:
+                label = df[label_col].values
+            else:
+                label = None
+            return inner_retag(files, label, how, save_path)
+        else:
+            assert(False), "How should be one of 'delete'|'move'|'retag'"
+
+        fastdup_performance_capture("delete_or_retag_stats_outliers", start_time)
+        return files
+    except Exception as e:
+        fastdup_capture_exception("delete_or_retag_stats_outliers", e)
 
 def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
                                     sample_method='random', with_images=True, get_label_func=None, d=576, file_list=None):
@@ -1398,21 +1494,33 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
         ret (int): 0 in case of success, 1 in case of failure
     '''
 
-
-    from fastdup.tensorboard_projector import export_to_tensorboard_projector_inner
-    if not os.path.exists(work_dir):
-        os.mkdir(work_dir)
-        assert os.path.exists(work_dir), 'Failed to create work_dir ' + work_dir
-    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat')), f'Faild to find fastdup output {work_dir}atrain_features.dat'
-    assert sample_size <= 5000, f'Tensorboard projector is limited by 5000 images'
-
-    imglist, features = load_binary_feature(os.path.join(work_dir, 'atrain_features.dat'), d=d)
-    if file_list is not None:
-        assert isinstance(file_list, list), 'file_list should be a list of absolute file names given in the same order'
-        assert len(file_list) == len(imglist), "file_list should be the same length as imglist got " + str(len(file_list)) + " and " + str(len(imglist))
-    export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_size, sample_method, with_images, get_label_func, d=d)
+    try:
+        start_time = time.time()
+        try:
+            import tensorflow
+            from tensorboard.plugins import projector
+        except Exception as ex:
+            print('For saving information for tensorboard project you need to install tensorflow. Please pip install tensorflow and tensorbaord and try again')
+            fastdup_capture_exception(ex)
+            return 1
 
 
+        from fastdup.tensorboard_projector import export_to_tensorboard_projector_inner
+        if not os.path.exists(work_dir):
+            os.mkdir(work_dir)
+            assert os.path.exists(work_dir), 'Failed to create work_dir ' + work_dir
+        assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat')), f'Faild to find fastdup output {work_dir}atrain_features.dat'
+        assert sample_size <= 5000, f'Tensorboard projector is limited by 5000 images'
+
+        imglist, features = load_binary_feature(os.path.join(work_dir, 'atrain_features.dat'), d=d)
+        if file_list is not None:
+            assert isinstance(file_list, list), 'file_list should be a list of absolute file names given in the same order'
+            assert len(file_list) == len(imglist), "file_list should be the same length as imglist got " + str(len(file_list)) + " and " + str(len(imglist))
+        export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_size, sample_method, with_images, get_label_func, d=d)
+        fastdup_performance_capture("export_to_tensorboard_projector", start_time)
+
+    except Exception as ex:
+        fastdup_capture_exception("export_to_tensorboard_projector", ex)
 
 
 def read_coco_labels(path):
@@ -1451,12 +1559,17 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
         labels (list): list of labels
 
     '''
-
-    assert len(img_list), "Image list is empty"
-    assert sample_size > 0
-    from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
-    return tgenerate_sprite_image(img_list, sample_size, log_dir, get_label_func, h=h, w=w,
-                                  alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
+    try:
+        start_time = time.time()
+        assert len(img_list), "Image list is empty"
+        assert sample_size > 0
+        from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
+        ret = tgenerate_sprite_image(img_list, sample_size, log_dir, get_label_func, h=h, w=w,
+                                      alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
+        fastdup_performance_capture("generate_sprite_image", start_time)
+        return ret
+    except Exception as ex:
+        fastdup_capture_exception("generate_sprite_image", ex)
 
 
 def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
@@ -1501,10 +1614,16 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
 
 
     '''
-    from .galleries import do_find_top_components
-    return do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
-                                  metric=metric, descending=descending, min_items=min_items, max_items = max_items,
-                                  keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
+    try:
+        start_time = time.time()
+        from .galleries import do_find_top_components
+        ret = do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
+                                      metric=metric, descending=descending, min_items=min_items, max_items = max_items,
+                                      keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
+        fastdup_performance_capture("find_top_components", start_time)
+        return ret
+    except Exception as ex:
+        fastdup_capture_exception("find_top_components", ex)
 
 def init_search(k, work_dir, d = 576, model_path = model_path_full):
     '''
@@ -1522,21 +1641,26 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full):
 
     '''
 
-    assert os.path.exists(model_path), "Failed to find model_path " + model_path
-    assert d > 0, "d must be greater than 0"
+    try:
+        start_time = time.time()
+        assert os.path.exists(model_path), "Failed to find model_path " + model_path
+        assert d > 0, "d must be greater than 0"
 
-    fun = dll.init_search
-    fun.restype = c_int
-    fun.argtypes = [c_int,
-		            c_char_p,
-                    c_int,
-                    c_char_p]
+        fun = dll.init_search
+        fun.restype = c_int
+        fun.argtypes = [c_int,
+                        c_char_p,
+                        c_int,
+                        c_char_p]
 
-    ret = fun(k, bytes(work_dir, 'utf-8'), d, bytes(model_path, 'utf-8'))
-    if ret != 0:
-        print("Failed to initialize search")
-        return ret
+        ret = fun(k, bytes(work_dir, 'utf-8'), d, bytes(model_path, 'utf-8'))
+        if ret != 0:
+            print("Failed to initialize search")
+            return ret
 
+        fastdup_performance_capture("init_search", start_time)
+    except Exception as e:
+        fastdup_capture_exception("init_search", e)
     return 0
 
 
@@ -1555,20 +1679,26 @@ def search(img, size, verbose=0):
             The output file is created on work_dir/similrity.csv as initialized by init_search
     '''
 
-    from numpy.ctypeslib import ndpointer
-    fun = dll.search
-    fun.restype = c_int
-    fun.argtypes = [ndpointer(dtype=np.uint8, flags="C_CONTIGUOUS"),
-                    c_int, c_int]
+    try:
+        start_time = tome.time()
+        from numpy.ctypeslib import ndpointer
+        fun = dll.search
+        fun.restype = c_int
+        fun.argtypes = [ndpointer(dtype=np.uint8, flags="C_CONTIGUOUS"),
+                        c_int, c_int]
 
-    #img_arr = np.ascontiguousarray(img, dtype=np.uint8)
-    img_arr = np.ascontiguousarray(np.array(img),dtype=np.uint8)
-    ret = fun(img_arr, size, verbose)
-    if ret != 0:
-        print("Failed to search for image")
-        return ret
+        #img_arr = np.ascontiguousarray(img, dtype=np.uint8)
+        img_arr = np.ascontiguousarray(np.array(img),dtype=np.uint8)
+        ret = fun(img_arr, size, verbose)
+        if ret != 0:
+            print("Failed to search for image")
+            return ret
 
-    return 0
+        fastdup_performance_capture("search", start_time)
+        return 0
+    except Exception as e:
+        fastdup_capture_exception("search", e)
+
 
 def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending= False, get_bounding_box_func=None,
@@ -1615,30 +1745,36 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
         ret (int): 0 in case of success, otherwise 1.
     '''
 
-    ret = check_params(stats_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+    try:
+        start_time = time.time()
+        ret = check_params(stats_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
+
+        assert metric in ['blur','size','mean','min','max','unique','stdv'], "Unknown metric value"
+
+        if isinstance(stats_file, pd.DataFrame):
+            pass
+        else:
+            assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
+            if os.path.isdir(stats_file):
+                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+
+        try:
+            import matplotlib
+        except Exception as ex:
+            print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
+            fastdup_capture_exception("create_stats_gallery", ex)
+            return 1
+
+
+        ret = do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
+                                       descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_stats_gallery", start_time)
         return ret
 
-    assert metric in ['blur','size','mean','min','max','unique','stdv'], "Unknown metric value"
-
-    if isinstance(stats_file, pd.DataFrame):
-        pass
-    else:
-        assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
-        if os.path.isdir(stats_file):
-            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
-
-    try:
-        import matplotlib
-    except Exception as ex:
-        print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
-        print("Exception was: ", ex)
-        return 1
-
-
-    return do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
-                                   descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
-
+    except Exception as e:
+        fastdup_capture_exception("create_stats_gallery", e)
 
 def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func=None,
@@ -1688,21 +1824,26 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
      '''
 
+    try:
+        start_time = time.time()
+        ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
 
-    ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+        if isinstance(similarity_file, pd.DataFrame):
+            pass
+        else:
+            assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
+            if os.path.isdir(similarity_file):
+                similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+
+        ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
+            slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
 
-    if isinstance(similarity_file, pd.DataFrame):
-        pass
-    else:
-        assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
-        if os.path.isdir(similarity_file):
-            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
-
-    return do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
-        slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
-
+    except Exception as e:
+        fastdup_capture_exception("create_similarity_gallery", e)
 
 
 def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
@@ -1732,27 +1873,34 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
 
     Returns:
     '''
+    try:
+        start_time = time.time()
+        ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
+        if ret != 0:
+            return ret
 
-    ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
-    if ret != 0:
+        if isinstance(stats_file, pd.DataFrame):
+            pass
+        else:
+            assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
+            if os.path.isdir(stats_file):
+                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+
+        try:
+            import matplotlib
+        except Exception as e:
+            fastdup_capture_exception("create_aspect_ratio_gallery", e)
+            print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
+            return 1
+
+
+        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir, kwargs=kwargs)
+        fastdup_performance_capture("create_aspect_ratio_gallery", start_time)
         return ret
 
-    if isinstance(stats_file, pd.DataFrame):
-        pass
-    else:
-        assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
-        if os.path.isdir(stats_file):
-            stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+    except Exception as e:
+        fastdup_capture_exception("create_aspect_ratio_gallery", e)
 
-    try:
-        import matplotlib
-    except Exception as ex:
-        print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
-        print("Exception was: ", ex)
-        return 1
-
-
-    return do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir, kwargs=kwargs)
 
 def export_to_cvat(files, labels, save_path):
     """
@@ -1768,12 +1916,17 @@ def export_to_cvat(files, labels, save_path):
     Returns:
         ret (int): 0 in case of success, otherwise 1.
     """
-    assert len(files), "Please provide a list of files"
-    assert labels is None or isinstance(labels, list), "Please provide a list of labels"
+    try:
+        start_time = time.time()
+        assert len(files), "Please provide a list of files"
+        assert labels is None or isinstance(labels, list), "Please provide a list of labels"
 
-    from fastdup.cvat import do_export_to_cvat
-    return do_export_to_cvat(files, labels, save_path)
-
+        from fastdup.cvat import do_export_to_cvat
+        ret =  do_export_to_cvat(files, labels, save_path)
+        fastdup_performance_capture("export_to_cvat", start_time)
+        return ret
+    except Exception as e:
+        fastdup_capture_exception("export_to_cvat", e)
 
 def export_to_labelImg(files, labels, save_path):
     """
@@ -1789,13 +1942,18 @@ def export_to_labelImg(files, labels, save_path):
     Returns:
         ret (int): 0 in case of success, otherwise 1.
     """
-    assert len(files), "Please provide a list of files"
-    assert labels is None or isinstance(labels, list), "Please provide a list of labels"
+    try:
+        start_time = time.time()
+        assert len(files), "Please provide a list of files"
+        assert labels is None or isinstance(labels, list), "Please provide a list of labels"
 
-    from fastdup.label_img import do_export_to_labelimg
-    return do_export_to_labelimg(files, labels, save_path)
-
-
+        from fastdup.label_img import do_export_to_labelimg
+        ret =  do_export_to_labelimg(files, labels, save_path)
+        fastdup_performance_capture("export_to_labelImg", start_time)
+        return ret
+    except Exception as e:
+        fastdup_capture_exception("export_to_labelImg", e)
+        return 1
 
 def top_k_label(labels_col, distance_col, k=10, threshold = None,  min_count=None, unknown_class=None):
     '''
@@ -1867,75 +2025,77 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     Returns:
         df (pd.DataFrame): List of predictions using knn method
     '''
+    try:
+        start_time = time.time()
+        from fastdup.confusion_matrix import classification_report
 
-    from fastdup.confusion_matrix import classification_report
+        assert os.path.exists(work_dir), "Failed to find work directory " + work_dir
+        assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
+            "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
+            "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
+            "each row is a label corresponding to the image in the atrain_features_data.csv file"
 
-    assert os.path.exists(work_dir), "Failed to find work directory " + work_dir
-    assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
-        "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
-        "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
-        "each row is a label corresponding to the image in the atrain_features_data.csv file"
+        if threshold is not None:
+            assert threshold >= 0 and threshold <= 1, "Please provide a valid threshold 0->1"
 
-    if threshold is not None:
-        assert threshold >= 0 and threshold <= 1, "Please provide a valid threshold 0->1"
+        if isinstance(work_dir, pd.DataFrame):
+            df = work_dir
+            assert len(df), "Empty dataframe received"
+        else:
+            if os.path.isdir(work_dir):
+                similarity_file = os.path.join(work_dir, FILENAME_SIMILARITY)
+            df = pd.read_csv(similarity_file)
 
-    if isinstance(work_dir, pd.DataFrame):
-        df = work_dir
-        assert len(df), "Empty dataframe received"
-    else:
-        if os.path.isdir(work_dir):
-            similarity_file = os.path.join(work_dir, FILENAME_SIMILARITY)
-        df = pd.read_csv(similarity_file)
+        labels_dict = None
+        if callable(get_label_func):
+            df['to_label'] = df['to'].apply(get_label_func)
+        elif isinstance(get_label_func, dict):
+            df['to_label'] = df['to'].apply(lambda x: get_label_func.get(x, MISSING_LABEL))
+        elif isinstance(get_label_func, str):
+            labels_df = pd.read_csv(get_label_func)
+            filenames_df = pd.read_csv(os.path.join(work_dir, FILENAME_IMAGE_LIST))
+            if len(labels_df) != len(filenames_df):
+                print('Error: labels file length does not match the number of images in the similarity file', get_label_func, len(labels_df), len(df))
+                return None
+            if 'label' not in labels_df.columns:
+                print('Error: labels file does not contain a label column', get_label_func)
+                return None
+            filenames_df['label'] = labels_df['label']
+            labels_dict = pd.Series(filenames_df.label.values,index=filenames_df.filename).to_dict()
+            df['to_label'] = df['to'].apply(lambda x: labels_dict.get(x, MISSING_LABEL))
 
-    labels_dict = None
-    if callable(get_label_func):
-        df['to_label'] = df['to'].apply(get_label_func)
-    elif isinstance(get_label_func, dict):
-        df['to_label'] = df['to'].apply(lambda x: get_label_func.get(x, MISSING_LABEL))
-    elif isinstance(get_label_func, str):
-        labels_df = pd.read_csv(get_label_func)
-        filenames_df = pd.read_csv(os.path.join(work_dir, FILENAME_IMAGE_LIST))
-        if len(labels_df) != len(filenames_df):
-            print('Error: labels file length does not match the number of images in the similarity file', get_label_func, len(labels_df), len(df))
-            return None
-        if 'label' not in labels_df.columns:
-            print('Error: labels file does not contain a label column', get_label_func)
-            return None
-        filenames_df['label'] = labels_df['label']
-        labels_dict = pd.Series(filenames_df.label.values,index=filenames_df.filename).to_dict()
-        df['to_label'] = df['to'].apply(lambda x: labels_dict.get(x, MISSING_LABEL))
+        from_list = df.groupby(by='from', axis=0)['to'].apply(list)
+        distance_list = df.groupby(by='from', axis=0)['distance'].apply(list)
+        to_label_list = df.groupby(by='from', axis=0)['to_label'].apply(list)
 
-    from_list = df.groupby(by='from', axis=0)['to'].apply(list)
-    distance_list = df.groupby(by='from', axis=0)['distance'].apply(list)
-    to_label_list = df.groupby(by='from', axis=0)['to_label'].apply(list)
+        df_from = from_list.to_frame()
+        df_dist = distance_list.to_frame()
+        df_label = to_label_list.to_frame()
 
-    df_from = from_list.to_frame()
-    df_dist = distance_list.to_frame()
-    df_label = to_label_list.to_frame()
+        df_merge = df_from.merge(df_dist, on='from')
+        df_merge = df_merge.merge(df_label, on='from')
 
-    df_merge = df_from.merge(df_dist, on='from')
-    df_merge = df_merge.merge(df_label, on='from')
-
-    if callable(get_label_func):
-        df_merge['from_label'] = df_merge.index.map(get_label_func)
-    elif isinstance(get_label_func, dict):
-        df_merge['from_label'] = df_merge.index.map(lambda x: get_label_func.get(x, MISSING_LABEL))
-    elif isinstance(get_label_func, str):
-        assert labels_dict is not None
-        df_merge['from_label'] = df_merge.index.map(lambda x: labels_dict.get(x, MISSING_LABEL))
-
-
-    df_merge['top_k'] = df_merge.apply(lambda x:
-                                       top_k_label(x['to_label'], x['distance'], k, threshold), axis=1)
-
-    y_values = df_merge['from_label'].tolist()
-    p1_values = df_merge['top_k'].tolist()
-    filenames = df_merge.index.tolist()
-    print(classification_report(y_values, p1_values))
-
-    return pd.DataFrame({'filename':filenames, 'prediction':p1_values, 'label':y_values})
+        if callable(get_label_func):
+            df_merge['from_label'] = df_merge.index.map(get_label_func)
+        elif isinstance(get_label_func, dict):
+            df_merge['from_label'] = df_merge.index.map(lambda x: get_label_func.get(x, MISSING_LABEL))
+        elif isinstance(get_label_func, str):
+            assert labels_dict is not None
+            df_merge['from_label'] = df_merge.index.map(lambda x: labels_dict.get(x, MISSING_LABEL))
 
 
+        df_merge['top_k'] = df_merge.apply(lambda x:
+                                           top_k_label(x['to_label'], x['distance'], k, threshold), axis=1)
+
+        y_values = df_merge['from_label'].tolist()
+        p1_values = df_merge['top_k'].tolist()
+        filenames = df_merge.index.tolist()
+        print(classification_report(y_values, p1_values))
+        fastdup_performance_capture("create_knn_classifier", start_time)
+        return pd.DataFrame({'filename':filenames, 'prediction':p1_values, 'label':y_values})
+    except Exception as ex:
+        fastdup_capture_exception("create_knn_classifier", ex)
+        return pd.DataFrame({'filename':[]})
 
 
 def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
@@ -1953,32 +2113,36 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
     Returns:
         df (pd.DataFrame): dataframe with filename, label and predicted label. Row per each image
     '''
+    try:
+        start_time = time.time()
+        from fastdup.confusion_matrix import classification_report
 
-    from fastdup.confusion_matrix import classification_report
+        assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
+            "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
+            "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
+            "each row is a label corresponding to the image in the atrain_features_data.csv file"
 
-    assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
-        "Please provide a valid callable function get_label_func, given a filename returns its string label or a list of labels, " \
-        "or a dictionary where the key is the absolute file name and the value is the label or list of labels or a labels file with header index,label where" \
-        "each row is a label corresponding to the image in the atrain_features_data.csv file"
+        comps = find_top_components(work_dir, get_label_func, 'visual', slice=None, comp_type='cluster')
+        print(comps.columns)
+        comps['top_k'] = comps.apply(lambda x:
+                                           top_k_label(x['label'], x['distance'], k, threshold=threshold), axis=1)
+        files = []
+        y_values = []
+        p1_values = []
+        for i,row in comps.iterrows():
+            cluster_label = row['top_k']
+            for f,l in zip(row['files'], row['label']):
+                files.append(f)
+                y_values.append(l)
+                p1_values.append(cluster_label)
 
-    comps = find_top_components(work_dir, get_label_func, 'visual', slice=None, comp_type='cluster')
-    print(comps.columns)
-    comps['top_k'] = comps.apply(lambda x:
-                                       top_k_label(x['labels'], x['distance'], k, threshold=threshold), axis=1)
-    files = []
-    y_values = []
-    p1_values = []
-    for i,row in comps.iterrows():
-        cluster_label = row['top_k']
-        for f,l in zip(row['files'], row['labels']):
-            files.append(f)
-            y_values.append(l)
-            p1_values.append(cluster_label)
+        print(classification_report(y_values, p1_values))
+        fastdup_performance_capture("create_kmeans_classifier", start_time)
+        return pd.DataFrame({'prediction':p1_values, 'label':y_values, 'filename':files})
 
-    print(classification_report(y_values, p1_values))
-
-    return pd.DataFrame({'prediction':p1_values, 'label':y_values, 'filename':files})
-
+    except Exception as ex:
+        fastdup_capture_exception("create_kmeans_classifier", ex)
+        return pd.DataFrame({'filename':[]})
 
 def run_kmeans(input_dir='',
                work_dir='.',
@@ -1988,7 +2152,7 @@ def run_kmeans(input_dir='',
                num_threads=-1,
                num_images=0,
                model_path=model_path_full,
-               license='CC-BY-NC-ND-4.0',            #license string
+               license='',            #license string
                nearest_neighbors_k=2,
                d=576,
                bounding_box="",
@@ -2019,23 +2183,29 @@ def run_kmeans(input_dir='',
     Returns:
         ret (int): 0 in case of success, 1 in case of error
     """
+    try:
+        start_time = time.time()
+        assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
+        assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
 
-    assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
-    assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
+        ret = run(input_dir=input_dir,
+                work_dir=work_dir,
+                verbose=verbose,
+                num_threads=num_threads,
+                num_images=num_images,
+                model_path=model_path,
+                license=license,            #license string
+                nearest_neighbors_k=nearest_neighbors_k,
+                d=d,
+                run_mode=5,
+                nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
+                bounding_box=bounding_box,
+                high_accuracy=high_accuracy)
+        fastdup_performance_capture("run_kmeans", start_time)
+        return ret
 
-    return run(input_dir=input_dir,
-            work_dir=work_dir,
-            verbose=verbose,
-            num_threads=num_threads,
-            num_images=num_images,
-            model_path=model_path,
-            license=license,            #license string
-            nearest_neighbors_k=nearest_neighbors_k,
-            d=d,
-            run_mode=5,
-            nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
-            bounding_box=bounding_box,
-            high_accuracy=high_accuracy)
+    except Exception as ex:
+        fastdup_capture_exception("run_kmeans", ex)
 
 
 def run_kmeans_on_extracted(input_dir='',
@@ -2046,7 +2216,7 @@ def run_kmeans_on_extracted(input_dir='',
                num_threads=-1,
                num_images=0,
                model_path=model_path_full,
-               license='CC-BY-NC-ND-4.0',            #license string
+               license='',            #license string
                nearest_neighbors_k=2,
                d=576):
     """
@@ -2073,17 +2243,23 @@ def run_kmeans_on_extracted(input_dir='',
         ret (int): 0 in case of success, 1 in case of error
     """
 
-    assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
-    assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
+    try:
+        start_time = time.time()
+        assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
+        assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
 
-    return run(input_dir=input_dir,
-               work_dir=work_dir,
-               verbose=verbose,
-               num_threads=num_threads,
-               num_images=num_images,
-               model_path=model_path,
-               license=license,            #license string
-               nearest_neighbors_k=nearest_neighbors_k,
-               d=d,
-               run_mode=6,
-               nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}")
+        ret = run(input_dir=input_dir,
+                   work_dir=work_dir,
+                   verbose=verbose,
+                   num_threads=num_threads,
+                   num_images=num_images,
+                   model_path=model_path,
+                   license=license,            #license string
+                   nearest_neighbors_k=nearest_neighbors_k,
+                   d=d,
+                   run_mode=6,
+                   nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}")
+        fastdup_performance_capture("run_kmeans_on_extracted", start_time)
+        return ret
+    except Exception as ex:
+        fastdup_capture_exception("run_kmeans_on_extracted", ex)
