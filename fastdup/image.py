@@ -9,8 +9,29 @@ import numpy as np
 import base64
 import io
 from fastdup.definitions import *
+from fastdup.sentry import fastdup_capture_exception
 import tarfile
 
+def calc_image_path(lazy_load, save_path, filename):
+    if lazy_load:
+        imgpath = os.path.join(save_path, "images", os.path.basename(filename).replace('/',''))
+    else:
+        imgpath = os.path.join(save_path, filename.replace('/',''))
+
+    p, ext = os.path.splitext(imgpath)
+    if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
+        imgpath += ".jpg"
+    return imgpath
+
+def clean_images(lazy_load, img_paths, section):
+    if not lazy_load:
+        for i in img_paths:
+            try:
+                if i is not None:
+                    os.unlink(i)
+            except Exception as ex:
+                print("Failed to delete image file ", i, ex)
+                fastdup_capture_exception(section, ex)
 
 def download_minio(path, save_path):
     ret = os.system(f"mc cp {path} {save_path}")
@@ -67,6 +88,7 @@ def fastdup_imread(img1_path, input_dir, kwargs):
                 f = tar.extractfile(img_name)
                 return cv2.imdecode(np.frombuffer(f.read(), np.uint8), cv2.IMREAD_COLOR)
         except Exception as ex:
+            fastdup_capture_exception("fastdup_imread", ex)
             print("Error reading from tar file: ", tar_file, ex)
             return None
     elif is_minio_or_s3:
@@ -75,13 +97,17 @@ def fastdup_imread(img1_path, input_dir, kwargs):
             minio_prefix = "/".join(input_dir.replace("minio://", "").split('/')[:2])
             #print('minio_prefix', minio_prefix)
             download_minio(minio_prefix + '/' + local_dir_no_temp + '/' + os.path.basename(img1_path), S3_TEMP_FOLDER)
-            return cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+            ret =  cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+            assert ret is not None, f"Failed to read image {os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path))}"
+            return ret
         elif input_dir.startswith("s3://"):
             local_dir_no_temp = truncate_folder_name(os.path.dirname(img1_path))
             s3_prefix = 's3://' + "/".join(input_dir.replace("s3://", "").split('/')[:1])
             #print('s3_prefix', s3_prefix)
             download_s3(s3_prefix + '/' + local_dir_no_temp + '/' + os.path.basename(img1_path), S3_TEMP_FOLDER)
-            return cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+            ret = cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
+            assert ret is not None, f"Failed to read image {os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path))}"
+            return ret
 
     print('Failed to read image from img_path', img1_path)
     return None
@@ -106,6 +132,8 @@ def image_base64(im):
     return base64.b64encode(io_buf.getvalue()).decode()
 
 def imageformatter(im, max_width=None):
+    if im is None:
+        return ""
     if max_width is not None:
         return f'<img src="data:image/jpeg;base64,{image_base64(im)}" width="{max_width}">'
     else:
@@ -208,7 +236,11 @@ def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bou
     name1 = os.path.splitext(os.path.basename(img1_path))[0]
     name2 = os.path.splitext(os.path.basename(img2_path))[0]
     pid = '{0}_{1}'.format(name1,name2)
-    hcon_img_path = '{0}/{1}.jpg'.format(save_path, pid)
+    lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
+    if lazy_load:
+        hcon_img_path = f'{save_path}/images/{pid}.jpg'
+    else:
+        hcon_img_path = f'{save_path}/{pid}.jpg'
     cv2.imwrite(hcon_img_path, hcon_img)
     assert os.path.exists(hcon_img_path)
 

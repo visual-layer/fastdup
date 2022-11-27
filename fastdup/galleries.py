@@ -9,7 +9,7 @@ import cv2
 import time
 import numpy as np
 import traceback
-from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread
+from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images
 from fastdup.definitions import *
 import re
 from multiprocessing import Pool
@@ -201,11 +201,12 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     nrows = None
     if 'nrows' in kwargs:
         nrows = kwargs['nrows']
+    kwargs['lazy_load'] = lazy_load
 
     if isinstance(similarity_file, pd.DataFrame):
         df = similarity_file
     else:
-        assert os.path.exists(similarity_file), f"Failed to find fastdup input file {similarity_file}"
+        assert os.path.exists(similarity_file), f"Failed to find fastdup input file {similarity_file}. Please run using fastdup.run(..) to generate this file."
         df = pd.read_csv(similarity_file, nrows=nrows)
         assert len(df), "Failed to read similarity file " + similarity_file
 
@@ -260,12 +261,12 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
             sets[impath1 +'_' + impath2] = True
             sets[impath2 +'_' + impath1] = True
             indexes.append(i)
+            img_paths.append(imgpath)
 
         except Exception as ex:
-            traceback.print_exc()
+            fastdup_capture_exception("triplet image", ex)
             print("Failed to generate viz for images", impath1, impath2, ex)
-            imgpath = None
-        img_paths.append(imgpath)
+            img_paths.append(None)
 
     subdf = subdf.iloc[indexes]
     import fastdup.html_writer
@@ -273,7 +274,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     if not lazy_load:
         subdf.insert(0, 'Image', [imageformatter(x, max_width) for x in img_paths])
     else:
-        img_paths2 = ["<img src=\"" + os.path.basename(x) + "\" loading=\"lazy\">" for x in img_paths]
+        img_paths2 = ["<img src=\"" + str(x) + "\" loading=\"lazy\">" for x in img_paths]
         subdf.insert(0, 'Image', img_paths2)
     out_file = os.path.join(save_path, 'similarity.html')
     if get_label_func is not None:
@@ -311,7 +312,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         else:
             title += ", for label " + str(slice)
 
-    assert len(subdf), "Error: failed to find any dupilcates, try to run() with lower threshold"
+    assert len(subdf), "Error: failed to find any duplicates, try to run() with lower threshold"
 
     fastdup.html_writer.write_to_html_file(subdf[fields], title, out_file)
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
@@ -323,13 +324,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         subdf[list(set(fields)-set(['Image']))].to_csv(save_artifacts_file, index=False)
         print("Stored similarity artifacts in ", save_artifacts_file)
 
-    if not lazy_load and not save_artifacts:
-        for i in img_paths:
-            try:
-                os.unlink(i)
-            except Exception as e:
-                print("Warning, failed to remove image file ", i, " with error ", e)
-
+    clean_images(lazy_load or save_artifacts, img_paths, "create_duplicates_gallery")
     return 0
 
 
@@ -344,17 +339,13 @@ def load_one_image_for_outliers(args):
 
         #consider saving second image as well!
         #make sure image file is unique, so add also folder name into the imagefile
-        imgpath = os.path.join(save_path, impath1.replace('/',''))
-        p, ext = os.path.splitext(imgpath)
-        if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
-            imgpath += ".jpg"
-
+        lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
+        imgpath = calc_image_path(lazy_load, save_path, impath1)
         cv2.imwrite(imgpath, img)
         assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
     except Exception as ex:
-        traceback.print_exc()
-        print("Failed to generate viz for images", impath1, impath2, ex)
+        fastdup_capture_exception(f"load_one_image_for_outliers", ex)
         imgpath = None
 
     return imgpath
@@ -412,6 +403,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     nrows = None
     if nrows in kwargs:
         nrows = kwargs['nrows']
+    kwargs['lazy_load'] = lazy_load
 
     save_artifacts = 'save_artifacts' in kwargs and kwargs['save_artifacts']
 
@@ -419,7 +411,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     if isinstance(outliers_file, pd.DataFrame):
         df = outliers_file
     else:
-        assert os.path.exists(outliers_file), f"Failed to find fastdup input file {outliers_file}"
+        assert os.path.exists(outliers_file), f"Failed to find fastdup input file {outliers_file}. Please run using fastdup.run(..) to generate this file."
         df = pd.read_csv(outliers_file, nrows=nrows)
         print('read outliers', len(df))
         work_dir = os.path.dirname(outliers_file)
@@ -427,7 +419,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
     if (how == 'all'):
         dups_file = os.path.join(os.path.dirname(outliers_file), FILENAME_SIMILARITY)
-        assert os.path.exists(dups_file), f'Failed to find input file {dups_file} which is needed for computing how=all similarities'
+        assert os.path.exists(dups_file), f'Failed to find input file {dups_file} which is needed for computing how=all similarities, . Please run using fastdup.run(..) to generate this file.'
 
         dups = pd.read_csv(dups_file, nrows=nrows)
         assert len(dups), "Error: Failed to locate similarity file file " + dups_file
@@ -459,8 +451,17 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs
         all_args.append(args)
 
-    with Pool() as pool:
-        img_paths = pool.map(load_one_image_for_outliers, all_args)
+    # trying to deal with the following runtime error:
+    #An attempt has been made to start a new process before the
+    #current process has finished its bootstrapping phase.
+    try:
+        with Pool() as pool:
+            img_paths = pool.map(load_one_image_for_outliers, all_args)
+    except RuntimeError as e:
+        fastdup_capture_exception("create_outliers_gallery_pool", e)
+        img_paths = []
+        for i in all_args:
+            img_paths.append(load_one_image_for_outliers(i))
 
     import fastdup.html_writer
     if not lazy_load:
@@ -494,14 +495,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print("Stored outliers visual view in ", os.path.join(out_file))
-    if not lazy_load and not save_artifacts:
-        for i in img_paths:
-            try:
-                os.unlink(i)
-            except Exception as ex:
-                print("Failed to delete image file ", i, ex)
-
-
+    clean_images(lazy_load or save_artifacts, img_paths, "create_outliers_gallery")
     return 0
 
 
@@ -621,9 +615,19 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             for f in files:
                 #t,w1,h1 = load_one_image(f, input_dir, get_bounding_box_func)
                 val_array.append([f, input_dir, get_bounding_box_func, kwargs])
-        
-            with Pool() as pool:
-                result = pool.map(load_one_image, val_array)
+
+            # trying to deal with the following runtime error:
+            #An attempt has been made to start a new process before the
+            #current process has finished its bootstrapping phase.
+            try:
+                with Pool() as pool:
+                    result = pool.map(load_one_image, val_array)
+            except RuntimeError as e:
+                fastdup_capture_exception("visualize_top_components", e)
+                result = []
+                for i in val_array:
+                    result.append(load_one_image(i))
+
             for x in result:
                 if x[0] is not None:
                     tmp_images.append(x[0])
@@ -645,7 +649,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             else:
                 img, labels = generate_sprite_image(images,  len(images), '', None, h=avg_h, w=avg_w, max_width=max_width)
 
-            local_file = os.path.join(save_path, f'component_{counter}.jpg')
+            lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
+            subfolder = "" if not lazy_load else "images/"
+            local_file = os.path.join(save_path, f'{subfolder}component_{counter}.jpg')
             cv2.imwrite(local_file, img)
             img_paths.append(local_file)
             counter+=1
@@ -685,8 +691,8 @@ def read_clusters_from_file(work_dir, get_label_func, kwargs):
 
 def read_components_from_file(work_dir, get_label_func, kwargs):
     assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
-    assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file"
-    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file"
+    assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
+    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
 
     nrows = None
     if len(kwargs) and 'nrows' in kwargs:
@@ -704,7 +710,7 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
         print(components.head())
 
     local_filenames = os.path.join(work_dir, 'atrain_' + FILENAME_IMAGE_LIST)
-    assert os.path.exists(local_filenames), "Error: Failed to find fastdup input file " + local_filenames
+    assert os.path.exists(local_filenames), "Error: Failed to find fastdup input file " + local_filenames + ". Please run using fastdup.run(..) to generate this file."
     filenames = pd.read_csv(local_filenames, nrows=nrows)
     if (len(components) != len(filenames)):
         if kwargs is not None and "squeeze_cc" in kwargs:
@@ -818,7 +824,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         cols_to_use = ['index', metric]
         if metric != 'size':
             cols_to_use = ['index', 'width', 'height']
-        assert os.path.exists(os.path.join(work_dir, 'atrain_stats.csv')), f"Error: Failed to find stats file {os.path.join(work_dir)}/atrain_stats.csv"
+        assert os.path.exists(os.path.join(work_dir, 'atrain_stats.csv')), f"Error: Failed to find stats file {os.path.join(work_dir)}/atrain_stats.csv. Please run using fastdup.run(..) to generate this file."
         stats = pd.read_csv(os.path.join(work_dir, 'atrain_stats.csv'), usecols=cols_to_use)
 
         if metric == 'size':
@@ -1041,6 +1047,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
     start = time.time()
 
+    kwargs['lazy_load'] = lazy_load
     ret = visualize_top_components(work_dir, save_path, num_images,
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
@@ -1187,15 +1194,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     else:
         print("Stored KMeans clusters visual view in ", os.path.join(out_file))
 
-    if not lazy_load and threshold is None and not save_artifacts:
-        for i in img_paths:
-            try:
-                os.unlink(i)
-                pass
-            except Exception as e:
-                print("Warning, failed to remove image file ", i, " with error ", e)
-                fastdup_capture_exception("create_components_gallery", e)
-
+    clean_images(lazy_load or save_artifacts or (threshold is not None), img_paths, "create_components_gallery")
     print('Execution time in seconds', round(time.time() - start, 1))
     return 0
 
@@ -1237,7 +1236,11 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None, k
 
     local_fig = f"{save_path}/stats.jpg"
     fig.savefig(local_fig ,dpi=100)
-    img = fastdup_imread(local_fig, input_dir, kwargs)
+    try:
+        img = fastdup_imread(local_fig, input_dir, kwargs)
+    except Exception as ex:
+        fastdup_capture_exception("get_stats_df", ex)
+        return ""
 
     ret = pd.DataFrame({'stats':[stats_info.to_html(escape=False,index=True).replace('\n','')], 'image':[imageformatter(img, max_width)]})
     return ret.to_html(escape=False,index=False).replace('\n','')
@@ -1289,7 +1292,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     if isinstance(stats_file, pd.DataFrame):
         df = stats_file
     else:
-        assert os.path.exists(stats_file), "Error: failed to find fastdup input file " + stats_file
+        assert os.path.exists(stats_file), "Error: failed to find fastdup input file " + stats_file + " . Please run using fastdup.run(..) to generate this file."
         work_dir = os.path.dirname(os.path.abspath(stats_file))
         df = pd.read_csv(stats_file)
     assert len(df), "Failed to read stats file " + stats_file
@@ -1325,13 +1328,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
 
-            #consider saving second image as well!
-            #make sure image file is unique, so add also folder name into the imagefile
-            imgpath = os.path.join(save_path, filename.replace('/',''))
-            p, ext = os.path.splitext(imgpath)
-            if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
-                imgpath += ".jpg"
-
+            imgpath = calc_image_path(lazy_load, save_path, filename)
             cv2.imwrite(imgpath, img)
             assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
@@ -1373,13 +1370,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print("Stored " + metric + " statistics view in ", os.path.join(out_file))
-    if not lazy_load:
-        for i in img_paths:
-            try:
-                os.unlink(i)
-            except Exception as ex:
-                print("Failed to delete image file ", i, ex)
-                fastdup_capture_exception("create_stats_gallery", ex)
+    clean_images(lazy_load, img_paths, "create_stats_gallery")
 
 def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func =None,
@@ -1437,7 +1428,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df = similarity_file
     else:
         work_dir = os.path.dirname(os.path.abspath(similarity_file))
-        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
+        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file + " . Please run using fastdup.run(..) to generate this file."
         df = pd.read_csv(similarity_file)
     assert len(df), "Failed to read stats file " + similarity_file
 
@@ -1519,11 +1510,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
 
-            imgpath = os.path.join(save_path, filename.replace('/',''))
-            p, ext = os.path.splitext(imgpath)
-            if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
-                imgpath += ".jpg"
-
+            imgpath = calc_image_path(lazy_load, save_path, filename)
             cv2.imwrite(imgpath, img)
             assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
@@ -1548,7 +1535,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             assert os.path.exists(imgpath2)
 
         except Exception as ex:
-            traceback.print_exc()
+            fastdup_capture_exception("create_similarity_gallery", ex)
             print("Failed to generate viz for images", filename, ex)
             imgpath = None
             imgpath2 = None
@@ -1586,13 +1573,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print("Stored similar images view in ", os.path.join(out_file))
-    if not lazy_load:
-        for i in img_paths:
-            try:
-                os.unlink(i)
-            except Exception as ex:
-                print("Failed to delete image file ", i, ex)
-                fastdup_capture_exception("create_similarity_gallery", ex)
+    clean_images(lazy_load, img_paths, "create_similarity_gallery")
 
     return df2
 
@@ -1681,8 +1662,9 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, m
         if max_width is not None:
             img_max_width = my_resize(img_max_width, max_width)
             img_max_height = my_resize(img_max_height, max_width)
-    except:
+    except Exception as ex:
         print("Failed to read images ", max_width_img, max_height_img)
+        fastdup_capture_exception("aspect ratio", ex)
         img_max_width = None
         img_max_height = None
 

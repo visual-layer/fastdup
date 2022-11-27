@@ -7,6 +7,9 @@ import os
 import traceback
 import uuid
 import hashlib
+from fastdup.definitions import VERSION__
+from datetime import datetime
+
 
 #get a random token based on the machine uuid
 token = hashlib.sha256(str(uuid.getnode()).encode()).hexdigest()
@@ -21,29 +24,40 @@ def init_sentry():
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
             # We recommend adjusting this value in production.
-            traces_sample_rate=1.0
+            traces_sample_rate=1.0,
+            release=VERSION__
         )
         unit_test = 'UNIT_TEST' in os.environ
-        with open(os.path.join(os.environ.get('HOME', '/tmp'),".token"), "w") as f:
-            f.write(token)
-
+        try:
+            with open(os.path.join(os.environ.get('HOME', '/tmp'),".token"), "w") as f:
+                f.write(token)
+        except:
+            pass
 
 def fastdup_capture_exception(section, e, warn_only=False):
     if not warn_only:
         traceback.print_exc()
     if 'SENTRY_OPT_OUT' not in os.environ:
-        fastdup_performance_capture(section, time.time())
-        capture_exception(e)
+        with sentry_sdk.push_scope() as scope:
+            scope.set_tag("section", section)
+            scope.set_tag("unit_test", unit_test)
+            scope.set_tag("token", token)
+            capture_exception(section, e)
 
 
 def fastdup_performance_capture(section, start_time):
     if 'SENTRY_OPT_OUT' not in os.environ:
         try:
+            # avoid reporting unit tests back to sentry
+            if token == '41840345eec72833b7b9928a56260d557ba2a1e06f86d61d5dfe755fa05ade85':
+                import random
+                if random.random() < 0.995:
+                    return
             with sentry_sdk.push_scope() as scope:
                 scope.set_tag("section", section)
                 scope.set_tag("unit_test", unit_test)
                 scope.set_tag("token", token)
-                scope.set_extra("runtime", time.time()-start_time)
+                scope.set_extra("runtime-sec", time.time()-start_time)
                 sentry_sdk.capture_message("Performance")
         finally:
             sentry_sdk.flush()

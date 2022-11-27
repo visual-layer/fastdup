@@ -23,10 +23,11 @@ from fastdup import coco
 from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture
 from fastdup.definitions import *
 from fastdup.utilts import download_from_s3
+from datetime import datetime
 try:
-	from tqdm import tqdm
+    from tqdm import tqdm
 except:
-	tqdm = (lambda x: x)
+    tqdm = (lambda x: x)
 
 
 __version__="0.158"
@@ -34,16 +35,32 @@ CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
 
+try:
+    now = datetime.now()
+    date_time = now.strftime("%Y-%m-%d")
+    with open("/tmp/.timeinfo", "w") as f:
+        if date_time.endswith('%'):
+            date_time = date_time[:len(date_time)-1]
+        f.write(date_time)
+except Exception as ex:
+    fastdup_capture_exception("Timestamp", ex)
+
 LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
-if platform.system() == "Darwin":
-	SO_SUFFIX=".dylib"
-	# https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
-	if os.path.exists(os.path.join(LOCAL_DIR, 'lib/crashpad_handler')):
-		os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
-	else:
-		print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
+os.environ['FASTDUP_LOCAL_DIR'] = LOCAL_DIR
+
+if platform.system() == "Windows":
+    fastdup_capture_exception("Wrong OS", RuntimeError(f"FastDup is not supported natively on Windows {platform.platform()}. "
+                                                         f"For running on windows need to install WSL"
+                                                         f"as instructed here: https://github.com/visual-layer/fastdup/blob/main/INSTALL.md#windows10"))
+elif platform.system() == "Darwin":
+    SO_SUFFIX=".dylib"
+    # https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
+    if os.path.exists(os.path.join(LOCAL_DIR, 'lib/crashpad_handler')):
+        os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
+    else:
+        print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
 else:
-	SO_SUFFIX=".so"
+    SO_SUFFIX=".so"
 
 so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
 
@@ -51,8 +68,16 @@ if not os.path.exists(so_file):
     print("Failed to find shared object", so_file);
     print("Current init file is on", __file__);
     sys.exit(1)
-dll = CDLL(so_file)
 
+try:
+    dll = CDLL(so_file)
+except Exception as ex:
+    fastdup_capture_exception("__init__", ex)
+    print("Please reach out to fastdup support, it seems installation is missing critical files to start fastdup.")
+    print("We would love to understand what has gone wrong.")
+    print("You can open an issue here: " +  GITHUB_URL + " or email us at " + CONTACT_EMAIL)
+    print("Share out output of the command \"find " + LOCAL_DIR + " \"")
+    sys.exit(1)
 
 model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.ort')
 if not os.path.exists(model_path_full):
@@ -159,7 +184,7 @@ def run(input_dir='',
 
         nearest_neighbors_k (int): For each image, how many similar images to look for.
 
-        d (int): Length of the feature vector. Change this parameter only when providing precomputed features instead of images.
+        d (int): Length of the feature vector. On default it is 576. When you use your own onnx model, change this parameter to the output model feature vector length.
 
         run_mode (int):
             ==run_mode=0== (the default) does the feature extraction and NN embedding to compute all pairs similarities.
@@ -501,7 +526,7 @@ def load_binary_feature(filename, d=576):
         >>> file_list, mat_features = fastdup.load_binary(FILENAME_FEATURES)
 
     '''
-	
+
     if not os.path.exists(filename) or not os.path.exists(filename + '.csv'):
         print("Error: failed to find the binary feature file:", filename, ' and the filenames csv file:', filename + '.csv')
         return None
@@ -588,24 +613,24 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
         "image. The label file has to have the `atrain_features.dat.csv`"
 
     if slice is not None and get_label_func is None:
-        print("When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func)")
-        return 1
+        assert False, "When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func"
 
     if not os.path.exists(save_path):
         os.mkdir(save_path)
-        if not os.path.exists(save_path):
-            print(f"Failed to generate save_path directory {save_path}")
-            return 1
+        assert os.path.exists(save_path), f"Failed to generate save_path directory {save_path}"
 
     if isinstance(work_dir, str):
         if work_dir.endswith('.csv'):
             path_work_dir = os.path.dirname(os.path.abspath(work_dir))
         else:
             path_work_dir = work_dir
-        if not os.path.exists(path_work_dir):
-            print("Failed to find work_dir (__init__) " + path_work_dir)
-            return 1
 
+        assert os.path.exists(path_work_dir), "Failed to find work_dir (__init__) " + path_work_dir
+
+        subfolder = os.path.join(save_path, "images")
+        if lazy_load and not os.path.exists(subfolder):
+            os.mkdir(subfolder)
+            assert os.path.exists(subfolder), f"Failed to generate sub folder images in {subfolder} when lazy_load=True"
 
     if max_width is not None:
         assert isinstance(max_width, int), "html image width should be an integer"
@@ -687,9 +712,9 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
     Function to create and display a gallery of images computed by the similarity metrics
 
     Example:
-	 	>>> import fastdup
-		>>> fastdup.run('input_folder', 'output_folder')
-		>>> fastdup.create_duplicates_gallery('output_folder', save_path='.', get_label_func = lambda x: x.split('/')[1], slice='hamburger')
+        >>> import fastdup
+        >>> fastdup.run('input_folder', 'output_folder')
+        >>> fastdup.create_duplicates_gallery('output_folder', save_path='.', get_label_func = lambda x: x.split('/')[1], slice='hamburger')
 
     Regarding get_label_func, this example assumes that the second folder name is the class name for example my_data/hamburger/image001.jpg. You can change it to match your own labeling convention.
 
@@ -763,10 +788,10 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
     Function to create and display a gallery of duplicaate videos computed by the similarity metrics
 
     Example:
-	 	>>> import fastdup
-		>>> fastdup.run('input_folder', 'output_folder', run_mode=1)  # extract frames from videos
-		>>> fastdup.run('input_folder', 'output_folder', run_mode=2)  # run fastdup
-		>>> fastdup.create_duplicates_videos_gallery('output_folder', save_path='.')
+        >>> import fastdup
+        >>> fastdup.run('input_folder', 'output_folder', run_mode=1)  # extract frames from videos
+        >>> fastdup.run('input_folder', 'output_folder', run_mode=2)  # run fastdup
+        >>> fastdup.create_duplicates_videos_gallery('output_folder', save_path='.')
 
 
     Args:
@@ -1333,7 +1358,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
           >>> df2 = create_similarity_gallery(..., get_label_func=...)
           >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
 
-	  Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
+      Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
       Args:
           stats_file (str):
@@ -1361,7 +1386,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 
           save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
 
-	
+
 
 
       Returns:
@@ -1501,7 +1526,7 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
             from tensorboard.plugins import projector
         except Exception as ex:
             print('For saving information for tensorboard project you need to install tensorflow. Please pip install tensorflow and tensorbaord and try again')
-            fastdup_capture_exception(ex)
+            fastdup_capture_exception("tensorflow import", ex)
             return 1
 
 
@@ -1566,7 +1591,6 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
         from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
         ret = tgenerate_sprite_image(img_list, sample_size, log_dir, get_label_func, h=h, w=w,
                                       alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
-        fastdup_performance_capture("generate_sprite_image", start_time)
         return ret
     except Exception as ex:
         fastdup_capture_exception("generate_sprite_image", ex)
