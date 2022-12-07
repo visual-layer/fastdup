@@ -591,7 +591,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     top_components = top_components.head(num_components)
     if 'debug_cc' in kwargs:
         print(top_components.head())
-    save_arficats = 'save_artifacts' in kwargs and kwargs['save_artifacts']
+    save_artifacts = 'save_artifacts' in kwargs and kwargs['save_artifacts']
 
     assert top_components is not None and len(top_components), f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
     comp_col = "component_id" if comp_type == "component" else "cluster"
@@ -604,6 +604,8 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             # find the component id
             component_id = row[comp_col]
             # find all the image filenames linked to this id
+            if save_artifacts:
+                pd.DataFrame({'filename':row['files']}).to_csv(os.path.join(save_path, f'component_{counter}_files.csv'))
             files = row['files'][:MAX_IMAGES_IN_GRID]
             if (len(files) == 0):
                 print(f"Failed to find any files for component_id {component_id}");
@@ -628,8 +630,12 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
                 for i in val_array:
                     result.append(load_one_image(i))
 
-            for x in result:
+            for t,x in enumerate(result):
                 if x[0] is not None:
+                    if save_artifacts:
+                        if not os.path.exists(f'{save_path}/comp_{counter}/'):
+                            os.mkdir(f'{save_path}/comp_{counter}')
+                        cv2.imwrite(f'{save_path}/comp_{counter}/{os.path.basename(files[t])}', x[0])
                     tmp_images.append(x[0])
                     w.append(x[1])
                     h.append(x[2])
@@ -1124,6 +1130,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             counter = 0
             for i,row in subdf.iterrows():
                 labels = list(row['label'])
+                if save_artifacts:
+                    pd.DataFrame({'label':labels}).to_csv(os.path.join(save_path, f"component_{counter}_labels.csv"))
                 if callable(get_reformat_filename_func) and 'is_video' in kwargs:
                     labels = [get_reformat_filename_func(x) for x in labels]
 

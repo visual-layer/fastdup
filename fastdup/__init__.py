@@ -131,13 +131,17 @@ def run(input_dir='',
                 * A folder
                 * A remote folder (s3 or minio starting with s3:// or minio://). When using minio append the minio server name for example minio://google/visual_db/sku110k.
                 * A file containing absolute filenames each on its own row.
-                * A file containing s3 full paths each on its own row.
+                * A file containing s3 full paths or minio paths each on its own row.
                 * A python list with absolute filenames
                 * yolov5 yaml input file containing train and test folders (single folder supported for now)
                 * We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
-            If you have other image extensions that are readable by opencv imread() you can give them in a file and then we do not check for the
-            known extensions.
-            Note: it is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files.
+            If you have other image extensions that are readable by opencv imread() you can give them in a file (each image on its own row) and then we do not check for the
+            known extensions and use opencv to read those formats.
+            Note: It is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files.
+            Note: We assume image sizes should be larger than 10x10 pixels. Smaller images will be ignored with a warning shown.
+            Note: It is possible to skip small images also by defining minimum allowed file size using turi_param='min_file_size=1000' (in bytes).
+            Note: For performance reasons it is always preferred to copy s3 images from s3 to local disk and then run fastdup on local disk. Since copying images from s3 in a loop is very slow.
+            Alternatively you can use the flag turi_param='sync_s3_to_local=1' to copy ahead all images on the remote s3 bucket to disk.
 
         work_dir (str): Optional path for storing intermediate files and results.
 
@@ -172,7 +176,11 @@ def run(input_dir='',
                 * sync_s3_to_local=0|1 In case of using s3 bucket sync s3 to local folder to improve performance. Assumes there is enough local disk space to contain the dataDefault is 0.\
 
 
-        distance (str): Distance metric for the Nearest Neighbors algorithm. Other distances are euclidean, squared_euclidean, manhattan.
+        distance (str): Distance metric for the Nearest Neighbors algorithm. The default is 'cosine' which works well in most cases.
+            For nn_provider='nnf' the following distance metrics are supported.
+            When using nnf_mode='Flat': 'cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon' are supported.
+            Otherwise 'cosine' and 'euclidean' are supported.
+            When using nn_provider='turi' the following distance metrics are supported. 'euclidean', 'cosine', 'manhattan', 'squared_euclidean'.
 
         threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical.
 
@@ -303,6 +311,14 @@ def run(input_dir='',
         print("If you like to resume a previously stopped run, please run with resume=1.")
         return 1
 
+    assert nn_provider in ['turi','nnf'], "Nearest neighbor implementation should be either turi or nnf."
+    if nn_provider == 'nnf':
+        if nnf_mode == "Flat":
+            assert distance in ['cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon'], f"Distance metric {distance} not supported for nnf provider nnf when nnf_mode=Flat"
+        else:
+            assert distance in ['euclidean', 'cosine'], "Distance should be either euclidean or cosine when nn_provider='nnf'"
+    elif nn_provider == 'turi':
+        assert distance in ['euclidean', 'cosine', 'manhattan', 'squared_euclidean'], "Distance should be either euclidean, cosine, manhattan or squared_euclidean when nn_provider='turi'"
 
 
     if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):

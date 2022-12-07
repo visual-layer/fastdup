@@ -31,6 +31,6 @@ HIGH_ACCURACY_MODEL_FEATURE_WIDTH = 960
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "0.170"
+VERSION__ = "0.173"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"

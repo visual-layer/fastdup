@@ -62,11 +62,15 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
     for i  in img_path[:sample_size]:
         # Save both tf image for prediction and PIL image for sprite
         if isinstance(i, str):
-            assert os.path.exists(i)
-            img_pil = cv2.imread(i)
-            assert img_pil is not None, f"Failed to read image from {i}"
-            img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
-            img_pil = cv2.resize(img_pil, (W, H))
+            try:
+                assert os.path.exists(i)
+                img_pil = cv2.imread(i)
+                assert img_pil is not None, f"Failed to read image from {i}"
+                img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
+                img_pil = cv2.resize(img_pil, (W, H))
+            except Exception as ex:
+                print("Failed to load image" + i)
+                continue
         else:
             img_pil = cv2.resize(i, (W, H))
             img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
