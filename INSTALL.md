@@ -11,7 +11,7 @@
 7. [Preinstalled docker](#docker)
 8. [Common installation errors](#common)
 
-fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip, Windows 10 Server (via WSL).
+fastdup is currently supported on Ubuntu 20.04 or 18.04 OS, CentOS 7.9, Amazon Linux 2, RedHat 4.8, Mac OS 10.X Intel chip, Mac OS 11.X M1 chip, Mac OS M1 pro chip 12.X 13.X, Windows 10 Server (via WSL).
 
 
 ## Ubuntu 20.04/18.04 LTS Machine Setup <a name="ubuntu">
@@ -31,8 +31,11 @@ python3.8 -m pip install --upgrade pip
 ```bash
 brew install ffmpeg@4
 ```
+Note: when using conda on Mac M1 or Mac M1 Pro make sure you install conda for arm (and not conda for intel) otherwise it will not be possible to install.
 
-## CentOS 7 Setup <a name="centos7">
+Note: when using python installed via pyenv, python3.7 does not work since it is too old, use python3.8
+
+## CentOS 7 Setup / Amazon Linux 2 / RedHat 4.8 <a name="centos7">
 ```bash
 sudo yum -y install epel-release
 sudo yum -y update
@@ -202,6 +205,8 @@ ERROR: fastdup-0.39-cp38-cp38-manylinux_2_31_x86_64.whl is not a supported wheel
 - Make sure pip is up to date using `python3.8 -m pip install -U pip`). 
 - Make sure you install using `python3.8 -m pip install..` and not just `pip install...`.
 - If that does not work, please open an issue with the otuput of `python3.8 -m pip debug --verbose` or join our slack channel.
+- If you are on mac using conda, make sure conda is installed for the right platform intel/ arm.
+- If you are on mac using pyenv, make sure to use python3.8 and not python3.7
 
 ERROR on Ubuntu: `libGL.so.1: cannot open shared object file: No such file or directory`
 - Need to install depedency: `sudo apt -y install libgl1-mesa-glx`
