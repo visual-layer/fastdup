@@ -902,7 +902,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         dict_cols = {'files':top_components}
         #if threshold is not None or metric is not None:
 
-        if 'distance' in components.columns:
+        if distance_col in components.columns:
             distance = components.groupby(comp_col)[distance_col].apply(np.min)
             dict_cols['distance'] = distance
         if metric is not None:
