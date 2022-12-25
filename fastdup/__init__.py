@@ -10,6 +10,7 @@
 import sys
 import os
 import json
+os.environ["QT_QPA_PLATFORM"] ="offscreen"
 from ctypes import *
 import pandas as pd
 pd.set_option('display.max_colwidth', None)
@@ -22,7 +23,7 @@ import time
 from fastdup import coco
 from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture
 from fastdup.definitions import *
-from fastdup.utilts import download_from_s3
+from fastdup.utilts import download_from_s3, check_latest_version, record_time
 from datetime import datetime
 try:
     from tqdm import tqdm
@@ -30,20 +31,17 @@ except:
     tqdm = (lambda x: x)
 
 
-__version__="0.158"
+__version__="0.177"
 CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
+#record_time()
 
-try:
-    now = datetime.now()
-    date_time = now.strftime("%Y-%m-%d")
-    with open("/tmp/.timeinfo", "w") as f:
-        if date_time.endswith('%'):
-            date_time = date_time[:len(date_time)-1]
-        f.write(date_time)
-except Exception as ex:
-    fastdup_capture_exception("Timestamp", ex)
+ret = check_latest_version(__version__)
+if ret:
+    raise RuntimeError(f"fastdup detected your are running an old version {__version__} (10 versions or more vs. the latest) please upgrade fastdup")
+
+
 
 LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 os.environ['FASTDUP_LOCAL_DIR'] = LOCAL_DIR
@@ -81,13 +79,285 @@ except Exception as ex:
 
 model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.ort')
 if not os.path.exists(model_path_full):
-    print("Failed to find onnx/ort file", model_path_full);
-    print("Current init file is on", __file__);
+    fastdup_capture_exception("Bad Install",  RuntimeError("Failed to find ort model on init " + __file__))
     sys.exit(1)
 
 
-if 'conda' in sys.version.lower() and 'clang' in sys.version.lower():
-    print("Warning: detected conda environment on Mac, this may lead to unstable behavior. It is recommended to switch to python. You can install python using 'brew install python@3.8'")
+#if 'conda' in sys.version.lower() and 'clang' in sys.version.lower():
+#    print("Warning: detected conda environment on Mac, this may lead to unstable behavior. It is recommended to switch to python. You can install python using 'brew install python@3.8'")
+
+
+def do_run(input_dir='',
+           work_dir='.',
+           test_dir='',
+           compute='cpu',
+           verbose=False,
+           num_threads=-1,
+           num_images=0,
+           turi_param='nnmodel=0',
+           distance='cosine',     #distance metric for the nearest neighbor model.
+           threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
+           lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
+           model_path=model_path_full,
+           license='',            #license string
+           version=False,          #show version and exit
+           nearest_neighbors_k=2,
+           d=576,
+           run_mode=0,
+           nn_provider='nnf',
+           min_offset=0,
+           max_offset=0,
+           nnf_mode="HNSW32",
+           nnf_param="",
+           bounding_box="",
+           batch_size = 1,
+           resume = 0,
+           high_accuracy=False):
+    print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
+
+    if 'sync_s3_to_local=1' in turi_param:
+        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
+        if 'delete_img=1' in turi_param:
+            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            turi_param = turi_param.replace('delete_img=1', '')
+        if 'delete_img=0' not in turi_param:
+            turi_param += ',delete_img=0'
+
+    _model_path = model_path
+    if (bounding_box == "face"):
+        _model_path=os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
+        assert os.path.exists(_model_path), "Failed to find FD model"
+        turi_param += ",save_crops=1"
+        run_mode = 1
+
+    input_dir2 = input_dir
+    if isinstance(input_dir, list):
+        input_dir2 = None
+    config = {"input_dir": input_dir2, "work_dir": work_dir, "test_dir": test_dir, "compute": compute, "verbose": verbose, "num_threads": num_threads,
+              "num_images": num_images, "turi_param": turi_param, "distance": distance, "threshold": threshold, "lower_threshold": lower_threshold,
+              "model_path": _model_path, "version": version, "nearest_neighbors_k": nearest_neighbors_k, "d": d, "run_mode": run_mode,
+              "nn_provider": nn_provider, "min_offset": min_offset, "max_offset": max_offset, "nnf_mode": nnf_mode, "nnf_param": nnf_param,
+              "bounding_box": bounding_box, "batch_size": batch_size, "resume": resume, "high_accuracy": high_accuracy}
+
+    if (work_dir.startswith('./')):
+        work_dir = work_dir[2:]
+
+    if isinstance(input_dir, list):
+        files = pd.DataFrame({'filename':input_dir})
+        files.to_csv('files.txt')
+        input_dir = 'files.txt'
+    elif (input_dir.strip() == '' and run_mode != 2):
+        print("Found an empty input directory, please point to the directory where you are images are found")
+        return 1
+
+    if input_dir.startswith('./'):
+        input_dir = input_dir[2:]
+
+    if input_dir.endswith('/'):
+        input_dir = input_dir[:-1]
+
+    cwd = os.getcwd()
+    if (work_dir.startswith(cwd + '/')):
+        work_dir = work_dir.replace(cwd + '/', '')
+
+    try:
+        if not os.path.exists(work_dir):
+            os.mkdir(work_dir)
+        with open(f"{work_dir}/config.json", "w") as f:
+            json.dump(config, f, indent=4)
+    except Exception as ex:
+        print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
+
+    if (version):
+        print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
+              "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
+        return 0
+
+
+
+    elif not os.path.exists(input_dir):
+        if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
+            pass
+        else:
+            print("Failed to find input dir", input_dir, " please check your input");
+            return 1
+
+    if os.path.abspath(input_dir) == os.path.abspath(work_dir.strip()):
+        print("Input and work_dir output directories are the same, please point to different directories")
+        return 1
+
+    if (resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
+                         os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and (run_mode == 0 or run_mode == 1)):
+        print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
+        print("If you like to resume a previously stopped run, please run with resume=1.")
+        return 1
+
+    assert nn_provider in ['turi','nnf'], "Nearest neighbor implementation should be either turi or nnf."
+    if nn_provider == 'nnf':
+        if nnf_mode == "Flat":
+            assert distance in ['cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon'], f"Distance metric {distance} not supported for nnf provider nnf when nnf_mode=Flat"
+        else:
+            assert distance in ['euclidean', 'cosine'], "Distance should be either euclidean or cosine when nn_provider='nnf'"
+    elif nn_provider == 'turi':
+        assert distance in ['euclidean', 'cosine', 'manhattan', 'squared_euclidean'], "Distance should be either euclidean, cosine, manhattan or squared_euclidean when nn_provider='turi'"
+
+
+    if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
+        print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
+        return 1
+
+    # support for YOLO dataset format
+    if (input_dir.endswith('.yaml')):
+        import yaml
+        with open(input_dir, "r") as stream:
+            try:
+                print('Detected yolo config file')
+                config = yaml.safe_load(stream)
+                if 'path' not in config or 'train' not in config:
+                    print('Failed to find path or train in yolo config file')
+                    return 1
+                if isinstance(config['train'], list):
+                    print('Train location folder list is not supported, please create a single train folder')
+                # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+                #path: ../datasets/coco128  # dataset root dir
+                #train: images/train2017  # train images (relative to 'path') 128 images
+                #val: images/train2017  # val images (relative to 'path') 128 images
+                #test:  # test images (optional)
+                input_dir = os.path.join(config['path'], config['train'])
+                if 'test' in config and config['test'].strip() != '':
+                    test_dir = os.path.join(config['path'], config['test'])
+
+            except Exception as exc:
+                print('Error when loading yolo .yaml config', exc)
+                return 1
+
+
+    if batch_size < 1 or batch_size > 200:
+        print("Allowed values for batch size 1->200.")
+        return 1
+
+    if isinstance(test_dir, list):
+        files = pd.DataFrame({'filenames':test_dir})
+        files.to_csv(INPUT_TEST_FILE_LOCATION)
+        test_dir = INPUT_TEST_FILE_LOCATION
+
+
+    if (run_mode == 3 and test_dir == ''):
+        print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
+        return 1
+
+    if (run_mode == 4 or run_mode == 6):
+        if not os.path.exists(os.path.join(work_dir, "nnf.index")):
+            print(f"Error: Failed to find stored model nnf.index on {work_dir}")
+            return 1
+
+    if high_accuracy:
+        if _model_path !=  model_path_full:
+            print("Error: Can not run high accuracy model when using user provided model_path")
+            return 1
+        if d != DEFAULT_MODEL_FEATURE_WIDTH:
+            print("Can not run high accuracy model when using user provided d")
+            return 1
+        _model_path = model_path_full.replace('l.ort', 'l2.ort')
+        d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
+
+    # When working with s3 remote folder allow loading it first to disk to improve performance
+    if 'sync_s3_to_local=1' in turi_param:
+        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
+        if 'delete_img=1' in turi_param:
+            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            turi_param = turi_param.replace('delete_img=1', '')
+        if 'delete_img=0' not in turi_param:
+            turi_param += ',delete_img=0'
+        input_dir = download_from_s3(input_dir, work_dir, verbose, False)
+
+        if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
+            test_dir = download_from_s3(test_dir, work_dir, verbose, True)
+
+    local_error_file = os.path.join(work_dir, FILENAME_ERROR_MSG)
+    if os.path.exists(local_error_file):
+        os.unlink(local_error_file)
+
+    #Calling the C++ side
+    dll.do_main.restype = c_int
+    dll.do_main.argtypes = [c_char_p,
+                            c_char_p,
+                            c_char_p,
+                            c_char_p,
+                            c_bool,
+                            c_int,
+                            c_ulonglong,
+                            c_char_p,
+                            c_char_p,
+                            c_float,
+                            c_float,
+                            c_char_p,
+                            c_char_p,
+                            c_bool,
+                            c_int,
+                            c_int,
+                            c_int,
+                            c_char_p,
+                            c_ulonglong,
+                            c_ulonglong,
+                            c_char_p,
+                            c_char_p,
+                            c_char_p,
+                            c_int,
+                            c_int]
+
+    cm = contextlib.nullcontext()
+
+    if 'JPY_PARENT_PID' in os.environ:
+        try:
+            from IPython import get_ipython
+            ip = get_ipython()
+            extension = ip.extension_manager.loaded
+            if 'wurlitzer' not in extension:
+                import wurlitzer
+                cm = wurlitzer.sys_pipes()
+        except:
+            print("On Jupyter notebook running on large datasets, there may be delay getting the console output\n"
+                  "A recommended way to fixing this is to run: \n"
+                  "%pip install wurlitzer\n"
+                  "%load_ext wurlitzer\n")
+
+    with cm as c:
+        ret = dll.do_main(bytes(input_dir, 'utf-8'),
+                          bytes(work_dir, 'utf-8'),
+                          bytes(test_dir.strip(), 'utf-8'),
+                          bytes(compute, 'utf-8'),
+                          verbose,
+                          num_threads,
+                          num_images,
+                          bytes(turi_param, 'utf-8'),
+                          bytes(distance, 'utf-8'),
+                          threshold,
+                          lower_threshold,
+                          bytes(license, 'utf-8'),
+                          bytes(_model_path, 'utf-8'),
+                          version,
+                          nearest_neighbors_k,
+                          d,
+                          run_mode,
+                          bytes(nn_provider, 'utf-8'),
+                          min_offset,
+                          max_offset,
+                          bytes(nnf_mode, 'utf-8'),
+                          bytes(nnf_param, 'utf-8'),
+                          bytes(bounding_box, 'utf-8'),
+                          batch_size,
+                          resume)
+
+        if ret != 0 and 'JPY_PARENT_PID' in os.environ:
+            if os.path.exists(local_error_file):
+                with open(local_error_file, "r") as f:
+                    print("fastdup C++ error received: ", f.read(), "\n")
+
+        return ret
+
+    return 1
+
 
 
 """
@@ -134,7 +404,7 @@ def run(input_dir='',
                 * A file containing s3 full paths or minio paths each on its own row.
                 * A python list with absolute filenames
                 * yolov5 yaml input file containing train and test folders (single folder supported for now)
-                * We support jpg, jpeg, tiff, tif, giff, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
+                * We support jpg, jpeg, tiff, tif, giff, heif, heic, bmp, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
             If you have other image extensions that are readable by opencv imread() you can give them in a file (each image on its own row) and then we do not check for the
             known extensions and use opencv to read those formats.
             Note: It is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files.
@@ -229,7 +499,10 @@ def run(input_dir='',
             ==num_em_iter=XX==, number of KMeans EM iterations to run. Default is 20.\
             ==num_clusters=XX==, number of KMeans clusters to use. Default is 100.\
 
-        bounding_box (str): Optional bouding box to crop images, given as bounding_box='rows=xx,cols=xx,height=xx,width=xx'.
+        bounding_box (str): Optional bounding box to crop images, given as bounding_box='row_y=xx,col_x=xx,height=xx,width=xx'. This defines a global bounding box to be used for all images.
+                            Alternatively, it is possible to set bounding_box='face' to crop the face from the image (in case a face is present). For the face crop the margin around the face is defined by
+                            turi_param='augmentation_horiz=0.2,augmentation_vert=0.2' where 0.2 mean 20% additional margin around the face relative to the width and height respectively.
+                            It is possible to change the margin, lower allower value is 0 (no margin) and upper allowed  value is 1. Default is 0.2.
 
         batch_size (int): Optional batch size when computing inference. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
 
@@ -242,242 +515,75 @@ def run(input_dir='',
 
     '''
 
-    print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
+    _input_dir = input_dir
 
-    if 'sync_s3_to_local=1' in turi_param:
-        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
-        if 'delete_img=1' in turi_param:
-            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
-            turi_param = turi_param.replace('delete_img=1', '')
-        if 'delete_img=0' not in turi_param:
-            turi_param += ',delete_img=0'
-
-    input_dir2 = input_dir
-    if isinstance(input_dir, list):
-        input_dir2 = None
-    config = {"input_dir": input_dir2, "work_dir": work_dir, "test_dir": test_dir, "compute": compute, "verbose": verbose, "num_threads": num_threads,
-              "num_images": num_images, "turi_param": turi_param, "distance": distance, "threshold": threshold, "lower_threshold": lower_threshold,
-              "model_path": model_path, "version": version, "nearest_neighbors_k": nearest_neighbors_k, "d": d, "run_mode": run_mode,
-              "nn_provider": nn_provider, "min_offset": min_offset, "max_offset": max_offset, "nnf_mode": nnf_mode, "nnf_param": nnf_param,
-              "bounding_box": bounding_box, "batch_size": batch_size, "resume": resume, "high_accuracy": high_accuracy}
-
-    if (work_dir.startswith('./')):
-        work_dir = work_dir[2:]
-
-    if isinstance(input_dir, list):
-        files = pd.DataFrame({'filename':input_dir})
-        files.to_csv('files.txt')
-        input_dir = 'files.txt'
-    elif (input_dir.strip() == '' and run_mode != 2):
-        print("Found an empty input directory, please point to the directory where you are images are found")
-        return 1
-
-    if input_dir.startswith('./'):
-        input_dir = input_dir[2:]
-
-    cwd = os.getcwd()
-    if (work_dir.startswith(cwd + '/')):
-        work_dir = work_dir.replace(cwd + '/', '')
-
-    try:
-        if not os.path.exists(work_dir):
-            os.mkdir(work_dir)
-        with open(f"{work_dir}/config.json", "w") as f:
-            json.dump(config, f, indent=4)
-    except Exception as ex:
-        print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
-
-    if (version):
-        print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
-                "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
-        return 0
-
-
-
-    elif not os.path.exists(input_dir):
-        if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
-            pass
-        else:
-            print("Failed to find input dir", input_dir, " please check your input");
-            return 1
-
-    if os.path.abspath(input_dir) == os.path.abspath(work_dir.strip()):
-        print("Input and work_dir output directories are the same, please point to different directories")
-        return 1
-
-    if (resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
-        os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and (run_mode == 0 or run_mode == 1)):
-        print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
-        print("If you like to resume a previously stopped run, please run with resume=1.")
-        return 1
-
-    assert nn_provider in ['turi','nnf'], "Nearest neighbor implementation should be either turi or nnf."
-    if nn_provider == 'nnf':
-        if nnf_mode == "Flat":
-            assert distance in ['cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon'], f"Distance metric {distance} not supported for nnf provider nnf when nnf_mode=Flat"
-        else:
-            assert distance in ['euclidean', 'cosine'], "Distance should be either euclidean or cosine when nn_provider='nnf'"
-    elif nn_provider == 'turi':
-        assert distance in ['euclidean', 'cosine', 'manhattan', 'squared_euclidean'], "Distance should be either euclidean, cosine, manhattan or squared_euclidean when nn_provider='turi'"
-
-
-    if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
-        print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
-        return 1
-
-    # support for YOLO dataset format
-    if (input_dir.endswith('.yaml')):
-        import yaml
-        with open(input_dir, "r") as stream:
-            try:
-                print('Detected yolo config file')
-                config = yaml.safe_load(stream)
-                if 'path' not in config or 'train' not in config:
-                    print('Failed to find path or train in yolo config file')
-                    return 1
-                if isinstance(config['train'], list):
-                    print('Train location folder list is not supported, please create a single train folder')
-                # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
-                #path: ../datasets/coco128  # dataset root dir
-                #train: images/train2017  # train images (relative to 'path') 128 images
-                #val: images/train2017  # val images (relative to 'path') 128 images
-                #test:  # test images (optional)
-                input_dir = os.path.join(config['path'], config['train'])
-                if 'test' in config and config['test'].strip() != '':
-                    test_dir = os.path.join(config['path'], config['test'])
-
-            except Exception as exc:
-                print('Error when loading yolo .yaml config', exc)
-                return 1
-
-
-    if batch_size < 1 or batch_size > 200:
-        print("Allowed values for batch size 1->200.")
-        return 1
-
-    if isinstance(test_dir, list):
-        files = pd.DataFrame({'filenames':test_dir})
-        files.to_csv(INPUT_TEST_FILE_LOCATION)
-        test_dir = INPUT_TEST_FILE_LOCATION
-
-
-    if (run_mode == 3 and test_dir == ''):
-        print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
-        return 1
-
-    if (run_mode == 4 or run_mode == 6):
-        if not os.path.exists(os.path.join(work_dir, "nnf.index")):
-            print(f"Error: Failed to find stored model nnf.index on {work_dir}")
-            return 1
-
-    if high_accuracy:
-        if model_path !=  model_path_full:
-            print("Error: Can not run high accuracy model when using user provided model_path")
-            return 1
-        if d != DEFAULT_MODEL_FEATURE_WIDTH:
-            print("Can not run high accuracy model when using user provided d")
-            return 1
-        model_path = model_path_full.replace('l.ort', 'l2.ort')
-        d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
-
-    # When working with s3 remote folder allow loading it first to disk to improve performance
-    if 'sync_s3_to_local=1' in turi_param:
-        assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
-        if 'delete_img=1' in turi_param:
-            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
-            turi_param = turi_param.replace('delete_img=1', '')
-        if 'delete_img=0' not in turi_param:
-            turi_param += ',delete_img=0'
-        input_dir = download_from_s3(input_dir, work_dir, verbose, False)
-
-        if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
-            test_dir = download_from_s3(test_dir, work_dir, verbose, True)
-
-    local_error_file = os.path.join(work_dir, FILENAME_ERROR_MSG)
-    if os.path.exists(local_error_file):
-        os.unlink(local_error_file)
-
-    #Calling the C++ side
-    dll.do_main.restype = c_int
-    dll.do_main.argtypes = [c_char_p, 
-            c_char_p,
-            c_char_p,
-            c_char_p,
-            c_bool,
-            c_int,
-            c_ulonglong, 
-            c_char_p,
-            c_char_p,
-            c_float,
-            c_float,
-            c_char_p,
-            c_char_p,
-            c_bool,
-            c_int,
-            c_int,
-            c_int,
-            c_char_p,
-            c_ulonglong,
-            c_ulonglong,
-            c_char_p,
-            c_char_p, 
-            c_char_p,
-            c_int,
-            c_int]
-
-    cm = contextlib.nullcontext()
-
-    if 'JPY_PARENT_PID' in os.environ:
+    if (bounding_box == 'face'):
+        bounding_box = ''
+        turi_param += ",save_crops=1"
+        if 'augmentation_horiz' not in turi_param and 'augmentation_vert' not in turi_param:
+            turi_param += ",augmentation_horiz=0.2,augmentation_vert=0.2"
+        ret = do_run(input_dir=input_dir,
+                     work_dir=work_dir,
+                     test_dir=test_dir,
+                     compute=compute,
+                     verbose=verbose,
+                     num_threads=num_threads,
+                     num_images=num_images,
+                     turi_param=turi_param,
+                     distance=distance,
+                     threshold=threshold,
+                     lower_threshold=lower_threshold,
+                     model_path=os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx'),
+                     license=license,
+                     version=version,
+                     nearest_neighbors_k=nearest_neighbors_k,
+                     d=d,
+                     run_mode=1,
+                     nn_provider=nn_provider,
+                     min_offset=min_offset,
+                     max_offset=max_offset,
+                     nnf_mode=nnf_mode,
+                     nnf_param=nnf_param,
+                     bounding_box=bounding_box,
+                     batch_size = batch_size,
+                     resume = resume,
+                     high_accuracy=high_accuracy)
+        if (ret != 0):
+            print("Failed to run fastdup")
+            return ret
         try:
-            from IPython import get_ipython
-            ip = get_ipython()
-            extension = ip.extension_manager.loaded
-            if 'wurlitzer' not in extension:
-                import wurlitzer
-                cm = wurlitzer.sys_pipes()
+            os.unlink(os.path.join(work_dir, 'atrain_features.dat'))
         except:
-            print("On Jupyter notebook running on large datasets, there may be delay getting the console output\n"
-                  "A recommended way to fixing this is to run: \n"
-                  "%pip install wurlitzer\n"
-                  "%load_ext wurlitzer\n")
+            pass
+        input_dir = os.path.join(work_dir, "crops")
 
-    with cm as c:
-        ret = dll.do_main(bytes(input_dir, 'utf-8'),
-        bytes(work_dir, 'utf-8'),
-        bytes(test_dir.strip(), 'utf-8'),
-        bytes(compute, 'utf-8'),
-        verbose,
-        num_threads,
-        num_images,
-        bytes(turi_param, 'utf-8'),
-        bytes(distance, 'utf-8'),
-        threshold,
-        lower_threshold,
-        bytes(license, 'utf-8'),
-        bytes(model_path, 'utf-8'),
-        version,
-        nearest_neighbors_k,
-        d,
-        run_mode,
-        bytes(nn_provider, 'utf-8'),
-        min_offset,
-        max_offset,
-        bytes(nnf_mode, 'utf-8'),
-        bytes(nnf_param, 'utf-8'),
-        bytes(bounding_box, 'utf-8'),
-        batch_size,
-        resume)
-
-        if ret != 0 and 'JPY_PARENT_PID' in os.environ:
-            if os.path.exists(local_error_file):
-                with open(local_error_file, "r") as f:
-                    print("fastdup C++ error received: ", f.read(), "\n")
-
-        return ret
-
-    return 1
-
-
+    ret = do_run(input_dir=input_dir,
+             work_dir=work_dir,
+             test_dir=test_dir,
+             compute=compute,
+             verbose=verbose,
+             num_threads=num_threads,
+             num_images=num_images,
+             turi_param=turi_param,
+             distance=distance,
+             threshold=threshold,
+             lower_threshold=lower_threshold,
+             model_path=model_path,
+             license=license,
+             version=version,
+             nearest_neighbors_k=nearest_neighbors_k,
+             d=d,
+             run_mode=run_mode,
+             nn_provider=nn_provider,
+             min_offset=min_offset,
+             max_offset=max_offset,
+             nnf_mode=nnf_mode,
+             nnf_param=nnf_param,
+             bounding_box=bounding_box,
+             batch_size = batch_size,
+             resume = resume,
+             high_accuracy=high_accuracy)
+    return ret
 
 def run_on_webdataset(input_dir='',
                       work_dir='.',
@@ -970,7 +1076,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
     Function to create and display a gallery of images for the largest graph components
 
     Args:
-        work_dir (str): path to fastdup work_dir
+        work_dir (str): path to fastdup work_dir. Altenatively dataframe with connected_compoennts.csv content from previous fastdup run.
 
         save_path (str): output folder location for the visuals
 
@@ -1009,11 +1115,13 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
-         kwargs (dict): Optional parameter to pass additional parameters to the function.
-            split_sentence_to_label_list (boolean): Optional parameter to split the label into a list of labels. Default is False.
-            limit_labels_printed (int): Optional parameter to limit the number of labels printed in the html report. Default is max_items.
-            nrows (int): limit the number of read rows for debugging purposes of the report
-            save_artifacts (bool): Optional param to save intermediate artifacts like image paths used for generating the component
+        kwargs (dict): Optional parameter to pass additional parameters to the function.
+        
+        split_sentence_to_label_list (boolean): Optional parameter to split the label into a list of labels. Default is False.
+           
+        limit_labels_printed (int): Optional parameter to limit the number of labels printed in the html report. Default is max_items.
+        nrows (int): limit the number of read rows for debugging purposes of the report
+        save_artifacts (bool): Optional param to save intermediate artifacts like image paths used for generating the component
 
     Returns:
         ret (int): 0 in case of success, otherwise 1
@@ -1033,6 +1141,13 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
             config = load_config(os.path.dirname(work_dir))
             if input_dir is None and config is not None and 'input_dir' in config:
                 input_dir = config['input_dir']
+        elif isinstance(work_dir, pd.DataFrame):
+            assert input_dir is not None, "When passing dataframe need to point input_dir to the previous work_dir"
+            assert len(work_dir), "Empty dataframe encountered"
+            assert 'component_id' in work_dir.columns, "Connected components dataframe should contain 'component_id' column"
+            assert '__id' in work_dir.columns or 'len' in work_dir.columns, "Connected components dataframe should contain '__id' column"
+        else:
+            assert False, f"Wrong work_dir type {type(work_dir)}"
 
         ret = do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                             max_width, max_items, min_items, get_bounding_box_func,
@@ -1638,7 +1753,7 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
 
         min_items (int): optional value, select only components with at least min_items
 
-        max_items (int) optional value, select only components with at most max_items
+        max_items (int): optional value, select only components with at most max_items
 
         keyword (str): optional, select labels with keyword  value inside
 
@@ -1818,7 +1933,8 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, 
+                                 min_items=2, max_items=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the similarity metric. In each table row one query image is
@@ -1842,9 +1958,8 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
             Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
             Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
-        slice (str or list): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
-        A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors. The score values are 0->100 where
-        0 means the query image is only similar to images outside its class, 100 means the query image is only similar to images from the same class.
+        slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
+            A special value is 'label_score' which is used for comparing both images and labels of the nearest neighbors. The score values are 0->100 where 0 means the query image is only similar to images outside its class, 100 means the query image is only similar to images from the same class.
 
         max_width (int): Optional param to limit the image width
 
@@ -1859,9 +1974,13 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
-    Returns:
-        ret (int): 0 in case of success, otherwise 1.
+        min_items (int): Optional parameter to select components with min_items or more
 
+        max_items (int): Optional parameter to limit the number of items displayed
+
+    Returns:
+        ret (pd.DataFrame): similarity dataframe, for each image filename returns a list of top K similar images.
+            each row has the columns 'from', 'to', 'label' (optional), 'distance'
      '''
 
     try:
@@ -1878,12 +1997,14 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
                 similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
 
         ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
-            slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+            slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, 
+            input_dir,  min_items, max_items, kwargs=kwargs)
         fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
 
     except Exception as e:
         fastdup_capture_exception("create_similarity_gallery", e)
+        return None
 
 
 def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
@@ -1912,6 +2033,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
     Returns:
+        ret (int): 0 in case of success, otherwise 1.
     '''
     try:
         start_time = time.time()
@@ -2303,3 +2425,71 @@ def run_kmeans_on_extracted(input_dir='',
         return ret
     except Exception as ex:
         fastdup_capture_exception("run_kmeans_on_extracted", ex)
+
+
+
+def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num_images=0, min_offset=0, max_offset=0, turi_param="",
+                         model_path = model_path_full, d=576, resize_video=0, keyframes_only=1):
+    """
+    A function to go over a collection of videos and etract them into frames. The output is saved to the work_dir/tmp
+    subfolder.
+
+    Args:
+        input_dir (str):
+        Location of the videos to extract.
+            * A folder
+            * A remote folder (s3 or minio starting with s3:// or minio://). When using minio append the minio server name for example minio://google/visual_db/sku110k.
+            * A file containing absolute filenames each on its own row.
+            * A file containing s3 full paths or minio paths each on its own row.
+            * A python list with absolute filenames
+            * We support api/mp4 video formats.
+
+        work_dir (str): Optional path for storing intermediate files and results.
+
+        verbose (boolean): Verbosity.
+
+        num_threads (int): Number of threads. If no value is specified num threads is auto configured by the number of cores.
+
+        num_images (unsigned long long): Number of images to run on. On default, run on all the images in the image_dir folder.
+
+        turi_param (str): Optional turi parameters seperated by command. Example run: turi_param='nnmodel=0,ccthreshold=0.99'
+        The following parameters are supported.
+            * nnmodel=xx, Nearest Neighbor model for clustering the features together. Supported options are 0 = brute_force (exact), 1 = ball_tree and 2 = lsh (both approximate).
+            * ccthreshold=xx, Threshold for running connected components to find clusters of similar images. Allowed values 0->1. The default ccthreshold is 0.96. This groups very similar images together, for example identical images or images that went
+            simple transformations like scaling, flip, zoom in. As higher the score the more similar images are grouped by and you will get \
+                smaller clusters. Score 0.9 is pretty broad and will clsuter images together even if they fine details are not similar. \
+                                                                                                                                   It is recommended to experiment with this parameter based on your dataset and then visualize the results using `fastdup.create_components_gallery()`.
+            * run_cc=0|1 run connected components on the resulting similarity graph. Default is 1.
+            * run_pagerank=0|1 run pagerank on the resulting similarity graph. Default is 1.
+            * delete_tar=0|1 when working with tar files obtained from cloud storage delete the tar after download
+            * delete_img=0|1 when working with images obtained from cloud storage delete the image after download
+            * tar_only=0|1 run only on tar files and ignore images in folders. Default is 0.
+            * run_stats=0|1 compute image statistics. Default is 1.
+            * sync_s3_to_local=0|1 In case of using s3 bucket sync s3 to local folder to improve performance. Assumes there is enough local disk space to contain the dataDefault is 0. \
+
+
+        min_offset (unsigned long long): Optional min offset to start iterating on the full file list.
+
+        max_offset (unsigned long long): Optional max offset to start iterating on the full file list.
+
+        resize_video (int): 0 = do not resize video, 1 = resize video based on the model_path dimensions
+
+        keyframes_only (int): 0 = extract all frames, 1 = extract only keyframes
+
+        model_path (str): optional string to point to alternatiuve onnx or ort model
+
+        d (int): output feature vector for model
+
+
+    Returns:
+        ret (int): Status code 0 = success, 1 = error.
+    """
+    t_param = f"video_keyframe_only={keyframes_only},video_no_resize={int(resize_video == 0)},run_video_extraction_only=1"
+    if (turi_param != ""):
+        t_param += "turi_param"
+
+    return run(input_dir=input_dir, work_dir=work_dir, verbose=verbose, run_mode=1,
+               turi_param=t_param, num_images=num_images, num_threads=num_threads,
+               min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d)
+
+

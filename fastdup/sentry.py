@@ -5,22 +5,43 @@ from sentry_sdk import capture_exception
 import time
 import os
 import traceback
+import platform
 import uuid
 import hashlib
 from fastdup.definitions import VERSION__
-from datetime import datetime
 
 
 #get a random token based on the machine uuid
 token = hashlib.sha256(str(uuid.getnode()).encode()).hexdigest()
-unit_test = False
+unit_test = None
+
+
+def find_certifi_path():
+    try:
+        import certifi
+        return os.path.join(os.path.dirname(certifi.__file__), 'cacert.pem')
+    except Exception as ex:
+        print('Failed to find certifi', ex)
+    return None
+
 
 def init_sentry():
     global unit_test
+
     if 'SENTRY_OPT_OUT' not in os.environ:
+
+        if platform.system() == 'Darwin':
+            # fix CA certficate issue on latest MAC models
+            path = find_certifi_path()
+            if path is not None:
+                if 'SSL_CERT_FILE' not in os.environ:
+                    os.environ["SSL_CERT_FILE"] = path
+                if 'REQUESTS_CA_BUNDLE' not in os.environ:
+                    os.environ["REQUESTS_CA_BUNDLE"] = path
+
         sentry_sdk.init(
             dsn="https://b526f209751f4bcea856a1d90e7cf891@o4504135122944000.ingest.sentry.io/4504168616427520",
-
+            debug='SENTRY_DEBUG' in os.environ,
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
             # We recommend adjusting this value in production.
@@ -42,7 +63,7 @@ def fastdup_capture_exception(section, e, warn_only=False):
             scope.set_tag("section", section)
             scope.set_tag("unit_test", unit_test)
             scope.set_tag("token", token)
-            capture_exception(section, e)
+            capture_exception(e, section)
 
 
 def fastdup_performance_capture(section, start_time):

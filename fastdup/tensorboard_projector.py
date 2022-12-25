@@ -97,8 +97,9 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
         spriteimage.paste(image, (w_loc*W, h_loc*H))
 
 
-    if max_width is not None and alternative_width is not None:
-        spriteimage = spriteimage.resize((max_width*alternative_width, max_width))
+    if max_width is not None:
+        factor = max_width / spriteimage.width
+        spriteimage = spriteimage.resize((int(spriteimage.width * factor), int(spriteimage.height * factor)))
 
     if isinstance(img_path[0], str):
         if alternative_filename is not None:

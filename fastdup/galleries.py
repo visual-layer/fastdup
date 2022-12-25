@@ -516,13 +516,13 @@ def load_one_image(args):
 
 def visualize_top_components(work_dir, save_path, num_components, get_label_func=None, group_by='visual', slice=None,
                              get_bounding_box_func=None, max_width=None, threshold=None, metric=None, descending=True,
-                             max_items = None, min_items=None, keyword=None, return_stats=True, comp_type="component",
+                             max_items = None, min_items=None, keyword=None, return_stats=False, comp_type="component",
                              input_dir=None, kwargs=None):
     '''
     Visualize the top connected components
 
     Args:
-        work_dir (str): directory with the output of fastdup run
+        work_dir (str): directory with the output of fastdup run or a dataframe with the content of connected_components.csv
 
         save_path (str): directory to save the output to
 
@@ -579,15 +579,17 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
     MAX_IMAGES_IN_GRID = 54
 
-    ret = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
-                                            slice=slice, threshold=threshold, metric=metric, descending=descending,
-                                            max_items=max_items,  min_items=min_items, keyword=keyword, save_path=save_path, return_stats=return_stats,
-                                            comp_type=comp_type, kwargs=kwargs)
-    if not return_stats:
-        top_components = ret
+    if isinstance(work_dir, pd.DataFrame) and 'distance' in work_dir.columns and 'component_id' in work_dir.columns \
+        and 'files' in work_dir.columns and 'len' in work_dir.columns and len(work_dir):
+        top_components = work_dir
     else:
-        assert ret is not None, f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
-    top_components, stats_html = ret
+        top_components = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
+                                                slice=slice, threshold=threshold, metric=metric, descending=descending,
+                                                max_items=max_items,  min_items=min_items, keyword=keyword, save_path=save_path,
+                                                return_stats=False, input_dir=input_dir,
+                                                comp_type=comp_type, kwargs=kwargs)
+
+    assert top_components is not None, f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
     top_components = top_components.head(num_components)
     if 'debug_cc' in kwargs:
         print(top_components.head())
@@ -672,10 +674,14 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             fastdup_capture_exception("visualize_top_components", ex)
 
     print(f'Finished OK. Components are stored as image files {save_path}/components_[index].jpg')
-    return top_components.head(num_components), img_paths, stats_html
+    return top_components.head(num_components), img_paths
 
 
 def read_clusters_from_file(work_dir, get_label_func, kwargs):
+    nrows = None
+    if 'nrows' in kwargs:
+        nrows = kwargs['nrows']
+
     if isinstance(work_dir, str):
         if os.path.isdir(work_dir):
             work_dir = os.path.join(work_dir, FILENAME_KMEANS_ASSIGNMENTS)
@@ -689,6 +695,9 @@ def read_clusters_from_file(work_dir, get_label_func, kwargs):
         df = work_dir
         assert len(df), f"Failed to read dataframe from {work_dir} or empty dataframe"
 
+    if nrows is not None:
+        df = df.head(nrows)
+
     if get_label_func is not None:
         df = find_label(get_label_func, df, 'filename', 'label')
 
@@ -696,9 +705,15 @@ def read_clusters_from_file(work_dir, get_label_func, kwargs):
 
 
 def read_components_from_file(work_dir, get_label_func, kwargs):
-    assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
-    assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
-    assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
+    if isinstance(work_dir, str):
+        assert os.path.exists(work_dir), 'Working directory work_dir does not exist'
+        assert os.path.exists(os.path.join(work_dir, 'connected_components.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
+        assert os.path.exists(os.path.join(work_dir, 'atrain_features.dat.csv')), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file."
+    elif isinstance(work_dir, pd.DataFrame):
+        assert len(work_dir), "Empty dataframe"
+        assert 'input_dir' in kwargs and os.path.exists(kwargs['input_dir']), "Failed to find fastdup work_dir"
+    else:
+        assert False, f"Unknown work_dir type {type(work_dir)}"
 
     nrows = None
     if len(kwargs) and 'nrows' in kwargs:
@@ -707,15 +722,24 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     debug_cc = kwargs is not None and "debug_cc" in kwargs and kwargs["debug_cc"]
 
     # read fastdup connected components, for each image id we get component id
-    components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS), nrows=nrows)
-    if 'min_distance' not in components.columns:
-        if kwargs is not None and "squeeze_cc" in kwargs:
-            components["min_distance"] = 0
+    if isinstance(work_dir, str):
+        components = pd.read_csv(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS), nrows=nrows)
+        if 'min_distance' not in components.columns:
+            if kwargs is not None and "squeeze_cc" in kwargs:
+                components["min_distance"] = 0
+    elif isinstance(work_dir, pd.DataFrame):
+        components = work_dir
+        if nrows is not None:
+            components = components.head(nrows)
+    else:
+        assert False, "Unknown work_dir type"
 
     if debug_cc:
         print(components.head())
 
-    local_filenames = os.path.join(work_dir, 'atrain_' + FILENAME_IMAGE_LIST)
+
+    local_dir = work_dir if isinstance(work_dir, str) else kwargs['input_dir']
+    local_filenames = os.path.join(local_dir, 'atrain_' + FILENAME_IMAGE_LIST)
     assert os.path.exists(local_filenames), "Error: Failed to find fastdup input file " + local_filenames + ". Please run using fastdup.run(..) to generate this file."
     filenames = pd.read_csv(local_filenames, nrows=nrows)
     if (len(components) != len(filenames)):
@@ -731,6 +755,7 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     # now join the two tables to get both id and image name
     else:
         components['filename'] = filenames['filename']
+    
     if debug_cc:
         print(components.head())
 
@@ -740,7 +765,7 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
         components = components.merge(sizes, how='left', left_on=['dirname'], right_on=['dirname'])
 
 
-    components = find_label(get_label_func,components, 'filename', 'label', kwargs)
+    components = find_label(get_label_func, components, 'filename', 'label', kwargs)
     if debug_cc:
         print(components.head())
     return components
@@ -775,7 +800,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     Function to find the largest components of duplicate images
 
     Args:
-        work_dir (str): working directory where fastdup.run was run.
+        work_dir (str): working directory where fastdup.run was run, alternatively a pd.DataFrame with the output of connected_components.csv
 
         get_label_func (callable): optional function given an absolute path to an image return the image label.
             Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
@@ -812,7 +837,7 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
 
     '''
-
+    kwargs['input_dir'] = input_dir
     if comp_type == "component":
         components = read_components_from_file(work_dir, get_label_func, kwargs)
         comp_col = "component_id"
@@ -830,8 +855,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         cols_to_use = ['index', metric]
         if metric != 'size':
             cols_to_use = ['index', 'width', 'height']
-        assert os.path.exists(os.path.join(work_dir, 'atrain_stats.csv')), f"Error: Failed to find stats file {os.path.join(work_dir)}/atrain_stats.csv. Please run using fastdup.run(..) to generate this file."
-        stats = pd.read_csv(os.path.join(work_dir, 'atrain_stats.csv'), usecols=cols_to_use)
+        local_dir = work_dir if isinstance(work_dir, str) else input_dir
+        assert os.path.exists(os.path.join(local_dir, 'atrain_stats.csv')), f"Error: Failed to find stats file {os.path.join(local_dir)}/atrain_stats.csv. Please run using fastdup.run(..) to generate this file."
+        stats = pd.read_csv(os.path.join(local_dir, 'atrain_stats.csv'), usecols=cols_to_use)
 
         if metric == 'size':
             stats['size'] = stats.apply(lambda x: x['width']*x['height'], axis=1)
@@ -971,10 +997,11 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         comps = comps[comps['len'] > 1] # remove any singleton components
 
     if threshold is not None or metric is not None or keyword is not None:
+        local_dir = work_dir if isinstance(work_dir, str) else input_dir
         if comp_type == "component":
-            comps.to_pickle(f'{work_dir}/{FILENAME_TOP_COMPONENTS}')
+            comps.to_pickle(f'{local_dir}/{FILENAME_TOP_COMPONENTS}')
         else:
-            comps.to_pickle(f'{work_dir}/{FILENAME_TOP_CLUSTERS}')
+            comps.to_pickle(f'{local_dir}/{FILENAME_TOP_CLUSTERS}')
 
     if not return_stats:
         return comps
@@ -992,7 +1019,10 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     Function to create and display a gallery of images for the largest graph components
 
     Parameters:
-        work_dir (str): path to fastdup work_dir
+        work_dir (str): path to fastdup work_dir. Alternatively (for advanced users):
+        * pd.DataFrame containing the content of connected_components.csv file. The file columns should contain: __id,component_id,min_distance.
+        * or pd.DataFrame containing the top components. The df should include the fields: component_id,files,distance,len. Where component_id is integer, files is a list of files
+        in this component, files is a list of absoluate image filenames in the component, distance is float in the range 0..1, len the files len.
 
         save_path (str): output folder location for the visuals
 
@@ -1058,11 +1088,10 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
                                                 descending, max_items, min_items, keyword,
-                                                return_stats=True, comp_type=comp_type, input_dir=input_dir, kwargs=kwargs)
-    if len(ret) < 3:
+                                                return_stats=False, comp_type=comp_type, input_dir=input_dir, kwargs=kwargs)
+    if ret is None:
         return None
-    else:
-        subdf, img_paths, stats_html = ret
+    subdf, img_paths = ret
     if subdf is None or len(img_paths) == 0:
         return None
 
@@ -1194,7 +1223,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     if metric is not None:
         subtitle = "Sorted by " + metric + " descending" if descending else "Sorted by " + metric + " ascending"
 
-    fastdup.html_writer.write_to_html_file(ret[columns], title, out_file, stats_html, subtitle)
+    fastdup.html_writer.write_to_html_file(ret[columns], title, out_file, "", subtitle)
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     if comp_type == "component":
@@ -1255,7 +1284,8 @@ def get_stats_df(df, subdf, metric, save_path, max_width=None, input_dir=None, k
 
 def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
+                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None,
+                            min_items=2, max_items=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics.
@@ -1292,6 +1322,12 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+       
+        min_items (int): Optional parameter to select components with min_items or more
+
+        max_items (int): Optional parameter to limit the number of items displayed
+
+     
      '''
 
 
@@ -1382,7 +1418,8 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
 
 def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func =None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, min_items=2, 
+                                 max_items=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics
@@ -1417,6 +1454,10 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+        min_items (int): Minimal number of items in the similarity group (optional).
+
+        max_items (int): Maximal number of items in the similarity group (optional).
+
 
     Returns:
         ret (pd.DataFrame): Dataframe with the image statistics
@@ -1434,11 +1475,14 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     work_dir = None
     if isinstance(similarity_file, pd.DataFrame):
         df = similarity_file
-    else:
+    elif isinstance(similarity_file, str):
         work_dir = os.path.dirname(os.path.abspath(similarity_file))
         assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file + " . Please run using fastdup.run(..) to generate this file."
         df = pd.read_csv(similarity_file)
-    assert len(df), "Failed to read stats file " + similarity_file
+    else:
+        assert False, f"Wrong type {type(work_dir)}"
+    
+    assert len(df), "Failed to read similarity file " + similarity_file
 
     if get_label_func is not None:
         df = find_label(get_label_func, df, 'from', 'label')
@@ -1484,7 +1528,9 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         subdf['score'] = label_score
         subdf['length'] = lengths
 
-        subdf = subdf[subdf['length'] > 1]
+        subdf = subdf[subdf['length'] >= min_items]
+        if max_items is not None:
+            subdf = subdf[subdf['length'] <= max_items]
         subdf = subdf.sort_values(['score','length'], ascending=not descending)
         df2 = subdf.copy()
         subdf = subdf.head(num_images)
