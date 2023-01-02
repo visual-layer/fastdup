@@ -31,7 +31,7 @@ except:
     tqdm = (lambda x: x)
 
 
-__version__="0.177"
+__version__="0.187"
 CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
@@ -114,6 +114,11 @@ def do_run(input_dir='',
            resume = 0,
            high_accuracy=False):
     print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
+    if (version):
+        print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
+              "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
+        return 0
+
 
     if 'sync_s3_to_local=1' in turi_param:
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
@@ -168,14 +173,9 @@ def do_run(input_dir='',
     except Exception as ex:
         print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
 
-    if (version):
-        print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
-              "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
-        return 0
 
 
-
-    elif not os.path.exists(input_dir):
+    if not os.path.exists(input_dir):
         if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
             pass
         else:
@@ -192,15 +192,12 @@ def do_run(input_dir='',
         print("If you like to resume a previously stopped run, please run with resume=1.")
         return 1
 
-    assert nn_provider in ['turi','nnf'], "Nearest neighbor implementation should be either turi or nnf."
+    assert nn_provider in ['nnf'], "Nearest neighbor implementation should be nnf."
     if nn_provider == 'nnf':
         if nnf_mode == "Flat":
             assert distance in ['cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon'], f"Distance metric {distance} not supported for nnf provider nnf when nnf_mode=Flat"
         else:
             assert distance in ['euclidean', 'cosine'], "Distance should be either euclidean or cosine when nn_provider='nnf'"
-    elif nn_provider == 'turi':
-        assert distance in ['euclidean', 'cosine', 'manhattan', 'squared_euclidean'], "Distance should be either euclidean, cosine, manhattan or squared_euclidean when nn_provider='turi'"
-
 
     if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
         print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
@@ -224,11 +221,13 @@ def do_run(input_dir='',
                 #val: images/train2017  # val images (relative to 'path') 128 images
                 #test:  # test images (optional)
                 input_dir = os.path.join(config['path'], config['train'])
-                if 'test' in config and config['test'].strip() != '':
+                if 'test' in config and config['test'] is not None and config['test'].strip() != '':
                     test_dir = os.path.join(config['path'], config['test'])
 
             except Exception as exc:
-                print('Error when loading yolo .yaml config', exc)
+                import traceback
+                traceback.print_exc();
+                print('Error when loading yolo .yaml config', input_dir, exc)
                 return 1
 
 
@@ -408,7 +407,7 @@ def run(input_dir='',
             If you have other image extensions that are readable by opencv imread() you can give them in a file (each image on its own row) and then we do not check for the
             known extensions and use opencv to read those formats.
             Note: It is not possible to mix compressed (videos or tars/zips) and regular images. Use the flag turi_param='tar_only=1' if you want to ignore images and run from compressed files.
-            Note: We assume image sizes should be larger than 10x10 pixels. Smaller images will be ignored with a warning shown.
+            Note: We assume image sizes should be larger or equal to 10x10 pixels. Smaller images (either on width or on height) will be ignored with a warning shown.
             Note: It is possible to skip small images also by defining minimum allowed file size using turi_param='min_file_size=1000' (in bytes).
             Note: For performance reasons it is always preferred to copy s3 images from s3 to local disk and then run fastdup on local disk. Since copying images from s3 in a loop is very slow.
             Alternatively you can use the flag turi_param='sync_s3_to_local=1' to copy ahead all images on the remote s3 bucket to disk.
@@ -450,7 +449,6 @@ def run(input_dir='',
             For nn_provider='nnf' the following distance metrics are supported.
             When using nnf_mode='Flat': 'cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon' are supported.
             Otherwise 'cosine' and 'euclidean' are supported.
-            When using nn_provider='turi' the following distance metrics are supported. 'euclidean', 'cosine', 'manhattan', 'squared_euclidean'.
 
         threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical.
 
@@ -486,7 +484,7 @@ def run(input_dir='',
             \
             ==run_mode=4== reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by run_mode=1.\
 
-        nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are turi|nnf. Default is nnf.
+        nn_provider (string): Provider of the nearest neighbor algorithm, allowed values are nnf.
 
         min_offset (unsigned long long): Optional min offset to start iterating on the full file list.
 
@@ -717,8 +715,9 @@ def load_config(work_dir):
     try:
         if work_dir == '':
             work_dir = '.'
-        with open(f'{work_dir}/config.json') as f:
-            return json.load(f)
+        if os.path.exists(f'{work_dir}/config.json'):
+            with open(f'{work_dir}/config.json') as f:
+                return json.load(f)
     except:
         print(f"Failed to read config file {work_dir}/config.json")
         return None
@@ -742,12 +741,7 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
         assert os.path.exists(save_path), f"Failed to generate save_path directory {save_path}"
 
     if isinstance(work_dir, str):
-        if work_dir.endswith('.csv'):
-            path_work_dir = os.path.dirname(os.path.abspath(work_dir))
-        else:
-            path_work_dir = work_dir
-
-        assert os.path.exists(path_work_dir), "Failed to find work_dir (__init__) " + path_work_dir
+        assert os.path.exists(work_dir), "Failed to find file or work_dir (__init__) " + work_dir
 
         subfolder = os.path.join(save_path, "images")
         if lazy_load and not os.path.exists(subfolder):
@@ -763,33 +757,45 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
 
 
 
-def find_similarity_file(similarity_file, input_dir, kwargs):
+def load_dataframe(file_type, type, input_dir, work_dir, kwargs):
 
+    assert type in ["similarity","outliers"]
     nrows = None
     if 'nrows' in kwargs:
         nrows = kwargs['nrows']
 
-    print(similarity_file)
-    if isinstance(similarity_file, pd.DataFrame):
-        if nrows is not None and similarity_file is not None and len(similarity_file) > nrows:
-            similarity_file = similarity_file.head(nrows)
+    if isinstance(file_type, pd.DataFrame):
+        if nrows is not None and file_type is not None and len(file_type) > nrows:
+            similarity_file = file_type.head(nrows)
 
-    elif isinstance(similarity_file, str):
-        assert os.path.exists(similarity_file), "Failed to find similarity file " + similarity_file
-        if os.path.isdir(similarity_file):
-            similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+    elif isinstance(file_type, str):
+        assert os.path.exists(file_type), "Failed to find similarity file " + file_type
+        if os.path.isdir(file_type):
+            file_type = os.path.join(file_type, FILENAME_SIMILARITY if type == "similarity" else FILENAME_OUTLIERS)
 
-        config = load_config(os.path.dirname(similarity_file))
-        similarity_file = pd.read_csv(similarity_file, nrows=nrows)
+        if file_type.endswith('.csv'):
+            hierarchical_run = 'hierarchical' in file_type
+            kwargs['hierarchical_run'] = hierarchical_run
+
+            if hierarchical_run:
+                assert work_dir is not None and os.path.isdir(work_dir), "When running hierarchical clustering, need to provide the work_dir"
+            kwargs['hierarchical_threshold'] = os.path.basename(file_type).split('_')[-1].replace('.csv', '')
+            if 'debug_hierarchical' in kwargs:
+                print('Found debug hierarchical', kwargs['hierarchical_threshold'], kwargs['hierarchical_run'])
+
+        config = load_config(os.path.dirname(file_type))
+        file_type = pd.read_csv(file_type, nrows=nrows)
         if input_dir is None and config is not None  and 'input_dir' in config:
             input_dir = config['input_dir']
 
     else:
-        print('wrong type of similarity file', type(similarity_file))
+        print('wrong type of similarity file', type(file_type))
         return None, None
 
-    assert isinstance(similarity_file, pd.DataFrame)
-    return similarity_file, input_dir
+    assert isinstance(file_type, pd.DataFrame)
+    assert len(file_type), "Found empty dataframe"
+    return file_type, input_dir
+
 
 
 def remove_duplicate_video_distances(df, kwargs):
@@ -828,10 +834,17 @@ def remove_duplicate_video_distances(df, kwargs):
 
 def create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
-                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, **kwargs):
+                              get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None,
+                              input_dir=None, work_dir=None, threshold=None, **kwargs):
     '''
 
-    Function to create and display a gallery of images computed by the similarity metrics
+    Function to create and display a gallery of duplicate/near duplicate images as computed by the similarity metric.
+
+    In addition, it is possible to compute hierarchical gallery of duplicate/near duplicate clusters. For doing so need to
+        (A) Run fastdup to compute similarity on work_dir
+        (B) Run connected components on the work_dir saving the component results to save_path (need to run with lazy_load=True)
+        (C) Run create_duplicates_gallery() on the components to find pairs of similar components. Point the similarity_file to similarity_hierarchical_XX.csv file where XX is the
+        connected components threshold (ccthreshold=XX).
 
     Example:
         >>> import fastdup
@@ -890,7 +903,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         if ret != 0:
             return ret;
 
-        similarity_file, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
+        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs)
 
 
         ret = do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
@@ -974,7 +987,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
             else:
                 work_dir = os.path.dirname(os.path.abspath(similarity_file))
 
-        df, input_dir = find_similarity_file(similarity_file, input_dir, kwargs)
+        df, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs)
         if threshold is not None:
             df = df[df['distance'] >= threshold]
 
@@ -990,7 +1003,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
 
 def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             how='one', slice=None, max_width=None, get_bounding_box_func=None,
-                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir =None, **kwargs):
+                            get_reformat_filename_func=None, get_extra_col_func=None, input_dir =None, work_dir=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the outliers metrics.
@@ -1033,6 +1046,8 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+        work_dir (str): Optional parameter to specify fastdup work_dir, when using a pd.DataFrame instead of a outliers file path
+
      '''
 
     try:
@@ -1041,25 +1056,12 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         if ret != 0:
             return ret;
 
-        if isinstance(outliers_file, pd.DataFrame):
-            pass
-        elif isinstance(outliers_file, str):
-            assert os.path.exists(outliers_file), "Failed to find outliers file " + outliers_file
-            if os.path.isdir(outliers_file):
-                outliers_file = os.path.join(outliers_file, FILENAME_OUTLIERS)
-
-            config = load_config(os.path.dirname(outliers_file))
-            if input_dir is None and config is not None  and 'input_dir' in config:
-                input_dir = config['input_dir']
-        else:
-            print('wrong type of similarity file', type(outliers_file))
-            return 1
-
-
+        outliers_file, input_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs)
         assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
         ret= do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
-                                          max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+                                          max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir,
+                                        **kwargs)
         fastdup_performance_capture("create_outliers_gallery", start_time)
         return ret
 
@@ -1076,7 +1078,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
     Function to create and display a gallery of images for the largest graph components
 
     Args:
-        work_dir (str): path to fastdup work_dir. Altenatively dataframe with connected_compoennts.csv content from previous fastdup run.
+        work_dir (str): path to fastdup work_dir, or a path to connected component csv file. Altenatively dataframe with connected_compoennts.csv content from previous fastdup run.
 
         save_path (str): output folder location for the visuals
 
@@ -1215,7 +1217,7 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
     try:
         start_time = time.time()
         kwargs['is_video'] = True
-        df, input_dir = find_similarity_file(work_dir, input_dir, kwargs)
+        df, input_dir = load_dataframe(work_dir, "similarity", input_dir, work_dir, kwargs)
         df = remove_duplicate_video_distances(df, kwargs)
         if df is None:
             return 1
@@ -1409,7 +1411,7 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
         fastdup_performance_capture("delete_components", start_time)
         return total_deleted
     except Exception as ex:
-        fastdup_capture_exception("delete_components", e)
+        fastdup_capture_exception("delete_components", ex)
 
 
 def delete_components_by_label(top_components_file,  min_items=10, min_distance=0.96,  how = 'majority', dry_run = True):
@@ -1716,7 +1718,6 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
     '''
     try:
-        start_time = time.time()
         assert len(img_list), "Image list is empty"
         assert sample_size > 0
         from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
@@ -1728,7 +1729,7 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
 
 def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
-                        descending=True, min_items=None, max_items = None, keyword=None, return_stats=False, save_path=None,
+                        descending=True, min_items=None, max_items = None, keyword=None,  save_path=None,
                         comp_type="component", **kwargs):
     '''
     Function to find the largest components of duplicate images
@@ -1757,8 +1758,6 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
 
         keyword (str): optional, select labels with keyword  value inside
 
-        return_stats (bool): optional, return statistics about the components size
-
         save_path (str): optional, save path
 
         comp_type (str): optional, either component or cluster
@@ -1774,7 +1773,7 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
         from .galleries import do_find_top_components
         ret = do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
                                       metric=metric, descending=descending, min_items=min_items, max_items = max_items,
-                                      keyword=keyword, return_stats=return_stats, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
+                                      keyword=keyword, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
         fastdup_performance_capture("find_top_components", start_time)
         return ret
     except Exception as ex:
@@ -1835,7 +1834,7 @@ def search(img, size, verbose=0):
     '''
 
     try:
-        start_time = tome.time()
+        start_time = time.time()
         from numpy.ctypeslib import ndpointer
         fun = dll.search
         fun.restype = c_int
@@ -2429,7 +2428,7 @@ def run_kmeans_on_extracted(input_dir='',
 
 
 def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num_images=0, min_offset=0, max_offset=0, turi_param="",
-                         model_path = model_path_full, d=576, resize_video=0, keyframes_only=1):
+                         model_path = model_path_full, d=576, resize_video=0, keyframes_only=1, license=""):
     """
     A function to go over a collection of videos and etract them into frames. The output is saved to the work_dir/tmp
     subfolder.
@@ -2486,10 +2485,11 @@ def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num
     """
     t_param = f"video_keyframe_only={keyframes_only},video_no_resize={int(resize_video == 0)},run_video_extraction_only=1"
     if (turi_param != ""):
-        t_param += "turi_param"
+        t_param += "," + turi_param
+
 
     return run(input_dir=input_dir, work_dir=work_dir, verbose=verbose, run_mode=1,
                turi_param=t_param, num_images=num_images, num_threads=num_threads,
-               min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d)
+               min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d, license=license)
 
 

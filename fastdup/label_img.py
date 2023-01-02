@@ -112,3 +112,4 @@ def do_export_to_labelimg(files, labels, save_path):
                 print('Failed to retag file', f, ' with exception', ex)
 
     print('Successfully exported to labeliImg', count, 'files')
+    return 0

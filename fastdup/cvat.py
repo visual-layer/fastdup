@@ -271,7 +271,8 @@ def copy_images_and_zip(files, save_path):
     os.system(f'cd {save_path} && zip -r {ZIP_FILE} .')
     assert os.path.exists(local_file)
     print('Zipped file:', local_file, ' for cvat')
-    
+    return 0    
+
     
 def do_export_to_cvat(files, labels, save_path):
     init_cvat_dir(save_path)
@@ -280,7 +281,7 @@ def do_export_to_cvat(files, labels, save_path):
     index = create_cvat_manifest(files, save_path)
     create_cvat_index(index, save_path)
     copy_images_and_zip(files, save_path)
-
+    return 0
 
 
 

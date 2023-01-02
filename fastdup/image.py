@@ -23,6 +23,23 @@ def calc_image_path(lazy_load, save_path, filename):
         imgpath += ".jpg"
     return imgpath
 
+
+def pad_image(image, target_width, target_height):
+    # Get the width and height of the original image
+    (height, width) = image.shape[:2]
+
+    # Calculate the padding sizes
+    pad_left = max((target_width - width) // 2, 0)
+    pad_right = max((target_width - width) // 2, 0) + (target_width - width) % 2
+    pad_top = max((target_height - height) // 2, 0)
+    pad_bottom = max((target_height - height) // 2, 0) + (target_height - height) % 2
+
+    # Create a padded image with the same type as the original image
+    padded_image = cv2.copyMakeBorder(image, pad_top, pad_bottom, pad_left, pad_right, cv2.BORDER_CONSTANT, value=0)
+
+    return padded_image
+
+
 def clean_images(lazy_load, img_paths, section):
     if not lazy_load:
         for i in img_paths:
@@ -202,8 +219,8 @@ def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bou
     img1 = fastdup_imread(img1_path, input_dir, kwargs)
     img2 = fastdup_imread(img2_path, input_dir, kwargs)
 
-    assert img1 is not None
-    assert img2 is not None
+    assert img1 is not None, "Failed to read image1 " + img1_path
+    assert img2 is not None, "Failed to read image2 " + img2_path
 
     img1 = plot_bounding_box(img1, get_bounding_box_func, img1_path)
     img2 = plot_bounding_box(img2, get_bounding_box_func, img2_path)
@@ -219,19 +236,31 @@ def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bou
 
     alpha = 0.5
     cimage = cv2.addWeighted(rimg1,alpha,rimg2,1-alpha,0)
-    
-    (w, h),nimg1 = draw_text(rimg1, os.path.splitext(os.path.basename(img1_path))[0], font_scale=1, pos=(10, 10))
-    (w, h),nimg2 = draw_text(rimg2, os.path.splitext(os.path.basename(img2_path))[0], font_scale=1, pos=(10, 10))
+
+    hierarchical_run = kwargs is not None and 'hierarchical_run' in kwargs and kwargs['hierarchical_run']
+    text1 = os.path.splitext(os.path.basename(img1_path))[0]
+    text2 = os.path.splitext(os.path.basename(img2_path))[0]
+    if hierarchical_run:
+        text1 = text1.split('_')[2]
+        text2 = text2.split('_')[2]
+
+    (w, h),nimg1 = draw_text(rimg1, text1, font_scale=1, pos=(10, 10))
+    (w, h),nimg2 = draw_text(rimg2, text2, font_scale=1, pos=(10, 10))
     (w, h),cimage = draw_text(cimage, 'blended image', font_scale=1, pos=(10, 10))
 
     assert cimage.shape[0] > 0 and cimage.shape[1] > 0
 
-    hcon_img = hconcat_resize_min([nimg1, nimg2, cimage])
+    if hierarchical_run:
+        hcon_img = hconcat_resize_min([nimg1, nimg2])
+    else:
+        hcon_img = hconcat_resize_min([nimg1, nimg2, cimage])
+
     summary_txt = 'type: {0}, distance: {1:.2f}'.format(ptype, distance)
     
     y = int(hcon_img.shape[0]*0.9)
-    x = int(hcon_img.shape[1]/3)    
-    (w, h),hcon_img = draw_text(hcon_img, summary_txt, font_scale=1, pos=(10, y))
+    x = int(hcon_img.shape[1]/3)
+    if not hierarchical_run:
+        (w, h),hcon_img = draw_text(hcon_img, summary_txt, font_scale=1, pos=(10, y))
 
     name1 = os.path.splitext(os.path.basename(img1_path))[0]
     name2 = os.path.splitext(os.path.basename(img2_path))[0]

@@ -63,7 +63,7 @@ def fastdup_capture_exception(section, e, warn_only=False):
             scope.set_tag("section", section)
             scope.set_tag("unit_test", unit_test)
             scope.set_tag("token", token)
-            capture_exception(e, section)
+            capture_exception(e, scope=scope)
 
 
 def fastdup_performance_capture(section, start_time):
@@ -79,7 +79,7 @@ def fastdup_performance_capture(section, start_time):
                 scope.set_tag("unit_test", unit_test)
                 scope.set_tag("token", token)
                 scope.set_extra("runtime-sec", time.time()-start_time)
-                sentry_sdk.capture_message("Performance")
+                sentry_sdk.capture_message("Performance", scope=scope)
         finally:
             sentry_sdk.flush()
 
