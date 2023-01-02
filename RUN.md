@@ -18,7 +18,7 @@
 
 ## Detailed Python API documentation <a name="run"/>
 
-[Documentation pages](https://visualdatabase.github.io/fastdup/)
+[Documentation pages](https://visual-layer.github.io/fastdup/)
 
 
 ## Input / output formats <a name="input"/>  
@@ -37,7 +37,7 @@ The intermediate outputs and final outputs are stored in the folder `work_dir`.
 Binary numpy array containing `n` rows (where `n` is the number of images) of 576 columns with the feature vectors. (Default filename is `features.dat`)
 An additional csv file containing the full paths to the image names corresponding to the feature vectors (default filename is `features.dat.csv`). Both those files are linked to each other. The reason we save the list of filenaes is that theh order of extraction may change depends on the file system listing. In addition, in case of corrupted images, its feature vector is skipped and not generated. In that case an additional output file is provided ( `features.bad.csv`). This file lists all the bad or corrupted images that were skipped. 
 
-Note: for using the binary features we provide the [following function](https://visualdatabase.github.io/fastdup/#fastdup.load_binary_feature).
+Note: for using the binary features we provide the [following function](https://visual-layer.github.io/fastdup/#fastdup.load_binary_feature).
 
 ### Similarity pair list
 
@@ -149,7 +149,7 @@ Example command line:
 
 ## Visualizing the outputs <a name="visualization"/>
 
-[Documentation pages](https://visualdatabase.github.io/fastdup/#fastdup-visualization-of-results)
+[Documentation pages](https://visual-layer.github.io/fastdup/#fastdup-visualization-of-results)
 
 
 ## Clustering <a name="clustering"/>
@@ -159,7 +159,7 @@ Example command line:
 
 ## Exporting to tensorboard projects
 
-Use the function `fastup.export_to_tensorboard_projector` descrbed [here](https://visualdatabase.github.io/fastdup/#fastdup.export_to_tensorboard_projector).
+Use the function `fastup.export_to_tensorboard_projector` descrbed [here](https://visual-layer.github.io/fastdup/#fastdup.export_to_tensorboard_projector).
 
 
 After storing the data you should run (in a Jupyter notebook)
@@ -170,7 +170,7 @@ After storing the data you should run (in a Jupyter notebook)
 
 ## Advanced topics: resuming a stored run <a name="resume"/>
 
-[See run_mode=2 documentation](https://visualdatabase.github.io/fastdup/#fastdup.run)
+[See run_mode=2 documentation](https://visual-layer.github.io/fastdup/#fastdup.run)
 There are several supported running modes:
 - `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
 It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
