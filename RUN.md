@@ -9,12 +9,13 @@
 6. [Clustering](#clustering)
 7. [Resuming a stored run](#resume)
 8. [Performing vector search](#external)
-9. [Support for cloud storage](#s3)
-10. [Working with tar/zip files as input](#tar)
-11. [Working with video](#video)
-12. [Using your own onnx model as feature extractpr](#onnx)
-13. [Extracting statistics about image dataset](#stats)
-14. [Debugging fastdup](#debug)
+9. [Comparing train/test](#train_test)
+10. [Support for cloud storage](#s3)
+11. [Working with tar/zip files as input](#tar)
+12. [Working with video](#video)
+13. [Using your own onnx model as feature extractpr](#onnx)
+14. [Extracting statistics about image dataset](#stats)
+15. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
 
@@ -182,6 +183,13 @@ it is possible to run on a few computing nodes, to extract the features, in para
 - `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
 - `run_mode=3` Reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on all inages give by the `test_dir` parameter. `input_dir` should point to the location of the train data. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
 - `run_mode=4` reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
+
+
+## Comparing train/test datasets <a name="train_test"/>
+It is possible to run fastdup to compare train and test datasets. In this case only similarities between the train and test are computed.
+To run in this mode, point input_dir to the train folder, test_dir to the test folder, and work_dir is the intermediate artifacts and output of the results.\
+The resulting similarity.csv file contains only relations between test images to train images (and not internal test images or internal train images).
+
 
 ## Advanced topics: vector search <a name="external"/>
 
