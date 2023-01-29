@@ -182,12 +182,15 @@ def my_resize(img, max_width):
     return img
 
 def plot_bounding_box(img, get_bounding_box_func, filename):
+    bbox_list = []
     if callable(get_bounding_box_func):
         bbox_list = get_bounding_box_func(filename)
-        for i in bbox_list:
-            cur_bbox = i
-            cur_bbox = [int(x) for x in cur_bbox]
-            img = cv2.rectangle(img, (cur_bbox[0], cur_bbox[1]), (cur_bbox[2], cur_bbox[3]), (0, 255, 0), 3)
+    elif isinstance(get_bounding_box_func, dict):
+        bbox_list = get_bounding_box_func.get(filename, [])
+    for i in bbox_list:
+        cur_bbox = i
+        cur_bbox = [int(x) for x in cur_bbox]
+        img = cv2.rectangle(img, (cur_bbox[0], cur_bbox[1]), (cur_bbox[2], cur_bbox[3]), (0, 255, 0), 3)
     return img
 
 

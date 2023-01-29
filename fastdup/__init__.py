@@ -21,9 +21,9 @@ from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_g
 import contextlib
 import time
 from fastdup import coco
-from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture
+from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture, fastdup_capture_log_debug_state
 from fastdup.definitions import *
-from fastdup.utilts import download_from_s3, check_latest_version, record_time
+from fastdup.utils import *
 from datetime import datetime
 try:
     from tqdm import tqdm
@@ -31,7 +31,7 @@ except:
     tqdm = (lambda x: x)
 
 
-__version__="0.187"
+__version__="0.199"
 CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
@@ -80,6 +80,7 @@ except Exception as ex:
 model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.ort')
 if not os.path.exists(model_path_full):
     fastdup_capture_exception("Bad Install",  RuntimeError("Failed to find ort model on init " + __file__))
+    print("Failed to find ort model on init " + __file__)
     sys.exit(1)
 
 
@@ -113,12 +114,15 @@ def do_run(input_dir='',
            batch_size = 1,
            resume = 0,
            high_accuracy=False):
+
+    fastdup_capture_log_debug_state(locals())
+    start_time = time.time()
+
     print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
     if (version):
         print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
               "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
         return 0
-
 
     if 'sync_s3_to_local=1' in turi_param:
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
@@ -144,27 +148,9 @@ def do_run(input_dir='',
               "nn_provider": nn_provider, "min_offset": min_offset, "max_offset": max_offset, "nnf_mode": nnf_mode, "nnf_param": nnf_param,
               "bounding_box": bounding_box, "batch_size": batch_size, "resume": resume, "high_accuracy": high_accuracy}
 
-    if (work_dir.startswith('./')):
-        work_dir = work_dir[2:]
-
-    if isinstance(input_dir, list):
-        files = pd.DataFrame({'filename':input_dir})
-        files.to_csv('files.txt')
-        input_dir = 'files.txt'
-    elif (input_dir.strip() == '' and run_mode != 2):
-        print("Found an empty input directory, please point to the directory where you are images are found")
-        return 1
-
-    if input_dir.startswith('./'):
-        input_dir = input_dir[2:]
-
-    if input_dir.endswith('/'):
-        input_dir = input_dir[:-1]
-
-    cwd = os.getcwd()
-    if (work_dir.startswith(cwd + '/')):
-        work_dir = work_dir.replace(cwd + '/', '')
-
+    # in case of failure crash report store current config
+    fastdup_capture_log_debug_state(config)
+    work_dir = shorten_path(work_dir)
     try:
         if not os.path.exists(work_dir):
             os.mkdir(work_dir)
@@ -173,24 +159,39 @@ def do_run(input_dir='',
     except Exception as ex:
         print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
 
+    if isinstance(input_dir, list):
+        os.makedirs(work_dir, exist_ok=True)
+        # saves the path to the list of files
+        files = expand_list_to_files(input_dir)
+        input_dir = save_as_csv_file_list(files, os.path.join(work_dir, 'files.txt'))
 
+    elif (input_dir.strip() == '' and run_mode != RUN_NN):
+        print("Found an empty input directory, please point to the directory where you are images are found")
+        return 1
+
+    input_dir = shorten_path(input_dir)
+    assert os.path.abspath(input_dir) != os.path.abspath(work_dir.strip()), "Input and work_dir output directories are the same, " \
+            "please point to different directories"
+
+    if isinstance(test_dir, list):
+        files = expand_list_to_files(test_dir)
+        test_dir = save_as_csv_file_list(files, os.path.join(work_dir, INPUT_TEST_FILE_LOCATION))
 
     if not os.path.exists(input_dir):
         if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
             pass
         else:
-            print("Failed to find input dir", input_dir, " please check your input");
-            return 1
+            assert False, f"Failed to find input dir {input_dir} please check your input."
+    else:
+        if os.path.isfile(input_dir):
+            if check_if_folder_list(input_dir):
+                files = list_subfolders_from_file(input_dir)
+                input_dir = save_as_csv_file_list(files, os.path.join(work_dir, "dirfiles.txt"))
 
-    if os.path.abspath(input_dir) == os.path.abspath(work_dir.strip()):
-        print("Input and work_dir output directories are the same, please point to different directories")
-        return 1
-
-    if (resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
-                         os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and (run_mode == 0 or run_mode == 1)):
-        print("Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory.")
-        print("If you like to resume a previously stopped run, please run with resume=1.")
-        return 1
+    if resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
+                         os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and \
+                         (run_mode == RUN_ALL or run_mode == RUN_EXTRACT):
+        assert False, "Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory."
 
     assert nn_provider in ['nnf'], "Nearest neighbor implementation should be nnf."
     if nn_provider == 'nnf':
@@ -199,7 +200,8 @@ def do_run(input_dir='',
         else:
             assert distance in ['euclidean', 'cosine'], "Distance should be either euclidean or cosine when nn_provider='nnf'"
 
-    if (run_mode == 3 and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
+    if ((run_mode == RUN_NNF_SEARCH_IMAGE_DIR or run_mode == RUN_NNF_SEARCH_STORED_FEATURES or run_mode == RUN_KMEANS_STORED_FEATURES) \
+            and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
         print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
         return 1
 
@@ -235,30 +237,38 @@ def do_run(input_dir='',
         print("Allowed values for batch size 1->200.")
         return 1
 
-    if isinstance(test_dir, list):
-        files = pd.DataFrame({'filenames':test_dir})
-        files.to_csv(INPUT_TEST_FILE_LOCATION)
-        test_dir = INPUT_TEST_FILE_LOCATION
 
-
-    if (run_mode == 3 and test_dir == ''):
-        print('For run_mode=3 test_dir parameter needs to point to the location of the test batch of images compred to the train images')
-        return 1
-
-    if (run_mode == 4 or run_mode == 6):
-        if not os.path.exists(os.path.join(work_dir, "nnf.index")):
-            print(f"Error: Failed to find stored model nnf.index on {work_dir}")
-            return 1
+    if run_mode == RUN_NNF_SEARCH_IMAGE_DIR:
+        assert test_dir != '', 'For run_mode=3 test_dir parameter needs to point to the location of the test batch of images ' \
+                               'compared to the train images'
 
     if high_accuracy:
-        if _model_path !=  model_path_full:
-            print("Error: Can not run high accuracy model when using user provided model_path")
-            return 1
         if d != DEFAULT_MODEL_FEATURE_WIDTH:
-            print("Can not run high accuracy model when using user provided d")
-            return 1
-        _model_path = model_path_full.replace('l.ort', 'l2.ort')
-        d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
+            if d != HIGH_ACCURACY_MODEL_FEATURE_WIDTH:
+                assert False, "Can not run high accuracy model when using user provided d, please run with high_accuracy=False, or undefine d"
+
+        if _model_path != model_path_full:
+            if _model_path.endswith('UndisclosedFastdupModel2.ort'):
+                d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
+            else:
+                assert False, "Error: Can not run high accuracy model when using user provided model_path, please run with high_accuracy=False"
+        else:
+            _model_path = model_path_full.replace('l.ort', 'l2.ort')
+            d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
+
+    if not os.path.exists(_model_path):
+        try:
+            err_msg = f"Model path folder exists? {os.path.isdir(os.path.dirname(_model_path))} \n"
+            f"List of files in model path folder {os.listdir(os.path.dirname(_model_path))}\n"
+            f"Please file a github issue: https://github.com/visual-layer/fastdup/issues to report this issue."
+        except:
+            err_msg = f"Failed to list model_path folder {_model_path}, folder does not exist"
+
+        if _model_path != model_path_full:
+            assert False, f"Failed to find user provided ORT model path {_model_path}.\n{err_msg}\n"
+        else:
+            assert False, f"Failed to find fastdup ORT model path {_model_path}.\n{err_msg}\n" \
+                          f"It looks like a corrupted fastdup install. "
 
     # When working with s3 remote folder allow loading it first to disk to improve performance
     if 'sync_s3_to_local=1' in turi_param:
@@ -351,8 +361,11 @@ def do_run(input_dir='',
         if ret != 0 and 'JPY_PARENT_PID' in os.environ:
             if os.path.exists(local_error_file):
                 with open(local_error_file, "r") as f:
-                    print("fastdup C++ error received: ", f.read(), "\n")
+                    error = f.read()
+                    print("fastdup C++ error received: ", error, "\n")
+                    fastdup_capture_exception("C++ error", RuntimeError(error))
 
+        fastdup_performance_capture("do_run", start_time)
         return ret
 
     return 1
@@ -401,7 +414,9 @@ def run(input_dir='',
                 * A remote folder (s3 or minio starting with s3:// or minio://). When using minio append the minio server name for example minio://google/visual_db/sku110k.
                 * A file containing absolute filenames each on its own row.
                 * A file containing s3 full paths or minio paths each on its own row.
-                * A python list with absolute filenames
+                * A python list with absolute filenames.
+                * A python list with absolute folders, all images and videos on those folders are added recusively
+                * For run_mode=2, a folder containing fastdup binary features or a file containing list of atrain_feature.dat.csv files in multiple folders
                 * yolov5 yaml input file containing train and test folders (single folder supported for now)
                 * We support jpg, jpeg, tiff, tif, giff, heif, heic, bmp, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
             If you have other image extensions that are readable by opencv imread() you can give them in a file (each image on its own row) and then we do not check for the
@@ -412,7 +427,7 @@ def run(input_dir='',
             Note: For performance reasons it is always preferred to copy s3 images from s3 to local disk and then run fastdup on local disk. Since copying images from s3 in a loop is very slow.
             Alternatively you can use the flag turi_param='sync_s3_to_local=1' to copy ahead all images on the remote s3 bucket to disk.
 
-        work_dir (str): Optional path for storing intermediate files and results.
+        work_dir (str): Path for storing intermediate files and results.
 
         test_dir (str): Optional path for test data. When given similarity of train and test images is compared (vs. train/train or test/test which are not performed).
             The following options are supported.
@@ -498,9 +513,10 @@ def run(input_dir='',
             ==num_clusters=XX==, number of KMeans clusters to use. Default is 100.\
 
         bounding_box (str): Optional bounding box to crop images, given as bounding_box='row_y=xx,col_x=xx,height=xx,width=xx'. This defines a global bounding box to be used for all images.
-                            Alternatively, it is possible to set bounding_box='face' to crop the face from the image (in case a face is present). For the face crop the margin around the face is defined by
-                            turi_param='augmentation_horiz=0.2,augmentation_vert=0.2' where 0.2 mean 20% additional margin around the face relative to the width and height respectively.
-                            It is possible to change the margin, lower allower value is 0 (no margin) and upper allowed  value is 1. Default is 0.2.
+            Beta release features (need to sign up at https://visual-layer.com): Tt is possible to set bounding_box='face' to crop the face from the image (in case a face is present).
+            In addition, you can set bounding_box='yolov5s' and we will run yolov5s to create and crop bounding boxes on your data. (We do not host this model, it is downloaded from the relevant github proejct).
+            For the face/yolov5 crop the margin around the face is defined by turi_param='augmentation_horiz=0.2,augmentation_vert=0.2' where 0.2 mean 20% additional margin around the face relative to the width and height respectively.
+            It is possible to change the margin, the lowest value is 0 (no margin) and upper allowed value is 1. Default is 0.2.
 
         batch_size (int): Optional batch size when computing inference. Allowed values < 200. Note: batch_size > 1 is enabled in the enterprise version.
 
@@ -512,10 +528,15 @@ def run(input_dir='',
         ret (int): Status code 0 = success, 1 = error.
 
     '''
+    fastdup_capture_log_debug_state(locals())
 
     _input_dir = input_dir
+    fd_model = False
+    if bounding_box == 'face' or bounding_box == 'yolov5s':
+        local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
+        if bounding_box == 'yolov5s':
+            local_model = find_model(YOLOV5S_MODEL)
 
-    if (bounding_box == 'face'):
         bounding_box = ''
         turi_param += ",save_crops=1"
         if 'augmentation_horiz' not in turi_param and 'augmentation_vert' not in turi_param:
@@ -531,7 +552,7 @@ def run(input_dir='',
                      distance=distance,
                      threshold=threshold,
                      lower_threshold=lower_threshold,
-                     model_path=os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx'),
+                     model_path=local_model,
                      license=license,
                      version=version,
                      nearest_neighbors_k=nearest_neighbors_k,
@@ -562,7 +583,7 @@ def run(input_dir='',
              verbose=verbose,
              num_threads=num_threads,
              num_images=num_images,
-             turi_param=turi_param,
+             turi_param=turi_param if not fd_model else turi_param.replace(',save_crops=1','').replace('save_crops=1',''),
              distance=distance,
              threshold=threshold,
              lower_threshold=lower_threshold,
@@ -613,6 +634,7 @@ def run_on_webdataset(input_dir='',
     You can control the free space using the flags turi_param='delete_tar=1|0' and delete_img='1|0'.  When delete_tar=1 the tars are processed one by one and deleted after processing.
     When delete_img=1 the images are processed one by one and deleted after processing.
     '''
+    fastdup_capture_log_debug_state(locals())
 
     ret = run(input_dir=input_dir, work_dir=work_dir, test_dir=test_dir, compute=compute, verbose=verbose, num_threads=num_threads, num_images=num_images,
               turi_param=turi_param, distance=distance, threshold=threshold,
@@ -681,6 +703,7 @@ def save_binary_feature(save_path, filenames, np_array):
         ret (int): 0 in case of success, otherwise 1
 
     '''
+    fastdup_capture_log_debug_state(locals())
 
     assert isinstance(save_path, str)  and save_path.strip() != "", "Save path should be a non empty string"
     assert isinstance(filenames, list), "filenames should be a list of image files"
@@ -723,9 +746,9 @@ def load_config(work_dir):
         return None
 
 def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width):
-    assert num_images >= 1, "Please select one or more images"
+    assert num_images >= 1, "Please select one or more images using num_images=xx flag"
     if num_images > 1000 and not lazy_load:
-        print("When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
+        print("Warning: When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
     if (get_label_func is not None):
         assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and \
@@ -757,7 +780,8 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
 
 
 
-def load_dataframe(file_type, type, input_dir, work_dir, kwargs):
+def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
+    fastdup_capture_log_debug_state(locals())
 
     assert type in ["similarity","outliers"]
     nrows = None
@@ -766,7 +790,7 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs):
 
     if isinstance(file_type, pd.DataFrame):
         if nrows is not None and file_type is not None and len(file_type) > nrows:
-            similarity_file = file_type.head(nrows)
+            file_type = file_type.head(nrows)
 
     elif isinstance(file_type, str):
         assert os.path.exists(file_type), "Failed to find similarity file " + file_type
@@ -794,11 +818,14 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs):
 
     assert isinstance(file_type, pd.DataFrame)
     assert len(file_type), "Found empty dataframe"
+    for col in cols:
+        assert col in file_type.columns, f"Failed to find column {col} in dataframe"
     return file_type, input_dir
 
 
 
 def remove_duplicate_video_distances(df, kwargs):
+    fastdup_capture_log_debug_state(locals())
 
     #remove duplicate indications into the same video
     df['subfolder1'] = df['from'].apply(lambda x: os.path.dirname(x))
@@ -879,6 +906,8 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
             The input is an absolute path to the image and the output is a list of bounding boxes.
             Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
             The input is an absolute path to the image and the output is the string to display instead of the filename.
@@ -896,6 +925,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         save_artifacts (boolean): Optional parameter to allow saving the intermediate artifacts (raw images, csv with results) to the output folder
 
    '''
+    fastdup_capture_log_debug_state(locals())
 
     try:
         start_time = time.time()
@@ -903,7 +933,7 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         if ret != 0:
             return ret;
 
-        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs)
+        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
 
 
         ret = do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
@@ -954,6 +984,9 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
         get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
             The input is an absolute path to the image and the output is a list of bounding boxes.
             Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
+
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
             The input is an absolute path to the image and the output is the string to display instead of the filename.
@@ -973,6 +1006,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
    '''
 
     try:
+        fastdup_capture_log_debug_state(locals())
         start_time = time.time()
         ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
         if ret != 0:
@@ -987,7 +1021,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
             else:
                 work_dir = os.path.dirname(os.path.abspath(similarity_file))
 
-        df, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs)
+        df, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
         if threshold is not None:
             df = df[df['distance'] >= threshold]
 
@@ -1034,9 +1068,11 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
         max_width (int): Optional parameter to set the max width of the gallery.
 
-        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+         get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
             The input is an absolute path to the image and the output is a list of bounding boxes.
             Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
             The input is an absolute path to the image and the output is the string to display instead of the filename.
@@ -1051,12 +1087,14 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
      '''
 
     try:
+        fastdup_capture_log_debug_state(locals())
+
         start_time = time.time()
         ret = check_params(outliers_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
         if ret != 0:
             return ret;
 
-        outliers_file, input_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs)
+        outliers_file, input_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs, ['from', "to", "distance"])
         assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
         ret= do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
@@ -1098,7 +1136,11 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
         max_items (int): Optional parameter to limit the number of items displayed (labels for group_by='visual' or components for group_by='label'). Default is None.
 
-        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.  The input is an absolute path to the image and the output is a list of bounding boxes.  Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.  The input is an absolute path to the image and the output is the string to display instead of the filename.
 
@@ -1131,6 +1173,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
         ret = check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width)
         if ret != 0:
             return ret
@@ -1191,7 +1234,11 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
 
         max_items (int): Optional parameter to limit the number of items displayed (labels for group_by='visual' or components for group_by='label'). Default is None.
 
-        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.  The input is an absolute path to the image and the output is a list of bounding boxes.  Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.  The input is an absolute path to the image and the output is the string to display instead of the filename.
 
@@ -1216,8 +1263,10 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         kwargs['is_video'] = True
-        df, input_dir = load_dataframe(work_dir, "similarity", input_dir, work_dir, kwargs)
+        df, input_dir = load_dataframe(work_dir, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
         df = remove_duplicate_video_distances(df, kwargs)
         if df is None:
             return 1
@@ -1261,7 +1310,11 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
 
         max_items (int): Optional parameter to limit the number of items displayed (labels for group_by='visual' or components for group_by='label'). Default is None.
 
-        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.  The input is an absolute path to the image and the output is a list of bounding boxes.  Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.  The input is an absolute path to the image and the output is the string to display instead of the filename.
 
@@ -1286,6 +1339,8 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         if isinstance(work_dir, str):
             config = load_config(os.path.dirname(work_dir))
             if input_dir is None and config is not None and 'input_dir' in config:
@@ -1307,6 +1362,8 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
         fastdup_capture_exception("create_kmeans_clusters_gallery", ex)
 
 def inner_delete(files, dry_run, how, save_path=None):
+    fastdup_capture_log_debug_state(locals())
+
     if how == 'move':
         assert save_path is not None and os.path.exists(save_path)
 
@@ -1336,6 +1393,7 @@ def inner_delete(files, dry_run, how, save_path=None):
 
 
 def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
+    fastdup_capture_log_debug_state(locals())
 
     assert files is not None and len(files)
     assert how == 'retag=labelImg' or how == 'retag=cvat', "Currently only retag=labelImg is supported"
@@ -1430,6 +1488,8 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert os.path.exists(top_components_file), "top_components_file should be a path to a file"
 
         # label is ,component_id,files,labels,to,distance,blur,len
@@ -1471,55 +1531,55 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
 
 def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename', label_col=None, lower_percentile=None, upper_percentile=None,
                           lower_threshold=None, upper_threshold=None, get_reformat_filename_func=None, dry_run=True,
-                          how='delete', save_path=None):
+                          how='delete', save_path=None, work_dir=None):
     '''
-      function to automate deletion of outlier files based on computed statistics.
+    function to automate deletion of outlier files based on computed statistics.
 
-      Example:
-          >>> import fastdup
-          >>> fastdup.run('/my/data/", work_dir="out")
-          delete 5% of the brightest images and delete 2% of the darkest images
-          >>> fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
+    Example:
+        >>> import fastdup
+        >>> fastdup.run('/my/data/", work_dir="out")
+        delete 5% of the brightest images and delete 2% of the darkest images
+        >>> fastdup.delete_or_retag_stats_outliers("out", metric="mean", lower_percentile=0.05, dry_run=False)
 
-          It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.
+        It is recommended to run with dry_run=True first, to see the list of files deleted before actually deleting.
 
-      Example:
-          This example first find wrong labels using similarity gallery and then deletes anything with score < 51.
-          Score is in range 0-100 where 100 means this image is similar only to images from the same class label.
-          Score 0 means this image is only similar to images from other class labels.
-          >>> import fastdup
-          >>> df2 = create_similarity_gallery(..., get_label_func=...)
-          >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
+    Example:
+        This example first find wrong labels using similarity gallery and then deletes anything with score < 51.
+        Score is in range 0-100 where 100 means this image is similar only to images from the same class label.
+        Score 0 means this image is only similar to images from other class labels.
+        >>> import fastdup
+        >>> df2 = create_similarity_gallery(..., get_label_func=...)
+        >>>fastdup.delete_or_retag_stats_outliers(df2, metric='score', filename_col = 'from', lower_threshold=51, dry_run=True)
 
-      Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
+    Note: it is possible to run with both `lower_percentile` and `upper_percentile` at once. It is not possible to run with `lower_percentile` and `lower_threshold` at once since they may be conflicting.
 
-      Args:
-          stats_file (str):
-              * folder pointing to fastdup workdir or
-              * file pointing to work_dir/atrain_stats.csv file or
-              * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
+    Args:
+        stats_file (str):
+          * folder pointing to fastdup workdir or
+          * file pointing to work_dir/atrain_stats.csv file or
+          * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
 
-          metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
+        metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
 
-          filename_col (str): column name in the stats_file to use as the filename
+        filename_col (str): column name in the stats_file to use as the filename
 
-          lower_percentile (float): lower percentile to use for the threshold. Values are 0->1, where 0.05 means remove 5% of the lowest values.
+        lower_percentile (float): lower percentile to use for the threshold. Values are 0->1, where 0.05 means remove 5% of the lowest values.
 
-          upper_percentile (float): upper percentile to use for the threshold. Values are 0->1, where 0.95 means remove 5% of the upper values.
+        upper_percentile (float): upper percentile to use for the threshold. Values are 0->1, where 0.95 means remove 5% of the upper values.
 
-          lower_threshold (float): lower threshold to use for the threshold. Only used if lower_percentile is None.
+        lower_threshold (float): lower threshold to use for the threshold. Only used if lower_percentile is None.
 
-          upper_threshold (float): upper threshold to use for the threshold. Only used if upper_percentile is None.
+        upper_threshold (float): upper threshold to use for the threshold. Only used if upper_percentile is None.
 
-          get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
+        get_reformat_filename_func (callable): Optional parameter to allow changing the  filename into another string. Useful in the case fastdup was run on a different folder or machine and you would like to delete files in another folder.
 
-          dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
+        dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-          how (str): either 'delete' or 'move' or 'retag'. In case of retag allowed value is retag=labelImg or retag=cvat
+        how (str): either 'delete' or 'move' or 'retag'. In case of retag allowed value is retag=labelImg or retag=cvat
 
-          save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
+        save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
 
-
+        work_dir (str): optional. In case of stats dataframe, point to fastdup work_dir.
 
 
       Returns:
@@ -1528,31 +1588,27 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert isinstance(dry_run, bool)
         assert how == 'delete' or how == 'move' or how == 'retag', "how should be one of 'delete'|'move'|'retag'"
+        if how == 'move':
+            assert save_path is not None, "When how='move' need to provide save_path to move the files to"
 
         if lower_threshold is not None and lower_percentile is not None:
-            print('You should only specify one of lower_threshold or lower_percentile')
-            return 1
+            assert False, 'You should only specify one of lower_threshold or lower_percentile'
+
         if upper_threshold is not None and upper_percentile is not None:
-            print('You should only specify one of upper_threshold or upper_percentile')
-            return 1
+            assert False,  'You should only specify one of upper_threshold or upper_percentile'
 
         if isinstance(stats_file, pd.DataFrame):
-
+            assert isinstance(work_dir, str) and os.path.exists(work_dir), "When providing pandas dataframe need to set work_dir to point to fastdup work_dir"
             df = stats_file
-            assert len(df), "Empty dataframe"
         else:
-            assert os.path.exists(stats_file)
-            if (os.path.isdir(stats_file)):
-                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
-            df = pd.read_csv(stats_file)
-            assert len(df), "Failed to find any data in " + stats_file
-
+            df = load_stats(stats_file, work_dir, {})
         if metric == "score" and metric not in df.columns:
-            print("For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where"
-                  "df is the output of create_similarity_gallery()")
-            return 1
+            assert False, "For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where df is the output of create_similarity_gallery()"
+
 
         assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
         assert filename_col in df.columns
@@ -1600,7 +1656,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
             files = df[filename_col].apply(get_reformat_filename_func).values
 
         if how == 'delete' or how == 'move':
-            return inner_delete(files, how=how, dry_run=dry_run)
+            return inner_delete(files, how=how, dry_run=dry_run, save_path=save_path)
         elif how.startswith('retag'):
             if label_col is not None:
                 label = df[label_col].values
@@ -1654,6 +1710,8 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         try:
             import tensorflow
             from tensorboard.plugins import projector
@@ -1770,6 +1828,8 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         from .galleries import do_find_top_components
         ret = do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
                                       metric=metric, descending=descending, min_items=min_items, max_items = max_items,
@@ -1797,6 +1857,8 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full):
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert os.path.exists(model_path), "Failed to find model_path " + model_path
         assert d > 0, "d must be greater than 0"
 
@@ -1835,6 +1897,8 @@ def search(img, size, verbose=0):
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         from numpy.ctypeslib import ndpointer
         fun = dll.search
         fun.restype = c_int
@@ -1856,7 +1920,7 @@ def search(img, size, verbose=0):
 
 def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             metric='blur', slice=None, max_width=None, descending= False, get_bounding_box_func=None,
-                         get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, **kwargs):
+                         get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, work_dir=None, **kwargs):
     '''
     Function to create and display a gallery of images computed by the statistics metrics.
     Supported metrics are: mean (color), max (color), min (color), stdv (color), unique (number of unique colors), bluriness (computed by the variance of the laplpacian method
@@ -1877,7 +1941,30 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
             Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
             Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
-        metric (str): Optional metric selection. One of 'blur','size','mean','min','max','unique','stdv'.
+        metric (str): Optional metric selection. Supported metrics are:
+            * width - of original image before resize
+            * height - of original image before resize
+            * size - area
+            * file_size - file size in bytes
+            * blur - variance of the laplacian
+            * unique - number of unique colors, 0..255
+            * mean - mean color 0..255
+            * max - max color 0..255
+            * min - min color 0..255
+            Advanced metris include (for running advanced metrics, run with turi_param='run_advanced_stats=1')
+            * contrast
+            * rms_contrast - square root of mean sum of stdv/mean per channel
+            * mean_rel_intensity_r
+            * mean_rel_intensity_b
+            * mean_rel_intensity_g
+            * mean_hue - transform to HSV and compute mean H
+            * mean_saturation - transform to HSV and compute mean S
+            * mean_val - transform to HSV and compute mean V
+            * edge_density - using canny filter
+            * mean_r - mean of R channel
+            * mean_g - mean of G channel
+            * mean_b - mean of B channel
+
 
         slice (str): Optional parameter to select a slice of the outliers file based on a specific label or a list of labels.
 
@@ -1885,7 +1972,11 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
         descending (bool): Optional parameter to control the order of the metric
 
-        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image. The input is an absolute path to the image and the output is a list of bounding boxes. Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+        get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
             The input is an absolute path to the image and the output is the string to display instead of the filename.
@@ -1895,25 +1986,25 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
+        work_dir (str): Optional parameter to fastdup work_dir. Needed when stats file is a pd.DataFrame.
+
+
     Returns:
         ret (int): 0 in case of success, otherwise 1.
     '''
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         ret = check_params(stats_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
         if ret != 0:
             return ret
 
-        assert metric in ['blur','size','mean','min','max','unique','stdv'], "Unknown metric value"
+        assert metric in ['blur','size','mean','min','max','unique','stdv', 'file_size','rms_contrast','mean_rel_intensity_r',
+                          'mean_rel_intensity_b','mean_rel_intensity_g','contrast','mean_saturation','mean_hue', 'mean_val', 'edge_density','mean_r', 'mean_g','mean_b'], "Unknown metric value: " + metric
 
-        if isinstance(stats_file, pd.DataFrame):
-            pass
-        else:
-            assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
-            if os.path.isdir(stats_file):
-                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
-
+        stats_file = load_stats(stats_file, work_dir, kwargs)
         try:
             import matplotlib
         except Exception as ex:
@@ -1923,7 +2014,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 
         ret = do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
-                                       descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, kwargs=kwargs)
+                                       descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, kwargs=kwargs)
         fastdup_performance_capture("create_stats_gallery", start_time)
         return ret
 
@@ -1932,7 +2023,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  slice=None, max_width=None, descending=False, get_bounding_box_func=None,
-                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, 
+                                 get_reformat_filename_func=None, get_extra_col_func=None, input_dir=None, work_dir=None,
                                  min_items=2, max_items=None, **kwargs):
     '''
 
@@ -1945,7 +2036,8 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
     For high quality labeled dataset we expect the score to be high, low score may indicate class label issues.
 
     Args:
-        similarity_file (str): csv file with the computed image statistics by the fastdup tool, or a path to the work_dir, alternatively a pandas dataframe.
+        similarity_file (str): csv file with the computed image statistics by the fastdup tool, or a path to the work_dir,
+            alternatively a pandas dataframe. In case of a pandas dataframe need to set work_dir to point to fastdup work_dir.
 
         save_path (str): output folder location for the visuals
 
@@ -1965,6 +2057,10 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         descending (bool): Optional param to control the order of the metric
 
         get_bounding_box_func (callable): Optional parameter to allow plotting bounding boxes on top of the image.
+            The input is an absolute path to the image and the output is a list of bounding boxes.
+            Each bounding box should be 4 integers: x1, y1, x2, y2. Example of valid bounding box list: [[0, 0, 100, 100]]
+            Alternatively, get_bounding_box_func could be a dictionary returning the bounding box list for each filename.
+            Alternatively, get_bounding_box_func could be a csv containing index,filename,col_x,row_y,width,height or a work_dir where the file atrain_crops.csv exists
 
         get_reformat_filename_func (callable): Optional parameter to allow changing the presented filename into another string.
 
@@ -1972,6 +2068,8 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
         input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
+
+        work_dir (str): Optional parameter to fastdup work_dir. Needed when similarity_file is a pd.DataFrame.
 
         min_items (int): Optional parameter to select components with min_items or more
 
@@ -1984,20 +2082,17 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         ret = check_params(similarity_file, num_images, lazy_load, get_label_func, slice, save_path, max_width)
         if ret != 0:
             return ret
 
-        if isinstance(similarity_file, pd.DataFrame):
-            pass
-        else:
-            assert os.path.exists(similarity_file), "Failed to find outliers file " + similarity_file
-            if os.path.isdir(similarity_file):
-                similarity_file = os.path.join(similarity_file, FILENAME_SIMILARITY)
+        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
 
         ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
             slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, 
-            input_dir,  min_items, max_items, kwargs=kwargs)
+            input_dir,  work_dir, min_items, max_items, kwargs=kwargs)
         fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
 
@@ -2036,16 +2131,13 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
         if ret != 0:
             return ret
 
-        if isinstance(stats_file, pd.DataFrame):
-            pass
-        else:
-            assert os.path.exists(stats_file), "Failed to find outliers file " + stats_file
-            if os.path.isdir(stats_file):
-                stats_file = os.path.join(stats_file, 'atrain_stats.csv')
+        stats_file = load_stats(stats_file, kwargs)
 
         try:
             import matplotlib
@@ -2079,6 +2171,8 @@ def export_to_cvat(files, labels, save_path):
     """
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert len(files), "Please provide a list of files"
         assert labels is None or isinstance(labels, list), "Please provide a list of labels"
 
@@ -2105,6 +2199,8 @@ def export_to_labelImg(files, labels, save_path):
     """
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert len(files), "Please provide a list of files"
         assert labels is None or isinstance(labels, list), "Please provide a list of labels"
 
@@ -2188,6 +2284,8 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         from fastdup.confusion_matrix import classification_report
 
         assert os.path.exists(work_dir), "Failed to find work directory " + work_dir
@@ -2276,6 +2374,8 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
     '''
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         from fastdup.confusion_matrix import classification_report
 
         assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and os.path.exists(get_label_func)), \
@@ -2346,6 +2446,8 @@ def run_kmeans(input_dir='',
     """
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
         assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
 
@@ -2406,6 +2508,8 @@ def run_kmeans_on_extracted(input_dir='',
 
     try:
         start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+
         assert num_clusters >= 2, "Number of clusters must be at least 2, got {}".format(num_clusters)
         assert num_em_iter >=1, "Number of EM iterations must be at least 1, got {}".format(num_em_iter)
 
@@ -2483,6 +2587,8 @@ def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num
     Returns:
         ret (int): Status code 0 = success, 1 = error.
     """
+    fastdup_capture_log_debug_state(locals())
+
     t_param = f"video_keyframe_only={keyframes_only},video_no_resize={int(resize_video == 0)},run_video_extraction_only=1"
     if (turi_param != ""):
         t_param += "," + turi_param
