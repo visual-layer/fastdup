@@ -79,7 +79,7 @@ pip install fastdup
 python3.XX -m pip install fastdup 
 ```
 - **Supported Python**: 3.7, 3.8, 3.9, 3.10
-- **Supported OS**: Windows 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
+- **Supported OS**: Windows 10, 11 and 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
 - [Full installation instructions are here](https://visual-layer.readme.io/docs/installation)
 
 ## Running fastdup
