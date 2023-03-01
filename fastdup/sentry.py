@@ -10,6 +10,7 @@ import platform
 import uuid
 import hashlib
 from fastdup.definitions import VERSION__
+from functools import wraps
 
 
 #get a random token based on the machine uuid
@@ -103,3 +104,18 @@ def fastdup_capture_log_debug_state(config):
         with sentry_sdk.configure_scope() as scope:
             scope.clear_breadcrumbs()
         sentry_sdk.add_breadcrumb(breadcrumb)
+
+
+def v1_sentry_handler(func):
+    @wraps(func)
+    def inner_function(*args, **kwargs):
+        try:
+            start_time = time.time()
+            ret = func(*args, **kwargs)
+            fastdup_performance_capture(f"V1:{func.__name__}", start_time)
+            return ret
+
+        except Exception as ex:
+            fastdup_capture_exception(f"V1:{func.__name__}", ex)
+            raise ex
+    return inner_function

@@ -16,6 +16,7 @@ import json
 import glob
 import cv2
 import shutil
+import zipfile
 
 MANIFEST_FILE = 'data/manifest.jsonl'
 INDEX_FILE = 'data/index.json'
@@ -79,7 +80,9 @@ def create_annotations_file(files, labels, save_path):
 
     shape = []
     for i, f in enumerate(files):
+        assert os.path.exists(f), "Faied to find path " + str(f)
         img = cv2.imread(f)
+        assert img is not None, "Failed to read image" + str(f)
         h, w, c = img.shape
         shape.append(
             {
@@ -258,17 +261,21 @@ def create_cvat_manifest(files, save_path):
 
 def init_cvat_dir(save_path):
     if not os.path.exists(save_path):
-        os.system(f'mkdir -p {save_path}/data')
+        os.makedirs(os.path.join(save_path, "data"))
     assert os.path.exists(save_path), "Failed to create save_path " + save_path
 
 
 def copy_images_and_zip(files, save_path):
     for f in files:
         shutil.copy(f, os.path.join(save_path, 'data'))
-    local_file = os.path.join(save_path, ZIP_FILE)
-    if os.path.exists(local_file):
-        os.remove(local_file)
-    os.system(f'cd {save_path} && zip -r {ZIP_FILE} .')
+    zip_path = os.path.join(save_path, ZIP_FILE)
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for f in files:
+            rel_path = os.path.relpath(f, save_path)
+            zip_path = os.path.join('data', rel_path)
+            zipf.write(f, zip_path)
     assert os.path.exists(local_file)
     print('Zipped file:', local_file, ' for cvat')
     return 0    

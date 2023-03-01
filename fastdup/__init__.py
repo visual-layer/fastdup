@@ -10,6 +10,10 @@
 import sys
 import os
 import json
+import shutil
+import tempfile
+from pathlib import Path
+
 os.environ["QT_QPA_PLATFORM"] ="offscreen"
 from ctypes import *
 import pandas as pd
@@ -25,13 +29,15 @@ from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_perfo
 from fastdup.definitions import *
 from fastdup.utils import *
 from datetime import datetime
+from fastdup.sentry import v1_sentry_handler
+
 try:
     from tqdm import tqdm
 except:
     tqdm = (lambda x: x)
 
 
-__version__="0.199"
+__version__="0.211"
 CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
@@ -45,11 +51,17 @@ if ret:
 
 LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 os.environ['FASTDUP_LOCAL_DIR'] = LOCAL_DIR
+is_windows = False
 
 if platform.system() == "Windows":
-    fastdup_capture_exception("Wrong OS", RuntimeError(f"FastDup is not supported natively on Windows {platform.platform()}. "
-                                                         f"For running on windows need to install WSL"
-                                                         f"as instructed here: https://github.com/visual-layer/fastdup/blob/main/INSTALL.md#windows10"))
+    is_windows = True
+    import struct
+    assert struct.calcsize("P") * 8 == 64, "Detected 32 bit windows, not supported, please run with 64 bits windows"
+    SO_SUFFIX=".dll"
+    so_file = os.path.join(LOCAL_DIR, 'fastdup_shared' + SO_SUFFIX)
+    # https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
+    if os.path.exists(os.path.join(LOCAL_DIR, 'lib\\crashpad_handler.exe')):
+        os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib\\crashpad_handler.exe')
 elif platform.system() == "Darwin":
     SO_SUFFIX=".dylib"
     # https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
@@ -57,10 +69,11 @@ elif platform.system() == "Darwin":
         os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
     else:
         print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
+    so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
 else:
     SO_SUFFIX=".so"
+    so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
 
-so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
 
 if not os.path.exists(so_file):
     print("Failed to find shared object", so_file);
@@ -68,13 +81,24 @@ if not os.path.exists(so_file):
     sys.exit(1)
 
 try:
-    dll = CDLL(so_file)
+    # this should be supported only from python3.8 and up
+    if platform.system() == "Windows":
+        os.add_dll_directory(LOCAL_DIR)
+        os.add_dll_directory(LOCAL_DIR + "\\lib")
+        os.add_dll_directory(os.path.join(os.environ['SystemRoot'], 'System32'))
+        #os.add_dll_directory("C:\\Program Files\\PowerShell\\7")
+        dll = WinDLL(so_file)
+    else:
+        dll = CDLL(so_file)
 except Exception as ex:
     fastdup_capture_exception("__init__", ex)
     print("Please reach out to fastdup support, it seems installation is missing critical files to start fastdup.")
     print("We would love to understand what has gone wrong.")
     print("You can open an issue here: " +  GITHUB_URL + " or email us at " + CONTACT_EMAIL)
-    print("Share out output of the command \"find " + LOCAL_DIR + " \"")
+    find_command = "\"find " + LOCAL_DIR + " \""
+    if platform.system() == "Windows":
+        find_command = "\"tree " + LOCAL_DIR + " \""
+    print("Share out output of the command " + find_command)
     sys.exit(1)
 
 model_path_full=os.path.join(LOCAL_DIR, 'UndisclosedFastdupModel.ort')
@@ -152,10 +176,11 @@ def do_run(input_dir='',
     fastdup_capture_log_debug_state(config)
     work_dir = shorten_path(work_dir)
     try:
-        if not os.path.exists(work_dir):
-            os.mkdir(work_dir)
-        with open(f"{work_dir}/config.json", "w") as f:
-            json.dump(config, f, indent=4)
+        if not work_dir.startswith('smb://'):
+            if not os.path.exists(work_dir):
+                os.mkdir(work_dir)
+            with open(f"{work_dir}/config.json", "w") as f:
+                json.dump(config, f, indent=4)
     except Exception as ex:
         print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
 
@@ -170,15 +195,18 @@ def do_run(input_dir='',
         return 1
 
     input_dir = shorten_path(input_dir)
-    assert os.path.abspath(input_dir) != os.path.abspath(work_dir.strip()), "Input and work_dir output directories are the same, " \
-            "please point to different directories"
+    if work_dir.startswith('smb://'):
+        assert input_dir != work_dir, "Input and work dir should point to different folders"
+    else:
+        assert os.path.abspath(input_dir) != os.path.abspath(work_dir.strip()), "Input and work_dir output directories are the same, " \
+                "please point to different directories"
 
     if isinstance(test_dir, list):
         files = expand_list_to_files(test_dir)
         test_dir = save_as_csv_file_list(files, os.path.join(work_dir, INPUT_TEST_FILE_LOCATION))
 
     if not os.path.exists(input_dir):
-        if input_dir.startswith('s3://') or input_dir.startswith('minio://'):
+        if input_dir.startswith('s3://') or input_dir.startswith('minio://') or input_dir.startswith('smb://'):
             pass
         else:
             assert False, f"Failed to find input dir {input_dir} please check your input."
@@ -188,10 +216,11 @@ def do_run(input_dir='',
                 files = list_subfolders_from_file(input_dir)
                 input_dir = save_as_csv_file_list(files, os.path.join(work_dir, "dirfiles.txt"))
 
-    if resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
-                         os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and \
-                         (run_mode == RUN_ALL or run_mode == RUN_EXTRACT):
-        assert False, "Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory."
+    if not work_dir.startswith('smb://'):
+        if resume == 0 and (os.path.exists(os.path.join(work_dir, 'atrain_features.dat')) or \
+                             os.path.exists(os.path.join(work_dir, FILENAME_FEATURES)))  and \
+                             (run_mode == RUN_ALL or run_mode == RUN_EXTRACT):
+            assert False, "Found existing atrain_features.dat file in the working directory, please remove it before running the program or run in a fresh directory."
 
     assert nn_provider in ['nnf'], "Nearest neighbor implementation should be nnf."
     if nn_provider == 'nnf':
@@ -287,11 +316,15 @@ def do_run(input_dir='',
     if os.path.exists(local_error_file):
         os.unlink(local_error_file)
 
+
+    char_type = c_char_p if not is_windows else c_wchar_p
+    encoding = lambda x: bytes(x, 'utf-8') if not is_windows else x
+   
     #Calling the C++ side
     dll.do_main.restype = c_int
-    dll.do_main.argtypes = [c_char_p,
-                            c_char_p,
-                            c_char_p,
+    dll.do_main.argtypes = [char_type,
+                            char_type,
+                            char_type,
                             c_char_p,
                             c_bool,
                             c_int,
@@ -301,7 +334,7 @@ def do_run(input_dir='',
                             c_float,
                             c_float,
                             c_char_p,
-                            c_char_p,
+                            char_type,
                             c_bool,
                             c_int,
                             c_int,
@@ -317,24 +350,10 @@ def do_run(input_dir='',
 
     cm = contextlib.nullcontext()
 
-    if 'JPY_PARENT_PID' in os.environ:
-        try:
-            from IPython import get_ipython
-            ip = get_ipython()
-            extension = ip.extension_manager.loaded
-            if 'wurlitzer' not in extension:
-                import wurlitzer
-                cm = wurlitzer.sys_pipes()
-        except:
-            print("On Jupyter notebook running on large datasets, there may be delay getting the console output\n"
-                  "A recommended way to fixing this is to run: \n"
-                  "%pip install wurlitzer\n"
-                  "%load_ext wurlitzer\n")
-
     with cm as c:
-        ret = dll.do_main(bytes(input_dir, 'utf-8'),
-                          bytes(work_dir, 'utf-8'),
-                          bytes(test_dir.strip(), 'utf-8'),
+        ret = dll.do_main(encoding(input_dir),
+                          encoding(work_dir),
+                          encoding(test_dir.strip()),
                           bytes(compute, 'utf-8'),
                           verbose,
                           num_threads,
@@ -344,7 +363,7 @@ def do_run(input_dir='',
                           threshold,
                           lower_threshold,
                           bytes(license, 'utf-8'),
-                          bytes(_model_path, 'utf-8'),
+                          encoding(_model_path),
                           version,
                           nearest_neighbors_k,
                           d,
@@ -426,6 +445,9 @@ def run(input_dir='',
             Note: It is possible to skip small images also by defining minimum allowed file size using turi_param='min_file_size=1000' (in bytes).
             Note: For performance reasons it is always preferred to copy s3 images from s3 to local disk and then run fastdup on local disk. Since copying images from s3 in a loop is very slow.
             Alternatively you can use the flag turi_param='sync_s3_to_local=1' to copy ahead all images on the remote s3 bucket to disk.
+            Note: fastdup plus beta version now supports bounding boxes on the c++ side. To use it prepare an input file with the following csv header: filename,col_x,row_y,width,height where each row as an image file
+            and bounding box information in the above format. Fastdup will run on the bounding box level and the reports will be generated on the bounding box level. For using bounding boxes please sign up
+            for our free beta program at https://visual-layer.com or send an email to info@databasevisual.com.
 
         work_dir (str): Path for storing intermediate files and results.
 
@@ -532,10 +554,12 @@ def run(input_dir='',
 
     _input_dir = input_dir
     fd_model = False
-    if bounding_box == 'face' or bounding_box == 'yolov5s':
+    if bounding_box == 'face' or bounding_box == 'yolov5s' or bounding_box == "rotated":
         local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
         if bounding_box == 'yolov5s':
             local_model = find_model(YOLOV5S_MODEL)
+        elif bounding_box == 'rotated':
+            local_model = model_path_full
 
         bounding_box = ''
         turi_param += ",save_crops=1"
@@ -548,7 +572,7 @@ def run(input_dir='',
                      verbose=verbose,
                      num_threads=num_threads,
                      num_images=num_images,
-                     turi_param=turi_param,
+                     turi_param=turi_param.replace(',shorten_filenames=1','').replace('shorten_filenames=1',''),
                      distance=distance,
                      threshold=threshold,
                      lower_threshold=lower_threshold,
@@ -574,7 +598,11 @@ def run(input_dir='',
             os.unlink(os.path.join(work_dir, 'atrain_features.dat'))
         except:
             pass
-        input_dir = os.path.join(work_dir, "crops")
+        input_dir = os.path.join(tempfile.gettempdir(), 'yolo_crops_input.csv')
+        pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
+            'index', 'filename', 'col_x', 'row_y', 'width', 'height']].to_csv(input_dir, index=False)
+
+        turi_param = turi_param.replace(',save_crops=1', '')
 
     ret = do_run(input_dir=input_dir,
              work_dir=work_dir,
@@ -1094,10 +1122,15 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         if ret != 0:
             return ret;
 
+        if work_dir is None and isinstance(outliers_file, str):
+            if os.path.isdir(outliers_file):
+                work_dir = outliers_file
+            else:
+                work_dir = os.path.dirname(outliers_file)
         outliers_file, input_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs, ['from', "to", "distance"])
         assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
-        ret= do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
+        ret = do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
                                           max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir,
                                         **kwargs)
         fastdup_performance_capture("create_outliers_gallery", start_time)
@@ -2101,7 +2134,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         return None
 
 
-def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_width=None, num_images=0, slice=None,
+def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, lazy_load=False, max_width=None, num_images=0, slice=None,
                                 get_filename_reformat_func=None, input_dir=None, **kwargs):
     '''
     Function to create and display a gallery of aspect ratio distribution.
@@ -2109,13 +2142,18 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
     Args:
          stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
 
+        save_path (str): output folder location for the visuals
+
         get_label_func (callable): optional function given an absolute path to an image return the image label.
             Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
             Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
 
+        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
+
+
          max_width (int): optional parameter to limit the plot image width
 
-         save_path (str): output folder location for the visuals
+
 
          num_images (int): optional number of images to compute the statistics on (default computes on all images)
 
@@ -2147,7 +2185,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, max_
             return 1
 
 
-        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, max_width, num_images, slice, input_dir, kwargs=kwargs)
+        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, lazy_load, max_width, num_images, slice, input_dir, kwargs=kwargs)
         fastdup_performance_capture("create_aspect_ratio_gallery", start_time)
         return ret
 
@@ -2598,4 +2636,13 @@ def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num
                turi_param=t_param, num_images=num_images, num_threads=num_threads,
                min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d, license=license)
 
+# give access to the main class
+# at the end of the file to solve circular dependencies
+from fastdup.engine import Fastdup
+from typing import Union
+import fastdup.fastdup_controller as FD
 
+@v1_sentry_handler
+def create(work_dir: Union[str, Path], input_dir: Union[str, Path] = None) -> Fastdup:
+    fd = Fastdup(work_dir=work_dir, input_dir=input_dir)
+    return fd
