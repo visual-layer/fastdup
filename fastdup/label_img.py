@@ -89,7 +89,7 @@ def export_label_classes(labels, save_path):
 def do_export_to_labelimg(files, labels, save_path):
 
     if not os.path.exists(save_path):
-        os.system(f"mkdir -p {save_path}")
+        os.makedirs(save_path)
     assert os.path.exists(save_path)
 
     export_label_classes(list(np.unique(labels)), save_path)

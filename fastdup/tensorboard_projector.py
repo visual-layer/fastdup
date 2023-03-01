@@ -59,26 +59,28 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
         divs = int(np.ceil(min(sample_size,len(img_path)) / NUM_IMAGES_WIDTH))
         height = min(divs, NUM_IMAGES_WIDTH)
 
-    for i  in img_path[:sample_size]:
+    for i, im  in enumerate(img_path[:sample_size]):
         # Save both tf image for prediction and PIL image for sprite
-        if isinstance(i, str):
+        if isinstance(im, str):
             try:
-                assert os.path.exists(i)
-                img_pil = cv2.imread(i)
-                assert img_pil is not None, f"Failed to read image from {i}"
+                assert os.path.exists(im)
+                img_pil = cv2.imread(im)
+                assert img_pil is not None, f"Failed to read image from {im}"
                 img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
                 img_pil = cv2.resize(img_pil, (W, H))
             except Exception as ex:
-                print("Failed to load image" + i)
+                print("Failed to load image" + im)
                 continue
         else:
-            img_pil = cv2.resize(i, (W, H))
+            img_pil = cv2.resize(im, (W, H))
             img_pil = cv2.cvtColor(img_pil, cv2.COLOR_BGR2RGB)
         images_pil.append(Image.fromarray(img_pil))
 
         # Assuming your output data is directly the label
         if callable(get_label_func):
-            label = get_label_func(i)
+            label = get_label_func(im)
+        elif isinstance(get_label_func, list):
+            label = get_label_func[i]
         else:
             label = "N/A"
         labels.append(label)
