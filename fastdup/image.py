@@ -11,16 +11,22 @@ import io
 from fastdup.definitions import *
 from fastdup.sentry import fastdup_capture_exception
 import tarfile
+import platform
 
-def calc_image_path(lazy_load, save_path, filename):
+def safe_replace(path):
+    return path.replace('/','_').replace('\\','_').replace(":",'_')
+
+def calc_image_path(lazy_load, save_path, filename, filename_suffix=''):
     if lazy_load:
-        imgpath = os.path.join(save_path, "images", os.path.basename(filename).replace('/',''))
+        os.makedirs(os.path.join(save_path, "images"), exist_ok=True)
+        imgpath = os.path.join(save_path, "images", safe_replace(filename))
     else:
-        imgpath = os.path.join(save_path, filename.replace('/',''))
+        imgpath = os.path.join(save_path, safe_replace(filename))
 
     p, ext = os.path.splitext(imgpath)
     if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
-        imgpath += ".jpg"
+        ext += ".jpg"
+    imgpath = p + filename_suffix + ext
     return imgpath
 
 
@@ -51,8 +57,13 @@ def clean_images(lazy_load, img_paths, section):
                 fastdup_capture_exception(section, ex)
 
 def download_minio(path, save_path):
-    ret = os.system(f"mc cp {path} {save_path}")
-    assert ret == 0, f"Failed to download from minio {path} to {save_path}"
+    if platform.system() == "Windows":
+        assert "FASTDUP_MC_PATH" in os.environ, "Have to define FASTUP_MC_PATH environment variable to point to minio client full_path. For example C:\\Users\\danny_bickson\\mc.exe"
+        save_path = save_path.replace(':','').replace('\\','').replace('/','')
+        ret = os.system(f"{os.envion['FASTDUP_MC_PATH']} cp {path} {save_path}")
+    else:
+        ret = os.system(f"mc cp {path} {save_path}")
+        assert ret == 0, f"Failed to download from minio {path} to {save_path}"
 
 def download_s3(path, save_path):
     ret = os.system(f"aws s3 cp {path} {save_path}")
@@ -88,7 +99,12 @@ def fastdup_imread(img1_path, input_dir, kwargs):
     #print('Got fastdup_imread', img1_path, input_dir)
 
     if os.path.exists(img1_path):
-        return cv2.imread(img1_path)
+        img = cv2.imread(img1_path, cv2.IMREAD_UNCHANGED)
+        if img is not None:
+            if img.dtype == 'uint16':
+                img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        return img
     elif ('/' +S3_TEMP_FOLDER + '/' in img1_path or '/' + S3_TEST_TEMP_FOLDER + '/' in img1_path) and \
          '.tar/' in img1_path:
         assert os.path.exists(input_dir), "Failed to find input dir " + input_dir
@@ -217,7 +233,14 @@ def draw_text(img, text,
 
     return text_size, img
 
-def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bounding_box_func=None, input_dir=None, kwargs=None):
+def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding_box_func=None, input_dir=None, kwargs=None):
+    id_from, id_to = row['from'], row['to']
+    suffix_from, suffix_to = (f'_{id_from}', f'_{id_to}') if 'id_to_filename_func' in kwargs else ('', '')
+    if 'id_to_filename_func' in kwargs:
+        id_to_filename_func = kwargs['id_to_filename_func']
+        row[['from','to']] = [id_to_filename_func(row['from']), id_to_filename_func(row['to'])]
+
+    img1_path, img2_path, distance, ptype = extract_filenames(row, work_dir, save_path, kwargs)
 
     img1 = fastdup_imread(img1_path, input_dir, kwargs)
     img2 = fastdup_imread(img2_path, input_dir, kwargs)
@@ -225,8 +248,8 @@ def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bou
     assert img1 is not None, "Failed to read image1 " + img1_path
     assert img2 is not None, "Failed to read image2 " + img2_path
 
-    img1 = plot_bounding_box(img1, get_bounding_box_func, img1_path)
-    img2 = plot_bounding_box(img2, get_bounding_box_func, img2_path)
+    img1 = plot_bounding_box(img1, get_bounding_box_func, id_from)
+    img2 = plot_bounding_box(img2, get_bounding_box_func, id_to)
 
     h1, w1, c1 = img1.shape
     h2, w2, c2 = img2.shape
@@ -267,9 +290,10 @@ def create_triplet_img(img1_path, img2_path, ptype, distance, save_path, get_bou
 
     name1 = os.path.splitext(os.path.basename(img1_path))[0]
     name2 = os.path.splitext(os.path.basename(img2_path))[0]
-    pid = '{0}_{1}'.format(name1,name2)
+    pid = '{0}_{1}'.format(name1,name2) + suffix_from + suffix_to
     lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
     if lazy_load:
+        os.makedirs(os.path.join(save_path, 'images'), exist_ok=True)
         hcon_img_path = f'{save_path}/images/{pid}.jpg'
     else:
         hcon_img_path = f'{save_path}/{pid}.jpg'

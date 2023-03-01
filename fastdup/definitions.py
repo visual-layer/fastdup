@@ -1,4 +1,7 @@
 from enum import Enum
+import os
+import sys
+import tempfile
 
 FILENAME_SIMILARITY = "similarity.csv"
 FILENAME_OUTLIERS = "outliers.csv"
@@ -13,6 +16,9 @@ FILENAME_LABELS = "labels.csv"
 FILENAME_KMEANS_CENTROIDS = "kmeans_centroids.csv"
 FILENAME_KMEANS_ASSIGNMENTS = "kmeans_assignments.csv"
 FILENAME_ERROR_MSG = "error.msg"
+FILENAME_DUPLICATES_HTML = "duplicates.html"
+FILENAME_OUTLIERS_HTML = "outliers.html"
+FILENAME_COMPONENTS_HTML = "components.html"
 
 IMAGELIST_HEADER="index,filename"
 LABEL_HEADER="index.label"
@@ -25,8 +31,12 @@ FILENAME_TOP_COMPONENTS = "top_components.pkl"
 FILENAME_TOP_CLUSTERS = "top_clusters.pkl"
 MISSING_LABEL = "N/A"
 
-S3_TEMP_FOLDER = "tmp"
-S3_TEST_TEMP_FOLDER = "testtmp"
+if sys.platform == "win32":
+    S3_TEMP_FOLDER = tempfile.gettempdir()
+    S3_TEST_TEMP_FOLDER = tempfile.gettempdir()
+else:
+    S3_TEMP_FOLDER = "tmp"
+    S3_TEST_TEMP_FOLDER = "testtmp"
 INPUT_FILE_LOCATION = "files.txt"
 INPUT_TEST_FILE_LOCATION = "testfiles.txt"
 
@@ -35,7 +45,7 @@ HIGH_ACCURACY_MODEL_FEATURE_WIDTH = 960
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "0.204"
+VERSION__ = "0.211"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 
@@ -60,3 +70,6 @@ SELECTION_STRATEGY_RANDOM = 1
 SELECTION_STRATEGY_UNIFORM_METRIC = 2
 
 YOLOV5S_MODEL = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
+
+def get_sep():
+    return os.sep

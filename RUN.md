@@ -9,17 +9,16 @@
 6. [Clustering](#clustering)
 7. [Resuming a stored run](#resume)
 8. [Performing vector search](#external)
-9. [Comparing train/test](#train_test)
-10. [Support for cloud storage](#s3)
-11. [Working with tar/zip files as input](#tar)
-12. [Working with video](#video)
-13. [Using your own onnx model as feature extractpr](#onnx)
-14. [Extracting statistics about image dataset](#stats)
-15. [Debugging fastdup](#debug)
+9. [Support for cloud storage](#s3)
+10. [Working with tar/zip files as input](#tar)
+11. [Working with video](#video)
+12. [Using your own onnx model as feature extractpr](#onnx)
+13. [Extracting statistics about image dataset](#stats)
+14. [Debugging fastdup](#debug)
 
 ## Detailed Python API documentation <a name="run"/>
 
-[Documentation pages](https://visualdatabase.github.io/fastdup/)
+[Documentation pages](https://visual-layer.github.io/fastdup/)
 
 
 ## Input / output formats <a name="input"/>  
@@ -38,7 +37,7 @@ The intermediate outputs and final outputs are stored in the folder `work_dir`.
 Binary numpy array containing `n` rows (where `n` is the number of images) of 576 columns with the feature vectors. (Default filename is `features.dat`)
 An additional csv file containing the full paths to the image names corresponding to the feature vectors (default filename is `features.dat.csv`). Both those files are linked to each other. The reason we save the list of filenaes is that theh order of extraction may change depends on the file system listing. In addition, in case of corrupted images, its feature vector is skipped and not generated. In that case an additional output file is provided ( `features.bad.csv`). This file lists all the bad or corrupted images that were skipped. 
 
-Note: for using the binary features we provide the [following function](https://visualdatabase.github.io/fastdup/#fastdup.load_binary_feature).
+Note: for using the binary features we provide the [following function](https://visual-layer.github.io/fastdup/#fastdup.load_binary_feature).
 
 ### Similarity pair list
 
@@ -112,8 +111,8 @@ __id,component_id,pagerank,delta
 
 In the above example, both image 2 and 4 are part of component 19, images 0,1,3 have their own unique component, which means they are not connected to the other images in the graph. For experimenting with differnet component thresholds, change the parameter `ccthreshold` which is given inside `turi_param='ccthreshold=0.88'` flag. When the `ccthreshold` is higher, less images are grouped together and more components are created. When the ccthreshold is lower, more images are grouped together and less components are created.
 
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz42.png)
-![alt text](https://github.com/visualdatabase/fastdup/blob/main/gallery/viz46.png)
+![alt text](https://github.com/visual-layer/fastdup/blob/main/gallery/viz42.png)
+![alt text](https://github.com/visual-layer/fastdup/blob/main/gallery/viz46.png)
 *Exaple components obtained from the ImageNet dataset using ccthreshold=0.96*
 
 
@@ -150,7 +149,7 @@ Example command line:
 
 ## Visualizing the outputs <a name="visualization"/>
 
-[Documentation pages](https://visualdatabase.github.io/fastdup/#fastdup-visualization-of-results)
+[Documentation pages](https://visual-layer.github.io/fastdup/#fastdup-visualization-of-results)
 
 
 ## Clustering <a name="clustering"/>
@@ -160,7 +159,7 @@ Example command line:
 
 ## Exporting to tensorboard projects
 
-Use the function `fastup.export_to_tensorboard_projector` descrbed [here](https://visualdatabase.github.io/fastdup/#fastdup.export_to_tensorboard_projector).
+Use the function `fastup.export_to_tensorboard_projector` descrbed [here](https://visual-layer.github.io/fastdup/#fastdup.export_to_tensorboard_projector).
 
 
 After storing the data you should run (in a Jupyter notebook)
@@ -171,7 +170,7 @@ After storing the data you should run (in a Jupyter notebook)
 
 ## Advanced topics: resuming a stored run <a name="resume"/>
 
-[See run_mode=2 documentation](https://visualdatabase.github.io/fastdup/#fastdup.run)
+[See run_mode=2 documentation](https://visual-layer.github.io/fastdup/#fastdup.run)
 There are several supported running modes:
 - `run_mode=0` (the default) does the feature extraction and NN embedding to compute all pairs similarities.
 It uses the `input_dir` command line argument for finding the directory to run on (or a list of files to run on). 
@@ -183,13 +182,6 @@ it is possible to run on a few computing nodes, to extract the features, in para
 - `run_mode=2` reads a stored feature file and computes the NN embedding to provide similarities. The `input_dir` param is ignored, and the `work_dir` is used to point to the numpy feature file. (Give a full path and filename).
 - `run_mode=3` Reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on all inages give by the `test_dir` parameter. `input_dir` should point to the location of the train data. This mode is used for scoring similarities on a new test dataset given a precomputed simiarity index on a train dataset.
 - `run_mode=4` reads the NN model stored by `nnf.index` from the `work_dir` and computes all pairs similarity on pre extracted feature vectors computer by `run_mode=1`.  
-
-
-## Comparing train/test datasets <a name="train_test"/>
-It is possible to run fastdup to compare train and test datasets. In this case only similarities between the train and test are computed.
-To run in this mode, point input_dir to the train folder, test_dir to the test folder, and work_dir is the intermediate artifacts and output of the results.\
-The resulting similarity.csv file contains only relations between test images to train images (and not internal test images or internal train images).
-
 
 ## Advanced topics: vector search <a name="external"/>
 
