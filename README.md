@@ -1,24 +1,19 @@
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_logo.png" alt="fastdup" width="500">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/fastdup%20newlogo%20trasparent2.png" alt="fastdup" width="400">
   </a>
-  <h1>Easily Manage, Clean & Curate Visual Data  at Scale</h1>
- </div>
+<br>
+</div>
+
+ ## Easily Manage, Clean & Curate Visual Data  at Scale
+  
+ **fastdup** by [Visual-Layer](https://visual-layer.com) is an unsupervised powerful free tool designed to rapidly extract valuable insights from your image & video datasets. Assisting you to increase your dataset quality and reduce your data operations costs at an unparalleled scale. 
+
+From the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate). 
+<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869/">Carlos Guestrin</a> & <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+
  
- **fastdup** is a tool for gaining insights from a large image/video collection. It can find anomalies, duplicate and near duplicate images/videos, clusters of similarity, learn the normal behavior and temporal interactions between images/videos. It can be used for smart subsampling of a higher quality dataset,  outlier removal, novelty detection of new information to be sent for tagging. 
- 
-
-**fastdup** is:
-
- - <font size=10> **Unsupervised**:</font>  <font size=5> fits any dataset </font>
- - <font size=10> **Scalable** :</font> <font size=5> handles 400M images on a single machine </font>
- - <font size=10> **Efficient**:</font> <font size=5> works on **CPU only** </font>
- - <font size=10> **Low Cost**: </font> <font size=5> can process 12M images on a $1 cloud machine budget</font>
-
-
- From the authors of [GraphLab](https://github.com/jegonzal/PowerGraph) and [Turi Create](https://github.com/apple/turicreate).
-
  <div>
    <img src="https://camo.githubusercontent.com/44da37f0f02bf104f0650fa5f2c754ed3f6166066c9210f31bacb9e63d60736e/68747470733a2f2f696d672e736869656c64732e696f2f707970692f707976657273696f6e732f70796261646765732e737667">
    <a href="https://pepy.tech/project/fastdup"><img src="https://static.pepy.tech/personalized-badge/fastdup?period=total&units=none&left_color=blue&right_color=orange&left_text=Downloads"></a>
@@ -32,91 +27,117 @@
 
 <a href="https://bit.ly/3NJLxEe">Large Image Datasets Today are a Mess Blog </a> | <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">Processing LAION400m Video </a><br>
 
+## Introducing fastdup V1.0::tada:
+- <font size=10> **Clean & simple API**:</font> The [new API](https://visual-layer.readme.io/docs/v1-api-engine-temp) is simpler to use <font size=5>  </font>
+- <font size=10> **Native Windows support**:</font> Windows now has first-class, full feature support in fastdup <font size=5>  </font>
+- <font size=10> **Amazing documentation**:</font> New and imporved fasdtdup [documentation](https://visual-layer.readme.io) <font size=5>  </font>
+- <font size=10> **Sleek galleries**:</font> New and improved [galleries](https://visual-layer.readme.io/docs/visualizing-data) to get a better view of your data <font size=5>  </font>
+- <font size=10> **Extensive labels support** :</font> <font size=5> Improved support for handling image and bounding box labels </font>
+- <font size=10> **Additional image formats support**: </font> <font size=5>Apple’s HEIC+HEIF, 16 bit grayscale TIFF </font>
+- <font size=10> **Support for Python3.10** </font> <font size=5> </font>
+- <font size=10> **Fully backcompatible to [old API](https://visual-layer.readme.io/docs/v02xx-api)** </font> <font size=5> </font>
+
 <br>
- <h2> Fastdup solves the following problems:</h2>
+ <h2> fastdup identifies these data issues:</h2>
  <div align="center" style="display:flex;flex-direction:column;">
-   <a href="https://www.visual-layer.com">
-    <img src="https://github.com/visualdatabase/fastdup/blob/main/gallery/image_and_video_duplicates-min.png" alt="fastdup" width="1400">
-  </a>
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_features-min.png" alt="fastdup" width="1400">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/issues.png" alt="fastdup" width="1000">
   </a>
  </div>
 
-</br>
-<h2> Just 2 lines of code to get you started:</h2>
+
+## What makes fastdup unique?
+ - <font size=25> **Quality**:</font>  <font size=5> fastdup can assist you in reaching a high quality dataset by finding and removing anomalies and outliers from your datasets. Finding duplicate and near duplicate of images (&videos) and finding clusters of similarity at a large scale! </font>
+ - <font size=25> **Cost** :</font> <font size=5> fastdup can also help you in reducing your data operations costs by facilitating the intelligent sampling of high-quality or novel datasets prior to labeling, as well as support the quality assessment of labeled data. </font>
+ - <font size=25> **Scale**:</font> <font size=5> fastdup graph engine is written in C++ and is highly efficient and works in an incredible scale! Running locally on a CPU only machine and can handle up to 400M images on a single CPU machine! </font>
+
+ <div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/features.png" alt="fastdup" width="1000">
+  </a>
+ </div>
+
+<div align="center" style="display:flex;flex-direction:column;">
+<h2> Get insights on your data with just 3 lines of code:</h2>
 <div align="center" style="display:flex;flex-direction:column;">
  <a href="https://www.youtube.com/watch?v=s6qamoFzyis&t=2s">
-    <img src="https://raw.githubusercontent.com/visualdatabase/fastdup/readme_v1/gallery/fastdup_run.gif" alt="fastdup" width="700">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/fastdup_run_v1.0.gif" alt="fastdup" width="800">
   </a>
   
   <div align="left" style="display:flex;flex-direction:column;">
   
 
-# Quick installation 
-- Python 3.7, 3.8, 3.9, 3.10
-- Supported OS: Ubuntu 20.04, Ubuntu 18.04, Debian 10, Mac OSX M1,  Mac OSX Intel, Amazon Linux 2, CentOS 7, RedHat 4.8, Windows 10 Server.
-
+## Installation 
 ```python
 # upgrade pip to its latest version
-python3.XX -m pip install -U pip
+pip install -U pip
+
 # install fastdup
-python3.XX -m pip install fastdup
+pip install fastdup
+    
+# Alternatively, use explicit python version (XX)
+python3.XX -m pip install fastdup 
 ```
-Where XX is your python version.
-For Windows, CentOS 7.X, RedHat 4.8, Amazon Linux 2 and other older Linux see our [Insallation instructions](./INSTALL.md).
+- **Supported Python**: 3.7, 3.8, 3.9, 3.10
+- **Supported OS**: Windows 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
+- [Full installation instructions are here](https://visual-layer.readme.io/docs/installation)
 
-# Full documentation
-[Full documentation is here](https://visual-layer.github.io/fastdup/)
-
-
-# Running the code
-
+## Running fastdup
 ```python
 import fastdup
-fastdup.run(input_dir="/path/to/your/folder", work_dir='out', nearest_neighbors_k=5, turi_param='ccthreshold=0.96')    #main running function.
-fastdup.create_duplicates_gallery('out/similarity.csv', save_path='.')     #create a visual gallery of found duplicates
-fastdup.create_outliers_gallery('out/outliers.csv',   save_path='.')       #create a visual gallery of anomalies
-fastdup.create_components_gallery('out', save_path='.')                    #create visualiaiton of connected components
-fastdup.create_stats_gallery('out', save_path='.', metric='blur')          #create visualization of images stastics (for example blur)
-fastdup.create_similarity_gallery('out', save_path='.',get_label_func=lambda x: x.split('/')[-2])     #create visualization of top_k similar images assuming data have labels which are in the folder name
-fastdup.create_aspect_ratio_gallery('out', save_path='.')                  #create aspect ratio gallery
+
+fd = fastdup.create(work_dir, images_dir)
+fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
+
+fd.vis.duplicates_gallery()     #create a visual gallery of found duplicates
+fd.vis.outliers_gallery()       #create a visual gallery of anomalies
+fd.vis.component_gallery()     #create visualiaiton of connected components
+fd.vis.stats_gallery()          #create visualization of images stastics (for example blur)
 ```
 
-![alt text](./gallery/fastdup_clip_24s_crop.gif)
-*Working on the Food-101 dataset. Detecting identical pairs, similar-pairs (search) and outliers (non-food images..)*
+![alt text](https://github.com/visual-layer/fastdup/blob/main/gallery/gifl_fastdup_quickstart_V1.gif?raw=true)
+*Working on the Oxford Pet Dataset. Detecting identical pairs, similar-pairs (search) and outliers*
 
-## Getting started examples
-- [🔥 Finding duplicates, outliers and connected components in the Food-101 dataset, including Tensorboard Projector visualization - Google Colab](https://bit.ly/3ydvtVJ)
-- [🔥🔥 Visualizing and understanding a new dataset, looking at dats outliers and label outliers, Training a baseline KNN classifier and getting to accuracy of 0.99 by removing confusing labels](https://www.kaggle.com/code/graphlab/horse-pork-meat-fastdup)  
-- [Finding wrong lables via image similarity](./examples/fastdup_wrong_labels.ipynb)
-- [Computing image statistics](./examples/fastdup_image_stats.ipynb)
-- [Using your own onnx model for extraction](./examples/fastdup_model_support.ipynb)
-- [Getting started on a Kaggle dataset](https://bit.ly/3OUqj7u)
-- [Deduplication of videos - Google Colab](https://github.com/visualdatabase/fastdup/tree/main/examples/fastdup_video.ipynb)
-- [Analyzing video of the MEVA dataset - Google Colab](https://bit.ly/3yE29ZW)
-- [Working with multipe labels per image](https://github.com/visualdatabase/fastdup/blob/main/examples/fastdup_peta.ipynb)
+## Getting started examples 
+- [Quick dataset analysis](https://visual-layer.readme.io/docs/getting-started) <a target="_blank" href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+- [Cleaning and preparing a dataset](https://visual-layer.readme.io/docs/abc)  <a target="_blank" href="https://colab.research.google.com/drive/1NBTD_Z5beSlumQOqDPdF2UzrhdEf0uxC">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+- [Preparing an image dataset for training](https://visual-layer.readme.io/docs/analyzing-labeled-images)  <a target="_blank" href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+- [Preparing an object dataset for training](https://visual-layer.readme.io/docs/objects-and-bounding-boxes)  <a target="_blank" href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-## Detailed instructions
-- [Detailed instructions, install from stable release and installation issues](https://bit.ly/3yDc2qw)
-- [Detailed running instructions](https://bit.ly/3OFLlY5)
+## Full documentation
+- [Full documentation is here](https://visual-layer.readme.io) 
+- [Older API documentation](https://visual-layer.readme.io/docs/v02xx-api)
+
+## Support and feature requests 
+<a href="https://bit.ly/3OLojyT">Join our Slack channel</a>    <a href="https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA" rel="nofollow"><img src="https://camo.githubusercontent.com/8df26cc38dabf1035cddfbed79714744bb93785bc8341cb883fef4cdc412572d/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f536c61636b2d3441313534423f6c6f676f3d736c61636b266c6f676f436f6c6f723d7768697465" alt="Slack" data-canonical-src="https://img.shields.io/badge/Slack-4A154B?logo=slack&amp;logoColor=white" style="max-width: 100%;"></a>
+    
+    
+<a href="https://visual-layer.readme.io/discuss">Have a question? Use our discussion forum</a> 
+
+## 🚀 fastdup enterprise early access
+ Sign up at <a href="https://www.visual-layer.com">Visual Layer</a>
+
+
+## What our users think about fastdup: 
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet.png" alt="fastdup" width="1000">
+  </a>
+<a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet2.png" alt="fastdup" width="1000">
+  </a>
+ </div>
 
 ## User community contributions
-[Stroke AIS Data](https://www.kaggle.com/code/mpwolke/stroke-ais-fastdup)
-[Tire Data](https://www.kaggle.com/code/taranmarley/fastdup-image-insights)
-[Butterfly Mimics](https://www.kaggle.com/code/mpwolke/butterfly-mimics-fastdup)
-[Drugs and Vitamins](https://www.kaggle.com/code/mpwolke/drugs-and-vitamins-fastdup)
-[Plastic Bottles](https://www.kaggle.com/code/mpwolke/plastic-bottles-fastdup)
-[Micro Organisms](https://www.kaggle.com/code/mpwolke/micro-organism-fastdup)
-[PCB Boards](https://www.kaggle.com/code/mpwolke/pcb-boards-fastdup)
-[ZebraFish](https://www.kaggle.com/code/mpwolke/danio-rerio-zebrafish-fastdup)
-[Whats the difference](https://www.kaggle.com/code/ovednagar/whats-the-difference)
+- [Master Data Integrity to Clean Your Computer Vision Datasets
+](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
+- [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
+- [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
-# Support and feature requests 
-<a href="https://bit.ly/3OLojyT">Join our Slack channel</a>
+## License questions
+Please reach us at info@visual-layer.com 
 
 ## Disclaimer
-
 <details>
   <summary><b>Usage Tracking</b></summary>
 
@@ -130,10 +151,8 @@ It is always possible to opt out of the experimental crash report collection via
 
 </details>
 
-# fastdup enterprise edition
- <a href="https://www.visual-layer.com">Visual Layer</a>
-
-# About us
-<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+## About Visual-Layer
+<a href="https://visual-layer.com">Visual Layer Inc.</a><br>
 
 </div>
+
