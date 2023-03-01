@@ -87,11 +87,11 @@ python3.XX -m pip install fastdup
 import fastdup
 
 fd = fastdup.create(work_dir, images_dir)
-fd.run(nearest_neighbors_k=5, ccthreshold=0.96)
+fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
 
 fd.vis.duplicates_gallery()     #create a visual gallery of found duplicates
 fd.vis.outliers_gallery()       #create a visual gallery of anomalies
-fd.vis.components_gallery()     #create visualiaiton of connected components
+fd.vis.component_gallery()     #create visualiaiton of connected components
 fd.vis.stats_gallery()          #create visualization of images stastics (for example blur)
 ```
 
