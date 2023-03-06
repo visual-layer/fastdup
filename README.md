@@ -164,7 +164,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F875741%2F1491706%2F7cad3d5b9f7a36a0a52bb4de2df1d8f4%2Fdataset-card.jpg%3Ft%3D2020-09-16-02-40-14&f=1&nofb=1&ipt=7845d4810c5980843aedf217ed08063d9677c8f23da2fb7bd0a12dc14fdb0600&ipo=images" width="256">
+              <img src="./gallery/cat_dog_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -196,7 +196,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/abc">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F789928%2F1356719%2F482af2e82bb07702d6bac54214ac206c%2Fdataset-card.png%3Ft%3D2020-07-21-02-47-18&f=1&nofb=1&ipt=92b367988bbb105d064d28c86fa95bf4a86a43df097031b677f7a04c58e04cee&ipo=images" width="256">
+              <img src="gallery/food_101_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -228,7 +228,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.explicit.bing.net%2Fth%3Fid%3DOIP.h-5fcBItaNgTbMTb3n1bhwHaEi%26pid%3DApi&f=1&ipt=29c47ec5dd6a831dae33897f8ae55b8522345bfc8363987d0d961355a1909982&ipo=images" width="256">
+              <img src="./gallery/imagenette_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -260,7 +260,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-              <img src="https://miro.medium.com/v2/resize:fit:1104/1*NR0biFNv5O3ShW1U1NtxvQ.png" width="256">
+              <img src="./gallery/coco_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
