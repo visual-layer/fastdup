@@ -167,7 +167,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F789928%2F1356719%2F482af2e82bb07702d6bac54214ac206c%2Fdataset-card.png%3Ft%3D2020-07-21-02-47-18&f=1&nofb=1&ipt=92b367988bbb105d064d28c86fa95bf4a86a43df097031b677f7a04c58e04cee&ipo=images" width="256">
       </td>    
       <td rowspan="3">
-        <b>Cleaning and preparing a dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The dataset contains 101 food classes with 1,000 images each. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images. FastDup also analyzes the dataset, finding similarity clusters and the percentage of images that fall within these clusters..
+        <b>Cleaning and preparing a dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images. FastDup also analyzes the dataset, finding similarity clusters and the percentage of images that fall within these clusters.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
@@ -197,7 +197,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.explicit.bing.net%2Fth%3Fid%3DOIP.h-5fcBItaNgTbMTb3n1bhwHaEi%26pid%3DApi&f=1&ipt=29c47ec5dd6a831dae33897f8ae55b8522345bfc8363987d0d961355a1909982&ipo=images" width="256">
       </td>    
       <td rowspan="3">
-        <b>Preparing an image dataset for training:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet, which is a large online dataset. The article describes how to download and annotate the dataset for analysis. It then goes on to use FastDup software to analyze the dataset for similarity and outlier images.
+        <b>Preparing an image dataset for training:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet. In this tutorial we show how to use fastDup to analyze the dataset for similarity and outlier images.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
@@ -227,7 +227,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://miro.medium.com/v2/resize:fit:1104/1*NR0biFNv5O3ShW1U1NtxvQ.png" width="256">
       </td>    
       <td rowspan="3">
-        <b>Preparing an object dataset for training:</b> In this tutorial we will load and analyze a the mini-coco dataset which is labeled with bounding boxes and classes.
+        <b>Preparing an object dataset for training:</b> In this tutorial we will load and analyze a the mini-coco dataset which is labeled with bounding boxes and classes. Using fastdup, we discover duplicates, outliers and possible mislabeled bounding boxes.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
