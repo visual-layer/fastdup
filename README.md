@@ -1,10 +1,44 @@
 
-<div align="center" style="display:flex;flex-direction:column;">
+<!-- PROJECT LOGO -->
+
+
+<br />
+<div align="center">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/fastdup%20newlogo%20trasparent2.png" alt="fastdup" width="400">
   </a>
-<br>
+
+<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
+  <p align="center">
+    Unlock your data's full potential - An unsupervised and free solution for image and video dataset analysis.
+    <br />
+    <a href="https://visual-layer.readme.io/"><strong>Explore the docs »</strong></a>
+    <br />
+    <a href="https://visual-layer.readme.io/">Features</a>
+    ·
+    <a href="https://github.com/visual-layer/fastdup/issues">Report Bug</a>
+    ·
+    <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Read Blog</a>
+    ·
+    <a href="https://visual-layer.readme.io/docs/getting-started">Quickstart</a>
+    .
+    <a href="https://visual-layer.com/">About us</a>
+    <br />
+    <br /> 
+    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email">
+    <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
+    </a>
+    <a href="https://www.linkedin.com/company/visual-layer/">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
+    </a>
+    <a href="https://www.youtube.com/@visual-layer4035">
+    <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
+    </a>
+  </p>
 </div>
+
+
+
 
  ## Easily Manage, Clean & Curate Visual Data  at Scale
   
