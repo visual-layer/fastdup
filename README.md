@@ -159,7 +159,7 @@ See [LICENSE](./LICENSE).
 
 For any queries, reach us at info@visual-layer.com 
 
-## What our users think about fastdup: 
+## 🌟 What our users think about fastdup:
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet.png" alt="fastdup" width="1000">
