@@ -119,11 +119,11 @@ python3.XX -m pip install fastdup
 
 Run fastdup with only 3 lines of code.
 
-![run](./gallery/fastdup_run_v1.0.gif)
+![run](./gallery/fastdup_run_v1.0_optimized.gif)
 
 Visualize the result.
 
-![results](./gallery/gifl_fastdup_quickstart_V1.gif)
+![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
 Here are the 7 lines of code you'll need in most cases.
 
