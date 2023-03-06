@@ -48,6 +48,8 @@
     ·
     <a href="https://visual-layer.readme.io/docs/getting-started">Quickstart</a>
     ·
+    <a href="https://visual-layer.com/">Enterprise Edition</a>
+    ·
     <a href="https://visual-layer.com/">About us</a>
     <br />
     <br /> 
@@ -62,8 +64,8 @@
     </a>
   </p>
   <br />
-    Want to do more with fastdup? Sign up for an early access to the enterprise version
-    <a href="https://www.visual-layer.com/">here</a>.
+    🔥 We've release V1.0! View the release notes
+    <a href="./RELEASE_NOTES.md">here</a>.
     <br />
 </div>
 
