@@ -261,8 +261,8 @@ Get help from the fastdup team or community members via the following channels -
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
-## 💯 Community and Contributions
-
+## 💯 Community Contributions
+The following are community contributed blog posts about fastdup - 
 
 - [Master Data Integrity to Clean Your Computer Vision Datasets
 ](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
