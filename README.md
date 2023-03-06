@@ -134,7 +134,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 <table>
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://storage.googleapis.com/kaggle-datasets-images/224104/481286/dd765fca1a57262c103fbfaeda98c6a3/dataset-card.png?t=2019-06-08-14-36-26" width="256">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F875741%2F1491706%2F7cad3d5b9f7a36a0a52bb4de2df1d8f4%2Fdataset-card.jpg%3Ft%3D2020-09-16-02-40-14&f=1&nofb=1&ipt=7845d4810c5980843aedf217ed08063d9677c8f23da2fb7bd0a12dc14fdb0600&ipo=images" width="256">
       </td>    
       <td rowspan="3">
         <b>Quick dataset analysis:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
@@ -164,7 +164,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://storage.googleapis.com/tfds-data/visualization/fig/food101-2.0.0.png" width="256">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F789928%2F1356719%2F482af2e82bb07702d6bac54214ac206c%2Fdataset-card.png%3Ft%3D2020-07-21-02-47-18&f=1&nofb=1&ipt=92b367988bbb105d064d28c86fa95bf4a86a43df097031b677f7a04c58e04cee&ipo=images" width="256">
       </td>    
       <td rowspan="3">
         <b>Cleaning and preparing a dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The dataset contains 101 food classes with 1,000 images each. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images. FastDup also analyzes the dataset, finding similarity clusters and the percentage of images that fall within these clusters..
