@@ -88,13 +88,10 @@ Additional features  -
 
 ## 📌 Why fastdup?
 
-+ **Quality** - fastdup can assist you in reaching a high-quality dataset by finding and removing anomalies and outliers from your datasets. Finding duplicate and near duplicate of images (&videos) and finding clusters of similarity at a large scale!
+- **Quality**: Find and remove anomalies and outliers from your dataset, including duplicates and similar images and videos at a large scale.
+- **Cost**: Reduce data operation costs by intelligently sampling high-quality or novel datasets before labeling and assessing labeled data quality.
+- **Scale**: fastdup's C++ graph engine is highly efficient and can handle up to 400M images on a single CPU machine.
 
-+ **Cost** - fastdup can also help you in reducing your data operations costs by facilitating the intelligent sampling of high-quality or novel datasets prior to labeling, as well as supporting the quality assessment of labeled data.
-
-+ **Scale** - fastdup graph engine is written in C++ and is highly efficient and works on an incredible scale! Running locally on a CPU-only machine and can handle up to 400M images on a single CPU machine!
-
- 
 ## ⚙ Setting up
 
 - **Supported Python**: 3.7, 3.8, 3.9, 3.10
