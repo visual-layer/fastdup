@@ -33,21 +33,9 @@
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/fastdup%20newlogo%20trasparent2.png" alt="fastdup" width="400">
   </a>
 
-  <head>
-    <style>
-      /* target the h3 and p tags and set their margin-bottom to zero */
-      h3, p {
-        margin-bottom: 0;
-        margin-top: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <h3 align="center" style="padding-bottom:0;">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
-    <p align="center">An unsupervised and free tool for image and video dataset analysis.</p>
-  </body>
-
+<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
   <p align="center">
+    An unsupervised and free tool for image and video dataset analysis.
     <br />
     <a href="https://visual-layer.readme.io/"><strong>Explore the docs »</strong></a>
     <br />
