@@ -129,7 +129,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 *Working on the Oxford Pet Dataset. Detecting identical pairs, similar-pairs (search) and outliers*
 
 
-## 💣 Learn from Examples
+## 💬 Learn from Examples
 
 <table>
   <tr>
