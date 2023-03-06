@@ -8,24 +8,23 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 
-
-<!-- [![PyPi][pypi-shield]][pypi-url] -->
+[![PyPi][pypi-shield]][pypi-url]
 [![PyPi][pypiversion-shield]][pypi-url]
 [![PyPi][downloads-shield]][downloads-url]
 [![Contributors][contributors-shield]][contributors-url]
-<!-- [![License][license-shield]][license-url] -->
+[![License][license-shield]][license-url]
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[pypi-shield]: https://img.shields.io/pypi/pyversions/fastdup?style=for-the-badge
+[pypi-shield]: https://img.shields.io/badge/Python-3.7%20|%203.8%20|%203.9%20|%203.10-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
 [pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge
-[downloads-shield]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Ffastdup
+[downloads-shield]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Ffastdup&color=lightblue
 [downloads-url]: https://pypi.org/project/fastdup/
 [contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[license-shield]: https://img.shields.io/github/license/visual-layer/fastdup?style=for-the-badge
-[license-url]: https://github.com/visual-layer/fastdup-v1.0-pre-release/blob/dnth/readme-refactor/LICENSE.md
+[license-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-purple.svg?style=for-the-badge
+[license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
 
 <!-- PROJECT LOGO -->
 <br />
@@ -56,6 +55,9 @@
     <br /> 
     <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email">
     <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
+    </a>
+    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email">
+    <img src="https://img.shields.io/badge/Discussion-%20Forum-brightgreen?style=for-the-badge&logo=discourse&logoColor=white" alt="Logo">
     </a>
     <a href="https://www.linkedin.com/company/visual-layer/">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
