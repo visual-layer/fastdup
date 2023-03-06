@@ -214,7 +214,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">
+          <a href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">
               <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
           </a>
       </td>
@@ -244,7 +244,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">
+          <a href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">
               <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
           </a>
       </td>
