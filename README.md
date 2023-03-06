@@ -35,7 +35,7 @@
 
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
   <p align="center">
-    Unlock your data's full potential - An unsupervised and free solution for image and video dataset analysis.
+    An unsupervised and free tool for image and video dataset analysis.
     <br />
     <a href="https://visual-layer.readme.io/"><strong>Explore the docs »</strong></a>
     <br />
