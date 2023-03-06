@@ -134,7 +134,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 <table>
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
+        <img src="https://storage.googleapis.com/kaggle-datasets-images/224104/481286/dd765fca1a57262c103fbfaeda98c6a3/dataset-card.png?t=2019-06-08-14-36-26" width="256">
       </td>    
       <td rowspan="3">
         <b>Quick dataset analysis:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
@@ -164,7 +164,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
+        <img src="https://storage.googleapis.com/tfds-data/visualization/fig/food101-2.0.0.png" width="256">
       </td>    
       <td rowspan="3">
         <b>Cleaning and preparing a dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The dataset contains 101 food classes with 1,000 images each. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images. FastDup also analyzes the dataset, finding similarity clusters and the percentage of images that fall within these clusters..
@@ -194,7 +194,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.explicit.bing.net%2Fth%3Fid%3DOIP.h-5fcBItaNgTbMTb3n1bhwHaEi%26pid%3DApi&f=1&ipt=29c47ec5dd6a831dae33897f8ae55b8522345bfc8363987d0d961355a1909982&ipo=images" width="256">
       </td>    
       <td rowspan="3">
         <b>Preparing an image dataset for training:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet, which is a large online dataset. The article describes how to download and annotate the dataset for analysis. It then goes on to use FastDup software to analyze the dataset for similarity and outlier images.
@@ -224,7 +224,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
 
   <tr>
       <td rowspan="3" width="160">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
+        <img src="https://miro.medium.com/v2/resize:fit:1104/1*NR0biFNv5O3ShW1U1NtxvQ.png" width="256">
       </td>    
       <td rowspan="3">
         <b>Preparing an object dataset for training:</b> In this tutorial we will load and analyze a the mini-coco dataset which is labeled with bounding boxes and classes.
