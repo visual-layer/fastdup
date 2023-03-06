@@ -84,7 +84,7 @@ Additional features  -
  </div>
 
 
-## Why fastdup?
+## 📌 Why fastdup?
 
 + **Quality** - fastdup can assist you in reaching a high quality dataset by finding and removing anomalies and outliers from your datasets. Finding duplicate and near duplicate of images (&videos) and finding clusters of similarity at a large scale!
 
@@ -93,7 +93,12 @@ Additional features  -
 + **Scale** - fastdup graph engine is written in C++ and is highly efficient and works in an incredible scale! Running locally on a CPU only machine and can handle up to 400M images on a single CPU machine!
 
  
-## Setting up
+## ⚙ Setting up
+
+- **Supported Python**: 3.7, 3.8, 3.9, 3.10
+- **Supported OS**: Windows 10, 11 and 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
+- [Full installation instructions are here](https://visual-layer.readme.io/docs/installation)
+
 
 ```python
 # upgrade pip to its latest version
@@ -105,12 +110,9 @@ pip install fastdup
 # Alternatively, use explicit python version (XX)
 python3.XX -m pip install fastdup 
 ```
-- **Supported Python**: 3.7, 3.8, 3.9, 3.10
-- **Supported OS**: Windows 10, 11 and 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
-- [Full installation instructions are here](https://visual-layer.readme.io/docs/installation)
 
 
-## Get started
+## ✅ Getting Started
 ```python
 import fastdup
 
@@ -127,7 +129,7 @@ fd.vis.stats_gallery()          # create visualization of images stastics (for e
 *Working on the Oxford Pet Dataset. Detecting identical pairs, similar-pairs (search) and outliers*
 
 
-## Quickstart Examples
+## 💣 Learn from Examples
 
 - [Quick dataset analysis](https://visual-layer.readme.io/docs/getting-started) <a target="_blank" href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 - [Cleaning and preparing a dataset](https://visual-layer.readme.io/docs/abc)  <a target="_blank" href="https://colab.research.google.com/drive/1NBTD_Z5beSlumQOqDPdF2UzrhdEf0uxC">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
@@ -135,13 +137,13 @@ fd.vis.stats_gallery()          # create visualization of images stastics (for e
 - [Preparing an object dataset for training](https://visual-layer.readme.io/docs/objects-and-bounding-boxes)  <a target="_blank" href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 
-## Getting Help
+## 🆘 Getting Help
 Get help from the fastdup team or community members via the following channels -
 + [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email).
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
-## Community and Contributions
+## 💯 Community and Contributions
 
 
 - [Master Data Integrity to Clean Your Computer Vision Datasets
@@ -149,7 +151,7 @@ Get help from the fastdup team or community members via the following channels -
 - [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
 - [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
-## License
+## 🎹 License
 fastdup is licensed under Creative Commons 4.0 license.
 See [LICENSE](./LICENSE).
 
@@ -166,7 +168,7 @@ For any queries, reach us at info@visual-layer.com
  </div>
 
 
-## Disclaimer
+## 🎷 Disclaimer
 <details>
   <summary><b>Usage Tracking</b></summary>
 
@@ -180,12 +182,10 @@ It is always possible to opt out of the experimental crash report collection via
 
 </details>
 
-## About Visual-Layer
-
-From the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate). 
+## 🧭 About Visual-Layer
+fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate). 
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869/">Carlos Guestrin</a> & <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
-
-<a href="https://visual-layer.com">Visual Layer Inc.</a><br>
+Learn more about Visual Layer [here](https://visual-layer.com).
 
 
