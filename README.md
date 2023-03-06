@@ -64,13 +64,13 @@
     </a>
   </p>
   <br />
-    🔥 We've release V1.0! View the release notes
+    🔥 We've released fastdup V1.0! View the release notes
     <a href="./RELEASE_NOTES.md">here</a>.
     <br />
 </div>
 
 ## 🏅 What's Included
-fastdup let's you identify -
+fastdup lets you identify -
  <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/issues.png" alt="fastdup" width="1000">
@@ -88,17 +88,17 @@ Additional features  -
 
 ## 📌 Why fastdup?
 
-+ **Quality** - fastdup can assist you in reaching a high quality dataset by finding and removing anomalies and outliers from your datasets. Finding duplicate and near duplicate of images (&videos) and finding clusters of similarity at a large scale!
++ **Quality** - fastdup can assist you in reaching a high-quality dataset by finding and removing anomalies and outliers from your datasets. Finding duplicate and near duplicate of images (&videos) and finding clusters of similarity at a large scale!
 
-+ **Cost** - fastdup can also help you in reducing your data operations costs by facilitating the intelligent sampling of high-quality or novel datasets prior to labeling, as well as support the quality assessment of labeled data.
++ **Cost** - fastdup can also help you in reducing your data operations costs by facilitating the intelligent sampling of high-quality or novel datasets prior to labeling, as well as supporting the quality assessment of labeled data.
 
-+ **Scale** - fastdup graph engine is written in C++ and is highly efficient and works in an incredible scale! Running locally on a CPU only machine and can handle up to 400M images on a single CPU machine!
++ **Scale** - fastdup graph engine is written in C++ and is highly efficient and works on an incredible scale! Running locally on a CPU-only machine and can handle up to 400M images on a single CPU machine!
 
  
 ## ⚙ Setting up
 
 - **Supported Python**: 3.7, 3.8, 3.9, 3.10
-- **Supported OS**: Windows 10, 11 and 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
+- **Supported OS**: Windows 10, 11, and 2019 Server (Native), Windows WSL, Ubuntu (20.04, 18.04), Mac OSX 10+ (Intel and M1 CPUs), Amazon Linux 2, CentOS 7, RedHat 4.8.
 - [Full installation instructions are here](https://visual-layer.readme.io/docs/installation)
 
 
@@ -123,8 +123,8 @@ fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
 
 fd.vis.duplicates_gallery()     # create a visual gallery of found duplicates
 fd.vis.outliers_gallery()       # create a visual gallery of anomalies
-fd.vis.component_gallery()     # create visualiaiton of connected components
-fd.vis.stats_gallery()          # create visualization of images stastics (for example blur)
+fd.vis.component_gallery()     # create visualization of connected components
+fd.vis.stats_gallery()          # create a visualization of images statistics (for example blur)
 ```
 
 ![alt text](https://github.com/visual-layer/fastdup/blob/main/gallery/gifl_fastdup_quickstart_V1.gif?raw=true)
@@ -174,7 +174,7 @@ For any queries, reach us at info@visual-layer.com
 <details>
   <summary><b>Usage Tracking</b></summary>
 
-We have added experimental crash report collection, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder name, user name, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores etc. Collecting fastdup crashes will help us improve stability. 
+We have added an experimental crash report collection, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder name, user name, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores etc. Collecting fastdup crashes will help us improve stability. 
 
 The code for the data collection is found [here](./src/sentry.hpp). On MAC we use [Google crashpad](https://chromium.googlesource.com/crashpad/crashpad). 
 
@@ -189,5 +189,3 @@ fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [
 <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869/">Carlos Guestrin</a> & <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
 
 Learn more about Visual Layer [here](https://visual-layer.com).
-
-
