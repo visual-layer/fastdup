@@ -287,12 +287,19 @@ The following are community-contributed blog posts about fastdup -
 - [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
 - [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
+## What our users think about fastdup
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com">
+    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet.png" alt="fastdup" width="1000">
+  </a>
+ </div>
+
+
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
 See [LICENSE](./LICENSE).
 
-For any queries, reach us at info@visual-layer.com 
-
+For any queries, reach us at info@visual-layer.com
 
 ## Disclaimer
 <details>
