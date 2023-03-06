@@ -30,7 +30,7 @@
 <br />
 <div align="center">
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/new_logo_fastdup_white2.png" alt="fastdup" width="400">
+    <img src="./gallery/new_logo_fastdup_white2.png" alt="fastdup" width="400">
   </a>
 
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
@@ -76,7 +76,7 @@
 fastdup lets you identify -
  <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/issues.png" alt="fastdup" width="1000">
+    <img src="./gallery/issues.png" alt="fastdup" width="1000">
   </a>
  </div>
 
@@ -84,7 +84,7 @@ Additional features -
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/features.png" alt="fastdup" width="1000">
+    <img src="./gallery/features.png" alt="fastdup" width="1000">
   </a>
  </div>
 
@@ -172,21 +172,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -204,21 +204,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1NBTD_Z5beSlumQOqDPdF2UzrhdEf0uxC">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -236,21 +236,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -268,21 +268,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -309,7 +309,7 @@ The following are community-contributed blog posts about fastdup -
 ## What our users think about fastdup
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet.png" alt="fastdup" width="1000">
+    <img src="./gallery/tweet.png" alt="fastdup" width="1000">
   </a>
  </div>
 
