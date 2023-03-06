@@ -92,6 +92,7 @@ Additional features  -
 - **Cost**: Reduce data operation costs by intelligently sampling high-quality or novel datasets before labeling and assessing labeled data quality.
 - **Scale**: fastdup's C++ graph engine is highly efficient and can handle up to 400M images on a single CPU machine.
 
+
 ## ⚙ Setting up
 
 - **Supported Python**: 3.7, 3.8, 3.9, 3.10
