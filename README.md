@@ -46,7 +46,7 @@ An unsupervised and free tool for image and video dataset analysis.
     <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Read Blog</a>
     ·
     <a href="https://visual-layer.readme.io/docs/getting-started">Quickstart</a>
-    .
+    ·
     <a href="https://visual-layer.com/">About us</a>
     <br />
     <br /> 
