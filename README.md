@@ -61,6 +61,10 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
+  <br />
+    Want to do more with fastdup? Sign up for an early access to the enterprise version
+    <a href="https://www.visual-layer.com/">here</a>.
+    <br />
 </div>
 
 ## 🏅 What's Included
@@ -130,27 +134,26 @@ fd.vis.stats_gallery()          # create visualization of images stastics (for e
 - [Preparing an image dataset for training](https://visual-layer.readme.io/docs/analyzing-labeled-images)  <a target="_blank" href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 - [Preparing an object dataset for training](https://visual-layer.readme.io/docs/objects-and-bounding-boxes)  <a target="_blank" href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-## Community and Contributing
-Join us on [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email). It's the fastest way to reach us. 
+
+## Getting Help
+Get help from the fastdup team or community members via the following channels -
++ [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email).
++ GitHub [issues](https://github.com/visual-layer/fastdup/issues).
++ Discussion [forum](https://visual-layer.readme.io/discuss).
+
+## Community and Contributions
+
 
 - [Master Data Integrity to Clean Your Computer Vision Datasets
 ](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
 - [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
 - [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
-## Getting Help
-
-<a href="https://bit.ly/3OLojyT">Join our Slack channel</a>    <a href="https://join.slack.com/t/visualdatabase/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA" rel="nofollow"><img src="https://camo.githubusercontent.com/8df26cc38dabf1035cddfbed79714744bb93785bc8341cb883fef4cdc412572d/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f536c61636b2d3441313534423f6c6f676f3d736c61636b266c6f676f436f6c6f723d7768697465" alt="Slack" data-canonical-src="https://img.shields.io/badge/Slack-4A154B?logo=slack&amp;logoColor=white" style="max-width: 100%;"></a>
-
-<a href="https://visual-layer.readme.io/discuss">Have a question? Use our discussion forum</a> 
-
 ## License
+fastdup is licensed under Creative Commons 4.0 license.
+See [LICENSE](./LICENSE).
 
-Please reach us at info@visual-layer.com 
-
-## 🚀 fastdup enterprise early access
- Sign up at <a href="https://www.visual-layer.com">Visual Layer</a>
-
+For any queries, reach us at info@visual-layer.com 
 
 ## What our users think about fastdup: 
 <div align="center" style="display:flex;flex-direction:column;">
@@ -161,7 +164,6 @@ Please reach us at info@visual-layer.com
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet2.png" alt="fastdup" width="1000">
   </a>
  </div>
-
 
 
 ## Disclaimer
