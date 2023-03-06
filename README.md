@@ -1,7 +1,32 @@
 
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+
+[![PyPi][pypi-shield]][pypi-url]
+[![PyPi][pypiversion-shield]][pypi-url]
+[![PyPi][downloads-shield]][downloads-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![License][license-shield]][license-url]
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[pypi-shield]: https://img.shields.io/pypi/pyversions/fastdup?style=for-the-badge
+[pypi-url]: https://pypi.org/project/fastdup/
+[pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge
+[downloads-shield]: https://img.shields.io/pypi/dm/fastdup?style=for-the-badge
+[downloads-url]: https://pypi.org/project/fastdup/
+[contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge
+[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
+[license-shield]: https://img.shields.io/github/license/visual-layer/fastdup?style=for-the-badge
+[license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
+
 <!-- PROJECT LOGO -->
-
-
 <br />
 <div align="center">
   <a href="https://www.visual-layer.com">
