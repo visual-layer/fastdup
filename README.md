@@ -131,7 +131,12 @@ fd.vis.stats_gallery()          # create visualization of images stastics (for e
 - [Preparing an object dataset for training](https://visual-layer.readme.io/docs/objects-and-bounding-boxes)  <a target="_blank" href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 ## Community and Contributing
+Join us on [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email). It's the fastest way to reach us. 
 
+- [Master Data Integrity to Clean Your Computer Vision Datasets
+](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
+- [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
+- [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
 ## Getting Help
 
@@ -157,11 +162,6 @@ Please reach us at info@visual-layer.com
   </a>
  </div>
 
-## User community contributions
-- [Master Data Integrity to Clean Your Computer Vision Datasets
-](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
-- [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
-- [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
 
 ## Disclaimer
