@@ -33,7 +33,7 @@
     <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/fastdup%20newlogo%20trasparent2.png" alt="fastdup" width="400">
   </a>
 
-<h3 align="center" style="margin: 0; padding: 0;">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
+<h3 align="center" style="padding-bottom:0;">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
 An unsupervised and free tool for image and video dataset analysis.
   <p align="center">
     <br />
