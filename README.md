@@ -167,7 +167,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
       </td>    
       <td rowspan="3">
-        <b>Cleaning and preparing a dataset:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
+        <b>Cleaning and preparing a dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The dataset contains 101 food classes with 1,000 images each. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images. FastDup also analyzes the dataset, finding similarity clusters and the percentage of images that fall within these clusters..
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
@@ -197,7 +197,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
       </td>    
       <td rowspan="3">
-        <b>Preparing an image dataset for training:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
+        <b>Preparing an image dataset for training:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet, which is a large online dataset. The article describes how to download and annotate the dataset for analysis. It then goes on to use FastDup software to analyze the dataset for similarity and outlier images.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
@@ -227,7 +227,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
         <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F224104%2F481286%2Fdd765fca1a57262c103fbfaeda98c6a3%2Fdataset-card.png%3Ft%3D2019-06-08-14-36-26&f=1&nofb=1&ipt=5e0672c3170238d6f1f0bb2d0756855366a295476d20354fdd168552f1ee8d31&ipo=images" width="256">
       </td>    
       <td rowspan="3">
-        <b>QPreparing an object dataset for training:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
+        <b>Preparing an object dataset for training:</b> In this tutorial we will load and analyze a the mini-coco dataset which is labeled with bounding boxes and classes.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
@@ -253,11 +253,6 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <!-- ------------------------------------------------------------------- -->
   
 </table>
-
-
-- [Cleaning and preparing a dataset](https://visual-layer.readme.io/docs/abc)  <a target="_blank" href="https://colab.research.google.com/drive/1NBTD_Z5beSlumQOqDPdF2UzrhdEf0uxC">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-- [Preparing an image dataset for training](https://visual-layer.readme.io/docs/analyzing-labeled-images)  <a target="_blank" href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-- [Preparing an object dataset for training](https://visual-layer.readme.io/docs/objects-and-bounding-boxes)  <a target="_blank" href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 
 ## 🆘 Getting Help
