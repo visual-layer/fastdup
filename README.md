@@ -123,7 +123,6 @@ Additional features -
 [![CentOS 7](https://img.shields.io/badge/CentOS%207-262577?style=for-the-badge&logo=centos&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a)
 [![RedHat 4.8](https://img.shields.io/badge/RedHat%204.8-EE0000?style=for-the-badge&logo=red-hat&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a) 
 
-Detailed installation instructions and common errors [here](https://visual-layer.readme.io/docs/installation).
 
 ### Installation
 
@@ -145,6 +144,8 @@ python3.XX -m pip install fastdup
 ```bash
 docker pull karpadoni/fastdup-ubuntu-20.04
 ```
+
+Detailed installation instructions and common errors [here](https://visual-layer.readme.io/docs/installation).
 
 ## Getting Started
 
