@@ -149,7 +149,7 @@ Visualize the result.
 
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
-Here are the 7 lines of code you'll need in most cases.
+Here are the 8 lines of code you'll need in most cases.
 
 ```python
 import fastdup
@@ -157,10 +157,11 @@ import fastdup
 fd = fastdup.create(work_dir, images_dir)
 fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
 
-fd.vis.duplicates_gallery()     # create a visual gallery of found duplicates
-fd.vis.outliers_gallery()       # create a visual gallery of anomalies
+fd.vis.duplicates_gallery()    # create a visual gallery of found duplicates
+fd.vis.outliers_gallery()      # create a visual gallery of anomalies
 fd.vis.component_gallery()     # create a visualization of connected components
-fd.vis.stats_gallery()          # create a visualization of images statistics (for example blur)
+fd.vis.stats_gallery()         # create a visualization of images statistics (for example blur)
+fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
 
 ## Learn from Examples
