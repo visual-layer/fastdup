@@ -29,8 +29,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/new_logo_fastdup_white2.png" alt="fastdup" width="400">
+
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
+    <img alt="Fastdup logo." src="./gallery/logo.png">
+    </picture>
   </a>
 
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
@@ -38,31 +43,31 @@
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
     <br />
-    <a href="https://visual-layer.readme.io/"><strong>Explore the docs »</strong></a>
+    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
     <br />
-    <a href="https://visual-layer.readme.io/">Features</a>
+    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Features</a>
     ·
-    <a href="https://github.com/visual-layer/fastdup/issues">Report Bug</a>
+    <a href="https://github.com/visual-layer/fastdup/issues" target="_blank" rel="noopener noreferrer">Report Bug</a>
     ·
-    <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Read Blog</a>
+    <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22" target="_blank" rel="noopener noreferrer">Read Blog</a>
     ·
-    <a href="https://visual-layer.readme.io/docs/getting-started">Quickstart</a>
+    <a href="https://visual-layer.readme.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
     ·
-    <a href="https://visual-layer.com/">Enterprise Edition</a>
+    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">Enterprise Edition</a>
     ·
-    <a href="https://visual-layer.com/">About us</a>
+    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
     <br /> 
-    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email">
+    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
     </a>
-    <a href="https://visual-layer.readme.io/discuss">
+    <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/Discussion-%20Forum-brightgreen?style=for-the-badge&logo=discourse&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.linkedin.com/company/visual-layer/">
+    <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.youtube.com/@visual-layer4035">
+    <a href="https://www.youtube.com/@visual-layer4035" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
@@ -75,16 +80,16 @@
 ## What's Included
 fastdup lets you identify -
  <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/issues.png" alt="fastdup" width="1000">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <img src="./gallery/issues.png" alt="fastdup" width="1000">
   </a>
  </div>
 
 Additional features -
 
 <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/features.png" alt="fastdup" width="1000">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <img src="./gallery/features.png" alt="fastdup" width="1000">
   </a>
  </div>
 
@@ -106,19 +111,22 @@ Additional features -
 
 > **Note** - Supported operating systems:
 
-![Windows 10](https://img.shields.io/badge/Windows%2010-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Windows 11](https://img.shields.io/badge/Windows%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Windows Server 2019](https://img.shields.io/badge/Windows%20Server%202019-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Windows WSL](https://img.shields.io/badge/Windows%20WSL-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Ubuntu 20.04 LTS](https://img.shields.io/badge/Ubuntu%2020.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
-![Ubuntu 18.04 LTS](https://img.shields.io/badge/Ubuntu%2018.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
-![macOS 10+ (Intel)](https://img.shields.io/badge/macOS%2010%2B%20(Intel)-000000?style=for-the-badge&logo=apple&logoColor=white)
-![macOS 10+ (M1)](https://img.shields.io/badge/macOS%2010%2B%20(M1)-000000?style=for-the-badge&logo=apple&logoColor=white)
-![Amazon Linux 2](https://img.shields.io/badge/Amazon%20Linux%202-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)
-![CentOS 7](https://img.shields.io/badge/CentOS%207-262577?style=for-the-badge&logo=centos&logoColor=white)
-![RedHat 4.8](https://img.shields.io/badge/RedHat%204.8-EE0000?style=for-the-badge&logo=red-hat&logoColor=white)
+[![Windows 10](https://img.shields.io/badge/Windows%2010-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
+[![Windows 11](https://img.shields.io/badge/Windows%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
+[![Windows Server 2019](https://img.shields.io/badge/Windows%20Server%202019-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
+[![Windows WSL](https://img.shields.io/badge/Windows%20WSL-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
+[![Ubuntu 20.04 LTS](https://img.shields.io/badge/Ubuntu%2020.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://visual-layer.readme.io/docs/installation#ubuntu-20041804-lts-machine-setup-a-nameubuntua)
+[![Ubuntu 18.04 LTS](https://img.shields.io/badge/Ubuntu%2018.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://visual-layer.readme.io/docs/installation#ubuntu-20041804-lts-machine-setup-a-nameubuntua)
+[![macOS 10+ (Intel)](https://img.shields.io/badge/macOS%2010%2B%20(Intel)-000000?style=for-the-badge&logo=apple&logoColor=white)](https://visual-layer.readme.io/docs/installation#mac-os-setup-a-namemacosxa)
+[![macOS 10+ (M1)](https://img.shields.io/badge/macOS%2010%2B%20(M1)-000000?style=for-the-badge&logo=apple&logoColor=white)](https://visual-layer.readme.io/docs/installation#mac-os-setup-a-namemacosxa)
+[![Amazon Linux 2](https://img.shields.io/badge/Amazon%20Linux%202-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://visual-layer.readme.io/docs/installation#amazon-linux-2-setup-a-nameamazon_linuxa)
+[![CentOS 7](https://img.shields.io/badge/CentOS%207-262577?style=for-the-badge&logo=centos&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a)
+[![RedHat 4.8](https://img.shields.io/badge/RedHat%204.8-EE0000?style=for-the-badge&logo=red-hat&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a) 
+
 
 ### Installation
+
+> **Option 1** - Install fastdup via [PyPI](https://pypi.org/project/fastdup/): 
 
 ```python
 # upgrade pip to its latest version
@@ -131,6 +139,13 @@ pip install fastdup
 python3.XX -m pip install fastdup 
 ```
 
+> **Option 2** - Install fastdup via an [Ubuntu 20.04 Docker image](https://hub.docker.com/r/karpadoni/fastdup-ubuntu-20.04) on DockerHub:
+
+```bash
+docker pull karpadoni/fastdup-ubuntu-20.04
+```
+
+Detailed installation instructions and common errors [here](https://visual-layer.readme.io/docs/installation).
 
 ## Getting Started
 
@@ -142,7 +157,7 @@ Visualize the result.
 
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
-Here are the 7 lines of code you'll need in most cases.
+Here are the 8 lines of code you'll need in most cases.
 
 ```python
 import fastdup
@@ -150,11 +165,14 @@ import fastdup
 fd = fastdup.create(work_dir, images_dir)
 fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
 
-fd.vis.duplicates_gallery()     # create a visual gallery of found duplicates
-fd.vis.outliers_gallery()       # create a visual gallery of anomalies
+fd.vis.duplicates_gallery()    # create a visual gallery of found duplicates
+fd.vis.outliers_gallery()      # create a visual gallery of anomalies
 fd.vis.component_gallery()     # create a visualization of connected components
-fd.vis.stats_gallery()          # create a visualization of images statistics (for example blur)
+fd.vis.stats_gallery()         # create a visualization of images statistics (for example blur)
+fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
+
+View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 ## Learn from Examples
 
@@ -162,7 +180,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F875741%2F1491706%2F7cad3d5b9f7a36a0a52bb4de2df1d8f4%2Fdataset-card.jpg%3Ft%3D2020-09-16-02-40-14&f=1&nofb=1&ipt=7845d4810c5980843aedf217ed08063d9677c8f23da2fb7bd0a12dc14fdb0600&ipo=images" width="256">
+              <img src="./gallery/cat_dog_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -170,21 +188,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -194,7 +212,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/abc">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstorage.googleapis.com%2Fkaggle-datasets-images%2F789928%2F1356719%2F482af2e82bb07702d6bac54214ac206c%2Fdataset-card.png%3Ft%3D2020-07-21-02-47-18&f=1&nofb=1&ipt=92b367988bbb105d064d28c86fa95bf4a86a43df097031b677f7a04c58e04cee&ipo=images" width="256">
+              <img src="gallery/food_101_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -202,21 +220,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning_and_preparing_an_image_dataset.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1NBTD_Z5beSlumQOqDPdF2UzrhdEf0uxC">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -226,7 +244,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
-              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.explicit.bing.net%2Fth%3Fid%3DOIP.h-5fcBItaNgTbMTb3n1bhwHaEi%26pid%3DApi&f=1&ipt=29c47ec5dd6a831dae33897f8ae55b8522345bfc8363987d0d961355a1909982&ipo=images" width="256">
+              <img src="./gallery/imagenette_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -234,21 +252,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -258,7 +276,7 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-              <img src="https://miro.medium.com/v2/resize:fit:1104/1*NR0biFNv5O3ShW1U1NtxvQ.png" width="256">
+              <img src="./gallery/coco_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="3">
@@ -266,21 +284,21 @@ fd.vis.stats_gallery()          # create a visualization of images statistics (f
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/nbviewer_logo.svg" height="34">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_object_dataset_for_training.ipynb">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/github_logo.png" height="32">
+              <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/drive/1MwxalEbILkSUt3NXZRhc9bWjfIGFbC6p">
-              <img src="https://raw.githubusercontent.com/qanastek/HugsVision/main/ressources/images/receipes/colab_logo.png" height="28">
+              <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
@@ -305,12 +323,22 @@ The following are community-contributed blog posts about fastdup -
 - [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
 ## What our users think about fastdup
+
+![feedback](./gallery/feedback-gallery.gif)
+
+<!-- + [Suhail](https://twitter.com/Suhail) - CEO, Playground.ai | Former CEO. Mixpanel -->
 <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
-    <img src="https://raw.githubusercontent.com/visual-layer/fastdup/main/gallery/tweet.png" alt="fastdup" width="1000">
+  <a href="https://twitter.com/Suhail/status/1613684003210694657?s=20">
+    <img src="./gallery/tweet_suhail.png" alt="fastdup" width="1000">
   </a>
  </div>
 
+<!-- + [Eric Wallace](https://twitter.com/Eric_Wallace_) - Researcher, UC Berkeley -->
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://twitter.com/Eric_Wallace_/status/1620449948579004417?s=20">
+    <img src="./gallery/tweet_eric_wallace.png" alt="fastdup" width="1000">
+  </a>
+ </div>
 
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
@@ -333,7 +361,7 @@ It is always possible to opt out of the experimental crash report collection via
 </details>
 
 ## About Visual-Layer
-fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate). 
-<a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869/">Carlos Guestrin</a> & <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a><br>
+
+fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate) - [Danny Bickson](https://www.linkedin.com/in/dr-danny-bickson-835b32), [Carlos Guestrin](https://www.linkedin.com/in/carlos-guestrin-5352a869) and [Amir Alush](https://www.linkedin.com/in/amiralush).
 
 Learn more about Visual Layer [here](https://visual-layer.com).
