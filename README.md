@@ -164,6 +164,8 @@ fd.vis.stats_gallery()         # create a visualization of images statistics (fo
 fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
 
+View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
+
 ## Learn from Examples
 
 <table>
