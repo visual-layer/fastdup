@@ -127,6 +127,8 @@ Detailed installation instructions and common errors [here](https://visual-layer
 
 ### Installation
 
+> **Option 1** - Install fastdup via [PyPI](https://pypi.org/project/fastdup/): 
+
 ```python
 # upgrade pip to its latest version
 pip install -U pip
@@ -138,6 +140,11 @@ pip install fastdup
 python3.XX -m pip install fastdup 
 ```
 
+> **Option 2** - Install fastdup via an [Ubuntu 20.04 Docker image](https://hub.docker.com/r/karpadoni/fastdup-ubuntu-20.04) on DockerHub:
+
+```bash
+docker pull karpadoni/fastdup-ubuntu-20.04
+```
 
 ## Getting Started
 
@@ -315,12 +322,22 @@ The following are community-contributed blog posts about fastdup -
 - [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 
 ## What our users think about fastdup
+
+![feedback](./gallery/feedback-gallery.gif)
+
+<!-- + [Suhail](https://twitter.com/Suhail) - CEO, Playground.ai | Former CEO. Mixpanel -->
 <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
-    <img src="./gallery/tweet.png" alt="fastdup" width="1000">
+  <a href="https://twitter.com/Suhail/status/1613684003210694657?s=20">
+    <img src="./gallery/tweet_suhail.png" alt="fastdup" width="1000">
   </a>
  </div>
 
+<!-- + [Eric Wallace](https://twitter.com/Eric_Wallace_) - Researcher, UC Berkeley -->
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://twitter.com/Eric_Wallace_/status/1620449948579004417?s=20">
+    <img src="./gallery/tweet_eric_wallace.png" alt="fastdup" width="1000">
+  </a>
+ </div>
 
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
