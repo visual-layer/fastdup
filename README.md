@@ -29,8 +29,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
+
   <a href="https://www.visual-layer.com">
-    <img src="./gallery/new_logo_fastdup_white2.png" alt="fastdup" width="400">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png">
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png">
+    <img alt="Fastdup logo." src="./gallery/logo.png">
+    </picture>
   </a>
 
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
