@@ -32,8 +32,8 @@
 
   <a href="https://www.visual-layer.com">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png">
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
     <img alt="Fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
