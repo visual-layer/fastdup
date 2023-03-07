@@ -30,7 +30,7 @@
 <br />
 <div align="center">
 
-  <a href="https://www.visual-layer.com">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
@@ -43,31 +43,31 @@
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
     <br />
-    <a href="https://visual-layer.readme.io/"><strong>Explore the docs »</strong></a>
+    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
     <br />
-    <a href="https://visual-layer.readme.io/">Features</a>
+    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Features</a>
     ·
-    <a href="https://github.com/visual-layer/fastdup/issues">Report Bug</a>
+    <a href="https://github.com/visual-layer/fastdup/issues" target="_blank" rel="noopener noreferrer">Report Bug</a>
     ·
-    <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22">Read Blog</a>
+    <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22" target="_blank" rel="noopener noreferrer">Read Blog</a>
     ·
-    <a href="https://visual-layer.readme.io/docs/getting-started">Quickstart</a>
+    <a href="https://visual-layer.readme.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
     ·
-    <a href="https://visual-layer.com/">Enterprise Edition</a>
+    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">Enterprise Edition</a>
     ·
-    <a href="https://visual-layer.com/">About us</a>
+    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
     <br /> 
-    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email">
+    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
     </a>
-    <a href="https://visual-layer.readme.io/discuss">
+    <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/Discussion-%20Forum-brightgreen?style=for-the-badge&logo=discourse&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.linkedin.com/company/visual-layer/">
+    <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.youtube.com/@visual-layer4035">
+    <a href="https://www.youtube.com/@visual-layer4035" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
@@ -80,7 +80,7 @@
 ## What's Included
 fastdup lets you identify -
  <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <img src="./gallery/issues.png" alt="fastdup" width="1000">
   </a>
  </div>
@@ -88,7 +88,7 @@ fastdup lets you identify -
 Additional features -
 
 <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <img src="./gallery/features.png" alt="fastdup" width="1000">
   </a>
  </div>
