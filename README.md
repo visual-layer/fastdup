@@ -104,11 +104,11 @@ Additional features -
 
 ### Prerequisites 
 
-> **Note** - Supported `Python` versions:
+> Supported `Python` versions:
 
 [![PyPi][pypi-shield]][pypi-url]
 
-> **Note** - Supported operating systems:
+> Supported operating systems:
 
 [![Windows 10](https://img.shields.io/badge/Windows%2010-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
 [![Windows 11](https://img.shields.io/badge/Windows%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
