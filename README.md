@@ -346,13 +346,17 @@ It is always possible to opt out of the experimental crash report collection via
 </details>
 
 ## About Visual-Layer
+
+<div align="center">
 <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=400>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=300>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=300>
     <img alt="Visual Layer logo." src="./gallery/visual_layer_logo.png">
     </picture>
 </a>
+</div>
+
 
 fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate) - [Danny Bickson](https://www.linkedin.com/in/dr-danny-bickson-835b32), [Carlos Guestrin](https://www.linkedin.com/in/carlos-guestrin-5352a869) and [Amir Alush](https://www.linkedin.com/in/amiralush).
 
