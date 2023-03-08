@@ -326,20 +326,6 @@ The following are community-contributed blog posts about fastdup -
 
 ![feedback](./gallery/feedback-gallery.gif)
 
-<!-- + [Suhail](https://twitter.com/Suhail) - CEO, Playground.ai | Former CEO. Mixpanel -->
-<div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://twitter.com/Suhail/status/1613684003210694657?s=20">
-    <img src="./gallery/tweet_suhail.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
-<!-- + [Eric Wallace](https://twitter.com/Eric_Wallace_) - Researcher, UC Berkeley -->
-<div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://twitter.com/Eric_Wallace_/status/1620449948579004417?s=20">
-    <img src="./gallery/tweet_eric_wallace.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
 See [LICENSE](./LICENSE).
