@@ -43,7 +43,7 @@ class Fastdup(FastdupController):
             embeddings=None,
             subset: list = None,
             data_type: str = 'infer',
-            overwrite: bool = True,
+            overwrite: bool = False,
             model_path=None,
             distance='cosine',
             nearest_neighbors_k: int = 2,
