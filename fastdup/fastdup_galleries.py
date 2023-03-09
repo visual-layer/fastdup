@@ -76,8 +76,10 @@ class FastdupVisualizer:
             try:
                 shutil.move(html_src_path, html_dst_path)
             except Exception as e:
+                # quick fix - prevent error when html file is not generated
                 pass
         if not save_artifacts and not lazy_load:
+            # quick fix - to prevent users from deleting their data by mistake
             # shutil.rmtree(save_dir)
             pass
 

@@ -77,6 +77,7 @@ class FastdupController:
         :param overwrite: overwrite existing fastdup state (delete work_dir)
         """
         if overwrite:
+            # quick fix - to prevent users from deleting their data by mistake
             # shutil.rmtree(self._work_dir, ignore_errors=True)
             self._fastdup_applied = False
 
