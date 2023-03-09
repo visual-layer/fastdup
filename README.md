@@ -29,7 +29,6 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
@@ -105,11 +104,11 @@ Additional features -
 
 ### Prerequisites 
 
-> **Note** - Supported `Python` versions:
+> Supported `Python` versions:
 
 [![PyPi][pypi-shield]][pypi-url]
 
-> **Note** - Supported operating systems:
+> Supported operating systems:
 
 [![Windows 10](https://img.shields.io/badge/Windows%2010-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
 [![Windows 11](https://img.shields.io/badge/Windows%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
@@ -326,20 +325,6 @@ The following are community-contributed blog posts about fastdup -
 
 ![feedback](./gallery/feedback-gallery.gif)
 
-<!-- + [Suhail](https://twitter.com/Suhail) - CEO, Playground.ai | Former CEO. Mixpanel -->
-<div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://twitter.com/Suhail/status/1613684003210694657?s=20">
-    <img src="./gallery/tweet_suhail.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
-<!-- + [Eric Wallace](https://twitter.com/Eric_Wallace_) - Researcher, UC Berkeley -->
-<div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://twitter.com/Eric_Wallace_/status/1620449948579004417?s=20">
-    <img src="./gallery/tweet_eric_wallace.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
 See [LICENSE](./LICENSE).
@@ -361,6 +346,17 @@ It is always possible to opt out of the experimental crash report collection via
 </details>
 
 ## About Visual-Layer
+
+<div align="center">
+<a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=300>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=300>
+    <img alt="Visual Layer logo." src="./gallery/visual_layer_logo.png">
+    </picture>
+</a>
+</div>
+
 
 fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate) - [Danny Bickson](https://www.linkedin.com/in/dr-danny-bickson-835b32), [Carlos Guestrin](https://www.linkedin.com/in/carlos-guestrin-5352a869) and [Amir Alush](https://www.linkedin.com/in/amiralush).
 
