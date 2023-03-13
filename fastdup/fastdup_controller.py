@@ -8,7 +8,7 @@ import pandas as pd
 from pathlib import Path
 import fastdup
 from pandas.errors import EmptyDataError
-import shutil
+# import shutil
 import fastdup.fastup_constants as FD
 #import boto3
 from fastdup.sentry import v1_sentry_handler
@@ -77,7 +77,8 @@ class FastdupController:
         :param overwrite: overwrite existing fastdup state (delete work_dir)
         """
         if overwrite:
-            shutil.rmtree(self._work_dir, ignore_errors=True)
+            # quick fix - to prevent users from deleting their data by mistake
+            # shutil.rmtree(self._work_dir, ignore_errors=True)
             self._fastdup_applied = False
 
         # set run mode & data type

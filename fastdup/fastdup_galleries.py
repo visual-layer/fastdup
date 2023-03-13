@@ -73,9 +73,15 @@ class FastdupVisualizer:
 
     def _clean_temp_dir(self, save_dir, html_src_path, html_dst_path, lazy_load=False, save_artifacts=False):
         if not lazy_load:
-            shutil.move(html_src_path, html_dst_path)
+            try:
+                shutil.move(html_src_path, html_dst_path)
+            except Exception as e:
+                # quick fix - prevent error when html file is not generated
+                pass
         if not save_artifacts and not lazy_load:
-            shutil.rmtree(save_dir)
+            # quick fix - to prevent users from deleting their data by mistake
+            # shutil.rmtree(save_dir)
+            pass
 
     @v1_sentry_handler
     def outliers_gallery(self, save_path: str = None, label_col: str = FD.ANNOT_LABEL, draw_bbox: bool = True,
