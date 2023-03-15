@@ -183,7 +183,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Quick Dataset Analysis:</b> In this example, we show how you can quickly analyze a dataset for potential issues. Using a few lines of code we show how you can identify duplicates, outliers, dark/bright/blurry images and cluster similar images. If you're new, start here.
+        <b>Quick Dataset Analysis:</b> In this example, we show how you can quickly analyze a dataset for potential issues. Using a few lines of code you can identify duplicates, outliers, dark/bright/blurry images and cluster similar images. If you're new, start here.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
