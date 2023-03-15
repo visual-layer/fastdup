@@ -183,24 +183,24 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Quick dataset analysis:</b> In this tutorial, the Oxford-IIIT Pet Dataset is used to demonstrate how to visualize similarity clusters, find duplicates and outliers in the dataset, and analyze the images in each cluster.
+        <b>Quick Dataset Analysis:</b> In this example, we show how you can quickly analyze a dataset for potential issues. Using a few lines of code we show how you can identify duplicates, outliers, dark/bright/blurry images and cluster similar images. If you're new, start here.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick_dataset_analysis.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/drive/18gbpq8A62KAjJolCuRnOAmJCRGT1Vu1J#scrollTo=pN6wiKBax7Pa">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
