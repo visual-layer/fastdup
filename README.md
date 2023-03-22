@@ -247,24 +247,24 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Preparing an image dataset for training:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet. In this tutorial, we show how to use fastdup to analyze the dataset for similarity and outlier images.
+        <b>Analysing Labeled Image Classification Dataset:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet. We show how to use fastdup to analyze the dataset for similarity and outlier images.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/preparing_a_labeled_image_dataset_for_training.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/drive/1LMbwD5QcXqqk8HSGfHu8m5o5KvG7MfGc">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
