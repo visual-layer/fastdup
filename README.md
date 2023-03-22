@@ -210,7 +210,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
   <tr>
       <td rowspan="3" width="160">
-      <a href="https://visual-layer.readme.io/docs/abc">
+      <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
               <img src="gallery/food_101_thumbnail.jpg" width="256">
       </a>
       </td>    
