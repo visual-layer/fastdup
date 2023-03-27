@@ -414,7 +414,7 @@ line-height: 1;
 position: absolute;
 margin: 0;
 bottom: 0;
-wifth: 150px
+width: 150px;
 right: 59px;
 }
 
