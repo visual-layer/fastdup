@@ -94,11 +94,15 @@ Additional features -
 
 
 ## Why fastdup?
+fastdup is written with speed and scalability in mind. Analyze large dataset even with consumer grade CPUs.
+
+In short, fastdup is:
 
 * **Fast**: Efficient C++ engine with speed up to 2 ms per image - process up to 8M images per hour with a 32-core machine.
 * **Scalable**: Handles up to 400M images on a single CPU machine.
 * **Unsupervised**: Runs on unlabeled (or labeled) image/video data.
 * **Cost**: fastdup is free - process up to 12M images on a $1 cloud machine budget. 
+* **Easy**: Analyze your dataset with only 3 lines of code.
 
 ## Setting up
 
