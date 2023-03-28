@@ -183,7 +183,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Quick Dataset Analysis:</b> In this example, we show how you can quickly analyze a dataset for potential issues. Using a few lines of code you can identify duplicates, outliers, dark/bright/blurry images and cluster similar images. If you're new, start here.
+        <b>Quick Dataset Analysis:</b> In this example, learn how to quickly analyze a dataset for potential issues. Identify duplicates, outliers, dark/bright/blurry images and cluster similar images with only a few lines of code. If you're new, start here.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
@@ -215,7 +215,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Cleaning Image Dataset:</b> In this tutorial, we use fastdup to clean and analyze a food-101 dataset. The cleaning process includes identifying and removing duplicates, broken images, outliers, as well as the darkest, brightest, and blurriest images.
+        <b>Cleaning Image Dataset:</b> In this tutorial, learn how to clean a dataset from broken images, duplicates, outliers, and identify dark/bright/blurry images.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
@@ -247,7 +247,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Analysing Labeled Image Classification Dataset:</b> In this tutorial, we analyze the Imagenette dataset, a 10-class, 13k image subset of ImageNet. We show how to use fastdup to analyze the dataset for similarity and outlier images.
+        <b>Analyzing Labeled Image Classification Dataset:</b> In this tutorial, learn how to analyze a labeled image classification dataset for potential issues. We use the Imagenette dataset, a 10-class, 13k image subset of ImageNet as a working example.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
@@ -279,7 +279,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Preparing an object dataset for training:</b> In this tutorial we will load and analyze the mini-coco dataset which is labeled with bounding boxes and classes. Using fastdup, we discover duplicates, outliers, and possible mislabeled bounding boxes.
+        <b>Analyzing Labeled Object Detection Dataset:</b> In this tutorial learn how to load and analyze an object detection dataset with labeled bounding boxes and classes. We use the mini-coco dataset as a working example. Learn how to discover duplicates, outliers, and possible mislabeled bounding boxes.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
@@ -319,11 +319,11 @@ The following are community-contributed blog posts about fastdup -
 - [Master Data Integrity to Clean Your Computer Vision Datasets
 ](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
 - [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
-- [Clean Up Your Digital Life: Simplify Your Photo Organization and Say Goodbye to Photo Clutter](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
+- [Clean Up Your Digital Life: How I Found 1929 Fully Identical Images, Dark, Bright and Blurry Shots in Minutes, For Free.](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
 - [The weighty significance of data cleanliness — or as I like to call it, “cleanliness is next to model-ness” — cannot be overstated.](https://alexlanseedoo.medium.com/the-weighty-significance-of-data-cleanliness-eb03dce1d0f8)
-## What our users think about fastdup
+## What our users say
 
-![feedback](./gallery/feedback-gallery.gif)
+![feedback](./gallery/user_quotes.png)
 
 ## License
 fastdup is licensed under Creative Commons 4.0 license.
