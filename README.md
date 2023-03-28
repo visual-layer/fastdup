@@ -98,7 +98,7 @@ Additional features -
 * **Fast**: Efficient C++ engine with speed up to 2 ms per image - process up to 8M images per hour with a 32-core machine.
 * **Scalable**: Handles up to 400M images on a single CPU machine.
 * **Unsupervised**: Runs on unlabeled (or labeled) image/video data.
-* **Cost**: Basic functions are free to use. Process up to 12M images on a $1 cloud machine budget. 
+* **Cost**: fastdup is free - process up to 12M images on a $1 cloud machine budget. 
 
 ## Setting up
 
