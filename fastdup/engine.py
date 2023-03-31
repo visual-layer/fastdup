@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union, Iterable
 import pandas as pd
 from fastdup.fastdup_controller import FastdupController
-from fastdup.fastdup_galleries import FastdupVisualizer
+from fastdup.fastdup_visualizer import FastdupVisualizer
 
 
 class Fastdup(FastdupController):
@@ -12,25 +12,21 @@ class Fastdup(FastdupController):
     Usage example
     =============
 
+    from fastdup.engine.Fastdup
 
-    # >>> from fastdup.engine.Fastdup
-    # >>> import fastdup.fastdup_constants as FD
-    # >>>
-    # >>> annotation_csv = '/path/to/annotation.csv'
-    # >>> data_dir = '/path/to/images/'
-    # >>> output_dir = '/path/to/fastdup_analysis'
-    # >>>
-    # >>> fdp = FastDupProxy(work_dir=output_dir)
-    # >>> fdp.run(input_dir=data_dir,
-    # >>>         df_annot=pd.read_csv(annotation_csv))
-    # >>>
-    # >>>
-    # >>> df_sim  = fdp.similarity(data=True)
-    # >>> im1_id, im2_id, sim = df_sim.iloc[0]
-    # >>> annot_im1, annot_im2 = fdp[im1_id], fdp[im2_id]
-    # >>>
-    # >>> df_cc, cc_info = fd.connected_components(data=True)
-    # >>>
+    annotation_csv = '/path/to/annotation.csv'
+    data_dir = '/path/to/images/'
+    output_dir = '/path/to/fastdup_analysis'
+
+    fd = Fastdup(work_dir=output_dir)
+    fd.run(input_dir=data_dir, annotations=pd.read_csv(annotation_csv)
+
+
+    df_sim  = fd.similarity()
+    im1_id, im2_id, sim = df_sim.iloc[0]
+    annot_im1, annot_im2 = fd[im1_id], fd[im2_id]
+
+    df_cc, cc_info = fd.connected_components()
     """
 
     def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path] = None):
@@ -42,7 +38,7 @@ class Fastdup(FastdupController):
             annotations: pd.DataFrame = None,
             embeddings=None,
             subset: list = None,
-            data_type: str = 'infer',
+            data_type: str = 'image',
             overwrite: bool = False,
             model_path=None,
             distance='cosine',
@@ -83,8 +79,20 @@ class Fastdup(FastdupController):
                   run fastdup on local disk. Since copying images from s3 in a loop is very slow, Alternatively you can
                   use the flag sync_s3_to_local=True to copy ahead all images on the remote s3 bucket to disk
         :param annotations: Optional dataframe with annotations.
+            annotation dataframe should have the following columns:
+                - image_filename: {Mandatory}. Relative path to the image wtr to input_dir
+                - split: (Optional). 'train' or 'test'
+                - label: (Optional). Class of the image
+                - bbox_x, bbox_y, bbox_h, bbox_w: (Optional). Bounding box of the object in the image
+                    if provided, fastdup will run on the bounding box instead of the whole image
+                - x1, y1, x2, y2, x3, y3, x4, y4: (Optional). Bounding box of the object in the image
+                    if provided, and bounding_box=='rotated_bbox' fastdup will run on the rotated bounding box.
+                - additional columns can be added and will be added to the output dataframe
+
+        :param embeddings: list of embeddings, if given fastdup will be activated on the given embedding instead of the
+            images. The embeddings should be in the same order as the images in the annotations dataframe.
         :param subset: List of images to run on. If None, run on all the images/bboxes.
-        :param data_type: Type of data to run on. Supported types: 'image', 'bbox'. Default is 'infer'.
+        :param data_type: Type of data to run on. Supported types: 'image', 'bbox'. Default is 'image'.
         :param model_path: path to model for feature extraction. supported formats: onnx, ort.
             Make sure to update d parameter acordingly.
         :param distance: - distance metric for the Nearest Neighbors algorithm.
@@ -99,13 +107,10 @@ class Fastdup(FastdupController):
         :param outlier_percentile: Percentile of the outlier score to use as threshold. Default is 0.5 (50%).
         :param threshold: Threshold to use for the graph generation. Default is 0.9.
         :param cc_threshold: Threshold to use for the graph connected component. Default is 0.96.
-        :param bounding_box: Optional bounding box to crop images, given as                                             TODO: internal bounding box or global bounding box?
-            bounding_box='row_y=xx,col_x=xx,height=xx,width=xx'. This defines a global bounding box to be used
-            for all images. Alternatively, it is possible to set bounding_box='face' to crop the face from the image
-            (in case a face is present). For the face crop the margin around the face is defined by
-            augmentation_horiz=0.2, augmentation_vert=0.2 where 0.2 mean 20% additional margin around the
-            face relative to the width and height respectively. It is possible to change the margin,
-            lower allower value is 0 (no margin) and upper allowed  value is 1. Default is 0.2.
+        :param bounding_box: yolov5s|face|retated_bbox
+            - yolov5s: Use yolov5s to detect objects in the image and run fastdup on each object.
+            - face: Use face detection to detect faces in the image and run fastdup on each face.
+            - rotated_bbox: Use the rotated bounding given in annotation data-fram box to run fastdup on the object.
         :param num_threads: Number of threads. By default, autoconfigured by the number of cores.
         :param license: Optional license key. If not provided, only free features are available.
         :param overwrite: Optional flag to overwrite existing fastdup results.

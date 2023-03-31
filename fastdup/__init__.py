@@ -37,7 +37,7 @@ except:
     tqdm = (lambda x: x)
 
 
-__version__="0.211"
+__version__="0.901"
 CONTACT_EMAIL="info@databasevisual.com"
 
 init_sentry()
@@ -84,7 +84,7 @@ try:
     # this should be supported only from python3.8 and up
     if platform.system() == "Windows":
         os.add_dll_directory(LOCAL_DIR)
-        os.add_dll_directory(LOCAL_DIR + "\\lib")
+        #os.add_dll_directory(LOCAL_DIR + "\\lib")
         os.add_dll_directory(os.path.join(os.environ['SystemRoot'], 'System32'))
         #os.add_dll_directory("C:\\Program Files\\PowerShell\\7")
         dll = WinDLL(so_file)
@@ -148,7 +148,9 @@ def do_run(input_dir='',
               "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
         return 0
 
-    if 'sync_s3_to_local=1' in turi_param:
+    assert input_dir is not None and isinstance(input_dir, (str,list)), "input_dir must be a string or a list"
+
+    if 'sync_s3_to_local=1' in turi_param and isinstance(input_dir, str):
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
         if 'delete_img=1' in turi_param:
             print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
@@ -207,7 +209,8 @@ def do_run(input_dir='',
 
     if not os.path.exists(input_dir):
         if input_dir.startswith('s3://') or input_dir.startswith('minio://') or input_dir.startswith('smb://'):
-            pass
+            if input_dir.startswith('33://') and 'sync_s3_to_local=1' not in turi_param:
+                print("Warning: Reading images directly with s3 may result in slow execution. If you have enough disk space it is recommened to run with sync_s3_to_local=True. This will download the s3 content first to the local drive and then run fastdup.")
         else:
             assert False, f"Failed to find input dir {input_dir} please check your input."
     else:
@@ -554,15 +557,14 @@ def run(input_dir='',
 
     _input_dir = input_dir
     fd_model = False
-    if bounding_box == 'face' or bounding_box == 'yolov5s' or bounding_box == "rotated":
+    if bounding_box == 'face' or bounding_box == 'yolov5s' or bounding_box == 'rotated':
         local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
         if bounding_box == 'yolov5s':
             local_model = find_model(YOLOV5S_MODEL)
         elif bounding_box == 'rotated':
             local_model = model_path_full
 
-        bounding_box = ''
-        turi_param += ",save_crops=1"
+        turi_param = turi_param.replace('save_crops=0','') + ",save_crops=1"
         if 'augmentation_horiz' not in turi_param and 'augmentation_vert' not in turi_param:
             turi_param += ",augmentation_horiz=0.2,augmentation_vert=0.2"
         ret = do_run(input_dir=input_dir,
@@ -587,7 +589,7 @@ def run(input_dir='',
                      max_offset=max_offset,
                      nnf_mode=nnf_mode,
                      nnf_param=nnf_param,
-                     bounding_box=bounding_box,
+                     bounding_box='',
                      batch_size = batch_size,
                      resume = resume,
                      high_accuracy=high_accuracy)
@@ -595,12 +597,52 @@ def run(input_dir='',
             print("Failed to run fastdup")
             return ret
         try:
-            os.unlink(os.path.join(work_dir, 'atrain_features.dat'))
-        except:
-            pass
-        input_dir = os.path.join(tempfile.gettempdir(), 'yolo_crops_input.csv')
-        pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
-            'index', 'filename', 'col_x', 'row_y', 'width', 'height']].to_csv(input_dir, index=False)
+            def safe_file_move(work_dir, backup_dir, fname):
+                if os.path.exists(os.path.join(work_dir, fname)):
+                    if os.path.exists(os.path.join(backup_dir, fname)):
+                        os.unlink(os.path.join(backup_dir, fname))
+                    shutil.move(os.path.join(work_dir, fname), os.path.join(backup_dir, fname))
+
+            backup_dir = os.path.join(work_dir, FOLDER_FULL_IMAGE_RUN)
+            os.makedirs(backup_dir, exist_ok=True)
+            safe_file_move(work_dir, backup_dir, 'atrain_stats.csv')
+            safe_file_move(work_dir, backup_dir,  'outliers.csv')
+            safe_file_move(work_dir, backup_dir,  'similarity.csv')
+            safe_file_move(work_dir, backup_dir,  'connected_components.csv')
+            safe_file_move(work_dir, backup_dir,  'atrain_features.bad.csv')
+            if os.path.exists(os.path.join(work_dir, 'atrain_features.dat')):
+                os.unlink(os.path.join(work_dir, 'atrain_features.dat'))
+        except Exception as ex:
+            print('Warning, exception', ex)
+
+        input_dir = os.path.join(tempfile.gettempdir(), 'crops_input.csv')
+        if bounding_box in ['face', 'yolov5s','rotated']:
+            if bounding_box in ['face', 'yolov5s']:
+                out_df = pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
+                    'index', 'crop_filename']]
+            elif bounding_box == 'rotated':
+                out_df = pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
+                    'index', 'crop_filename']]
+
+
+            # BR CAREFUL, FASTDUP C++ CAN NOT SUPPORT UNORDERED OR MISSING OFFSETS, NEED TO COMPLETE CORRUPT
+            # CROPS WITH THEIR MATCHING OFFSETS
+            out_df = out_df.rename({'crop_filename':'filename'}, axis=1)
+            # handle the case some crops are missing, we need a placeholder not to change the offsets
+            out_df  = out_df.sort_values('index')
+            max_index = out_df['index'].max()  # Get the maximum index value
+            index_range = range(max_index + 1)  # Create the desired index range
+
+            # Create a new DataFrame with the desired index range
+            new_df = pd.DataFrame({'index': index_range})
+
+            # Merge the new DataFrame with the existing DataFrame using a left join
+            out_df = pd.merge(new_df, out_df, on='index', how='left')
+
+            # Optionally, you can fill in the empty rows with NaN values using the `fillna()` method
+            out_df = out_df.fillna(value='missing_file')
+            assert len(out_df) == max_index + 1, "Failed to merge to fill in holes"
+            out_df.to_csv(input_dir, index=False)
 
         turi_param = turi_param.replace(',save_crops=1', '')
 
@@ -626,7 +668,7 @@ def run(input_dir='',
              max_offset=max_offset,
              nnf_mode=nnf_mode,
              nnf_param=nnf_param,
-             bounding_box=bounding_box,
+             bounding_box='',
              batch_size = batch_size,
              resume = resume,
              high_accuracy=high_accuracy)
@@ -780,16 +822,23 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
 
     if (get_label_func is not None):
         assert callable(get_label_func) or isinstance(get_label_func, dict) or (isinstance(get_label_func, str) and \
-        os.path.exists(get_label_func)), "get_label_func has to be a callable function or a dictionary, given the filename returns the "
+        os.path.exists(get_label_func)) or (isinstance(work_dir, pd.DataFrame) and get_label_func in work_dir.columns) or \
+        isinstance(get_label_func, str),  \
+        "get_label_func has to be a callable function or a dictionary, given the filename returns the "
         "label of the file. Alternatively get_label_func can be a file with header of index,label and a single line of labels per"
-        "image. The label file has to have the `atrain_features.dat.csv`"
+        "image. The label file has to have the same order and length as `atrain_features.dat.csv`. Alternatively when giving a pd.DataFrame get_label_func can be the column name."
 
     if slice is not None and get_label_func is None:
         assert False, "When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func"
 
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
+    if save_path.endswith('.html'):
+        save_path = os.path.dirname(save_path)
+    if save_path == "":
+        save_path = "."
+    elif not os.path.exists(save_path):
+        os.makedirs(save_path, exist_ok=True)
         assert os.path.exists(save_path), f"Failed to generate save_path directory {save_path}"
+
 
     if isinstance(work_dir, str):
         assert os.path.exists(work_dir), "Failed to find file or work_dir (__init__) " + work_dir
@@ -815,6 +864,8 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
     nrows = None
     if 'nrows' in kwargs:
         nrows = kwargs['nrows']
+    load_crops = 'load_crops' in kwargs and kwargs['load_crops']
+
 
     if isinstance(file_type, pd.DataFrame):
         if nrows is not None and file_type is not None and len(file_type) > nrows:
@@ -823,11 +874,17 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
     elif isinstance(file_type, str):
         assert os.path.exists(file_type), "Failed to find similarity file " + file_type
         if os.path.isdir(file_type):
+            if work_dir is None:
+                work_dir = file_type
             file_type = os.path.join(file_type, FILENAME_SIMILARITY if type == "similarity" else FILENAME_OUTLIERS)
 
         if file_type.endswith('.csv'):
             hierarchical_run = 'hierarchical' in file_type
             kwargs['hierarchical_run'] = hierarchical_run
+            if work_dir is None:
+                work_dir = os.path.dirname(file_type)
+                if work_dir == "":
+                    work_dir = "."
 
             if hierarchical_run:
                 assert work_dir is not None and os.path.isdir(work_dir), "When running hierarchical clustering, need to provide the work_dir"
@@ -837,18 +894,26 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
 
         config = load_config(os.path.dirname(file_type))
         file_type = pd.read_csv(file_type, nrows=nrows)
+        if load_crops:
+            local_crop_file = os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST)
+            assert os.path.exists(local_crop_file), f"Failed to find crop file {local_crop_file}"
+            crop_file = pd.read_csv(os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST))
+            assert crop_file is not None and len(crop_file), f"Failed to find crop file {local_crop_file}"
+
         if input_dir is None and config is not None  and 'input_dir' in config:
             input_dir = config['input_dir']
+        if work_dir is None and config is not None and 'work_dir' in config:
+            work_dir = config['work_dir']
 
     else:
-        print('wrong type of similarity file', type(file_type))
-        return None, None
+        print(f'wrong type of {type} file', type(file_type))
+        return None, None, None
 
     assert isinstance(file_type, pd.DataFrame)
     assert len(file_type), "Found empty dataframe"
     for col in cols:
         assert col in file_type.columns, f"Failed to find column {col} in dataframe"
-    return file_type, input_dir
+    return file_type, input_dir, work_dir
 
 
 
@@ -961,11 +1026,11 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
         if ret != 0:
             return ret;
 
-        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
+        similarity_file, input_dir, work_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
 
 
         ret = do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
-                                            get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, kwargs)
+                                            get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, **kwargs)
         fastdup_performance_capture("create_duplicates_gallery", start_time)
         return ret
 
@@ -1049,7 +1114,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
             else:
                 work_dir = os.path.dirname(os.path.abspath(similarity_file))
 
-        df, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
+        df, input_dir, work_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
         if threshold is not None:
             df = df[df['distance'] >= threshold]
 
@@ -1127,7 +1192,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
                 work_dir = outliers_file
             else:
                 work_dir = os.path.dirname(outliers_file)
-        outliers_file, input_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs, ['from', "to", "distance"])
+        outliers_file, input_dir, work_dir = load_dataframe(outliers_file, "outliers", input_dir, work_dir, kwargs, ['from', "to", "distance"])
         assert how == 'one' or how == 'all', "Wrong argument to how=[one|all]"
 
         ret = do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice,
@@ -1230,7 +1295,7 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
         ret = do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                             max_width, max_items, min_items, get_bounding_box_func,
                                             get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
-                                            descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, kwargs=kwargs)
+                                            descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, **kwargs)
         fastdup_performance_capture("create_components_gallery", start_time)
         return ret
 
@@ -1299,7 +1364,7 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
         fastdup_capture_log_debug_state(locals())
 
         kwargs['is_video'] = True
-        df, input_dir = load_dataframe(work_dir, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
+        df, input_dir, work_dir = load_dataframe(work_dir, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
         df = remove_duplicate_video_distances(df, kwargs)
         if df is None:
             return 1
@@ -1387,7 +1452,7 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
                                             'visual', slice, max_width, max_items, min_items, get_bounding_box_func,
                                             get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
                                             descending=descending, keyword=keyword, comp_type="cluster",
-                                            input_dir=input_dir, kwargs=kwargs)
+                                            input_dir=input_dir, **kwargs)
         fastdup_performance_capture("create_components_gallery", start_time)
         return ret
 
@@ -1589,10 +1654,10 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
     Args:
         stats_file (str):
           * folder pointing to fastdup workdir or
-          * file pointing to work_dir/atrain_stats.csv file or
+          * file pointing to work_dir/atrain_stats.csv file or file pointing to the work_dir/outliers.csv file
           * pandas DataFrame containing list of files giveb in the filename_col column and a metric column.
 
-        metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size"
+        metric (str): statistic metric, should be one of "blur", "mean", "min", "max", "stdv", "unique", "width", "height", "size", "outlier_distance".
 
         filename_col (str): column name in the stats_file to use as the filename
 
@@ -1637,16 +1702,23 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
         if isinstance(stats_file, pd.DataFrame):
             assert isinstance(work_dir, str) and os.path.exists(work_dir), "When providing pandas dataframe need to set work_dir to point to fastdup work_dir"
             df = stats_file
+        elif metric == "outlier_distance":
+            df, input_dir, work_dir = load_dataframe(work_dir, "outliers", "", work_dir, {}, ["from","to","distance"])
+            filenames = load_filenames(work_dir, {})
+            df = merge_with_filenames_one_sided(df, filenames)
+            filename_col = "filename"
+            metric = "distance"
         else:
             df = load_stats(stats_file, work_dir, {})
+
         if metric == "score" and metric not in df.columns:
             assert False, "For removing wrong labels created by the create_similarity_gallery() need to run stats_file=df where df is the output of create_similarity_gallery()"
 
 
         assert metric in df.columns or metric=='size', f"Unknown metric {metric} options are {df.columns}"
-        assert filename_col in df.columns
+        assert filename_col in df.columns, f"Column {filename_col} is not found in the dataframe, available columns are: {list(df.columns)}"
         if label_col:
-            assert label_col in df.columns, f"{label_col} column should be in the stats_file"
+            assert label_col in df.columns, f"{label_col} column should be in the stats_file, available columns are: {list(df.columns)}"
 
         if metric == 'size':
             df['size'] = df.apply(lambda x: x['width'] * x['height'], axis=1)
@@ -2047,7 +2119,7 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
 
 
         ret = do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
-                                       descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, kwargs=kwargs)
+                                       descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, **kwargs)
         fastdup_performance_capture("create_stats_gallery", start_time)
         return ret
 
@@ -2121,11 +2193,11 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         if ret != 0:
             return ret
 
-        similarity_file, input_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
+        similarity_file, input_dir, work_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
 
         ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
             slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, 
-            input_dir,  work_dir, min_items, max_items, kwargs=kwargs)
+            input_dir,  work_dir, min_items, max_items, **kwargs)
         fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
 
@@ -2185,7 +2257,7 @@ def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, lazy
             return 1
 
 
-        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, lazy_load, max_width, num_images, slice, input_dir, kwargs=kwargs)
+        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, lazy_load, max_width, num_images, slice, input_dir, **kwargs)
         fastdup_performance_capture("create_aspect_ratio_gallery", start_time)
         return ret
 
@@ -2646,3 +2718,6 @@ import fastdup.fastdup_controller as FD
 def create(work_dir: Union[str, Path], input_dir: Union[str, Path] = None) -> Fastdup:
     fd = Fastdup(work_dir=work_dir, input_dir=input_dir)
     return fd
+
+
+

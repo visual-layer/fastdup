@@ -31,6 +31,7 @@
 import os
 import cv2
 import numpy as np
+from fastdup.image import get_shape
 
 def image_to_label_img_xml(img_path, cur_label, save_dir=None):
 
@@ -39,7 +40,8 @@ def image_to_label_img_xml(img_path, cur_label, save_dir=None):
         assert os.path.exists(save_dir), '{} does not exist'.format(save_dir)
 
     img = cv2.imread(img_path)
-    h, w, c = img.shape
+    assert img is not None, f"Failed to read image {img_path}"
+    h, w, c = get_shape(img)
     xml =  f'<annotation>\n'
     xml += f'   <folder>{cur_label}</folder>\n'
     xml += f'   <filename>{os.path.basename(img_path)}</filename>\n'

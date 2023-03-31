@@ -9,12 +9,13 @@ import cv2
 import time
 import numpy as np
 import traceback
-from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images, pad_image
+import shutil
+from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images, pad_image, enhance_image
 from fastdup.definitions import *
 import re
 from multiprocessing import Pool
 from fastdup.sentry import *
-from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components
+from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir
 
 try:
     from tqdm import tqdm
@@ -72,14 +73,24 @@ def swap_dataframe(subdf, cols):
 
 
 def find_label(get_label_func, df, in_col, out_col, kwargs=None):
+
+
     if (get_label_func is not None):
         if isinstance(get_label_func, str):
-            df_labels = load_labels(get_label_func, kwargs)
-            assert len(df_labels) == len(df), f"Error: wrong length of labels file {get_label_func} expected {len(df)} got {len(df_labels)}"
-            df[out_col] = df_labels['label']
+            if os.path.exists(get_label_func):
+                df_labels = load_labels(get_label_func, kwargs)
+                assert len(df_labels) == len(df), f"Error: wrong length of labels file {get_label_func} expected {len(df)} got {len(df_labels)}"
+                df[out_col] = df_labels['label']
+            elif get_label_func in df.columns:
+                df[out_col] = df['label']
+            else:
+                assert False, f"Found str label {get_label_func} but it is neither a file nor a column name in the dataframe {df.columns}"
         elif isinstance(get_label_func, dict):
             df[out_col] = df[in_col].apply(lambda x: get_label_func.get(x, MISSING_LABEL))
         elif callable(get_label_func):
+            #if 'id_to_filename_func' in kwargs:
+            #    df[out_col] = df['__id' if '__id' in df.columns else ('index' if 'index' in df.columns else in_col)].apply(lambda x: get_label_func(x))
+            #else:
             df[out_col] = df[in_col].apply(lambda x: get_label_func(x))
         else:
             assert False, f"Failed to understand get_label_func type {type(get_label_func)}"
@@ -180,7 +191,11 @@ def extract_filenames(row, work_dir, save_path, kwargs):
         type2 = row['label2']
     else:
         type2 = get_type(impath2)
-    ptype = '{0}_{1}'.format(type1, type2)
+
+    if type1 == "unknown" and type2 == "unknown":
+        ptype = ""
+    else:
+        ptype = '{0}_{1}'.format(type1, type2)
     return impath1, impath2, dist, ptype
 
 
@@ -234,7 +249,7 @@ def prepare_hierarchy(df, work_dir, save_path, debug_hierarchical, kwargs):
 def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, descending=True,
                               lazy_load=False, get_label_func=None, slice=None, max_width=None,
                                  get_bounding_box_func=None, get_reformat_filename_func=None,
-                                 get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, kwargs=None):
+                                 get_extra_col_func=None, input_dir=None, work_dir=None, threshold=None, **kwargs):
     '''
 
     Function to create and display a gallery of images computed by the similarity metrics
@@ -284,20 +299,20 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 
     img_paths = []
-    nrows = None
-    if 'nrows' in kwargs:
-        nrows = kwargs['nrows']
+    #v1 = 'id_to_filename_func' in kwargs
     kwargs['lazy_load'] = lazy_load
     hierarchical_run = kwargs is not None and 'hierarchical_run' in kwargs and kwargs['hierarchical_run']
     draw_orig_image = 'draw_orig_image' in kwargs and kwargs['draw_orig_image']
     blur_threshold = None
     if 'blur_threshold' in kwargs:
         blur_threshold = kwargs['blur_threshold']
+    save_dir = calc_save_dir(save_path)
 
     df = similarity_file
-    if df['from'].dtype in [int, np.int64] and not 'id_to_filename_func' in kwargs:
+    if df['from'].dtype in [int, np.int64]:
         assert df['to'].dtype in [int, np.int64], "Wrong types, expect both str or both int"
         filenames = load_filenames(work_dir, kwargs)
+        filenames = filenames[["index","filename"]]
         df = merge_with_filenames(df, filenames)
 
     get_bounding_box_func = get_bounding_box_func_helper(get_bounding_box_func)
@@ -314,7 +329,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         df = df[df['distance'] >= threshold]
         assert len(df), f"Failed to find any duplicates images with similarity score >= {threshold}"
 
-    if slice is not None and get_label_func is not None:
+    if get_label_func is not None:
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
         df = slice_df(df, slice, 'label', kwargs)
         if slice in ["diff","same"]:
@@ -327,7 +342,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
             pd.set_option('display.max_rows', 50)
             pd.set_option('display.max_columns', 500)
             pd.set_option('display.width', 1000)
-        df = prepare_hierarchy(df, work_dir, save_path, debug_hierarchical, kwargs)
+        df = prepare_hierarchy(df, work_dir, save_dir, debug_hierarchical, kwargs)
 
     df = df.sort_values('distance', ascending=not descending)
     df = df.drop_duplicates(subset=['from','to'])
@@ -352,7 +367,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         if im1 + '_' + im2 in sets:
             continue
         try:
-            img, imgpath = create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding_box_func,
+            img, imgpath = create_triplet_img(row, work_dir, save_dir, extract_filenames, get_bounding_box_func,
                                               input_dir, kwargs)
             sets[im1 +'_' + im2] = True
             sets[im2 +'_' + im1] = True
@@ -362,25 +377,26 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         except Exception as ex:
             fastdup_capture_exception("triplet image", ex)
             print("Failed to generate viz for images", im1, im2, ex)
-            img_paths.append(None)
+            #img_paths.append(None)
 
     subdf = subdf.iloc[indexes]
     import fastdup.html_writer
 
-    html_img = format_image_html_string(img_paths, lazy_load, None, save_path)
+    html_img = format_image_html_string(img_paths, lazy_load, None, save_dir)
     subdf.insert(0, 'Image', html_img)
 
-    out_file = os.path.join(save_path, FILENAME_DUPLICATES_HTML) if not hierarchical_run else os.path.join(save_path, 'similarity_hierarchical.html')
-
-    if get_label_func is not None:
-        #subdf.insert(2, 'From', subdf['from'].apply(lambda x: get_label(x, get_label_func)))
-        subdf = find_label(get_label_func, subdf, 'from', 'From')
-        #subdf.insert(3, 'To', subdf['to'].apply(lambda x: get_label(x, get_label_func)))
-        subdf = find_label(get_label_func, subdf, 'to', 'To')
+    if save_path.endswith(".html"):
+        out_file = save_path
     else:
-        subdf = subdf.rename(columns={'from':'From', 'to':'To'}, inplace=False)
+        out_file = os.path.join(save_path, FILENAME_DUPLICATES_HTML) if not hierarchical_run else os.path.join(save_path, 'similarity_hierarchical.html')
+
+
+    subdf = subdf.rename(columns={'from':'From', 'to':'To'}, inplace=False)
     subdf = subdf.rename(columns={'distance':'Distance'}, inplace=False)
     fields = ['Image', 'Distance', 'From', 'To']
+    if get_label_func is not None:
+        subdf = subdf.rename(columns={'label':'From_Label','label2':'To_Label'}, inplace=False)
+        fields.extend(['From_Label', 'To_Label'])
 
     # for video, show duplicate counts between frames
     if 'ratio' in subdf.columns:
@@ -398,10 +414,16 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         subdf['To'] = subdf['To'].apply(lambda x: get_reformat_filename_func(x))
 
     title = 'Duplicates Report'
+    subtitle = "Showing duplicate"
     if 'is_video' in kwargs:
         title = 'Video Duplicates Report'
+        subtitle += " video pairs"
+    else:
+        subtitle += " image pairs"
+
     if hierarchical_run:
         title = 'Hierarchical Duplicates Report'
+        subtitle = "Showing hierarchical images pairs"
 
     if slice is not None:
         if slice == "diff":
@@ -411,9 +433,12 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
     assert len(subdf), "Error: failed to find any duplicates, try to run() with lower threshold"
 
-    # reformat_disp_path = kwargs.get('get_display_filename_func', lambda x: x)
-    # subdf['from'] = subdf['from'].apply(lambda x: reformat_disp_path(x))
-    # subdf['to'] = subdf['to'].apply(lambda x: reformat_disp_path(x))
+    if 'get_display_filename_func' in kwargs:
+        subdf['From'] = subdf['From'].apply(kwargs['get_display_filename_func'])
+        subdf['To'] = subdf['To'].apply(kwargs['get_display_filename_func'])
+    #elif 'id_to_filename_func' in kwargs:
+    #    subdf['From'] = subdf['From'].apply(kwargs['id_to_filename_func'])
+    #    subdf['To'] = subdf['To'].apply(kwargs['id_to_filename_func'])
     subdf['info'] = swap_dataframe(subdf, fields)
     if max_width is None:
         max_width = 600
@@ -422,7 +447,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
     save_artifacts = 'save_artifacts' in kwargs and kwargs['save_artifacts']
     if save_artifacts:
-        save_artifacts_file = os.path.join(save_path, 'similarity_artifacts.csv')
+        save_artifacts_file = os.path.join(save_dir, 'similarity_artifacts.csv')
         subdf[list(set(fields)-set(['Image']))].to_csv(save_artifacts_file, index=False)
         print("Stored similarity artifacts in ", save_artifacts_file)
 
@@ -436,22 +461,26 @@ def load_one_image_for_outliers(args):
     row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs = args
 
     outlier_id = row['from']
-    imgpath_suffix = f'_{outlier_id}' if 'id_to_filename_func' in kwargs else ''
-    if 'id_to_filename_func' in kwargs:
-        id_to_file = kwargs['id_to_filename_func']
-        row[['from', 'to']] = [id_to_file(row['from']), id_to_file(row['to'])]
+    #imgpath_suffix = f'_{outlier_id}' if 'id_to_filename_func' in kwargs else ''
+    #if 'id_to_filename_func' in kwargs:
+    #    id_to_file = kwargs['id_to_filename_func']
+    #    row[['from', 'to']] = [id_to_file(row['from']), id_to_file(row['to'])]
     impath1, impath2, dist, ptype = extract_filenames(row, work_dir, save_path, kwargs)
 
     try:
         img = fastdup_imread(impath1, input_dir, kwargs)
+        assert img is not None, f"Failed to read image from {impath1} {input_dir}"
         img = plot_bounding_box(img, get_bounding_box_func, outlier_id)
+        assert img is not None, f"Failed to plot bb from {impath1} {input_dir}"
         img = my_resize(img, max_width=max_width)
+        assert img is not None, f"Failed to resize image from {impath1} {input_dir}"
+        if 'enhance_image' in kwargs and kwargs['enhance_image']:
+            img = enhance_image(img)
 
         #consider saving second image as well!
         #make sure image file is unique, so add also folder name into the imagefile
         lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
-        imgpath = calc_image_path(lazy_load, save_path, impath1, imgpath_suffix)
-        print(imgpath)
+        imgpath = calc_image_path(lazy_load, save_path, impath1, "")
         cv2.imwrite(imgpath, img)
         assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
@@ -518,12 +547,14 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     hierarchical_run = 'hierarchical_run' in kwargs and kwargs['hierarchical_run']
     debug_hierarchical = 'debug_hierarchical' in kwargs and kwargs['debug_hierarchical']
     save_artifacts = 'save_artifacts' in kwargs and kwargs['save_artifacts']
+    save_dir = calc_save_dir(save_path)
+
 
     img_paths = []
     kwargs['lazy_load'] = lazy_load
 
     df = outliers_file
-    if df['from'].dtype in [int, np.int64] and not 'id_to_filename_func' in kwargs:
+    if df['from'].dtype in [int, np.int64]:
         filenames = load_filenames(work_dir, kwargs)
         df = merge_with_filenames(df, filenames)
 
@@ -556,7 +587,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
             pd.set_option('display.max_rows', 50)
             pd.set_option('display.max_columns', 500)
             pd.set_option('display.width', 1000)
-        df, comp_images, comp_map = prepare_hierarchy(df, work_dir, save_path, debug_hierarchical, kwargs)
+        df, comp_images, comp_map = prepare_hierarchy(df, work_dir, save_dir, debug_hierarchical, kwargs)
 
     if get_label_func is not None:
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
@@ -567,7 +598,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     df = df.drop_duplicates(subset='from').sort_values(by='distance', ascending=True).head(num_images)
     all_args = []
     for i, row in tqdm(df.iterrows(), total=min(num_images, len(df))):
-        args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs
+        args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_dir, kwargs
         all_args.append(args)
 
     # trying to deal with the following runtime error:
@@ -585,13 +616,14 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
             img_paths.append(load_one_image_for_outliers(i))
 
     import fastdup.html_writer
-    img_html = format_image_html_string(img_paths, lazy_load, max_width, save_path)
+    img_html = format_image_html_string(img_paths, lazy_load, max_width, save_dir)
     df.insert(0, 'Image', img_html)
 
     df = df.rename(columns={'distance':'Distance','from':'Path'}, inplace=False)
 
-    out_file = os.path.join(save_path, 'outliers.html')
+    out_file = os.path.join(save_path, 'outliers.html') if not save_path.endswith(".html") else save_path
     title = 'Outliers Report'
+    subtitle = "Showing image outliers, one per row"
     if slice is not None:
         title += ", " + str(slice)
 
@@ -609,7 +641,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     reformat_disp_path = kwargs.get('get_display_filename_func', lambda x: x)
     df['Path'] = df['Path'].apply(lambda x: reformat_disp_path(x))
     df['info'] = swap_dataframe(df, cols)
-    fastdup.html_writer.write_to_html_file(df[['Image','info']], title, out_file, jupyter_html=kwargs.get('jupyter_html', False))
+    fastdup.html_writer.write_to_html_file(df[['Image','info']], title, out_file, subtitle=subtitle, jupyter_html=kwargs.get('jupyter_html', False))
 
     if save_artifacts:
         df[list(set(cols)-set(['Image']))].to_csv(f'{save_path}/outliers_report.csv')
@@ -626,9 +658,16 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 def load_one_image(args):
     try:
         f, fid, input_dir, get_bounding_box_func, kwargs = args
+        assert f is not None, f"Got None image name {fid} {input_dir} {kwargs}"
         img = fastdup_imread(f, input_dir, kwargs)
+        assert img is not None, f"Failed to read image {f} {input_dir} {kwargs}"
         img = plot_bounding_box(img, get_bounding_box_func, fid)
+        assert img is not None, f"Failed to read image {f} {input_dir} {kwargs}"
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        assert img is not None, f"Failed to read image {f} {input_dir} {kwargs}"
+        if 'enhance_image' in kwargs and kwargs['enhance_image']:
+            img = enhance_image(img)
+            assert img is not None, f"Failed to enchance image {f} {input_dir} {kwargs}"
         return img, img.shape[1], img.shape[0]
     except Exception as ex:
         print("Warning: Failed to load image ", f, "skipping image due to error", ex)
@@ -699,11 +738,11 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
         return None, None
 
     assert num_components > 0, "Number of components should be larger than zero"
-
     MAX_IMAGES_IN_GRID = 54
+    #v1 = 'id_to_filename_func' in kwargs
 
     if isinstance(work_dir, pd.DataFrame) and 'distance' in work_dir.columns and 'component_id' in work_dir.columns \
-        and 'files' in work_dir.columns and 'len' in work_dir.columns and len(work_dir):
+        and 'files' in work_dir.columns and 'len' in work_dir.columns and 'files_ids' in work_dir.columns and len(work_dir):
         top_components = work_dir
     else:
         top_components = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
@@ -726,37 +765,43 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     assert top_components is not None and len(top_components), f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
     comp_col = "component_id" if comp_type == "component" else "cluster"
 
+
     # iterate over the top components
     img_paths = []
     counter = 0
-    filname_transform_func = kwargs.get('id_to_filename_func', lambda x: x)
+    #filname_transform_func = kwargs.get('id_to_filename_func', lambda x: x)
     all_labels = []
     for i,row in tqdm(top_components.iterrows(), total = len(top_components)):
         try:
             # find the component id
             component_id = row[comp_col]
-            # find all the image filenames linked to this id
+            # find all the image filenames linked to this `id`
             if save_artifacts:
-                pd.DataFrame({'filename':row['files']}).to_csv(os.path.join(save_path, f'component_{counter}_files.csv'))
+                if not os.path.exists(os.path.join(save_path, 'images')):
+                    os.mkdir(os.path.join(save_path, 'images'))
+                pd.DataFrame({'filename':row['files']}).to_csv(os.path.join(save_path, 'images', f'component_{counter}_files.csv'))
             files_ids = sample_from_components(row, metric, kwargs, MAX_IMAGES_IN_GRID)
-            files = [filname_transform_func(x) for x in files_ids]
-            if (len(files) == 0):
+            if (len(files_ids) == 0):
                 print(f"Failed to find any files for component_id {component_id}");
                 break
 
+            files, files_ids = zip(*files_ids)
+            # if v1 and isinstance(files[0], str):
+            #     files = [os.path.join(input_dir, x) for x in files]
 
             if save_artifacts:
-                import shutil
-                if not os.path.exists(save_path + f"/raw_images_{counter}"):
-                    os.mkdir(save_path + f"/raw_images_{counter}")
+                if not os.path.exists(os.path.join(save_path , "images", f"raw_images_{counter}")):
+                    os.mkdir(os.path.join(save_path, "images", f"raw_images_{counter}"))
                 for f in files:
-                    shutil.copy(f, save_path + f"/raw_images_{counter}")
+                    shutil.copy(f, os.path.join(save_path, "images", f"raw_images_{counter}"))
 
             tmp_images = []
             w,h = [], []
             val_array = []
             for f, fid in zip(files, files_ids):
-                #t,w1,h1 = load_one_image(f, input_dir, get_bounding_box_func)
+                assert f is not None, f"Found None image name on {fid} {input_dir} {row}"
+                #if v1:
+                #    assert isinstance(fid, (int,np.uint32)), f"found a wrong file_id {fid} {type(fid)}"
                 val_array.append([f, fid, input_dir, get_bounding_box_func, kwargs])
 
             # trying to deal with the following runtime error:
@@ -778,9 +823,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             for t,x in enumerate(result):
                 if x[0] is not None:
                     if save_artifacts:
-                        if not os.path.exists(f'{save_path}/comp_{counter}/'):
-                            os.mkdir(f'{save_path}/comp_{counter}')
-                        cv2.imwrite(f'{save_path}/comp_{counter}/{os.path.basename(files[t])}', x[0])
+                        if not os.path.exists(f'{save_path}/images/comp_{counter}/'):
+                            os.mkdir(f'{save_path}/images/comp_{counter}')
+                        cv2.imwrite(f'{save_path}/images/comp_{counter}/{os.path.basename(files[t])}', x[0])
                     tmp_images.append(x[0])
                     w.append(x[1])
                     h.append(x[2])
@@ -804,7 +849,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
                     f = pad_image(f, avg_w, avg_h)
                 images.append(f)
 
-            labels = None if get_label_func is None else [get_label_func(fid) for fid in files_ids]
+            labels = row['label'] if 'label' in row else None
 
             if len(images) <= 3:
                 img, labels = generate_sprite_image(images,  len(images), '', labels, h=avg_h, w=avg_w, alternative_width=len(images), max_width=max_width)
@@ -812,10 +857,13 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
                 img, labels = generate_sprite_image(images,  len(images), '', labels, h=avg_h, w=avg_w, max_width=max_width)
 
             all_labels.append(labels)
+            #all_files.append(files)
             lazy_load = kwargs.get('lazy_load', False)
             subfolder = "" if not lazy_load else "images/"
-            os.makedirs(os.path.join(save_path, subfolder), exist_ok=True)
-            local_file = os.path.join(save_path, f'{subfolder}component_{counter}_{component_id}.jpg')
+            save_dir = calc_save_dir(save_path)
+            save_dir = os.path.join(save_dir, "images")
+            os.makedirs(os.path.join(save_dir, subfolder), exist_ok=True)
+            local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{component_id}.jpg')
             cv2.imwrite(local_file, img)
             img_paths.append(local_file)
             counter+=1
@@ -830,8 +878,10 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             fastdup_capture_exception("visualize_top_components", ex)
 
     print(f'Finished OK. Components are stored as image files {save_path}/components_[index].jpg')
-    if get_label_func is not None:
-        top_components['label'] = all_labels
+    if 'label' in top_components:
+        top_components['label'] = top_components['label'].apply(lambda x: x[:MAX_IMAGES_IN_GRID])
+    #top_components['files'] = all_files
+
     return top_components.head(num_components), img_paths
 
 
@@ -856,7 +906,7 @@ def read_clusters_from_file(work_dir, get_label_func, kwargs):
             df = df.head(nrows)
 
     if get_label_func is not None:
-        df = find_label(get_label_func, df, 'filename', 'label')
+        df = find_label(get_label_func, df, 'filename', 'label', kwargs)
 
     return df
 
@@ -869,8 +919,10 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     nrows = None
     if len(kwargs) and 'nrows' in kwargs:
         nrows = kwargs['nrows']
+    load_crops = (kwargs is not None) and ('load_crops' in kwargs) and kwargs['load_crops']
+    draw_bbox = (kwargs is not None) and ('draw_bbox' in kwargs) and kwargs['draw_bbox']
 
-    debug_cc = kwargs is not None and "debug_cc" in kwargs and kwargs["debug_cc"]
+    debug_cc = (kwargs is not None) and ("debug_cc" in kwargs) and kwargs["debug_cc"]
 
     # read fastdup connected components, for each image id we get component id
     if isinstance(work_dir, str):
@@ -896,12 +948,15 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     if local_dir.endswith(".csv"):
         local_dir = os.path.dirname(os.path.abspath(local_dir))
 
+
     filenames = load_filenames(local_dir, kwargs)
-    if (len(components) != len(filenames)):
+    if (len(components) != len(filenames)) or load_crops:
         components = components.merge(filenames, left_on="__id", right_on="index", how="left")
     # now join the two tables to get both id and image name
     else:
         components['filename'] = filenames['filename']
+    if load_crops and not draw_bbox: # crop filename contains both crop filename and original image filename, if we want to load_crop then we need to pick the later
+        components['filename'] = filenames["crop_filename"]
     
     if debug_cc:
         print(components.head())
@@ -990,14 +1045,17 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         components = read_components_from_file(work_dir, get_label_func, kwargs)
         comp_col = "component_id"
         distance_col = "min_distance"
+        index_col = "__id"
     elif comp_type == "cluster":
         components = read_clusters_from_file(work_dir, get_label_func, kwargs)
         comp_col = "cluster"
         distance_col = "distance"
+        index_col = "index"
     else:
         assert False, f"Wrong component type {comp_type}"
 
-    assert components is not None and len(components), f"Failed to read components file {work_dir} or empty dataframe read"
+    assert components is not None and len(components), f"Failed to read components file {work_dir} or found no images to cluster to components. Try to run fastdup again with lower ccthreshold." \
+                                                       f"Value ccthreshold values are 0 to 1, where 1 no images are cluster together and zero means all images are clustered together."
 
     if metric is not None:
         cols_to_use = ['index', metric]
@@ -1033,7 +1091,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
         if group_by == 'visual':
             top_labels = components.groupby(comp_col)['label'].apply(list)
             top_files = components.groupby(comp_col)['filename'].apply(list)
-            dict_cols = {'files':top_files, 'label':top_labels}
+            files_ids = components.groupby(comp_col)[index_col].apply(list)
+
+            dict_cols = {'files':top_files, 'label':top_labels, 'files_ids':files_ids}
 
             if kwargs and 'is_video' in kwargs:
                 top_dirs = components.groupby(comp_col)['dirname'].apply(list)
@@ -1066,7 +1126,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
             top_files = components.groupby('label')['filename'].apply(list)
             top_components = components.groupby('label')[comp_col].apply(list)
-            dict_cols = {'files':top_files, comp_col:top_components}
+            files_ids = components.groupby('label')[index_col].apply(list)
+
+            dict_cols = {'files':top_files, comp_col:top_components, 'files_ids':files_ids}
 
             if kwargs and 'is_video' in kwargs:
                 top_dirs = components.groupby('label')['dirname'].apply(list)
@@ -1085,10 +1147,12 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
     else:
         top_components = components.groupby(comp_col)['filename'].apply(list)
+        files_ids = components.groupby(comp_col)[index_col].apply(list)
+
         if 'debug_cc' in kwargs:
             print(top_components.head())
 
-        dict_cols = {'files':top_components}
+        dict_cols = {'files':top_components, 'files_ids':files_ids}
         #if threshold is not None or metric is not None:
 
         if distance_col in components.columns:
@@ -1132,7 +1196,13 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     if slice == "diff":
         comps = comps.sort_values('distance', ascending=not descending)
     elif metric is None:
-        comps = comps.sort_values('len', ascending=not descending)
+        if 'sort_by' in kwargs and kwargs['sort_by'] != 'comp_size':
+            if kwargs['sort_by'] in comps.columns:
+                comps = comps.sort_values(kwargs['sort_by'] , ascending=not descending)
+            else:
+                print(f"Warning: asked to sort by column {kwargs['sort_by']} but this column is missing. Available columns are {comps.columns}")
+        else:
+            comps = comps.sort_values('len', ascending=not descending)
     else:
         comps['avg_metric'] = comps[metric].apply(lambda x: np.mean(x))
         comps = comps.sort_values('avg_metric', ascending=not descending)
@@ -1175,9 +1245,9 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
 
 def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                                  group_by='visual', slice=None, max_width=None, max_items=None, min_items=None,
-                                 get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_info_func=None,
+                                 get_bounding_box_func=None, get_reformat_filename_func=None, get_extra_col_func=None,
                                  threshold=None ,metric=None, descending=True, keyword=None, comp_type="component", input_dir=None,
-                                 kwargs=None):
+                                 **kwargs):
     '''
 
     Function to create and display a gallery of images for the largest graph components
@@ -1239,6 +1309,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
      '''
 
     start = time.time()
+    #v1 = 'id_to_filename_func' in kwargs
+
     if num_images > 1000 and not lazy_load:
         print("Warning: When plotting more than 1000 images, please run with lazy_load=True. Chrome and Safari support lazy loading of web images, otherwise the webpage gets too big")
 
@@ -1263,7 +1335,9 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     else:
         assert isinstance(kwargs['selection_strategy'],int) and kwargs['selection_strategy'] >= 0 and kwargs['selection_strategy'] <= 2
 
-    ret = visualize_top_components(work_dir, save_path, num_images,
+    save_dir = calc_save_dir(save_path)
+
+    ret = visualize_top_components(work_dir, save_dir, num_images,
                                                 get_label_func, group_by, slice,
                                                 get_bounding_box_func, max_width, threshold, metric,
                                                 descending, max_items, min_items, keyword,
@@ -1275,13 +1349,14 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
         return None
 
     assert len(subdf) == len(img_paths), "Number of components and number of images do not match"
-
     import fastdup.html_writer
     save_artifacts= 'save_artifacts' in kwargs and kwargs['save_artifacts']
+    if save_artifacts:
+        subdf.to_csv(f'{save_dir}/components.csv')
 
     comp_col = "component_id" if comp_type == "component" else "cluster"
 
-    cols_dict = {comp_col:subdf[comp_col].values,
+    cols_dict = {comp_col:subdf[comp_col].values,'files':subdf['files'].values,
                  num_items_title:subdf['len'].apply(lambda x: "{:,}".format(x)).values}
     if 'distance' in subdf.columns:
         cols_dict['distance'] = subdf['distance'].values
@@ -1327,8 +1402,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
 
             info_df = pd.DataFrame(dict_rows).T
             info_list.append(info_df)
-        if save_artifacts:
-            info_df.to_csv(f'{save_path}/component_{counter}_df.csv')
+        #if save_artifacts:
+        #    info_df.to_csv(f'{save_dir}/component_{counter}_df.csv')
         counter += 1
 
     ret = pd.DataFrame({'info': info_list})
@@ -1339,8 +1414,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
             counter = 0
             for i,row in subdf.iterrows():
                 labels = list(row['label'])
-                if save_artifacts:
-                    pd.DataFrame({'label':labels}).to_csv(os.path.join(save_path, f"component_{counter}_labels.csv"))
+                #if save_artifacts:
+                #    pd.DataFrame({'label':labels,'files':list(row['files'])}).to_csv(os.path.join(save_dir, f"component_{counter}_labels.csv", index=False))
                 if callable(get_reformat_filename_func) and 'is_video' in kwargs:
                     labels = [get_reformat_filename_func(x) for x in labels]
 
@@ -1352,7 +1427,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                     lencount = kwargs['limit_labels_printed']
                 counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
                 if save_artifacts:
-                    counts_df.to_csv(f'{save_path}/counts_{counter}.csv')
+                    counts_df.to_csv(f'{save_dir}/counts_{counter}.csv')
 
                 counts_df = counts_df.head(lencount)#.reset_index().rename({'index': 'label'}, axis=1)
                 counts_df.index.names = ['label']
@@ -1371,8 +1446,8 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
                 if kwargs is not None and 'limit_labels_printed' in kwargs:
                     lencount = kwargs['limit_labels_printed']
                 counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
-                if save_artifacts:
-                    counts_df.to_csv(f'{save_path}/counts_{counter}.csv')
+                #if save_artifacts:
+                #    counts_df.to_csv(f'{save_dir}/counts_{counter}.csv')
                 counts_df = counts_df.head(lencount)
                 comp_table.append(counts_df)
                 counter+=1
@@ -1381,7 +1456,10 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     img_html = format_image_html_string(img_paths, lazy_load, max_width, save_path)
     ret.insert(0, 'image', img_html)
 
-    out_file = os.path.join(save_path, "components_hierarchical.html") if run_hierarchical else os.path.join(save_path, 'components.html')
+    if save_path.endswith('.html'):
+        out_file = save_path
+    else:
+        out_file = os.path.join(save_dir, "components_hierarchical.html") if run_hierarchical else os.path.join(save_dir, 'components.html')
     columns = ['info','image']
     if 'label' in subdf.columns:
         if group_by == 'visual':
@@ -1392,19 +1470,32 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     if comp_type == "component":
         if 'is_video' in kwargs:
             title = 'Video Components Report'
+            subtitle = "Showing groups of similar videos"
         elif run_hierarchical:
             title = 'Hierarchical Components Report'
+            subtitle = "Showing hierarchical groups of similar images"
+
         else:
             title = 'Components Report'
+            subtitle = "Showing groups of similar images"
     else:
         title = "KMeans Cluster Report"
+        subtitle = "Showing groups of similar images"
 
-    subtitle = None
+
     if slice is not None:
-        subtitle = "slice: " + str(slice)
+        if slice == "diff":
+            subtitle += ", from different classes"
+        elif slice =="same":
+            subtitle += ", from the same class"
+        else:
+            subtitle += ", for label: " + str(slice)
     if metric is not None:
-        subtitle = "Sorted by " + metric + " descending" if descending else "Sorted by " + metric + " ascending"
+        subtitle = ", Sorted by " + metric + " descending" if descending else "Sorted by " + metric + " ascending"
+
     ret = ret[['image','info', 'label']] if 'label' in subdf.columns else ret[['image','info']]
+    if callable(get_extra_col_func):
+        ret['files'] = subdf['files'].values#.apply(lambda x: [get_extra_col_func(y) for y in x])
     fastdup.html_writer.write_to_html_file(ret, title, out_file, None, subtitle, max_width,
                                            jupyter_html=kwargs.get('jupyter_html', False))
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
@@ -1522,8 +1613,9 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     get_bounding_box_func = get_bounding_box_func_helper(get_bounding_box_func)
 
     df = stats_file
-    df = find_label(get_label_func, df, 'filename', 'label')
+    df = find_label(get_label_func, df, 'filename', 'label', kwargs)
     df = slice_df(df, slice, 'label', kwargs)
+    save_dir = calc_save_dir(save_path)
 
     if metric is not None and metric == 'size':
         df['size'] = df['width'] * df['height']
@@ -1536,15 +1628,16 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         df = df[df[metric] != DEFAULT_METRIC_MINUS_ONE]
 
     subdf = df.sort_values(metric, ascending=not descending).head(num_images)
-    stat_info = get_stats_df(df, subdf, metric, save_path, max_width)
+    stat_info = ""
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
             filename = lookup_filename(row['filename'], work_dir)
             img = fastdup_imread(filename, None, None)
+            assert img is not None, "Failed to read image " + filename + " orig filename " + row['filename']
             img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
 
-            imgpath = calc_image_path(lazy_load, save_path, filename)
+            imgpath = calc_image_path(lazy_load, save_dir, filename)
             cv2.imwrite(imgpath, img)
             assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
@@ -1555,7 +1648,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         img_paths.append(imgpath)
 
     import fastdup.html_writer
-    img_html = format_image_html_string(img_paths, lazy_load, max_width, save_path)
+    img_html = format_image_html_string(img_paths, lazy_load, max_width, save_dir)
     subdf.insert(0, 'Image', img_html)
 
     cols = [metric,'Image','filename']
@@ -1567,10 +1660,27 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     if callable(get_reformat_filename_func):
         subdf['filename'] = subdf['filename'].apply(lambda x: get_reformat_filename_func(x))
 
-    out_file = os.path.join(save_path, metric + '.html')
+    out_file = os.path.join(save_path, metric + '.html') if not save_path.endswith(".html") else save_path
     title = metric + ' Image Report'
+    if metric == "mean" and descending:
+        title = "Bright Image Report"
+    elif metric == "mean":
+        title = "Dark Image Report"
+    elif metric == "size" and descending:
+        title = "Largest Image Report"
+    elif metric == "size":
+        title = "Smallest Image Report"
+    elif metric == "blur" and not descending:
+        title = "Blurry Image Report"
+    elif metric == "blur":
+        title = "Sharpest Image Report"
+
+    subtitle = "Showing example images, sort by "
+    subtitle += "descending" if descending else "ascending"
+    subtitle += " order"
+
     if slice is not None:
-        title += ", " + str(slice)
+        subtitle += ", " + str(slice)
 
     if metric == 'size':
         cols.append('width')
@@ -1580,8 +1690,8 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         cols.append('label')
 
     subdf['info'] = swap_dataframe(subdf, cols)
-    fastdup.html_writer.write_to_html_file(subdf[['Image','info']], title, out_file, stat_info,
-                                           jupyter_html=kwargs['kwargs'].get('jupyter_html', False))
+    fastdup.html_writer.write_to_html_file(subdf[['Image','info']], title, out_file, stat_info, subtitle, 
+                                           jupyter_html=kwargs.get('jupyter_html', False))
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print_success_msg(metric, out_file, lazy_load)
@@ -1643,7 +1753,6 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
 
 
     from fastdup import generate_sprite_image
-    img_paths = []
     img_paths2 = []
     from_paths = []
     info0 = []
@@ -1651,12 +1760,29 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     label_score = []
     lengths = []
 
+    #v1 = 'id_to_filename_func' in kwargs
     df = similarity_file
     get_bounding_box_func = get_bounding_box_func_helper(get_bounding_box_func)
+    reformat_disp_path = kwargs.get('get_display_filename_func', lambda x: x)
+    load_crops = kwargs.get('load_crops', False)
+    if 'from_filename' not in df.columns and 'to_filename' not in df.columns:
+        if load_crops:
+            assert "filename" not in df.columns
+            filenames = load_filenames(work_dir, kwargs)
+            assert filenames is not None and not filenames.empty, f"Failed to read crop files from {work_dir}"
+            assert "index" in filenames.columns and "filename" in filenames.columns
+            df = merge_with_filenames(df, filenames[["index","filename"]])
+        else:
+            df = similarity_file
+            if df['from'].dtype in [int, np.int64]:
+                assert df['to'].dtype in [int, np.int64], "Wrong types, expect both str or both int"
+                filenames = load_filenames(work_dir, kwargs)
+                filenames = filenames[["index", "filename"]]
+                df = merge_with_filenames(df, filenames)
 
-    if get_label_func is not None:
-        df = find_label(get_label_func, df, 'from', 'label')
-        df = find_label(get_label_func, df, 'to', 'label2')
+    if get_label_func is not None and ('label' not in df.columns or 'label2' not in df.columns):
+        df = find_label(get_label_func, df, 'from', 'label', kwargs)
+        df = find_label(get_label_func, df, 'to', 'label2', kwargs)
 
         if slice != 'label_score':
             df = slice_df(df, slice, 'label')
@@ -1666,19 +1792,23 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         print("Warning: you are running create_similarity_gallery() without providing get_label_func so similarities are not computed between different classes. "
               "It is recommended to run this report with labels. Without labels this report output is similar to create_duplicate_gallery()")
 
+
     df = df.sort_values(['from','distance'], ascending= not descending)
-    if 'label' in df.columns:
-        top_labels = df.groupby('from')['label2'].apply(list)
+    if 'label' in df.columns and 'label2' in df.columns:
+        top_labels_to = df.groupby('from')['label2'].apply(list)
+        top_labels_from = df.groupby('from')['label'].apply(list)
 
     tos = df.groupby('from')['to'].apply(list)
     distances = df.groupby('from')['distance'].apply(list)
 
     if 'label' in df.columns:
-        subdf = pd.DataFrame({'to':tos, 'label':top_labels,'distance':distances}).reset_index()
+        subdf = pd.DataFrame({'to':tos, 'label':top_labels_from, 'label2':top_labels_to, 'distance':distances}).reset_index()
     else:
         subdf = pd.DataFrame({'to':tos, 'distance':distances}).reset_index()
 
+
     info_df = None
+
 
     if slice is None or slice != 'label_score':
         subdf = subdf.sort_values(['distance'], ascending=not descending)
@@ -1687,16 +1817,13 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         stat_info = None
     else:
         for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
-            filename = lookup_filename(row['from'], work_dir)
-            label = None
-            if isinstance(get_label_func, dict):
-                label = get_label_func.get(filename, MISSING_LABEL)
-            elif callable(get_label_func):
-                label = get_label_func(filename)
-            else:
-                assert False, "not implemented yet"
-            similar = [x==label for x in list(row['label'])]
-            similar = 100.0*sum(similar)/(1.0*len(row['label']))
+            filename = str(row["from"])
+            filename = lookup_filename(filename, work_dir)
+
+            from_label = row['label'][0]
+            to_label = row['label2']
+            similar = [x==from_label for x in list(to_label)]
+            similar = 100.0*sum(similar)/(1.0*len(to_label))
             lengths.append(len(row['label']))
             label_score.append(similar)
         subdf['score'] = label_score
@@ -1708,118 +1835,163 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         subdf = subdf.sort_values(['score','length'], ascending=not descending)
         df2 = subdf.copy()
         subdf = subdf.head(num_images)
-        stat_info = get_stats_df(df2, subdf, metric='score', save_path=save_path, max_width=max_width, kwargs=kwargs)
-
-    filename_transform_func = kwargs['kwargs'].get('id_to_filename_func', lambda x: x)
-    reformat_disp_path = kwargs['kwargs'].get('get_display_filename_func', lambda x: x)
 
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
         try:
             label = None
-            id_from = row['from']
-            filename = filename_transform_func(row['from'])
+            filename = row["from"]
             filename = lookup_filename(filename, work_dir)
-            if callable(get_label_func):
-                label = get_label_func(id_from)
-            elif isinstance(get_label_func, dict):
-                label = get_label_func.get(id_from, MISSING_LABEL)
-            elif isinstance(get_label_func, str):
-                assert False, "Not implemented yet"
+            if 'label' in row:
+                label = row['label']
+                if isinstance(label, list):
+                  label = label[0]
 
-            disp_filename = reformat_disp_path(id_from)
+            disp_filename = reformat_disp_path(filename)
             if callable(get_reformat_filename_func):
-                new_filename = get_reformat_filename_func(disp_filename)
+                new_filename = get_reformat_filename_func(filename)
             else:
                 new_filename = disp_filename
 
             if label is not None:
-                info0_df = pd.DataFrame({'label':[label],'from':[disp_filename]}).T
+                info0_df = pd.DataFrame({'label':[label],'from':[new_filename]}).T
             else:
-                info0_df = pd.DataFrame({'from':[disp_filename]}).T
+                info0_df = pd.DataFrame({'from':[new_filename]}).T
 
-            info0.append(info0_df)
 
             img = fastdup_imread(filename, input_dir=input_dir, kwargs=kwargs)
-            img = plot_bounding_box(img, get_bounding_box_func, id_from)
+            assert img is not None, f"Failed to read image {str(filename)} {input_dir}"
+            img = plot_bounding_box(img, get_bounding_box_func, filename)
             img = my_resize(img, max_width)
+            if 'enhance_image' in kwargs and kwargs['enhance_image']:
+                img = enhance_image(img)
 
-            image_suffix = f'_{id_from}' if 'id_to_filename_func' in kwargs['kwargs'] else ''
-            imgpath = calc_image_path(lazy_load, save_path, filename, filename_suffix=image_suffix)
+            image_suffix = ''
+            save_dir = calc_save_dir(save_path)
+
+            subdir = os.path.join(save_dir, "images")
+            if not os.path.exists(subdir):
+                os.mkdir(subdir)
+            imgpath = calc_image_path(lazy_load, subdir, filename, filename_suffix=image_suffix)
             cv2.imwrite(imgpath, img)
-            from_paths.append(imgpath)
-
             assert os.path.exists(imgpath), "Failed to save img to " + imgpath
 
+
             MAX_IMAGES = 10
-            to_ids = row['to'][:MAX_IMAGES]
-            to_impaths_ = [filename_transform_func(im) for im in to_ids]
-            imgs = [plot_bounding_box(fastdup_imread(im, input_dir=input_dir, kwargs=kwargs),
-                                      get_bounding_box_func, id_to) for im, id_to in zip(to_impaths_, to_ids)]
+            to_impaths_ = row["to"]
+            #else:
+            imgs = [plot_bounding_box(fastdup_imread(im, input_dir=input_dir, kwargs=kwargs),get_bounding_box_func,im) for im  in to_impaths_]
+
+            keep_aspect_ratio = True
+            if kwargs is not None and 'keep_aspect_ratio' in kwargs and not kwargs['keep_aspect_ratio']:
+                keep_aspect_ratio = False
+            h = []
+            w = []
+            for im in imgs:
+                if im is not None:
+                    h.append(im.shape[0])
+                    w.append(im.shape[1])
+
+            avg_h = int(np.mean(h))
+            avg_w = int(np.mean(w))
+            max_h = int(np.max(h))
+            max_w = int(np.max(w))
+            if keep_aspect_ratio:
+                avg_h = max_h
+                avg_w = max_w
+
+            img2 = []
+            for f in imgs:
+                if not keep_aspect_ratio:
+                    f = cv2.resize(f, (avg_w,avg_h))
+                else:
+                    f = pad_image(f, avg_w, avg_h)
+                img2.append(f)
+
             to_impaths = []
-            for im, imgpath, to_id in zip(imgs, to_impaths_, to_ids):
-                image_suffix = f'_{to_id}' if 'id_to_filename_func' in kwargs['kwargs'] else ''
-                imgpath = calc_image_path(lazy_load, save_path, imgpath, filename_suffix=image_suffix)
-                cv2.imwrite(imgpath, im)
-                to_impaths.append(imgpath)
+            for im, imgpath2 in zip(img2, to_impaths_):
+                assert imgpath2 != imgpath, f"Found duplicate image {imgpath} {imgpath2}"
+                image_suffix = ''
+                imgpath2 = calc_image_path(lazy_load, save_dir, imgpath2, filename_suffix=image_suffix)
+                if 'enhance_image' in kwargs and kwargs['enhance_image']:
+                    im = enhance_image(im)
+                cv2.imwrite(imgpath2, im)
+                assert os.path.exists(imgpath2), "Failed to save img to " + imgpath
+                to_impaths.append(imgpath2)
 
             distances = row['distance'][:MAX_IMAGES]
-            imgpath2 = f"{save_path}/to_image_{i}.jpg"
+            imgpath2 = f"{subdir}/to_image_{i}.jpg"
             info_df = pd.DataFrame({'distance':distances, 'to':[lookup_filename(im, work_dir) for im in to_impaths]})
 
-            info_df['to'] = [reformat_disp_path(fid) for fid in to_ids]
+            info_df['to'] = [reformat_disp_path(fid) for fid in to_impaths_]
             if callable(get_reformat_filename_func):
                 info_df['to'] = info_df['to'].apply(lambda x: get_reformat_filename_func(x))
 
-            if 'label2' in df.columns:
-                info_df['label'] = row['label'][:MAX_IMAGES]
+            if 'label2' in subdf.columns:
+                info_df['label2'] = row['label2'][:MAX_IMAGES]
             info_df = info_df.sort_values('distance',ascending=False)
             info_df = info_df.set_index('distance')
-            info.append(info_df)
 
             h = max_width if max_width is not None else 0
             w = h
-            to_labels = [get_label_func(im_id) for im_id in to_ids] if callable(get_label_func) else None
-            generate_sprite_image(to_impaths, min(len(imgs), MAX_IMAGES), save_path, to_labels, h, w, imgpath2, min(len(imgs),MAX_IMAGES), max_width=max_width)
-            assert os.path.exists(imgpath2)
+            if keep_aspect_ratio:
+                h = avg_h
+                w = avg_w
+            to_labels = None
+            if 'label2' in info_df.columns:
+                to_labels = info_df['label2'].values
+            sample_size=  min(len(imgs), MAX_IMAGES)
+            to_impaths = to_impaths[:sample_size]
+            to_impaths.reverse()
+            generate_sprite_image(to_impaths, min(len(imgs), MAX_IMAGES), save_dir, to_labels, h, w, imgpath2, min(len(imgs),MAX_IMAGES), max_width=max_width)
+
+            assert os.path.exists(imgpath2), "Failed to generate sprite image " + imgpath2
+
+            # This addition should be last before exception otherwise lengths do not match in case of exception
+            info.append(info_df)
+            info0.append(info0_df)
+
 
         except Exception as ex:
             fastdup_capture_exception("create_similarity_gallery", ex)
             print("Failed to generate viz for images", filename, ex)
             imgpath = None
             imgpath2 = None
-            to_impaths = []
 
-        img_paths += to_impaths
         img_paths2.append(imgpath2)
+        from_paths.append(imgpath)
+
 
     import fastdup.html_writer
-    img_html1 = format_image_html_string(from_paths, max_width, lazy_load, save_path)
-    img_html2 = format_image_html_string(img_paths2, None, lazy_load, save_path)
+    img_html1 = format_image_html_string(from_paths, lazy_load, max_width, save_dir)
+    img_html2 = format_image_html_string(img_paths2, lazy_load, None, save_dir)
     subdf.insert(0, 'Query Image', img_html1)
     subdf.insert(0, 'Similar', img_html2)
     subdf['info_to'] = info
     subdf['info_from'] = info0
 
-    out_file = os.path.join(save_path, 'similarity.html')
+    if not save_path.endswith('.html'):
+        out_file = os.path.join(save_path, 'similarity.html')
+    else:
+        out_file = save_path
     title = 'Similarity Report'
     if slice is not None:
         title += ", " + str(slice)
 
     cols = ['info_from','info_to', 'Query Image','Similar']
-    if slice is not None and slice == 'label_score':
-        cols = ['score'] + cols
+    #if slice is not None and slice == 'label_score':
+    #    cols = ['score'] + cols
     if callable(get_extra_col_func):
         subdf['extra'] = subdf['from'].apply(lambda x: get_extra_col_func(x))
         cols.append('extra')
 
     subdf['info'] = swap_dataframe(subdf, cols)
-    fastdup.html_writer.write_to_html_file(subdf[cols], title, out_file, stat_info, max_width,
-                                           jupyter_html=kwargs['kwargs'].get('jupyter_html', False))
+    fastdup.html_writer.write_to_html_file(subdf[cols], title, out_file, "", max_width,
+                                           jupyter_html=kwargs.get('jupyter_html', False))
     assert os.path.exists(out_file), "Failed to generate out file " + out_file
 
     print_success_msg('similar images', out_file, lazy_load)
     save_artifacts = 'save_artifacts' in kwargs and kwargs['save_artifacts']
-    clean_images(lazy_load or save_artifacts, set(img_paths).union(set(img_paths2)).union(set(from_paths)), "create_similarity_gallery")
+    clean_images(lazy_load or save_artifacts, set(img_paths2).union(set(from_paths)), "create_similarity_gallery")
 
     return df2
 
@@ -1861,7 +2033,7 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, l
         df = df.head(num_images)
 
     if get_label_func is not None:
-        df = find_label(get_label_func, df, 'filename', 'label')
+        df = find_label(get_label_func, df, 'filename', 'label', kwargs)
         df = slice_df(df, slice, 'label', kwargs)
 
     assert len(df), "Empty stats file " + stats_file
@@ -1934,3 +2106,86 @@ def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, l
     out_file = os.path.join(save_path, 'aspect_ratio.html')
     print_success_msg('aspect ratio', out_file, lazy_load)
     return write_to_html_file(ret, title, out_file, None)
+
+if __name__ == "__main__":
+    import pandas as pd
+    import fastdup
+    import os
+    if False:
+        os.chdir('/Users/dannybickson/Downloads/mafat')
+        df = pd.read_csv('mafat.csv')
+        # df['img_filename'] = df['filename']
+        # del df['filename']
+        import shutil
+        #shutil.rmtree('output2')
+        fd = fastdup.create(input_dir='.', work_dir='output2')
+
+        fd.run(annotations=df, overwrite=True, license=os.environ["LICENSE"], bounding_box='rotated', augmentation_additive_margin=15,
+               verbose=True, ccthreshold=0.8, num_images=200)    #ret = fd.vis.similarity_gallery(load_crops=True,slice='label_score',ascending=True,num_images=100,enhance_image=True,keep_aspect_ratio=True)
+        #ret = fd.vis.component_gallery(load_crops=True,slice='diff',ascending=True,num_images=30,enhance_image=True,keep_aspect_ratio=True,get_extra_col_func=lambda x: x)
+        #ret = fd.vis.outliers_gallery(load_crops=False)
+        ret= fd.vis.stats_gallery(load_crops=False)
+        #ret = fd.vis.similarity_gallery(load_crops=True,slice='label_score',ascending=True,num_images=30,enhance_image=True,keep_aspect_ratio=True)
+        #ret = fd.vis.similarity_gallery(load_crops=True,slice='label_score')
+        #fd.vis.component_gallery(load_crops=True,enhance_image=True,keep_aspect_ratio=True, save_artifacts=True,slice='same')
+        #fd.vis.similarity_gallery(load_crops=True, enhance_image=True, keep_aspect_ratio=True, save_artifacts=True,slice="label_score",ascending=True)
+    elif False:
+        import shutil
+        os.chdir('/Users/dannybickson/visual_database/cxx/unittests')
+        import fastdup;
+        fd = fastdup.create(input_dir='.', work_dir='mafat_out4')
+        ret = fd.run()
+        fd.vis.component_gallery(load_crops=False)
+    elif False:
+        import shutil
+        os.chdir('/Users/dannybickson/Downloads/facedemo/')
+        import fastdup;
+        shutil.rmtree('frames_out')
+        fd = fastdup.create(input_dir='frames', work_dir='frames_out')
+        fd.run(bounding_box='face', license=os.environ["LICENSE"],threshold=0.85)
+        fd.vis.component_gallery(load_crops=True)
+        fd.vis.component_gallery(load_crops=False, draw_bbox=True)
+        fd.vis.duplicates_gallery(load_crops=True, draw_bbox=True)
+        fd.vis.outliers_gallery(load_crops=True, draw_bbox=False)
+        fd.vis.outliers_gallery(load_crops=True, draw_bbox=True)
+        fd.vis.outliers_gallery(load_crops=False, draw_bbox=False)
+        fd.vis.duplicates_gallery(load_crops=True, draw_bbox=False)
+        fd.vis.duplicates_gallery(load_crops=True, draw_bbox=True)
+        fd.vis.stats_gallery(load_crops=True, draw_bbox=True)
+        fd.vis.stats_gallery(load_crops=False, draw_bbox=False)
+    elif False:
+        import fastdup
+        if os.path.exists("tmp_out"):
+            shutil.rmtree('tmp_out')
+        fd = fastdup.create(input_dir='/mnt/data/sku110k', work_dir='tmp_out')
+        fd.run(threshold=0.85, ccthreshold=0.85, num_images=100)
+        #fd.vis.similarity_gallery(load_crops=False)
+        df = fastdup.find_top_components('tmp_out')
+        df['label'] = df['files'].apply(lambda x: [os.path.basename(y)[:2] for y in x])
+        print(df.head())
+        fd.vis.component_gallery(load_crops=False, sort_by='comp_size', external_df=df, label_col='label')
+        files = fd.annotations()
+        files['label'] = files['filename'].apply(lambda x: os.path.basename(x)[:2])
+        sim = fd.similarity()
+        df = merge_with_filenames(sim, files)
+        df['label'] = df['from'].apply(lambda x: os.path.basename(x)[:2])
+        df['label2'] = df['to'].apply(lambda x: os.path.basename(x)[:2])
+        fd.vis.duplicates_gallery(load_rops=False, label_col='label', external_df=df)
+        fd.vis.outliers_gallery(load_crops=False, label_col='label', external_df=df)
+        stats = fd.img_stats()
+        stats['label'] = stats['filename'].apply(lambda x: os.path.basename(x)[:2])
+        fd.vis.stats_gallery(load_crops=False, label_col='label', external_df=stats)
+    else:
+        if os.path.exists("tmp_out"):
+            shutil.rmtree('tmp_out')
+        fd = fastdup.create(input_dir='/mnt/data/sku110k', work_dir='tmp_out')
+        fd.run(threshold=0.85, ccthreshold=0.85, num_images=100)
+        fastdup.create_duplicates_gallery('tmp_out', 'saved_duplicates.html')
+        #fastdup.create_stats_gallery('tmp_out', 'saved_stats.html')
+
+
+
+        #fd.run(num_images=15,ccthreshold=0.7)
+
+    #ret= fd.vis.stats_gallery(load_crops=True)
+    #ret= fd.vis.duplicates_gallery(load_crops=True)

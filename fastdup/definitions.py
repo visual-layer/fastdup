@@ -14,11 +14,13 @@ FILENAME_COMPONENT_INFO = "component_info.csv"
 FILENAME_CONNECTED_COMPONENTS = "connected_components.csv"
 FILENAME_LABELS = "labels.csv"
 FILENAME_KMEANS_CENTROIDS = "kmeans_centroids.csv"
+FILENAME_CROP_LIST = "crops.csv"
 FILENAME_KMEANS_ASSIGNMENTS = "kmeans_assignments.csv"
 FILENAME_ERROR_MSG = "error.msg"
 FILENAME_DUPLICATES_HTML = "duplicates.html"
 FILENAME_OUTLIERS_HTML = "outliers.html"
 FILENAME_COMPONENTS_HTML = "components.html"
+FOLDER_FULL_IMAGE_RUN = "full_image_run"
 
 IMAGELIST_HEADER="index,filename"
 LABEL_HEADER="index.label"
@@ -45,7 +47,7 @@ HIGH_ACCURACY_MODEL_FEATURE_WIDTH = 960
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "0.211"
+VERSION__ = "0.912"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 

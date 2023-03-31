@@ -107,8 +107,8 @@ def gen_data(output_dir, n_valid_single_bbox, n_valid_double_bbox, n_duplicated_
         bbox_h, bbox_w = np.random.randint(10, 60), np.random.randint(10, 60)
         save_bbox_im(output_dir, bg_color1, [bbox_color], [bbox_x1], [bbox_y1], [bbox_h], [bbox_w], suffix='_1_duplicate')
         save_bbox_im(output_dir, bg_color2, [bbox_color], [bbox_x2], [bbox_y2], [bbox_h], [bbox_w], suffix='_2_duplicate')
-        duplicated_bbox.append(get_df_dict([bg_color1, bbox_color], bbox_color, bbox_x, bbox_y, bbox_h, bbox_w, suffix='_1_duplicate'))
-        duplicated_bbox.append(get_df_dict([bg_color2, bbox_color], bbox_color, bbox_x, bbox_y, bbox_h, bbox_w, suffix='_2_duplicate'))
+        duplicated_bbox.append(get_df_dict([bg_color1, bbox_color], bbox_color, bbox_x1, bbox_y1, bbox_h, bbox_w, suffix='_1_duplicate'))
+        duplicated_bbox.append(get_df_dict([bg_color2, bbox_color], bbox_color, bbox_x2, bbox_y2, bbox_h, bbox_w, suffix='_2_duplicate'))
     color_idx += 3*n_valid_single_bbox
 
     # create corrupted images
@@ -163,7 +163,7 @@ def create_invalid_bbox_ims(output_dir):
 
 def create_synthetic_data(target_dir, n_valid_single_bbox=50, n_valid_double_bbox=50, n_duplicated_bbox=21,
                           n_corrupted_image=22, n_no_image=23):
-    shutil.rmtree(target_dir, ignore_errors=True)
+    #shutil.rmtree(target_dir, ignore_errors=True)
     os.makedirs(target_dir, exist_ok=True)
 
     df_single, df_double, df_duplicate, df_corrupted, df_no_image = \

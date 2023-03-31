@@ -6,6 +6,7 @@ from fastdup.definitions import *
 from datetime import datetime
 from fastdup.sentry import fastdup_capture_exception
 import warnings
+import itertools
 
 
 IMAGE_SUFFIXES = ['jpg', 'jpeg','png','gif','tif', 'tiff', 'bmp', 'heif', 'heic']
@@ -26,8 +27,8 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     if platform.system() == "Windows":
         local_folder = 'testtemp' if is_test else 'temp'
     if input_dir.startswith('s3://'):
-
-        command = 'aws s3 sync ' + input_dir + ' ' + f'{work_dir}/{local_folder}'
+        endpoint = "" if "FASTDUP_S3_ENDPOINT_URL" not in os.environ else f"--endpoint-url={os.environ['FASTDUP_S3_ENDPOINT_URL']}"
+        command = f'aws s3 {endpoint} sync ' + input_dir + ' ' + f'{work_dir}/{local_folder}'
         if not verbose:
             command += ' --no-progress'
         ret = os.system(command)
@@ -103,7 +104,13 @@ def record_time():
     except Exception as ex:
         fastdup_capture_exception("Timestamp", ex)
 
-
+def calc_save_dir(save_path):
+    save_dir = save_path
+    if save_dir.endswith(".html"):
+        save_dir = os.path.dirname(save_dir)
+        if save_dir == "":
+            save_dir = "."
+    return save_dir
 
 def get_images_from_path(path):
     "List a subfoler recursively and get all image files supported by fastdup"
@@ -178,18 +185,25 @@ def save_as_csv_file_list(filenames, files_path):
 def expand_list_to_files(the_list):
     assert len(the_list), "Got an empty list for input"
     files = []
+    found = False
     for f in the_list:
-        if f.startswith("s3://") or f.startswith("minio://"):
-            if f.lower().endswith(IMAGE_SUFFIXES):
-                files.extend(f)
+        if isinstance(f, str):
+            if f.startswith("s3://") or f.startswith("minio://"):
+                for suffix in IMAGE_SUFFIXES:
+                    if f.lower().endswith(suffix):
+                        found = True
+                        files.append(f)
+                        break
+
+                assert found, f"Unsupported mode: can not run on lists of s3 folders, please list all image or video files " \
+                              f"in s3 and give a list of all files each one in a new row, file was {f}"
+
+            elif os.path.isfile(f):
+                files.append(f)
+            elif os.path.isdir(f):
+                files.extend(get_images_from_path(f))
             else:
-                assert False, "Unsupported mode: can not run on lists of s3 folders, please list all files in s3 and give a list of all files each one in a new row"
-        if os.path.isfile(f):
-            files.append(f)
-        elif os.path.isdir(f):
-            files.extend(get_images_from_path)
-        else:
-            warnings.warn(f"Failed to find file {f}")
+                assert False, f"Unknown file type encountered in list: {f}"
 
     assert len(files), "Failed to extract any files from list"
     return files
@@ -210,10 +224,14 @@ def find_nrows(kwargs):
 
 def load_filenames(work_dir, kwargs):
     assert work_dir is not None and isinstance(work_dir, str) and os.path.exists(work_dir), \
-        "Need to specify work_dir to point to the location of fastdup work_dir"
+        f"Need to specify work_dir to point to the location of fastdup work_dir, got {work_dir}"
+    load_crops = 'load_crops' in kwargs and kwargs['load_crops']
+    draw_bbox = 'draw_bbox' in kwargs and kwargs['draw_bbox']
 
     if work_dir.endswith('.csv'):
         local_filenames = work_dir
+    elif load_crops or draw_bbox:
+        local_filenames = os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST)
     else:
         local_filenames = os.path.join(work_dir, "atrain_" + FILENAME_IMAGE_LIST)
     assert os.path.isfile(local_filenames), "Failed to find fastdup input file " + local_filenames
@@ -222,7 +240,8 @@ def load_filenames(work_dir, kwargs):
     filenames = pd.read_csv(local_filenames, nrows=nrows)
     assert len(filenames), "Empty dataframe found " + local_filenames
     assert 'filename' in filenames.columns, f"Error: Failed to find filename column in {work_dir}/atrain_{FILENAME_IMAGE_LIST}"
-
+    if load_crops and not draw_bbox:
+        filenames["crop_filename"] = filenames["filename"]
     return filenames
 
 def merge_stats_with_filenames(df, filenames):
@@ -300,6 +319,10 @@ def merge_with_filenames(df, filenames):
     df = df.rename(columns={'filename_x': 'from', 'filename_y': 'to'})
     return df
 
+def merge_with_filenames_one_sided(df, filenames):
+    df = df.merge(filenames, left_on='from', right_on='index')
+    assert len(df), "Failed to merge similarity/outliers with atrain_features.dat.csv file"
+    return df
 def get_bounding_box_func_helper(get_bounding_box_func):
     if get_bounding_box_func is None:
         return None
@@ -334,14 +357,14 @@ def get_bounding_box_func_helper(get_bounding_box_func):
 def sample_from_components(row, metric, kwargs, howmany):
     selection_strategy = kwargs['selection_strategy']
     if selection_strategy == SELECTION_STRATEGY_FIRST:
-        return row['files'][:howmany]
+        return list(itertools.islice(zip(row['files'],row['files_ids']), howmany))
     elif selection_strategy == SELECTION_STRATEGY_RANDOM:
-        return random.sample(row['files'], howmany)
+        return list(itertools.islice(random.sample(zip(row['files'], row['files_ids'])), howmany))
     elif selection_strategy == SELECTION_STRATEGY_UNIFORM_METRIC:
         assert metric in row, "When using selection_strategy=2 (SELECTION_STRATEGY_UNIFORM_METRIC) need to call with metric=metric."
         assert len(row[metric]) == len(row['files'])
         #Combine the lists into a list of tuples
-        combined = zip(row['files'], row[metric])
+        combined = zip(zip(row['files'],row['files_ids']), row[metric])
 
         # Sort the list of tuples by the float value
         sorted_combined = sorted(combined, key=lambda x: x[1])
@@ -355,10 +378,6 @@ def sample_from_components(row, metric, kwargs, howmany):
         return filenames
 
 if __name__ == "__main__":
-    #print(get_bounding_box_func_helper("../t1/atrain_crops.csv"))
-    file = ["a","b","c","d", "e","f","g","h"]
-    floats = [1,2,3,4,1,2,3,1]
-    row = {}
-    row['blur'] = floats
-    row['files'] = file
-    sample_from_components(row, 'blur', {}, 2)
+    import fastdup
+    fd = fastdup.create(input_dir='/mnt/data/sku110k', work_dir='abcd')
+    fd.run(num_images=10, overwrite=True)

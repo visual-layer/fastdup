@@ -1,12 +1,13 @@
 
 # dtypes
-IMG = 'images'
+IMG = 'image'
 BBOX = 'bbox'
 
 # run modes
 MODE_DEFAULT = 'default'
 MODE_EMBEDDING = 'embedding'
 MODE_CROP = 'crop'
+MODE_ROTATED_BBOX = 'rotated'
 
 # fastdup files
 SPLITS_CSV = 'splits_found.json'
@@ -28,7 +29,7 @@ ANNOT_PKL = 'full_annot.pkl.gz'
 IMG_GRP_ANNOT_PKL = 'img_grouped_annot.pkl.gz'
 
 # annotation expected columns
-ANNOT_FILENAME = 'img_filename'
+ANNOT_FILENAME = 'filename'
 ANNOT_CROP_FILENAME = 'crop_filename'
 ANNOT_IMG_ID = 'img_id'
 ANNOT_IMG_H = 'img_h'
@@ -51,7 +52,7 @@ ANNOT_LABEL = 'label'
 
 # extended annotation columns
 ANNOT_VALID = 'is_valid'
-ANNOT_FD_ID = 'fastdup_id'
+ANNOT_FD_ID = 'index'
 
 # Connected components columns
 CC_INST_ID = '__id'
@@ -79,3 +80,6 @@ STATS_INST_ID = 'index'
 # map file columns
 MAP_INST_ID = 'index'
 MAP_FILENAME = 'filename'
+
+ERROR_MISSING_IMAGE = 'ERROR_MISSING_FILE'
+ERROR_BAD_BOUNDING_BOX = 'ERROR_BAD_BOUNDING_BOX'

@@ -16,6 +16,24 @@ import platform
 def safe_replace(path):
     return path.replace('/','_').replace('\\','_').replace(":",'_')
 
+
+def enhance_image(image):
+    # Convert image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Apply histogram equalization
+    equalized = cv2.equalizeHist(gray)
+
+    # Return equalized image
+    return equalized
+
+def get_shape(img):
+    if len(img.shape) == 2:
+        h, w, c = (*img.shape, 1)
+    else:
+        h, w, c = img.shape
+    return h, w, c
+
 def calc_image_path(lazy_load, save_path, filename, filename_suffix=''):
     if lazy_load:
         os.makedirs(os.path.join(save_path, "images"), exist_ok=True)
@@ -24,7 +42,7 @@ def calc_image_path(lazy_load, save_path, filename, filename_suffix=''):
         imgpath = os.path.join(save_path, safe_replace(filename))
 
     p, ext = os.path.splitext(imgpath)
-    if ext is not None and ext != '' and ext.lower() not in ['png','tiff','tif','jpeg','jpg','gif']:
+    if ext is not None and ext != '' and ext.lower() not in ['.png','.tiff','.tif','.jpeg','.jpg','.gif','.webp']:
         ext += ".jpg"
     imgpath = p + filename_suffix + ext
     return imgpath
@@ -50,7 +68,7 @@ def clean_images(lazy_load, img_paths, section):
     if not lazy_load:
         for i in img_paths:
             try:
-                if i is not None:
+                if i is not None and os.path.exists(i):
                     os.unlink(i)
             except Exception as ex:
                 print("Failed to delete image file ", i, ex)
@@ -66,7 +84,8 @@ def download_minio(path, save_path):
         assert ret == 0, f"Failed to download from minio {path} to {save_path}"
 
 def download_s3(path, save_path):
-    ret = os.system(f"aws s3 cp {path} {save_path}")
+    endpoint = "" if "FASTDUP_S3_ENDPOINT_URL" not in os.environ else f"--endpoint-url={os.environ['FASTDUP_S3_ENDPOINT_URL']}"
+    ret = os.system(f"aws s3 {endpoint} cp {path} {save_path}")
     assert ret == 0, f"Failed to download from s3 {path} to {save_path}"
 
 def truncate_folder_name(path):
@@ -141,6 +160,22 @@ def fastdup_imread(img1_path, input_dir, kwargs):
             ret = cv2.imread(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
             assert ret is not None, f"Failed to read image {os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path))}"
             return ret
+    #Failed to read image1 ..\milvus_vector_db\data\images\..\milvus_vector_db\data\images\Egyptian_Mau_210.jpg
+    elif img1_path.startswith(input_dir) and len(img1_path) >= len(input_dir) +2:
+        suffix = img1_path[len(input_dir):]
+        if input_dir in suffix and os.path.exists(suffix):
+            img = cv2.imread(suffix, cv2.IMREAD_UNCHANGED)
+            if img is not None:
+                if img.dtype == 'uint16':
+                    img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+                    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+            return img
+    elif "''" in img1_path: # try to handle french and other languages where c side doubles the '' otherwise pandas can't read it
+        new_img1_path = img1_path.replace("''","")
+        if os.path.exists(new_img1_path):
+            img = cv2.imread(new_img1_path, cv2.IMREAD_UNCHANGED)
+            return img
+
 
     print('Failed to read image from img_path', img1_path)
     return None
@@ -160,6 +195,16 @@ def image_base64(im):
         return "None"
     if isinstance(im, str):
         im = cv2.imread(im)
+        if im is None:
+            return "None"
+
+    # try to overcome this error
+    """OpenCV(4.7.0) :-1: error: (-5:Bad argument) in function 'imencode'
+    > Overload resolution failed:
+    >  - img data type = 17 is not supported
+    >  - Expected Ptr<cv::UMat> for argument 'img'"""
+    if im.dtype == np.int8:
+        im = im.astype(np.uint8)
     is_success, buffer = cv2.imencode(".jpg", np.array(im))
     io_buf = io.BytesIO(buffer)
     return base64.b64encode(io_buf.getvalue()).decode()
@@ -188,7 +233,10 @@ def get_optimal_font_scale(text, width):
     return 1, text_size
 
 def my_resize(img, max_width):
-    h, w, c = img.shape
+    if img is None:
+        return None
+    h, w, c = get_shape(img)
+
     w1 = 320
     if max_width is not None and w > max_width:
         w1 = max_width
@@ -234,25 +282,29 @@ def draw_text(img, text,
     return text_size, img
 
 def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding_box_func=None, input_dir=None, kwargs=None):
+    #v1 = 'id_to_filename_func' in kwargs
     id_from, id_to = row['from'], row['to']
-    suffix_from, suffix_to = (f'_{id_from}', f'_{id_to}') if 'id_to_filename_func' in kwargs else ('', '')
-    if 'id_to_filename_func' in kwargs:
-        id_to_filename_func = kwargs['id_to_filename_func']
-        row[['from','to']] = [id_to_filename_func(row['from']), id_to_filename_func(row['to'])]
+    #if v1:
+    #    assert not isinstance(id_from, str), f"Wrong type {row}"
+
+    #suffix_from, suffix_to = (f'_{id_from}', f'_{id_to}') if v1 else ('', '')
+    #if v1:
+    #    id_to_filename_func = kwargs['id_to_filename_func']
+    #    row[['from','to']] = [id_to_filename_func(row['from']), id_to_filename_func(row['to'])]
 
     img1_path, img2_path, distance, ptype = extract_filenames(row, work_dir, save_path, kwargs)
 
     img1 = fastdup_imread(img1_path, input_dir, kwargs)
     img2 = fastdup_imread(img2_path, input_dir, kwargs)
 
-    assert img1 is not None, "Failed to read image1 " + img1_path
-    assert img2 is not None, "Failed to read image2 " + img2_path
+    assert img1 is not None, f"Failed to read image1 {img1_path} {str(input_dir)}"
+    assert img2 is not None, f"Failed to read image2 {img2_path} {str(input_dir)}"
 
     img1 = plot_bounding_box(img1, get_bounding_box_func, id_from)
     img2 = plot_bounding_box(img2, get_bounding_box_func, id_to)
 
-    h1, w1, c1 = img1.shape
-    h2, w2, c2 = img2.shape
+    h1, w1, c1 = get_shape(img1)
+    h2, w2, c2 = get_shape(img2)
     assert h1 > 0 and h2 > 0 and w1 > 0 and w2 > 0
 
     w = 320
@@ -281,8 +333,11 @@ def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding
     else:
         hcon_img = hconcat_resize_min([nimg1, nimg2, cimage])
 
-    summary_txt = 'type: {0}, distance: {1:.2f}'.format(ptype, distance)
-    
+    if ptype != "":
+        summary_txt = 'type: {0}, distance: {1:.2f}'.format(ptype, distance)
+    else:
+        summary_txt = 'distance: {0:.2f}'.format(distance)
+
     y = int(hcon_img.shape[0]*0.9)
     x = int(hcon_img.shape[1]/3)
     if not hierarchical_run:
@@ -290,7 +345,7 @@ def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding
 
     name1 = os.path.splitext(os.path.basename(img1_path))[0]
     name2 = os.path.splitext(os.path.basename(img2_path))[0]
-    pid = '{0}_{1}'.format(name1,name2) + suffix_from + suffix_to
+    pid = '{0}_{1}'.format(name1,name2) #+ suffix_from + suffix_to
     lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
     if lazy_load:
         os.makedirs(os.path.join(save_path, 'images'), exist_ok=True)
@@ -298,7 +353,7 @@ def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding
     else:
         hcon_img_path = f'{save_path}/{pid}.jpg'
     cv2.imwrite(hcon_img_path, hcon_img)
-    assert os.path.exists(hcon_img_path)
+    assert os.path.exists(hcon_img_path), f"Failed to write image to {hcon_img_path}"
 
     return hcon_img, hcon_img_path
 

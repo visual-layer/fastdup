@@ -92,6 +92,7 @@ textarea {
 
 img {
   display: block;
+  min-width: 25%;
   height: auto;\n'''
 
     #if max_width is None:
@@ -329,6 +330,7 @@ bottom: 0;
     font-weight: 600;
     font-size: 2rem;
     line-height: 0.9285714286;
+    text-align: center;
     padding: 8px 8px;
 '''
 
@@ -414,13 +416,21 @@ line-height: 1;
 position: absolute;
 margin: 0;
 bottom: 0;
-width: 150px;
+wifth: 150px
 right: 59px;
 }
 
 .hero-logo__subtitle {
 margin: 2px 0 24px 0;
 font-size: 4rem;
+line-height: 1.1333333333;
+font-weight: 600;
+color: #2E3E8E;
+}
+
+.hero-logo__subtitle2 {
+margin: 2px 0 24px 0;
+font-size: 2rem;
 line-height: 1.1333333333;
 font-weight: 600;
 color: #2E3E8E;
@@ -477,10 +487,10 @@ padding-top: 15px;
 border-color: #657BEC;
 position: relative;
 border-width: 0.5px;
-#width: 750px;
+max-width: 100%;
 }
 .component__image::before {
-    content: 'image';
+    content: '';
 position: absolute;
 top: 27px;
 left: 27px;
@@ -573,8 +583,7 @@ def write_html_header(title, subtitle = None, max_width = None, jupyter_html = F
     <meta property="og:image" content="" />
     <title>{title}</title>
     '''
-    if subtitle is not None:
-        result += '<center><h3> %s </h3></center><br>' % subtitle
+
 
     result += f'''
     
@@ -592,7 +601,12 @@ def write_html_header(title, subtitle = None, max_width = None, jupyter_html = F
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-logo">
-                        <p class="hero-logo__subtitle">{title}</p>
+                        <p class="hero-logo__subtitle">{title}</p>'''
+
+    if subtitle is not None and subtitle != "":
+        result += f'''<p class="hero-logo__subtitle2">{subtitle}</p>'''
+
+    result += '''   
                     </div>
                 </div>
             </div>
@@ -676,8 +690,10 @@ def write_component_info_row(row, col_order, write_row_name=True, half_size=Fals
             for i,trow in row[col].iterrows():
                 result += write_component_info_row(trow, row[col].columns, write_row_name, True)
             result += write_component_info_footer(-1)
+        elif isinstance(row[col], list):
+            result += f"    <td>{str(row[col])}</td>\n"
         else:
-            assert False, f"Wrong instance type {type(row[col])}"
+            assert False, f"Wrong instance type {type(row[col])}, {col} {str(row[col])}"
     result += "</tr>\n"
 
     return result
@@ -688,7 +704,8 @@ def write_component(cols, row, index, max_width, write_row_name):
     for c in cols:
         header = c.replace('_', ' ').title()
         if c.lower() == 'image':
-            assert "img src" in row[c]
+            if "img src" not in row[c]:
+                print(f"Warning: Failed to find image src in image column: {str(row[c])}")
             result += write_component_image(index, row[c], max_width)
         elif isinstance(row[c], pd.DataFrame):
             #print('FOUND DF WITH COL', row[c].columns)
@@ -698,6 +715,8 @@ def write_component(cols, row, index, max_width, write_row_name):
             result += write_component_info_footer()
         elif isinstance(row[c], str) or isinstance(row[c], int) or isinstance(row[c], float):
             result += write_component_str(row[c], header)
+        elif isinstance(row[c], list):
+            result += write_component_str(str(row[c]), header)
         else:
             assert(False), f"Wrong instance type {type(row[c])}"
 

@@ -5,6 +5,7 @@ from sentry_sdk import capture_exception
 
 import time
 import os
+import sys
 import traceback
 import platform
 import uuid
@@ -74,6 +75,9 @@ def fastdup_capture_exception(section, e, warn_only=False):
             scope.set_tag("section", section)
             scope.set_tag("unit_test", unit_test)
             scope.set_tag("token", token)
+            scope.set_tag("platform", platform.platform())
+            scope.set_tag("platform.version", platform.version())
+            scope.set_tag("python", sys.version)
             capture_exception(e, scope=scope)
 
 
@@ -92,6 +96,9 @@ def fastdup_performance_capture(section, start_time):
                 scope.set_tag("unit_test", unit_test)
                 scope.set_tag("token", token)
                 scope.set_tag("runtime-sec", time.time()-start_time)
+                scope.set_tag("platform", platform.platform())
+                scope.set_tag("platform.version", platform.version())
+                scope.set_tag("python", sys.version)
                 sentry_sdk.capture_message("Performance", scope=scope)
         finally:
             sentry_sdk.flush(timeout=5)

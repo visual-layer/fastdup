@@ -17,6 +17,7 @@ import glob
 import cv2
 import shutil
 import zipfile
+from fastdup.image import get_shape
 
 MANIFEST_FILE = 'data/manifest.jsonl'
 INDEX_FILE = 'data/index.json'
@@ -83,7 +84,7 @@ def create_annotations_file(files, labels, save_path):
         assert os.path.exists(f), "Faied to find path " + str(f)
         img = cv2.imread(f)
         assert img is not None, "Failed to read image" + str(f)
-        h, w, c = img.shape
+        h, w, c = get_shape(img)
         shape.append(
             {
                 "type":"rectangle",
@@ -245,7 +246,7 @@ def create_cvat_manifest(files, save_path):
         for f in files:
             filename, ext = os.path.splitext(os.path.basename(f))
             img = cv2.imread(f)
-            h, w, c = img.shape
+            h, w, c = get_shape(img)
             cstr = "{"
             cstr += "\"name\":\"{}\",\"extension\":\".{}\",\"width\":{},\"height\":{}".format(filename, ext[1:], w, h)
             cstr += ",\"meta\":{\"related_images\":[]}}\n"

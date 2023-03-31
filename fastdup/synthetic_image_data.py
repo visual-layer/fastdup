@@ -50,7 +50,7 @@ def create_corrupted_image(output_dir, color):
 
 
 def gen_data(output_dir, n_valid, n_corrupted, n_duplicated, n_no_annotation, n_no_image):
-    shutil.rmtree(output_dir, ignore_errors=True)
+    #shutil.rmtree(output_dir, ignore_errors=True)
     os.makedirs(output_dir, exist_ok=True)
 
     colors = []
