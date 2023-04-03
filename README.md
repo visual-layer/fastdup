@@ -314,7 +314,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
 <table>
   <tr>
       <td rowspan="3" width="160">
-      <a href="https://visual-layer.readme.io/docs/video-face-detection" target="_blank">
+      <a href="https://visual-layer.readme.io/docs/video-face-detection">
               <img src="./gallery/video-face-detection.png" width="256">
       </a>
       </td>    
