@@ -306,6 +306,78 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   
 </table>
 
+## Advanced Features
+
+The following are advanced functionalities of fastdup. Sign up for free to be an beta tester and get early access at info@visual-layer.com .
+
+<table>
+  <tr>
+      <td rowspan="3" width="160">
+      <a href="https://visual-layer.readme.io/docs/video-face-detection">
+              <img src="./gallery/video-face-detection.png" width="256">
+      </a>
+      </td>    
+      <td rowspan="3">
+        <b>Face Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a face detection model to detect and crop from videos. Following that we analyze the cropped faces for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr>
+
+  <!-- ------------------------------------------------------------------- -->
+
+  <tr>
+      <td rowspan="3" width="160">
+      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
+              <img src="gallery/video-yolov5-detection.png" width="256">
+      </a>
+      </td>    
+      <td rowspan="3">
+        <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pretrained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr>
+  
+</table>
+
+
+
+
 
 ## Getting Help
 Get help from the fastdup team or community members via the following channels -
