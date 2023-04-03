@@ -309,12 +309,12 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 ## Advanced Features
 
 The following are advanced functionalities of fastdup which are still in the beta testing phase.
-Sign up for free to be a beta tester and get early access at info@visual-layer.com .
+Sign up for free to be a beta tester and get early access. Drop us an email at info@visual-layer.com .
 
 <table>
   <tr>
       <td rowspan="3" width="160">
-      <a href="https://visual-layer.readme.io/docs/video-face-detection">
+      <a href="https://visual-layer.readme.io/docs/video-face-detection" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/video-face-detection.png" width="256">
       </a>
       </td>    
@@ -322,21 +322,21 @@ Sign up for free to be a beta tester and get early access at info@visual-layer.c
         <b>Face Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a face detection model to detect and crop from videos. Following that we analyze the cropped faces for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
@@ -346,7 +346,7 @@ Sign up for free to be a beta tester and get early access at info@visual-layer.c
 
   <tr>
       <td rowspan="3" width="160">
-      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
+      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection" target="_blank" rel="noopener noreferrer">
               <img src="gallery/video-yolov5-detection.png" width="256">
       </a>
       </td>    
@@ -354,21 +354,21 @@ Sign up for free to be a beta tester and get early access at info@visual-layer.c
         <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pre-trained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb" target="_blank" rel="noopener noreferrer">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
