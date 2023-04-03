@@ -183,7 +183,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Quick Dataset Analysis:</b> In this example, learn how to quickly analyze a dataset for potential issues. Identify duplicates, outliers, dark/bright/blurry images and cluster similar images with only a few lines of code. If you're new, start here.
+        <b>Quick Dataset Analysis:</b> In this example, learn how to quickly analyze a dataset for potential issues. Identify duplicates, outliers, dark/bright/blurry images, and cluster similar images with only a few lines of code. If you're new, start here.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
@@ -308,7 +308,8 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 ## Advanced Features
 
-The following are advanced functionalities of fastdup. Sign up for free to be an beta tester and get early access at info@visual-layer.com .
+The following are advanced functionalities of fastdup which are still in the beta testing phase.
+Sign up for free to be a beta tester and get early access at info@visual-layer.com .
 
 <table>
   <tr>
@@ -350,7 +351,7 @@ The following are advanced functionalities of fastdup. Sign up for free to be an
       </a>
       </td>    
       <td rowspan="3">
-        <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pretrained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
+        <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pre-trained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
