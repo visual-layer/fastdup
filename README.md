@@ -404,7 +404,37 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
-  
+   <!-- ------------------------------------------------------------------- -->
+
+  <tr>
+      <td rowspan="3" width="160">
+      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
+              <img src="gallery/survailance.png" width="256">
+      </a>
+      </td>
+      <td rowspan="3">
+        <b>Survailance Camera Analysis:</b> In this tutorial, learn how to use fastdup to analyze survailance camera videos, caption the activity inside the videos and detect indoor/ outdoor. 
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/survailance.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/survailance.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/survailance.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr> 
 </table>
 
 
