@@ -207,6 +207,38 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
 
   <!-- ------------------------------------------------------------------- -->
+  <tr>
+      <td rowspan="3" width="160">
+      <a href="https://visual-layer.readme.io/docs/getting-started">
+              <img src="./gallery/cat_dog_thumbnail.jpg" width="256">
+      </a>
+      </td>    
+      <td rowspan="3">
+        <b>Dino v2 Embeddings:</b> In this example, learn how to use the latest Dino v2 algorithm to create and visualize image embeddings.
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr>
+
+  <!-- ------------------------------------------------------------------- -->
+
 
   <tr>
       <td rowspan="3" width="160">
