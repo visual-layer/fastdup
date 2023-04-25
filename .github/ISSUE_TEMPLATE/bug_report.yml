@@ -20,7 +20,7 @@ body:
       label: What did you expect to see?
       placeholder: Tell us what you expect!
     validations:
-      required: true
+      required: false
   - type: input
     id: fastdup-version
     attributes:
@@ -72,7 +72,7 @@ body:
     attributes:
       label: Attach a screenshot [Optional]
     validations:
-      required: true
+      required: false
   - type: input
     id: contact
     attributes:
@@ -80,4 +80,4 @@ body:
       description: How can we get in touch with you if we need more info?
       placeholder: ex. email@example.com
     validations:
-      required: true
+      required: false
