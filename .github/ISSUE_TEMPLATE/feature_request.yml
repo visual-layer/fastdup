@@ -1,0 +1,36 @@
+name: Feature Request
+description: Suggest a new feature for the project
+title: "[Feature Request]: "
+labels: ["feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature for our project! Please fill out the following information so we can better understand your request.
+  - type: input
+    id: feature-name
+    attributes:
+      label: Feature Name
+      description: What do you want to call this feature?
+      placeholder: ex. Dark Mode
+    validations:
+      required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Please describe the new feature in as much detail as possible.
+      placeholder: |
+        What does the feature do?
+        Why do you think it's important?
+        How will it benefit users?
+    validations:
+      required: true
+  - type: input
+    id: contact-info
+    attributes:
+      label: Contact Information [Optional]
+      description: How can we get in touch with you if we have questions or need more information?
+      placeholder: ex. email@example.com
+    validations:
+      required: false

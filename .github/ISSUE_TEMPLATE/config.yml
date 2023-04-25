@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussion Forum
+    url: https://visual-layer.readme.io/discuss
+    about: Ask questions and discuss.
+  - name: Slack Channel
+    url: https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email
+    about: Chat with us.
+  - name: Documentation Page
+    url: https://visual-layer.readme.io/
+    about: Read the docs.
