@@ -37,7 +37,7 @@
     </picture>
   </a>
 
-<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale</h3>
+<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
 
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
@@ -66,6 +66,9 @@
     <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
     </a>
+    <a href="https://twitter.com/visual_layer" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Logo">
+    </a>
     <a href="https://www.youtube.com/@visual-layer4035" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
@@ -77,14 +80,14 @@
 </div>
 
 ## What's Included
-fastdup lets you identify -
+fastdup analyzes your image/video dataset for potential issues such as -
  <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <img src="./gallery/issues.png" alt="fastdup" width="1000">
   </a>
  </div>
 
-Additional features -
+fastdup works on both labeled and unlabeled data. Additional features include -
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
@@ -156,13 +159,13 @@ Visualize the result.
 
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
-Here are the 8 lines of code you'll need in most cases.
+Here are 8 lines of code you'll need in most cases.
 
 ```python
 import fastdup
 
 fd = fastdup.create(work_dir, images_dir)
-fd.run(nearest_neighbors_k=5, cc_threshold=0.96)
+fd.run()
 
 fd.vis.duplicates_gallery()    # create a visual gallery of found duplicates
 fd.vis.outliers_gallery()      # create a visual gallery of anomalies
@@ -414,7 +417,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
       </a>
       </td>    
       <td rowspan="3">
-        <b>Satellite Image Analysis:</b> In this tutorial, learn how to use fastdup to load 16 bit grayscale satellite image, work with rotated bounding boxes, understand your dataset, find issues with the data and check the quality of annotations.
+        <b>Satellite Image Analysis:</b> In this tutorial, learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes, understand your dataset, find issues with the data and check the quality of annotations.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
@@ -482,7 +485,7 @@ Get help from the fastdup team or community members via the following channels -
 ## Community Contributions
 The following are community-contributed blog posts about fastdup - 
 
-- [Master Data Integrity to Clean Your Computer Vision Datasets
+- [Master Data Integrity to Clean Your Computer Vision Datasets.
 ](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
 - [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
 - [Clean Up Your Digital Life: How I Found 1929 Fully Identical Images, Dark, Bright and Blurry Shots in Minutes, For Free.](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
