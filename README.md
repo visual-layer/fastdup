@@ -23,7 +23,7 @@
 [downloads-url]: https://pypi.org/project/fastdup/
 [contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[license-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-purple.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-purple.svg?style=for-the-badge
 [license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
 
 <!-- PROJECT LOGO -->
