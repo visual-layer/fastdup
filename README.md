@@ -46,7 +46,7 @@
     <br />
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Features</a>
     ·
-    <a href="https://github.com/visual-layer/fastdup/issues" target="_blank" rel="noopener noreferrer">Report Bug</a>
+    <a href="https://github.com/visual-layer/fastdup/issues/new/choose" target="_blank" rel="noopener noreferrer">Report Bug</a>
     ·
     <a href="https://medium.com/@amiralush/large-image-datasets-today-are-a-mess-e3ea4c9e8d22" target="_blank" rel="noopener noreferrer">Read Blog</a>
     ·
@@ -217,7 +217,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Dino v2 Embeddings:</b> In this example, learn how to use the latest Dino v2 algorithm to create and visualize image embeddings.
+        <b>DINOv2 Embeddings:</b> In this example, learn how to use DINOv2 models to visualize image embeddings of your dataset. Runs on CPU!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
