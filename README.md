@@ -217,7 +217,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="3">
-        <b>Dino v2 Embeddings:</b> In this example, learn how to use the latest Dino v2 algorithm to create and visualize image embeddings.
+        <b>DINOv2 Embeddings:</b> In this example, learn how to use [DINOv2](https://github.com/facebookresearch/dinov2) models to visualize image embeddings of your dataset. Run on CPU!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
