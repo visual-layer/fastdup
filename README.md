@@ -476,7 +476,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
   <tr>
       <td rowspan="3" width="160">
       <a href="https://visual-layer.readme.io/docs/image-search">
-              <img src="gallery/shopee.png" width="256">
+              <img src="gallery/product-matching.png" width="256">
       </a>
       </td>
       <td rowspan="3">
