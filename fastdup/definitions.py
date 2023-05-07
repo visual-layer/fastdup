@@ -47,7 +47,7 @@ HIGH_ACCURACY_MODEL_FEATURE_WIDTH = 960
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "0.912"
+VERSION__ = "0.927"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 
@@ -72,6 +72,96 @@ SELECTION_STRATEGY_RANDOM = 1
 SELECTION_STRATEGY_UNIFORM_METRIC = 2
 
 YOLOV5S_MODEL = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
+DINOV2S_MODEL = "https://vl-company-website.s3.us-east-2.amazonaws.com/model_artifacts/dinov2/dinov2_vits14.onnx"
+DINOV2S_MODEL_DIM = 384
+DINOV2B_MODEL = "https://vl-company-website.s3.us-east-2.amazonaws.com/model_artifacts/dinov2/dinov2_vitb14.onnx"
+DINOV2B_MODEL_DIM = 768
+
+CAPTION_MODEL1_NAME = 'automatic'
+CAPTION_MODEL2_NAME = 'blip'
+CAPTION_MODEL3_NAME = 'blip2'
+VQA_MODEL1_NAME = "indoors_outdoors"
+AGE_LABEL1_NAME = 'age'
+
+# dtypes
+IMG = 'image'
+BBOX = 'bbox'
+
+# run modes
+MODE_DEFAULT = 'default'
+MODE_EMBEDDING = 'embedding'
+MODE_CROP = 'crop'
+MODE_ROTATED_BBOX = 'rotated'
+
+# fastdup files
+SPLITS_CSV = 'splits_found.json'
+MAPPING_CSV = 'atrain_features.dat.csv'
+BAD_CSV = 'atrain_features.bad.csv'
+FEATURES_DATA = 'atrain_features.dat'
+STATS_CSV = 'atrain_stats.csv'
+CONFIG_JSON = 'config.json'
+CROPS_CSV = 'atrain_crops.csv'
+
+# extra files
+BBOX_INPUT_CSV = 'objects_annot_fastdup_input.csv'
+ANNOT_PKL = 'full_annot.pkl.gz'
+IMG_GRP_ANNOT_PKL = 'img_grouped_annot.pkl.gz'
+
+# annotation expected columns
+ANNOT_FILENAME = 'filename'
+ANNOT_CROP_FILENAME = 'crop_filename'
+ANNOT_IMG_ID = 'img_id'
+ANNOT_IMG_H = 'img_h'
+ANNOT_IMG_W = 'img_w'
+ANNOT_BBOX_X = 'col_x'
+ANNOT_BBOX_Y = 'row_y'
+ANNOT_BBOX_W = 'width'
+ANNOT_BBOX_H = 'height'
+ANNOT_ROT_BBOX_X1 = 'x1'
+ANNOT_ROT_BBOX_Y1 = 'y1'
+ANNOT_ROT_BBOX_X2 = 'x2'
+ANNOT_ROT_BBOX_Y2 = 'y2'
+ANNOT_ROT_BBOX_X3 = 'x3'
+ANNOT_ROT_BBOX_Y3 = 'y3'
+ANNOT_ROT_BBOX_X4 = 'x4'
+ANNOT_ROT_BBOX_Y4 = 'y4'
+ANNOT_SPLIT = 'split'
+ANNOT_ERROR = 'error_code'
+ANNOT_LABEL = 'label'
+
+# extended annotation columns
+ANNOT_VALID = 'is_valid'
+ANNOT_FD_ID = 'index'
+
+# Connected components columns
+CC_INST_ID = '__id'
+CC_UNI_SPLIT = 'uni_split'
+CC_BI_SPLIT = 'bi_split'
+
+# bad files columns
+BAD_FILENAME = 'filename'
+BAD_ERROR = 'error_code'
+BAD_FD_ID = 'index'
+
+# similarity columns
+SIM_SRC_IMG = 'from'
+SIM_DST_IMG = 'to'
+SIM_SCORE = 'distance'
+
+# outliers columns
+OUT_ID = 'outlier'
+OUT_NEAREST_NEIGHBOR = 'nearest'
+OUT_SCORE = 'distance'
+
+# stats columns
+STATS_INST_ID = 'index'
+
+# map file columns
+MAP_INST_ID = 'index'
+MAP_FILENAME = 'filename'
+
+ERROR_MISSING_IMAGE = 'ERROR_MISSING_FILE'
+ERROR_BAD_BOUNDING_BOX = 'ERROR_BAD_BOUNDING_BOX'
 
 def get_sep():
     return os.sep

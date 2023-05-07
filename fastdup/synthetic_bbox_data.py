@@ -8,7 +8,7 @@ from pathlib import Path
 import cv2
 from fastdup.fastdup_controller import FastdupController
 from webcolors import rgb_to_name
-import fastdup.fastup_constants as FD
+import fastdup.definitions as FD
 import matplotlib.pyplot as plt
 
 
