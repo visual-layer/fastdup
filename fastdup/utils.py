@@ -2,6 +2,7 @@ import os
 import glob
 import random
 import platform
+from pathlib import Path
 from fastdup.definitions import *
 from datetime import datetime
 from fastdup.sentry import fastdup_capture_exception
@@ -192,8 +193,8 @@ def expand_list_to_files(the_list):
     files = []
     found = False
     for f in the_list:
-        if isinstance(f, str):
-            if f.startswith("s3://") or f.startswith("minio://"):
+        if isinstance(f, str) or isinstance(f, Path):
+            if isinstance(f, str) and (f.startswith("s3://") or f.startswith("minio://")):
                 for suffix in IMAGE_SUFFIXES:
                     if f.lower().endswith(suffix):
                         found = True
