@@ -31,8 +31,8 @@
 <div align="center">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=800>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=800>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
     <img alt="Fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
@@ -75,8 +75,8 @@
   </p>
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=400>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=800>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=800>
     <img alt="Fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
