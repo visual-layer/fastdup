@@ -75,8 +75,8 @@
   </p>
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=800>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=800>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=700>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=700>
     <img alt="Fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
