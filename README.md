@@ -73,10 +73,17 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=400>
+    <img alt="Fastdup logo." src="./gallery/logo.png">
+    </picture>
+  </a>
   <br />
     🔥 We've released fastdup V1.0! View the release notes
     <a href="./RELEASE_NOTES.md">here</a>.
-    <br />
+  <br />
 </div>
 
 ## What's Included
