@@ -80,6 +80,7 @@
     </picture>
   </a>
   <br />
+  <br />
     🔥 We've released
     <a href="./RELEASE_NOTES.md">fastdup V1.0</a> and <a href="https://techcrunch.com/2023/05/16/visual-layer-helps-enterprise-manage-the-massive-visual-data-sets-they-need-to-build-ai-models-raises-7m/">featured</a> in Techrunch, raising $7M!
   <br />
