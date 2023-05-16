@@ -38,7 +38,6 @@
   </a>
 
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
-
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
     <br />
@@ -73,10 +72,18 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=700>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=700>
+    <img alt="Fastdup logo." src="./gallery/logo.png">
+    </picture>
+  </a>
   <br />
-    🔥 We've released fastdup V1.0! View the release notes
-    <a href="./RELEASE_NOTES.md">here</a>.
-    <br />
+  <br />
+    🔥 We've released
+    <a href="./RELEASE_NOTES.md">fastdup V1.0</a> and <a href="https://techcrunch.com/2023/05/16/visual-layer-helps-enterprise-manage-the-massive-visual-data-sets-they-need-to-build-ai-models-raises-7m/">featured</a> in Techrunch, raising $7M!
+  <br />
 </div>
 
 ## What's Included
