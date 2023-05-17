@@ -224,6 +224,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
 
   <!-- ------------------------------------------------------------------- -->
+
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
@@ -260,9 +261,8 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
-
+  
   <!-- ------------------------------------------------------------------- -->
-
 
   <tr>
       <td rowspan="4" width="160">
@@ -464,6 +464,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
@@ -502,6 +503,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
