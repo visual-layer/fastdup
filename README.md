@@ -513,7 +513,7 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
 
   <tr>
       <td rowspan="3" width="160">
-      <a href="https://visual-layer.readme.io/docs/image-search">
+      <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
               <img src="gallery/feature_vector.png" width="256">
       </a>
       </td>
