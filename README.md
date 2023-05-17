@@ -420,8 +420,8 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/github_logo.png" height="32">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
   </tr>
@@ -429,12 +429,12 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/video-yolov5-detection.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pre-trained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
@@ -457,15 +457,22 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/satellite.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Satellite Image Analysis:</b> In this tutorial, learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes, understand your dataset, find issues with the data and check the quality of annotations.
       </td>
       <td align="center" width="80">
@@ -488,15 +495,22 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/surveillance.png" width="256">
       </a>
       </td>
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Surveillance Camera Analysis:</b> In this tutorial, learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/ outdoor. 
       </td>
       <td align="center" width="80">
@@ -518,17 +532,24 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
-  </tr> 
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/image-search">
               <img src="gallery/product-matching.jpg" width="256">
       </a>
       </td>
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Image Search:</b> In this tutorial, learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
       </td>
       <td align="center" width="80">
@@ -550,7 +571,14 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
-  </tr> 
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 </table>
 
 
