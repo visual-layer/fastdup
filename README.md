@@ -217,7 +217,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
@@ -255,7 +255,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
@@ -295,7 +295,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
@@ -334,7 +334,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
@@ -373,7 +373,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
