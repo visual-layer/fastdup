@@ -81,8 +81,8 @@
   </a>
   <br />
   <br />
-    🔥 We've released
-    <a href="./RELEASE_NOTES.md">fastdup V1.0</a> and <a href="https://techcrunch.com/2023/05/16/visual-layer-helps-enterprise-manage-the-massive-visual-data-sets-they-need-to-build-ai-models-raises-7m/">featured</a> in Techrunch, raising $7M!
+    🔥 We released
+    <a href="https://medium.com/@visual-layer/fastdup-one-year-strong-and-still-going-adb382a536d3">fastdup V1.0</a> and were <a href="https://techcrunch.com/2023/05/16/visual-layer-helps-enterprise-manage-the-massive-visual-data-sets-they-need-to-build-ai-models-raises-7m/">featured</a> in Techrunch, raising $7M!
   <br />
 </div>
 
@@ -187,12 +187,12 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 <table>
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
               <img src="./gallery/cat_dog_thumbnail.jpg" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Quick Dataset Analysis:</b> In this example, learn how to quickly analyze a dataset for potential issues. Identify duplicates, outliers, dark/bright/blurry images, and cluster similar images with only a few lines of code. If you're new, start here.
       </td>
       <td align="center" width="80">
@@ -215,15 +215,23 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
+
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
               <img src="./gallery/dino.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>DINOv2 Embeddings:</b> In this example, learn how to use DINOv2 models to visualize image embeddings of your dataset. Runs on CPU!
       </td>
       <td align="center" width="80">
@@ -246,17 +254,23 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
-
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  
   <!-- ------------------------------------------------------------------- -->
 
-
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
               <img src="gallery/food_101_thumbnail.jpg" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Cleaning Image Dataset:</b> In this tutorial, learn how to clean a dataset from broken images, duplicates, outliers, and identify dark/bright/blurry images.
       </td>
       <td align="center" width="80">
@@ -279,16 +293,23 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
               <img src="./gallery/imagenette_thumbnail.jpg" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Analyzing Labeled Image Classification Dataset:</b> In this tutorial, learn how to analyze a labeled image classification dataset for potential issues. We use the Imagenette dataset, a 10-class, 13k image subset of ImageNet as a working example.
       </td>
       <td align="center" width="80">
@@ -311,16 +332,23 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
               <img src="./gallery/coco_thumbnail.jpg" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Analyzing Labeled Object Detection Dataset:</b> In this tutorial learn how to load and analyze an object detection dataset with labeled bounding boxes and classes. We use the mini-coco dataset as a working example. Learn how to discover duplicates, outliers, and possible mislabeled bounding boxes.
       </td>
       <td align="center" width="80">
@@ -343,6 +371,13 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
   
@@ -355,12 +390,12 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
 
 <table>
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-face-detection">
               <img src="./gallery/video-face-detection.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Face Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a face detection model to detect and crop from videos. Following that we analyze the cropped faces for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
       </td>
       <td align="center" width="80">
@@ -383,16 +418,23 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/video-yolov5-detection.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pre-trained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
@@ -415,15 +457,23 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/satellite.png" width="256">
       </a>
       </td>    
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Satellite Image Analysis:</b> In this tutorial, learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes, understand your dataset, find issues with the data and check the quality of annotations.
       </td>
       <td align="center" width="80">
@@ -446,15 +496,23 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
               <img src="gallery/surveillance.png" width="256">
       </a>
       </td>
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Surveillance Camera Analysis:</b> In this tutorial, learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/ outdoor. 
       </td>
       <td align="center" width="80">
@@ -476,17 +534,24 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
-  </tr> 
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
 
   <!-- ------------------------------------------------------------------- -->
 
   <tr>
-      <td rowspan="3" width="160">
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/image-search">
-              <img src="gallery/product-matching.png" width="256">
+              <img src="gallery/product-matching.jpg" width="256">
       </a>
       </td>
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Image Search:</b> In this tutorial, learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
       </td>
       <td align="center" width="80">
@@ -509,15 +574,22 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr> 
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
  <!-- ------------------------------------------------------------------- -->
 
-  <tr>
-      <td rowspan="3" width="160">
+ <tr>
+      <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
               <img src="gallery/feature_vector.png" width="256">
       </a>
       </td>
-      <td rowspan="3">
+      <td rowspan="4">
         <b>Feature vectors:</b> In this tutorial, learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
       </td>
       <td align="center" width="80">
@@ -540,10 +612,16 @@ Sign up for free to be a beta tester and get early access. Drop us an email at i
           </a>
       </td>
   </tr> 
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+
+  
 </table>
-
-
-
 
 
 ## Getting Help
