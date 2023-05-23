@@ -313,21 +313,21 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
         <b>Analyzing Labeled Image Classification Dataset:</b> In this tutorial, learn how to analyze a labeled image classification dataset for potential issues. We use the Imagenette dataset, a 10-class, 13k image subset of ImageNet as a working example.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
