@@ -2,12 +2,19 @@ name: Test Run Examples
 
 on: 
   push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *' # Trigger at 8 AM every day
 
 jobs:
   test-quick-dataset-analysis:
-    runs-on: ubuntu-latest
+    runs-on: runs-on: ${{ matrix.os }}
     env:
         SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-latest, macos-latest, windows-latest]
+            python-version: ['3.9', '3.10']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -17,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'
+          python-version: ${{ matrix.python-version }}
       
       - name: Install dependencies
         run: |
