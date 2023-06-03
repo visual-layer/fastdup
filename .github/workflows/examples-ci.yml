@@ -29,17 +29,55 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install fastdup matplotlib==3.6.3
+          pip install fastdup matplotlib
 
       - name: Download dataset
         run: |
             wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
             tar xf "images.tar.gz"
 
-
       - name: Run example
         run: |
           python .github/workflows/tests/quick_dataset_analysis.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir
+          path: fastdup_work_dir/
+
+  test-cleaning-image-dtaset:
+    runs-on: ${{ matrix.os }}
+    env:
+        SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            python-version: ['3.9']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastdup matplotlib
+
+      - name: Download dataset
+        run: |
+            wget http://data.vision.ee.ethz.ch/cvl/food-101.tar.gz
+            tar -xf food-101.tar.gz
+
+      - name: Run example
+        run: |
+          python .github/workflows/tests/cleaning_image_dataset.py
       
       - name: Save artifacts
         uses: actions/upload-artifact@v3
