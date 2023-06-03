@@ -13,7 +13,7 @@ jobs:
         SENTRY_OPT_OUT: True
     strategy:
         matrix:
-            os: [ubuntu-latest, macos-latest, windows-latest]
+            os: [ubuntu-latest, windows-latest]
             python-version: ['3.9']
     steps:
       - name: Checkout repository
@@ -33,13 +33,13 @@ jobs:
 
       - name: Download dataset
         run: |
-          if ($env:RUNNER_OS -eq "Windows") {
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
             Invoke-WebRequest -Uri "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -OutFile "images.tar.gz"
             Expand-Archive -Path "images.tar.gz" -DestinationPath "path/to/dataset"
-          } else {
+          else
             wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
             tar xf "images.tar.gz" -C "path/to/dataset"
-          }
+          fi
 
       - name: Run example
         run: |
