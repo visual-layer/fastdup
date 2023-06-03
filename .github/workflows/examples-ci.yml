@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install fastdup
+          pip install fastdup matplotlib
 
       - name: Download dataset
         run: |
@@ -32,3 +32,9 @@ jobs:
       - name: Run example
         run: |
           python .github/workflows/tests/quick_dataset_analysis.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir
+          path: fastdup_work_dir/
