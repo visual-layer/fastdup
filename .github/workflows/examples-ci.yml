@@ -26,4 +26,4 @@ jobs:
 
       - name: Run example
         run: |
-          python .github/workflows/tests/test_quick_dataset_analysis.py
+          python .github/workflows/tests/quick_dataset_analysis.py
