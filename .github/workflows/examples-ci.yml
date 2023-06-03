@@ -4,7 +4,7 @@ on:
   push:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * *' # Trigger at 8 AM every day
+    - cron: '0 16 * * *' # Trigger at 8 AM every day
 
 jobs:
   test-quick-dataset-analysis:
