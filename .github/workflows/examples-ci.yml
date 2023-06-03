@@ -109,6 +109,7 @@ jobs:
 
 
   test-quick-dataset-analysis:
+    needs: common-steps
     runs-on: ${{ matrix.os }}
     env:
         SENTRY_OPT_OUT: True
@@ -117,8 +118,6 @@ jobs:
             os: [ubuntu-latest]
             python-version: ['3.9']
     steps:
-      - uses: common-steps
-
       - name: Download dataset
         run: |
             wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
@@ -135,6 +134,7 @@ jobs:
           path: fastdup_work_dir/
 
   test-cleaning-image-dataset:
+    needs: common-steps
     runs-on: ${{ matrix.os }}
     env:
         SENTRY_OPT_OUT: True
@@ -143,8 +143,6 @@ jobs:
             os: [ubuntu-latest]
             python-version: ['3.9']
     steps:
-      - uses: common-steps
-
       - name: Download dataset
         run: |
             wget http://data.vision.ee.ethz.ch/cvl/food-101.tar.gz
