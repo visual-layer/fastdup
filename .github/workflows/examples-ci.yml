@@ -43,7 +43,7 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastdup_work_dir
+          name: fastdup_work_dir_quick_dataset_analysis
           path: fastdup_work_dir/
 
   test-cleaning-image-dataset:
@@ -82,5 +82,5 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastdup_work_dir
+          name: fastdup_work_dir_cleaning_image_dataset
           path: fastdup_work_dir/
