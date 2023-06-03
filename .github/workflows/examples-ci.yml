@@ -34,7 +34,7 @@ jobs:
       - name: Download dataset
         run: |
             wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
-            tar xf "images.tar.gz""
+            tar xf "images.tar.gz"
 
 
       - name: Run example
