@@ -33,13 +33,9 @@ jobs:
 
       - name: Download dataset
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            Invoke-WebRequest -Uri "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -OutFile "images.tar.gz"
-            Expand-Archive -Path "images.tar.gz"
-          else
             wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
             tar xf "images.tar.gz""
-          fi
+
 
       - name: Run example
         run: |
