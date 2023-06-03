@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-quick-dataset-analysis:
-    runs-on: runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     env:
         SENTRY_OPT_OUT: True
     strategy:
