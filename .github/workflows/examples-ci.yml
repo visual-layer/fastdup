@@ -107,8 +107,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install fastdup matplotlib
 
-# jobs using common steps
-jobs:
+
   test-quick-dataset-analysis:
     runs-on: ${{ matrix.os }}
     env:
