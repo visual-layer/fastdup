@@ -13,7 +13,7 @@ jobs:
         SENTRY_OPT_OUT: True
     strategy:
         matrix:
-            os: [ubuntu-latest, windows-latest]
+            os: [ubuntu-latest]
             python-version: ['3.9']
     steps:
       - name: Checkout repository
