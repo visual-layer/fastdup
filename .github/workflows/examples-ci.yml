@@ -5,7 +5,9 @@ on:
 
 jobs:
   test-quick-dataset-analysis:
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+        SENTRY_OPT_OUT: True
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,5 +26,4 @@ jobs:
 
       - name: Run example
         run: |
-          export SENTRY_OPT_OUT=True
           python .github/workflows/tests/test_quick_dataset_analysis.py
