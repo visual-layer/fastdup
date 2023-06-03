@@ -11,7 +11,7 @@ coco_annotations['filename'] = coco_annotations['filename'].apply(lambda x: 'coc
 coco_annotations = coco_annotations.drop_duplicates()
 
 input_dir = '.'
-work_dir = 'fastdup_minicoco'
+work_dir = 'fastdup_work_dir'
 
 fd = fastdup.create(work_dir=work_dir, input_dir=input_dir)
 fd.run(annotations=coco_annotations, overwrite=True, num_images=10000)

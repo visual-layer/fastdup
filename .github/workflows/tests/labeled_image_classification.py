@@ -35,7 +35,7 @@ df_annot['label'] = df_annot['label'].map(label_map)
 import fastdup
 print(f'fastdup version: {fastdup.__version__}')
 
-work_dir = 'fastdup_imagenette'
+work_dir = 'fastdup_work_dir'
 fd = fastdup.create(work_dir=work_dir, input_dir=data_dir) 
 fd.run(annotations=df_annot, ccthreshold=0.9, threshold=0.8)
 
