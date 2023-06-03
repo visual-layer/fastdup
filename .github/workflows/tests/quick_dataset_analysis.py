@@ -1,13 +1,13 @@
-import os
-import subprocess
+# import os
+# import subprocess
 
-def callsh(command):
-  status = subprocess.run(command)
-  status.check_returncode()
-  print(status.stdout)
+# def callsh(command):
+#   status = subprocess.run(command)
+#   status.check_returncode()
+#   print(status.stdout)
 
-callsh(['wget', 'https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz', '-O', 'images.tar.gz'])
-callsh(['tar', 'xf', 'images.tar.gz'])
+# callsh(['wget', 'https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz', '-O', 'images.tar.gz'])
+# callsh(['tar', 'xf', 'images.tar.gz'])
 
 import fastdup
 print(f'fastdup version: {fastdup.__version__}')
