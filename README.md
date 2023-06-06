@@ -68,7 +68,7 @@
     <a href="https://twitter.com/visual_layer" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.youtube.com/@visual-layer4035" target="_blank" rel="noopener noreferrer">
+    <a href="https://www.youtube.com/@visual-layer" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
