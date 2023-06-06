@@ -166,18 +166,21 @@ Visualize the result.
 
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
-Here are 8 lines of code you'll need in most cases.
+In short, you'll need 3 lines of code to run fastdup:
 
 ```python
 import fastdup
-
-fd = fastdup.create(work_dir, images_dir)
+fd = fastdup.create("IMAGE_FOLDER/")
 fd.run()
+```
 
-fd.vis.duplicates_gallery()    # create a visual gallery of found duplicates
+And 5 lines of code to visualize issues:
+
+```python
+fd.vis.duplicates_gallery()    # create a visual gallery of duplicates
 fd.vis.outliers_gallery()      # create a visual gallery of anomalies
 fd.vis.component_gallery()     # create a visualization of connected components
-fd.vis.stats_gallery()         # create a visualization of images statistics (for example blur)
+fd.vis.stats_gallery()         # create a visualization of images statistics (e.g. blur)
 fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
 
