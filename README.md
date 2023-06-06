@@ -643,8 +643,10 @@ The following are community-contributed blog posts about fastdup -
 ![feedback](./gallery/user_quotes.png)
 
 ## License
-fastdup is licensed under Creative Commons 4.0 license.
+fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
+
 See [LICENSE](./LICENSE).
+
 
 For any queries, reach us at info@visual-layer.com
 
