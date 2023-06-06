@@ -1,7 +1,6 @@
 name: Test Run Examples
 
 on: 
-  push:
   workflow_dispatch:
   schedule:
     - cron: '0 16 * * *' # Trigger at 4PM every day
