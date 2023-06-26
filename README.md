@@ -31,9 +31,9 @@
 <div align="center">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
-    <img alt="Fastdup logo." src="./gallery/logo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.png" width=400>
+    <img alt="fastdup logo." src="./gallery/vl_profiler_promo.png">
     </picture>
   </a>
 
@@ -72,36 +72,34 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+  <a href="https://app.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=700>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=700>
-    <img alt="Fastdup logo." src="./gallery/logo.png">
+    <img alt="VL Profiler." src="./gallery/logo.png">
     </picture>
   </a>
   <br />
   <br />
-    🔥 We released
-    <a href="https://medium.com/@visual-layer/fastdup-one-year-strong-and-still-going-adb382a536d3">fastdup V1.0</a> and were <a href="https://techcrunch.com/2023/05/16/visual-layer-helps-enterprise-manage-the-massive-visual-data-sets-they-need-to-build-ai-models-raises-7m/">featured</a> in Techrunch, raising $7M!
-  <br />
+
+🚀 Introducing VL Profiler! 🚀
+We're excited to announce our new cloud product, VL Profiler. It's designed to help you gain deeper insights and enhance your productivity while using fastdup. With VL Profiler, you can visualize your data, track changes over time, and much more.
+<a href="https://app.visual-layer.com" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
+
+Note: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us!
+
+<br />
 </div>
 
-## What's Included
-fastdup analyzes your image/video dataset for potential issues such as -
- <div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
-    <img src="./gallery/issues.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
-fastdup works on both labeled and unlabeled data. Additional features include -
+## What's Included in fastdup
+fastdup can handle both labeled and unlabeled image/video datasets, helping you to discover potential quality 
+concerns while providing extra functionalities.
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
-    <img src="./gallery/features.png" alt="fastdup" width="1000">
+    <img src="./gallery/fastdup_features_new.png" alt="fastdup" width="1000">
   </a>
  </div>
-
 
 ## Why fastdup?
 
