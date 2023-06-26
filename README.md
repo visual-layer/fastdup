@@ -74,9 +74,9 @@
   </p>
   <a href="https://app.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.png" width=700>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.png" width=700>
-    <img alt="VL Profiler." src="./gallery/vl_profiler_promo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.svg" width=700>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.svg" width=700>
+    <img alt="VL Profiler." src="./gallery/vl_profiler_promo.svg">
     </picture>
   </a>
   <br />
