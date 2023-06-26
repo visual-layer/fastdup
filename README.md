@@ -31,9 +31,9 @@
 <div align="center">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.png" width=400>
-    <img alt="fastdup logo." src="./gallery/vl_profiler_promo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
+    <img alt="fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
 
@@ -74,9 +74,9 @@
   </p>
   <a href="https://app.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/one-year-old-banner.png" width=700>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/one-year-old-banner.png" width=700>
-    <img alt="VL Profiler." src="./gallery/logo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.png" width=700>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.png" width=700>
+    <img alt="VL Profiler." src="./gallery/vl_profiler_promo.png">
     </picture>
   </a>
   <br />
