@@ -1,0 +1,164 @@
+name: Test Run Examples
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: '0 16 * * *' # Trigger at 4PM every day
+
+jobs:
+  test-quick-dataset-analysis:
+    runs-on: ${{ matrix.os }}
+    env:
+        SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-22.04]
+            python-version: ['3.9']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastdup matplotlib
+
+      - name: Download dataset
+        run: |
+            wget "https://thor.robots.ox.ac.uk/~vgg/data/pets/images.tar.gz" -O "images.tar.gz"
+            tar xf "images.tar.gz"
+
+      - name: Run example
+        run: |
+          python .github/workflows/tests/quick_dataset_analysis.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir_quick_dataset_analysis
+          path: fastdup_work_dir/
+
+  test-cleaning-image-dataset:
+    runs-on: ${{ matrix.os }}
+    env:
+        SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            python-version: ['3.9']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastdup matplotlib
+
+      - name: Download dataset
+        run: |
+            wget http://data.vision.ee.ethz.ch/cvl/food-101.tar.gz
+            tar -xf food-101.tar.gz
+
+      - name: Run example
+        run: |
+          python .github/workflows/tests/cleaning_image_dataset.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir_cleaning_image_dataset
+          path: fastdup_work_dir/
+
+  test-labeled-image-classification:
+    runs-on: ${{ matrix.os }}
+    env:
+        SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            python-version: ['3.9']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastdup matplotlib
+
+      - name: Download dataset
+        run: |
+            wget https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-160.tgz
+            tar -xf imagenette2-160.tgz
+
+      - name: Run example
+        run: |
+          python .github/workflows/tests/labeled_image_classification.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir_labeled_image_classification
+          path: fastdup_work_dir/
+
+  test-labeled-object-detection:
+    runs-on: ${{ matrix.os }}
+    env:
+        SENTRY_OPT_OUT: True
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            python-version: ['3.9']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastdup fastdup plotly gdown
+
+      - name: Download dataset
+        run: |
+            gdown --fuzzy https://drive.google.com/file/d/1iSXVTlkV1_DhdYpVDqsjlT4NJFQ7OkyK/view
+            unzip -qq coco_minitrain_25k.zip
+            cd coco_minitrain_25k/annotations && gdown --fuzzy https://drive.google.com/file/d/1i12p23cXlqp1QrXjAD_vu467r4q67Mq9/view
+
+      - name: Run example
+        run: |
+          python .github/workflows/tests/labeled_object_detection.py
+      
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastdup_work_dir_labeled_object_detection
+          path: fastdup_work_dir/
