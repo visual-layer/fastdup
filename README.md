@@ -72,7 +72,7 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
-  <a href="https://bit.ly/3phvCaf" target="_blank" rel="noopener noreferrer">
+  <a href="https://cutt.ly/9wyxhZAI" target="_blank" rel="noopener noreferrer">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
@@ -84,7 +84,7 @@
 
 🚀 Introducing VL Profiler! 🚀
 We're excited to announce our new cloud product, VL Profiler. It's designed to help you gain deeper insights and enhance your productivity while using fastdup. With VL Profiler, you can visualize your data, track changes over time, and much more.
-<a href="https://bit.ly/3phvCaf" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
+<a href="https://cutt.ly/9wyxhZAI" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
 
 Note: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us!
 
