@@ -68,7 +68,7 @@
     <a href="https://twitter.com/visual_layer" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Logo">
     </a>
-    <a href="https://www.youtube.com/@visual-layer4035" target="_blank" rel="noopener noreferrer">
+    <a href="https://www.youtube.com/@visual-layer" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
@@ -164,18 +164,21 @@ Visualize the result.
 
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
 
-Here are 8 lines of code you'll need in most cases.
+In short, you'll need 3 lines of code to run fastdup:
 
 ```python
 import fastdup
-
-fd = fastdup.create(work_dir, images_dir)
+fd = fastdup.create("IMAGE_FOLDER/")
 fd.run()
+```
 
-fd.vis.duplicates_gallery()    # create a visual gallery of found duplicates
+And 5 lines of code to visualize issues:
+
+```python
+fd.vis.duplicates_gallery()    # create a visual gallery of duplicates
 fd.vis.outliers_gallery()      # create a visual gallery of anomalies
 fd.vis.component_gallery()     # create a visualization of connected components
-fd.vis.stats_gallery()         # create a visualization of images statistics (for example blur)
+fd.vis.stats_gallery()         # create a visualization of images statistics (e.g. blur)
 fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
 
@@ -641,8 +644,10 @@ The following are community-contributed blog posts about fastdup -
 ![feedback](./gallery/user_quotes.png)
 
 ## License
-fastdup is licensed under Creative Commons 4.0 license.
+fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
+
 See [LICENSE](./LICENSE).
+
 
 For any queries, reach us at info@visual-layer.com
 
