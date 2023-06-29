@@ -641,7 +641,7 @@ The following are community-contributed blog posts about fastdup -
 - [The weighty significance of data cleanliness — or as I like to call it, “cleanliness is next to model-ness” — cannot be overstated.](https://alexlanseedoo.medium.com/the-weighty-significance-of-data-cleanliness-eb03dce1d0f8)
 ## What our users say
 
-![feedback](./gallery/user_quotes.png)
+![feedback](./gallery/user_quotes.jpg)
 
 ## License
 fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
