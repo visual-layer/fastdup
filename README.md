@@ -389,7 +389,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="4">
-        <b>Analyzing Hugging Face Datasets:</b> In this tutorial learn how to load and analyze datasets from Hugging Face Datasets.
+        <b>Analyzing Hugging Face Datasets:</b> In this tutorial learn how to load and analyze datasets from   <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
