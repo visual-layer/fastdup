@@ -168,7 +168,7 @@ In short, you'll need 3 lines of code to run fastdup:
 
 ```python
 import fastdup
-fd = fastdup.create("IMAGE_FOLDER/")
+fd = fastdup.create(input_dir="IMAGE_FOLDER/")
 fd.run()
 ```
 
