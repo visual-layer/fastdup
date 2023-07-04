@@ -169,7 +169,7 @@ In short, you'll need 3 lines of code to run fastdup:
 
 ```python
 import fastdup
-fd = fastdup.create("IMAGE_FOLDER/")
+fd = fastdup.create(input_dir="IMAGE_FOLDER/")
 fd.run()
 ```
 
@@ -376,6 +376,45 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+
+  <!-- ------------------------------------------------------------------- -->
+
+  <tr>
+      <td rowspan="4" width="160">
+      <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+              <img src="./gallery/hf_thumbnail.jpg" width="256">
+      </a>
+      </td>    
+      <td rowspan="4">
+        <b>Analyzing Hugging Face Datasets:</b> In this tutorial learn how to load and analyze datasets from   <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>.
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
