@@ -365,7 +365,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you have already have a dataset hosted on Hugging Face hub.
+        <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
         <br>
         <br>
         <b>📌 Dataset:</b> <a href="https://huggingface.co/datasets/zh-plus/tiny-imagenet">Tiny-ImageNet</a>.
