@@ -87,7 +87,7 @@ We're excited to announce our new cloud product, VL Profiler. It's designed to h
 
 <a href="https://cutt.ly/9wyxhZAI" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
 
-<strong>Note</strong>: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us! [Sign-up](https://cutt.ly/9wyxhZAI) now, it's free.
+<strong>📝 Note</strong>: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us! [Sign-up](https://cutt.ly/9wyxhZAI) now, it's free.
 
 <br />
 </div>
