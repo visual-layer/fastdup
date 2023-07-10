@@ -53,7 +53,7 @@
     ·
     <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">Enterprise Edition</a>
     ·
-    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">About us</a>
+    <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
     <br /> 
     <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email" target="_blank" rel="noopener noreferrer">
