@@ -48,7 +48,7 @@
     ·
     <a href="https://github.com/visual-layer/fastdup/issues/new/choose" target="_blank" rel="noopener noreferrer">Report Bug</a>
     ·
-    <a href="https://medium.com/visual-layer" target="_blank" rel="noopener noreferrer">Read Blog</a>
+    <a href="https://medium.com/visual-layer" target="_blank" rel="noopener noreferrer">Blog</a>
     ·
     <a href="https://visual-layer.readme.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
     ·
