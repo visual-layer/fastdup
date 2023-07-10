@@ -531,11 +531,11 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
-              <img src="gallery/satellite.png" width="256">
+              <img src="gallery/satellite_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="4">
-        <b>Satellite Image Analysis:</b> In this tutorial, learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes, understand your dataset, find issues with the data and check the quality of annotations.
+        <b>🛰️ Satellite Image Analysis:</b> Learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes and find issues with the data and check the quality of annotations.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
@@ -570,11 +570,11 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
-              <img src="gallery/surveillance.png" width="256">
+              <img src="gallery/surveillance_thumbnail.jpg" width="256">
       </a>
       </td>
       <td rowspan="4">
-        <b>Surveillance Camera Analysis:</b> In this tutorial, learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/ outdoor. 
+        <b>🎥 Surveillance Camera Analysis:</b> Learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/outdoor scene and automatically caption the images using the <a href="https://github.com/salesforce/BLIP"> BLIP</a> model. 
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
@@ -613,7 +613,7 @@ Learn how to use fastdup as a poweruser!
       </a>
       </td>
       <td rowspan="4">
-        <b>Image Search:</b> In this tutorial, learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
+        <b>🔍 Image Search:</b> Learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
@@ -647,11 +647,11 @@ Learn how to use fastdup as a poweruser!
  <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
-              <img src="gallery/feature_vector.png" width="256">
+              <img src="gallery/feature_vector.jpg" width="256">
       </a>
       </td>
       <td rowspan="4">
-        <b>Feature vectors:</b> In this tutorial, learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
+        <b>➡️ Feature vectors:</b> Learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
