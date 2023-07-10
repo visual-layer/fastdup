@@ -414,11 +414,11 @@ Learn how to use fastdup as a poweruser!
   <tr> 
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="./gallery/dino.png" width="256">
+              <img src="./gallery/dino_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="4">
-        <b>DINOv2 Embeddings:</b> In this example, learn how to use DINOv2 models to visualize image embeddings of your dataset. Runs on CPU!
+        <b>🦖 DINOv2 Embeddings:</b> Extract feature vectors of your images using DINOv2 model. Runs on CPU. No GPU needed!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
@@ -457,7 +457,7 @@ Learn how to use fastdup as a poweruser!
       </a>
       </td>    
       <td rowspan="4">
-        <b>Face Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a face detection model to detect and crop from videos. Following that we analyze the cropped faces for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
+        <b>😗 Face Detection in Videos:</b> Learn how to use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
@@ -496,7 +496,7 @@ Learn how to use fastdup as a poweruser!
       </a>
       </td>    
       <td rowspan="4">
-        <b>YOLOv5 Object Detection Video Analysis:</b> In this tutorial, learn how to use fastdup with a pre-trained yolov5 object detection model to detect and crop from videos. Following that we analyze the cropped objects for issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
+        <b> 🤖 Object Detection in Videos:</b> Learn how to use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
