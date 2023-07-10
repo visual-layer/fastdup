@@ -538,28 +538,28 @@ Learn how to use fastdup as a poweruser!
         <b>🛰️ Satellite Image Analysis:</b> Learn how to use fastdup to load 16-bit grayscale satellite image, work with rotated bounding boxes and find issues with the data and check the quality of annotations.
       </td>
       <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
               <img src="./gallery/nbviewer_logo.svg" height="34">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
               <img src="./gallery/github_logo.png" height="32">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
               <img src="./gallery/colab_logo.png" height="28">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
-          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/mafat-final.ipynb">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
