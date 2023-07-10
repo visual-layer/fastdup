@@ -281,7 +281,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>Analyzing Labeled Image Classification Dataset:</b> In this tutorial, learn how to analyze a labeled image classification dataset for potential issues. We use the Imagenette dataset, a 10-class, 13k image subset of ImageNet as a working example.
+        <b>🖼 Analyze Image Classification Dataset:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
+        <br>
+        <br>
+        <b>📌 Dataset:</b> <a href="https://github.com/fastai/imagenette">Imagenette</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
@@ -320,7 +323,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>Analyzing Labeled Object Detection Dataset:</b> In this tutorial learn how to load and analyze an object detection dataset with labeled bounding boxes and classes. We use the mini-coco dataset as a working example. Learn how to discover duplicates, outliers, and possible mislabeled bounding boxes.
+        <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bouding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
+        <br>
+        <br>
+        <b>📌 Dataset:</b> <a href="https://cocodataset.org/#home">COCO</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
@@ -359,7 +365,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>Analyzing Hugging Face Datasets:</b> In this tutorial learn how to load and analyze datasets from   <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>.
+        <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you have already have a dataset hosted on Hugging Face hub.
+        <br>
+        <br>
+        <b>📌 Dataset:</b> <a href="https://huggingface.co/datasets/zh-plus/tiny-imagenet">Tiny-ImageNet</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
