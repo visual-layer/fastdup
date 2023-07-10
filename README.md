@@ -406,7 +406,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 Learn how to use fastdup as a poweruser!
 
-> **Note**: We have made the decision to offer our advanced features completely free of charge, without requiring a license key. Feel free to try them out and provide us with your valuable feedback!
+> **Note**: We have made the decision to offer our advanced features completely free of charge, without requiring a license key. Feel free to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
 <table>
 
