@@ -18,10 +18,10 @@
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [pypi-shield]: https://img.shields.io/badge/Python-3.7%20|%203.8%20|%203.9%20|%203.10-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
-[pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge
+[pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=success
 [downloads-shield]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fv2%2Fprojects%2Ffastdup&color=lightblue
 [downloads-url]: https://pypi.org/project/fastdup/
-[contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge&color=orange
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
 [license-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-purple.svg?style=for-the-badge
 [license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
@@ -60,7 +60,7 @@
     <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
     </a>
     <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/badge/DISCUSSION%20FORUM-brightgreen?style=for-the-badge&logo=discourse&logoWidth=20" alt="Logo">
+    <img src="https://img.shields.io/badge/DISCUSSION%20FORUM-slateblue?style=for-the-badge&logo=discourse&logoWidth=20" alt="Logo">
     </a>
     <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
@@ -84,6 +84,7 @@
 
 🚀 Introducing VL Profiler! 🚀
 We're excited to announce our new cloud product, VL Profiler. It's designed to help you gain deeper insights and enhance your productivity while using fastdup. With VL Profiler, you can visualize your data, track changes over time, and much more.
+
 <a href="https://cutt.ly/9wyxhZAI" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
 
 <strong>Note</strong>: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us! [Sign-up](https://cutt.ly/9wyxhZAI) now, it's free.
