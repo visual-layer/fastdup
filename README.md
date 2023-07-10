@@ -406,12 +406,12 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 Learn how to use fastdup as a poweruser!
 
-> **Note**: We decided to release the advance features free to use without any license key! Try them out and let us know what you think!
+> **Note**: We have made the decision to offer our advanced features completely free of charge, without requiring a license key. Feel free to try them out and provide us with your valuable feedback!
 
 <table>
 
 
-  <tr>
+  <tr> 
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
               <img src="./gallery/dino.png" width="256">
