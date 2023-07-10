@@ -187,6 +187,7 @@ fd.vis.similarity_gallery()    # create a gallery of similar images
 View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 ## Learn from Examples
+Learn the basics of fastdup through interactive examples. View the notebooks on GitHub, nbviewer or even better run them Google Colab or Kaggle, for free.
 
 <table>
   <tr>
@@ -196,7 +197,7 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
       </a>
       </td>    
       <td rowspan="4">
-        <b>Quick Dataset Analysis:</b> In this example, learn how to quickly analyze a dataset for potential issues. Identify duplicates, outliers, dark/bright/blurry images, and cluster similar images with only a few lines of code. If you're new, start here.
+        <b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image clusters. If you're new, start here!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
@@ -221,45 +222,6 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-
-  <!-- ------------------------------------------------------------------- -->
-
-  <tr>
-      <td rowspan="4" width="160">
-      <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="./gallery/dino.png" width="256">
-      </a>
-      </td>    
-      <td rowspan="4">
-        <b>DINOv2 Embeddings:</b> In this example, learn how to use DINOv2 models to visualize image embeddings of your dataset. Runs on CPU!
-      </td>
-      <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="34">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/github_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/colab_logo.png" height="28">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
               <img src="./gallery/kaggle_logo.png" height="32">
           </a>
       </td>
@@ -431,6 +393,47 @@ The following are advanced functionalities of fastdup which are still in the bet
 Sign up for free to be a beta tester and get early access. Drop us an email at info@visual-layer.com .
 
 <table>
+
+
+  <tr>
+      <td rowspan="4" width="160">
+      <a href="https://visual-layer.readme.io/docs/getting-started">
+              <img src="./gallery/dino.png" width="256">
+      </a>
+      </td>    
+      <td rowspan="4">
+        <b>DINOv2 Embeddings:</b> In this example, learn how to use DINOv2 models to visualize image embeddings of your dataset. Runs on CPU!
+      </td>
+      <td align="center" width="80">
+          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/nbviewer_logo.svg" height="34">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/github_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/colab_logo.png" height="28">
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <td align="center">
+          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+              <img src="./gallery/kaggle_logo.png" height="32">
+          </a>
+      </td>
+  </tr>
+  
+  <!-- ------------------------------------------------------------------- -->
+  
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-face-detection">
