@@ -235,11 +235,14 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
-              <img src="gallery/food_101_thumbnail.jpg" width="256">
+              <img src="gallery/food_thumbnail.jpg" width="256">
       </a>
       </td>    
       <td rowspan="4">
-        <b>Cleaning Image Dataset:</b> In this tutorial, learn how to clean a dataset from broken images, duplicates, outliers, and identify dark/bright/blurry images.
+        <b>🧹 Cleaning Image Dataset:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is good place to start.
+        <br>
+        <br>
+        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
