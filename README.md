@@ -188,7 +188,7 @@ fd.vis.similarity_gallery()    # create a gallery of similar images
 View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 ## Learn from Examples
-Learn the basics of fastdup through interactive examples. View the notebooks on GitHub, nbviewer. Or even better run them on Google Colab or Kaggle, for free.
+Learn the basics of fastdup through interactive examples. View the notebooks on GitHub or nbviewer. Even better, run them on Google Colab or Kaggle, for free.
 
 <table>
   <tr>
