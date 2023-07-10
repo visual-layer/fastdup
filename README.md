@@ -239,7 +239,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is good place to start.
+        <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
         <br>
         <br>
         <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
@@ -323,7 +323,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </a>
       </td>    
       <td rowspan="4">
-        <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bouding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
+        <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
         <br>
         <br>
         <b>📌 Dataset:</b> <a href="https://cocodataset.org/#home">COCO</a>.
@@ -404,8 +404,9 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 ## Advanced Features
 
-The following are advanced functionalities of fastdup which are still in the beta testing phase.
-Sign up for free to be a beta tester and get early access. Drop us an email at info@visual-layer.com .
+Learn how to use fastdup as a poweruser!
+
+> **Note**: We decided to release the advance features free to use without any license key! Try them out and let us know what you think!
 
 <table>
 
