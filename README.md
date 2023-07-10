@@ -41,6 +41,7 @@
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
     <br />
+    <br />
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
     <br />
     <a href="#whats-included-in-fastdup" target="_blank" rel="noopener noreferrer">Features</a>
