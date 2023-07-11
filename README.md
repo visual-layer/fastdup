@@ -207,22 +207,22 @@ View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 		<tr>
 			<td align="center" width="30">
 				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" />
+					<img src="./gallery/nbviewer_logo.svg" height="34"/>
 				</a>
 			</td>
 			<td align="center" width="30">
 				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" />
+					<img src="./gallery/nbviewer_logo.svg" height="34"/>
 				</a>
 			</td>
 			<td align="center" width="30">
 				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" />
+					<img src="./gallery/nbviewer_logo.svg" height="34"/>
 				</a>
 			</td>
 			<td align="center" width="30">
 				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" />
+					<img src="./gallery/nbviewer_logo.svg" height="34"/>
 				</a>
 			</td>
 		</tr>
