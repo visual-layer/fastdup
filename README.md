@@ -188,6 +188,46 @@ fd.vis.similarity_gallery()    # create a gallery of similar images
 View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 
+<table class="tg">
+	<thead>
+		<tr>
+			<td class="tg-0pky" colspan="4">
+				<a href="https://visual-layer.readme.io/docs/getting-started">
+					<img src="./gallery/cat_dog_thumbnail.jpg" width="180" />
+				</a>
+			</td>
+			<td class="tg-0pky" rowspan="2">
+				<b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image
+				clusters. If you're new, start here!
+				<br />
+				<br />
+				<b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>.
+			</td>
+		</tr>
+		<tr>
+			<td align="center" width="30">
+				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+					<img src="./gallery/nbviewer_logo.svg" />
+				</a>
+			</td>
+			<td align="center" width="30">
+				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+					<img src="./gallery/nbviewer_logo.svg" />
+				</a>
+			</td>
+			<td align="center" width="30">
+				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+					<img src="./gallery/nbviewer_logo.svg" />
+				</a>
+			</td>
+			<td align="center" width="30">
+				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+					<img src="./gallery/nbviewer_logo.svg" />
+				</a>
+			</td>
+		</tr>
+	</thead>
+</table>
 
 
 ## Learn from Examples
