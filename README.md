@@ -198,7 +198,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
             <img src="./gallery/cat_dog_thumbnail.jpg" width="120">
         </a>
     </td>    
-    <td colspan="4">
+    <td colspan="4" valign="top">
         <b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image clusters. If you're new, start here!
     </td>
     <td rowspan="3" width="160">
@@ -206,7 +206,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
             <img src="./gallery/food_thumbnail.jpg" width="120">
         </a>
     </td>    
-    <td colspan="4">
+    <td colspan="4" valign="top">
         <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
     </td>
   </tr>
