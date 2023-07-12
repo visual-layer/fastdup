@@ -598,6 +598,39 @@ Learn how to use fastdup as a poweruser!
 			</a>
 		</td>
 	</tr>
+	<tr>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/ocr_thumbnail.jpg" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🔢 Optical Character Recognition</b><br />
+			Search through large image datasets optical characters with PaddleOCR.
+		</td>
+	</tr>
+	<tr>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+	</tr>
 </table>
 
 
