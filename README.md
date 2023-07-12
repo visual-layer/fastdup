@@ -219,42 +219,42 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
     </td>
   </tr>
   <tr>
-    <td>
+    <td width="80">
         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/nbviewer_logo.svg" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/github_logo.png" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/colab_logo.png" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/kaggle_logo.png" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/nbviewer_logo.svg" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/github_logo.png" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/colab_logo.png" width="34">
         </a>
     </td>
-    <td>
+    <td width="80">
         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/kaggle_logo.png" width="34">
         </a>
