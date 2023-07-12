@@ -405,6 +405,212 @@ Learn how to use fastdup as a poweruser!
 
 > **Note**: We're happy to announce all advanced features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
+
+
+
+
+<table>
+	<tr>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/dino_thumbnail.jpg" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🦖 DINOv2 Embeddings</b><br />
+			Extract feature vectors of your images using DINOv2 model. Runs on CPU. No GPU needed!
+		</td>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/video-face-detection.png" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>😗 Face Detection in Videos</b><br />
+			Learn how to use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
+		</td>
+	</tr>
+	<tr>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+	</tr>
+	<tr>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/video-yolov5-detection.png" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🤖 Object Detection in Videos</b><br />
+			Learn how to use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry
+			objects.
+		</td>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/surveillance_thumbnail.jpg" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🎥 Surveillance Camera Analysis</b><br />
+			Learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/outdoor scene and automatically caption the images using the
+			<a href="https://github.com/salesforce/BLIP"> BLIP</a> model.
+		</td>
+	</tr>
+	<tr>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+	</tr>
+	<tr>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/product-matching.jpg" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🔍 Image Search</b><br />
+			Learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
+		</td>
+		<td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+				<img src="./gallery/feature_vector.jpg" width="120" />
+			</a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>➡️ Feature Vectors</b><br />
+			Learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
+		</td>
+	</tr>
+	<tr>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+	</tr>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
 <table>
 
 
@@ -523,45 +729,6 @@ Learn how to use fastdup as a poweruser!
       </td>
   </tr>
   
-   <!-- ------------------------------------------------------------------- -->
-
-  <tr>
-      <td rowspan="4" width="160">
-      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
-              <img src="gallery/satellite_thumbnail.jpg" width="256">
-      </a>
-      </td>    
-      <td rowspan="4">
-        <b>🛰️ Satellite Image Analysis:</b> Learn how to load 16-bit grayscale satellite image with oriented bounding boxes (OBB), find issues with the images and check the quality of annotations.
-      </td>
-      <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="34">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-              <img src="./gallery/github_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-              <img src="./gallery/colab_logo.png" height="28">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-
    <!-- ------------------------------------------------------------------- -->
 
   <tr>
