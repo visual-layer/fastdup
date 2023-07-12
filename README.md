@@ -208,7 +208,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </a>
     </td>    
     <td colspan="4" valign="top">
-        <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+        <b>🧹 Clean Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
     </td>
   </tr>
   <tr>
