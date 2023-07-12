@@ -192,7 +192,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 <table>
   <tr>
-    <td rowspan="2" width="160">
+    <td rowspan="3" width="160">
         <a href="https://visual-layer.readme.io/docs/getting-started">
             <img src="./gallery/cat_dog_thumbnail.jpg" width="120">
         </a>
@@ -200,7 +200,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
     <td>
         <b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image clusters. If you're new, start here!
     </td>
-    <td rowspan="2" width="160">
+    <td rowspan="3" width="160">
         <a href="https://visual-layer.readme.io/docs/getting-started">
             <img src="./gallery/food_thumbnail.jpg" width="120">
         </a>
@@ -212,26 +212,32 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
     <td>
         <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>
-        <br>
+    </td>
+    <td>
+        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>
+    </td>
+  </tr>
+  <tr>
+    <td>
         <b>📌 Notebooks:</b>
-        <table style="width: 100%;">
+        <table style="width: 100%;" cellpadding="10">
             <tr>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                         <img src="./gallery/nbviewer_logo.svg" height="34">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                         <img src="./gallery/github_logo.png" height="32">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                         <img src="./gallery/colab_logo.png" height="28">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                         <img src="./gallery/kaggle_logo.png" height="32">
                     </a>
@@ -240,27 +246,25 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </table>
     </td>
     <td>
-        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>
-        <br>
         <b>📌 Notebooks:</b>
-        <table style="width: 100%;">
+        <table style="width: 100%;" cellpadding="10">
             <tr>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
                         <img src="./gallery/nbviewer_logo.svg" height="34">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
                         <img src="./gallery/github_logo.png" height="32">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
                         <img src="./gallery/colab_logo.png" height="28">
                     </a>
                 </td>
-                <td>
+                <td align="center" valign="middle">
                     <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
                         <img src="./gallery/kaggle_logo.png" height="32">
                     </a>
@@ -268,9 +272,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
             </tr>
         </table>
     </td>
-  </tr>
-</table>
-
+ 
 
 
 <table>
