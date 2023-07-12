@@ -192,6 +192,89 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 <table>
   <tr>
+    <td rowspan="2" width="160">
+        <a href="https://visual-layer.readme.io/docs/getting-started">
+            <img src="./gallery/cat_dog_thumbnail.jpg" width="120">
+        </a>
+    </td>    
+    <td>
+        <b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image clusters. If you're new, start here!
+    </td>
+    <td rowspan="2" width="160">
+        <a href="https://visual-layer.readme.io/docs/getting-started">
+            <img src="./gallery/food_thumbnail.jpg" width="120">
+        </a>
+    </td>    
+    <td>
+        <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+    </td>
+  </tr>
+  <tr>
+    <td>
+        <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>
+        <br>
+        <b>📌 Notebooks:</b>
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                        <img src="./gallery/nbviewer_logo.svg" height="34">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                        <img src="./gallery/github_logo.png" height="32">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                        <img src="./gallery/colab_logo.png" height="28">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                        <img src="./gallery/kaggle_logo.png" height="32">
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </td>
+    <td>
+        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>
+        <br>
+        <b>📌 Notebooks:</b>
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                        <img src="./gallery/nbviewer_logo.svg" height="34">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                        <img src="./gallery/github_logo.png" height="32">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                        <img src="./gallery/colab_logo.png" height="28">
+                    </a>
+                </td>
+                <td>
+                    <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                        <img src="./gallery/kaggle_logo.png" height="32">
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </td>
+  </tr>
+</table>
+
+
+
+<table>
+  <tr>
     <td rowspan="3" width="160">
         <a href="https://visual-layer.readme.io/docs/getting-started">
             <img src="./gallery/cat_dog_thumbnail.jpg" width="120">
