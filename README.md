@@ -219,7 +219,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   </tr>
   <tr>
     <td>
-        <b>📌 Notebooks:</b>
         <table style="width: 100%;">
             <tr>
                 <td>
@@ -246,7 +245,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </table>
     </td>
     <td>
-        <b>📌 Notebooks:</b>
         <table style="width: 100%;">
             <tr>
                 <td>
