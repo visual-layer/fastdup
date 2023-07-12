@@ -427,7 +427,7 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td colspan="4" valign="top">
 			<b>😗 Face Detection in Videos</b><br />
-			Learn how to use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
+			Use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
 		</td>
 	</tr>
 	<tr>
@@ -480,7 +480,7 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td colspan="4" valign="top">
 			<b>🤖 Object Detection in Videos</b><br />
-			Learn how to use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry
+			Use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry
 			objects.
 		</td>
 		<td rowspan="2" width="160">
@@ -490,7 +490,7 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td colspan="4" valign="top">
 			<b>🎥 Surveillance Camera Analysis</b><br />
-			Learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/outdoor scene and automatically caption the images using the
+			Analyze surveillance camera videos, caption the activity inside the videos and detect indoor/outdoor scene and automatically caption the images using the
 			<a href="https://github.com/salesforce/BLIP"> BLIP</a> model.
 		</td>
 	</tr>
@@ -544,7 +544,7 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td colspan="4" valign="top">
 			<b>🔍 Image Search</b><br />
-			Learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
+			Search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
 		</td>
 		<td rowspan="2" width="160">
 			<a href="https://visual-layer.readme.io/docs/getting-started">
@@ -553,7 +553,7 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td colspan="4" valign="top">
 			<b>➡️ Feature Vectors</b><br />
-			Learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
+			Read fastdup-generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
 		</td>
 	</tr>
 	<tr>
