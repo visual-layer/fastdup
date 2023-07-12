@@ -263,7 +263,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
-
 <table>
   <tr>
     <td rowspan="3" width="160">
