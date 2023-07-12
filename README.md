@@ -220,7 +220,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
     <td>
         <b>📌 Notebooks:</b>
-        <div style="display: flex; gap: 10px; margin-left: 20px; margin-top: 10px;">
+        <div style="display: flex; gap: 10px; margin-left: 40px; margin-top: 10px;">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                 <img src="./gallery/nbviewer_logo.svg" height="34">
             </a>
