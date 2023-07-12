@@ -224,37 +224,37 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
             <img src="./gallery/nbviewer_logo.svg" height="34">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/github_logo.png" height="32">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/colab_logo.png" height="28">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/kaggle_logo.png" height="32">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/nbviewer_logo.svg" height="34">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/github_logo.png" height="32">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/colab_logo.png" height="28">
         </a>
     </td>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
             <img src="./gallery/kaggle_logo.png" height="32">
         </a>
