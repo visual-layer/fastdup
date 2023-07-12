@@ -213,10 +213,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   </tr>
   <tr>
     <td colspan="4">
-        <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>
+        <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>.
     </td>
     <td colspan="4">
-        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>
+        <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
     </td>
   </tr>
   <tr>
@@ -352,7 +352,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         <b>📌 Dataset:</b> <a href="https://huggingface.co/datasets/zh-plus/tiny-imagenet">Tiny-ImageNet</a>.
     </td>
     <td colspan="4">
-        <b>📌 Dataset:</b> <a href="https://mafatchallenge.mod.gov.il/">MAFAT Satellite Vision</a>
+        <b>📌 Dataset:</b> <a href="https://mafatchallenge.mod.gov.il/">MAFAT Satellite Vision</a>.
     </td>
   </tr>
   <tr>
