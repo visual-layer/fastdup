@@ -220,7 +220,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
     <td>
         <table style="width: 100%;">
-            <tr>
                 <td>
                     <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
                         <img src="./gallery/nbviewer_logo.svg" height="34">
@@ -241,12 +240,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
                         <img src="./gallery/kaggle_logo.png" height="32">
                     </a>
                 </td>
-            </tr>
         </table>
     </td>
     <td>
         <table style="width: 100%;">
-            <tr>
                 <td>
                     <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
                         <img src="./gallery/nbviewer_logo.svg" height="34">
@@ -267,7 +264,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
                         <img src="./gallery/kaggle_logo.png" height="32">
                     </a>
                 </td>
-            </tr>
         </table>
     </td>
   </tr>
