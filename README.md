@@ -268,7 +268,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </a>
     </td>    
     <td colspan="4" valign="top">
-        <b>🖼 Analyze Image Classification Dataset:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
+        <b>🖼 Analyze Image Classification Dataset</b><br>Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
     </td>
     <td rowspan="3" width="160">
         <a href="https://visual-layer.readme.io/docs/getting-started">
@@ -276,7 +276,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </a>
     </td>    
     <td colspan="4" valign="top">
-        <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
+        <b>🎁 Analyze Object Detection Dataset</b><br>Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
     </td>
   </tr>
   <tr>
@@ -336,7 +336,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </a>
     </td>    
     <td colspan="4" valign="top">
-        <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
+        <b>🤗 Analyze Hugging Face Datasets</b><br>Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
     </td>
     <td rowspan="3" width="160">
         <a href="https://visual-layer.readme.io/docs/getting-started">
@@ -344,7 +344,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
         </a>
     </td>    
     <td colspan="4" valign="top">
-        <b>🛰️ Satellite Image Analysis:</b> Learn how to load 16-bit grayscale satellite image with oriented bounding boxes (OBB), find issues with the images and check the quality of annotations.
+        <b>🛰️ Satellite Image Analysis</b><br>Learn how to load 16-bit grayscale satellite image with oriented bounding boxes (OBB), find issues with the images and check the quality of annotations.
     </td>
   </tr>
   <tr>
