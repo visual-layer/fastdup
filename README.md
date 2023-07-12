@@ -187,51 +187,70 @@ fd.vis.similarity_gallery()    # create a gallery of similar images
 
 View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
-
-<table class="tg">
-	<thead>
-		<tr>
-			<td class="tg-0pky" colspan="4">
-				<a href="https://visual-layer.readme.io/docs/getting-started">
-					<img src="./gallery/cat_dog_thumbnail.jpg" width="180" />
-				</a>
-			</td>
-			<td class="tg-0pky" rowspan="2">
-				<b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image
-				clusters. If you're new, start here!
-				<br />
-				<br />
-				<b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>.
-			</td>
-		</tr>
-		<tr>
-			<td align="center" width="30">
-				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" height="34"/>
-				</a>
-			</td>
-			<td align="center" width="30">
-				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" height="34"/>
-				</a>
-			</td>
-			<td align="center" width="30">
-				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" height="34"/>
-				</a>
-			</td>
-			<td align="center" width="30">
-				<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-					<img src="./gallery/nbviewer_logo.svg" height="34"/>
-				</a>
-			</td>
-		</tr>
-	</thead>
-</table>
-
-
 ## Learn from Examples
 Learn the basics of fastdup through interactive examples. View the notebooks on GitHub or nbviewer. Even better, run them on Google Colab or Kaggle, for free.
+
+<table>
+  <tr>
+    <td rowspan="4" width="160">
+        <a href="https://visual-layer.readme.io/docs/getting-started">
+            <img src="./gallery/cat_dog_thumbnail.jpg" width="120">
+        </a>
+    </td>    
+    <td rowspan="4">
+        <b>⚡ Quickstart:</b> Learn how to install fastdup, load a dataset and analyze it for potential issues such as duplicates/near-duplicates, broken images, outliers, dark/bright/blurry images, and view visually similar image clusters. If you're new, start here!
+        <br>
+        <br>
+        <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>
+        <br>
+        <b>📌 Notebooks:</b>
+        <br>
+        <div style="display: flex; gap: 10px; margin-left: 20px; margin-top: 10px;">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                <img src="./gallery/nbviewer_logo.svg" height="34">
+            </a>
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                <img src="./gallery/github_logo.png" height="32">
+            </a>
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                <img src="./gallery/colab_logo.png" height="28">
+            </a>
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="32">
+            </a>
+        </div>
+    </td>
+    <td rowspan="4" width="160">
+        <a href="https://visual-layer.readme.io/docs/getting-started">
+            <img src="./gallery/food_thumbnail.jpg" width="120">
+        </a>
+    </td>    
+    <td rowspan="4">
+        <b>🧹 Analyze Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+      <br>
+      <br>
+      <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
+        <br>
+        <b>📌 Notebooks:</b>
+        <br>
+        <div style="display: flex; gap: 10px; margin-left: 20px; margin-top: 10px;">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                <img src="./gallery/nbviewer_logo.svg" height="34">
+            </a>
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                <img src="./gallery/github_logo.png" height="32">
+            </a>
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                <img src="./gallery/colab_logo.png" height="28">
+            </a>
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="32">
+            </a>
+        </div>
+    </td>
+</tr>
+
+</table>
 
 <table>
   <tr>
