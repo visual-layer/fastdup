@@ -219,7 +219,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
     </td>
   </tr>
   <tr>
-    <td width="80">
+    <td width="80" align="center">
         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
             <img src="./gallery/nbviewer_logo.svg" height="34">
         </a>
