@@ -338,21 +338,10 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
     <td colspan="4" valign="top">
         <b>🤗 Analyze Hugging Face Datasets</b><br>Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
     </td>
-    <td rowspan="3" width="160">
-        <a href="https://visual-layer.readme.io/docs/getting-started">
-            <img src="./gallery/satellite_thumbnail.jpg" width="120">
-        </a>
-    </td>    
-    <td colspan="4" valign="top">
-        <b>🛰️ Satellite Image Analysis</b><br>Learn how to load 16-bit grayscale satellite image with oriented bounding boxes (OBB), find issues with the images and check the quality of annotations.
-    </td>
   </tr>
   <tr>
     <td colspan="4">
         <b>📌 Dataset:</b> <a href="https://huggingface.co/datasets/zh-plus/tiny-imagenet">Tiny-ImageNet</a>.
-    </td>
-    <td colspan="4">
-        <b>📌 Dataset:</b> <a href="https://mafatchallenge.mod.gov.il/">MAFAT Satellite Vision</a>.
     </td>
   </tr>
   <tr>
@@ -373,26 +362,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
     </td>
     <td width="80" align="center">
         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-            <img src="./gallery/kaggle_logo.png" height="32">
-        </a>
-    </td>
-    <td width="80" align="center">
-        <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-            <img src="./gallery/nbviewer_logo.svg" height="34">
-        </a>
-    </td>
-    <td width="80" align="center">
-        <a href="https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-            <img src="./gallery/github_logo.png" height="32">
-        </a>
-    </td>
-    <td width="80" align="center">
-        <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
-            <img src="./gallery/colab_logo.png" height="28">
-        </a>
-    </td>
-    <td width="80" align="center">
-        <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
             <img src="./gallery/kaggle_logo.png" height="32">
         </a>
     </td>
@@ -608,6 +577,14 @@ Learn how to use fastdup as a poweruser!
 			<b>🔢 Optical Character Recognition</b><br />
 			Search through large image datasets optical characters with PaddleOCR.
 		</td>
+        <td rowspan="2" width="160">
+			<a href="https://visual-layer.readme.io/docs/getting-started">
+            <img src="./gallery/satellite_thumbnail.jpg" width="120">
+        </a>
+		</td>
+		<td colspan="4" valign="top">
+			<b>🛰️ Satellite Image Analysis</b><br>Learn how to load 16-bit grayscale satellite image with oriented bounding boxes (OBB), find issues with the images and check the quality of annotations.
+		</td>
 	</tr>
 	<tr>
 		<td width="80" align="center">
@@ -627,6 +604,26 @@ Learn how to use fastdup as a poweruser!
 		</td>
 		<td width="80" align="center">
 			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
+				<img src="./gallery/kaggle_logo.png" height="32" />
+			</a>
+		</td>
+        <td width="80" align="center">
+			<a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
+				<img src="./gallery/nbviewer_logo.svg" height="34" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
+				<img src="./gallery/github_logo.png" height="32" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
+				<img src="./gallery/colab_logo.png" height="28" />
+			</a>
+		</td>
+		<td width="80" align="center">
+			<a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/satellite-image-analysis.ipynb">
 				<img src="./gallery/kaggle_logo.png" height="32" />
 			</a>
 		</td>
