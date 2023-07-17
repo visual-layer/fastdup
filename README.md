@@ -235,7 +235,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -275,7 +275,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -315,7 +315,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -355,7 +355,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -403,7 +403,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -439,7 +439,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -476,7 +476,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -513,7 +513,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -550,7 +550,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -587,7 +587,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -624,7 +624,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
@@ -661,7 +661,7 @@ Learn how to use fastdup as a poweruser!
    <tr>
       <td align="center">
          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="30">
+         <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
