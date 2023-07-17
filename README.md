@@ -222,7 +222,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -264,7 +264,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -306,7 +306,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -348,7 +348,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -401,7 +401,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -437,7 +437,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -476,7 +476,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -515,7 +515,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr>
@@ -554,7 +554,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr> 
@@ -592,7 +592,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr> 
@@ -631,7 +631,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-              <img src="./gallery/colab_logo.png" height="25">
+              <img src="./gallery/colab_logo.png" height="20">
           </a>
       </td>
   </tr> 
