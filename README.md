@@ -516,8 +516,8 @@ Learn how to use fastdup as a poweruser!
 			</a>
 		</td>
 		<td colspan="4" valign="top">
-			<b>➡️ Feature Vectors</b><br />
-			Read fastdup-generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
+			<b>➡️ Use Your Own Feature Vectors</b><br />
+			Read fastdup-generated feature vectors in Python and use them for downstream processing. Or run fastdup on your own feature vectors!
 		</td>
 	</tr>
 	<tr>
