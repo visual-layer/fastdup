@@ -112,7 +112,7 @@ Here are the top benefits of fastdup:
 + **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
 + **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
 + **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
-+ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just 3 lines of code.
++ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
 
 
 
