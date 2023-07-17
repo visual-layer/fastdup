@@ -208,28 +208,28 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -250,28 +250,28 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -292,28 +292,28 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -334,28 +334,28 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -387,28 +387,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -423,28 +423,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -462,28 +462,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -501,28 +501,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -540,28 +540,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr> 
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -578,28 +578,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr> 
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
@@ -617,28 +617,28 @@ Learn how to use fastdup as a poweruser!
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="23">
+              <img src="./gallery/nbviewer_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-              <img src="./gallery/github_logo.png" height="23">
+              <img src="./gallery/github_logo.png" height="30">
           </a>
       </td>
   </tr>
   <tr>
       <td align="center">
           <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-              <img src="./gallery/colab_logo.png" height="23">
+              <img src="./gallery/colab_logo.png" height="25">
           </a>
       </td>
   </tr> 
   <tr>
       <td align="center">
           <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="23">
+              <img src="./gallery/kaggle_logo.png" height="30">
           </a>
       </td>
   </tr>
