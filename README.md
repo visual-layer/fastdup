@@ -405,6 +405,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
          </a>
       </td>
    </tr>
+   <!-- ------------------------------------------------------------------- -->
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/getting-started">
