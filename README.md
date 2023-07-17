@@ -197,7 +197,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="./gallery/cat_dog_thumbnail.jpg" width="256">
+              <img src="./gallery/cat_dog_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -239,7 +239,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
-              <img src="gallery/food_thumbnail.jpg" width="256">
+              <img src="gallery/food_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -281,7 +281,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
-              <img src="./gallery/imagenette_thumbnail.jpg" width="256">
+              <img src="./gallery/imagenette_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -323,7 +323,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-              <img src="./gallery/coco_thumbnail.jpg" width="256">
+              <img src="./gallery/coco_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -379,7 +379,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-              <img src="./gallery/hf_thumbnail.jpg" width="256">
+              <img src="./gallery/hf_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -415,7 +415,7 @@ Learn how to use fastdup as a poweruser!
   <tr> 
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
-              <img src="./gallery/dino_thumbnail.jpg" width="256">
+              <img src="./gallery/dino_thumbnail.jpg" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -454,7 +454,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-face-detection">
-              <img src="./gallery/video-face-detection.png" width="256">
+              <img src="./gallery/video-face-detection.png" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -493,7 +493,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
-              <img src="gallery/video-yolov5-detection.png" width="256">
+              <img src="gallery/video-yolov5-detection.png" width="200">
       </a>
       </td>    
       <td rowspan="4">
@@ -532,7 +532,7 @@ Learn how to use fastdup as a poweruser!
   <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/image-search">
-              <img src="gallery/product-matching.jpg" width="256">
+              <img src="gallery/product-matching.jpg" width="200">
       </a>
       </td>
       <td rowspan="4">
@@ -570,7 +570,7 @@ Learn how to use fastdup as a poweruser!
  <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
-              <img src="gallery/feature_vector.jpg" width="256">
+              <img src="gallery/feature_vector.jpg" width="200">
       </a>
       </td>
       <td rowspan="4">
@@ -609,7 +609,7 @@ Learn how to use fastdup as a poweruser!
  <tr>
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
-              <img src="gallery/ocr_thumbnail.jpg" width="256">
+              <img src="gallery/ocr_thumbnail.jpg" width="200">
       </a>
       </td>
       <td rowspan="4">
