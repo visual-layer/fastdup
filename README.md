@@ -372,7 +372,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
+         <b>🤗 Analyze Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
@@ -408,7 +408,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>🦖 DINOv2 Embeddings:</b> Extract feature vectors of your images using <a href="https://github.com/facebookresearch/dinov2">DINOv2</a> model. Runs on CPU. No GPU needed!
+         <b>🦖 DINOv2 Embeddings:</b> Extract feature vectors of your images using <a href="https://github.com/facebookresearch/dinov2">DINOv2</a> model. Runs on CPU.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
@@ -445,7 +445,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>➡️ Use Your Own Feature Vectors:</b> Learn how to read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your calculated feature vectors.
+         <b>➡️ Use Your Own Feature Vectors:</b> Read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your feature vectors.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
@@ -482,7 +482,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>😗 Face Detection in Videos:</b> Learn how to use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
+         <b>😗 Face Detection in Videos:</b> Use fastdup with a face detection model to detect faces from videos and analyze the cropped faces for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry faces.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-face-detection.ipynb">
@@ -519,7 +519,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b> 🤖 Object Detection in Videos:</b> Learn how to use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
+         <b> 🤖 Object Detection in Videos:</b> Use fastdup with a pre-trained <a href="https://github.com/ultralytics/yolov5">YOLOv5</a> model to detect and analyze objects for potential issues such as duplicates, near-duplicates, outliers, bright/dark/blurry objects.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/video-yolov5-detection.ipynb">
@@ -556,7 +556,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>🔢 Optical Character Recognition:</b> Search through large image datasets optical characters with PaddleOCR.
+         <b>🔢 Optical Character Recognition:</b> Enrich your dataset by detecting multilingual texts with <a href="https://github.com/ultralytics/yolov5">PaddleOCR</a>.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/optical-character-recognition.ipynb">
@@ -593,7 +593,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>🔍 Image Search:</b> Learn how to use fastdup to search through large image datasets for duplicates/similar images using a query image. Runs on CPU!
+         <b>🔍 Image Search:</b> Search through large image datasets for duplicates/near-duplicates using a query image. Runs on CPU!
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
