@@ -408,7 +408,7 @@ Learn how to use fastdup as a poweruser!
          </a>
       </td>
       <td rowspan="4">
-         <b>🦖 DINOv2 Embeddings:</b> Extract feature vectors of your images using DINOv2 model. Runs on CPU. No GPU needed!
+         <b>🦖 DINOv2 Embeddings:</b> Extract feature vectors of your images using <a href="https://github.com/facebookresearch/dinov2">DINOv2</a> model. Runs on CPU. No GPU needed!
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
