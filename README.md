@@ -359,8 +359,22 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
           </a>
       </td>
   </tr>
-
   <!-- ------------------------------------------------------------------- -->
+
+</table>
+
+
+
+## Exciting New Features
+
+Learn how to use fastdup as a poweruser!
+
+> **Note**: We're happy to announce all advanced features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
+
+
+<table>
+
+<!-- ------------------------------------------------------------------- -->
 
   <tr>
       <td rowspan="4" width="160">
@@ -370,9 +384,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>    
       <td rowspan="4">
         <b>🤗 Analyze Hugging Face Datasets:</b> Learn how to load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
-        <br>
-        <br>
-        <b>📌 Dataset:</b> <a href="https://huggingface.co/datasets/zh-plus/tiny-imagenet">Tiny-ImageNet</a>.
       </td>
       <td align="center" width="80">
           <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
@@ -401,23 +412,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
           </a>
       </td>
   </tr>
-
-  <!-- ------------------------------------------------------------------- -->
-
-</table>
-
-
-
-## Exciting New Features
-
-Learn how to use fastdup as a poweruser!
-
-> **Note**: We're happy to announce all advanced features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
-
-
-<table>
-
-
   <tr> 
       <td rowspan="4" width="160">
       <a href="https://visual-layer.readme.io/docs/getting-started">
@@ -534,45 +528,6 @@ Learn how to use fastdup as a poweruser!
   </tr>
 
    <!-- ------------------------------------------------------------------- -->
-
-  <tr>
-      <td rowspan="4" width="160">
-      <a href="https://visual-layer.readme.io/docs/video-yolov5-detection">
-              <img src="gallery/surveillance_thumbnail.jpg" width="256">
-      </a>
-      </td>
-      <td rowspan="4">
-        <b>🎥 Surveillance Camera Analysis:</b> Learn how to use fastdup to analyze surveillance camera videos, caption the activity inside the videos and detect indoor/outdoor scene and automatically caption the images using the <a href="https://github.com/salesforce/BLIP"> BLIP</a> model. 
-      </td>
-      <td align="center" width="80">
-          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
-              <img src="./gallery/nbviewer_logo.svg" height="34">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
-              <img src="./gallery/github_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
-              <img src="./gallery/colab_logo.png" height="28">
-          </a>
-      </td>
-  </tr>
-  <tr>
-      <td align="center">
-          <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
-              <img src="./gallery/kaggle_logo.png" height="32">
-          </a>
-      </td>
-  </tr>
-
-  <!-- ------------------------------------------------------------------- -->
 
   <tr>
       <td rowspan="4" width="160">
