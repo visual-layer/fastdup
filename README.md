@@ -105,9 +105,15 @@ concerns while providing extra functionalities.
 
 ## Why fastdup?
 
-- **Quality**: Find and remove anomalies and outliers from your dataset, including duplicates and similar images and videos at a large scale.
-- **Cost**: Reduce data operation costs by intelligently sampling high-quality or novel datasets before labeling and assessing labeled data quality.
-- **Scale**: fastdup's C++ graph engine is highly efficient and can handle up to 400M images on a single CPU machine.
+With a plethora of data visualization/profiling tools available, what sets fastdup apart? 
+Here are the top benefits of fastdup:
+
++ **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
++ **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
++ **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
++ **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
++ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just 3 lines of code.
+
 
 
 ## Setting up
