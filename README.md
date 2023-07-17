@@ -365,7 +365,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
-## Advanced Features
+## Exciting New Features
 
 Learn how to use fastdup as a poweruser!
 
