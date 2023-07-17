@@ -366,8 +366,6 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 ## Exciting New Features
 
-Learn how to use fastdup as a poweruser!
-
 > **Note**: We're happy to announce all advanced features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
 <table>
