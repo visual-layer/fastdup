@@ -233,9 +233,9 @@ fastdup.create_duplicates_gallery(os.path.join(test_dir, 'similarity.csv'))
 
 ## Working with tar/tgz/zip files as input <a name="tar"/>
 
-Some popular datasets like [LAOIN 400M](https://laion.ai/laion-400-open-dataset/) use webdataset compressed formats. Fastdup supports the following compressed file formats: `tar,tgz,tar.gz,zip`. Those compressed files can be located in a local folder or remote s3 or minio path.
+Some popular datasets like [LAION 400M](https://laion.ai/laion-400-open-dataset/) use webdataset compressed formats. Fastdup supports the following compressed file formats: `tar,tgz,tar.gz,zip`. Those compressed files can be located in a local folder or remote s3 or minio path.
 
-For example, the LAOIN dataset contains the following tar files:
+For example, the LAION dataset contains the following tar files:
 
 ```
 00000.tar containing:
@@ -280,7 +280,7 @@ Once all jobs are finished, collect all the output files from the `work_dir` int
 
 ```python
 import fastdup
-fastdup.run('', run_mode=2, work_dir='/path/to/work_dir')
+fastdup.run('s3://mybucket/myfolder', run_mode=2, work_dir='/path/to/work_dir')
 ```
 
 For running on 50M images you will need an ubuntu machine with 32 cores and 256GB RAM. We are working on further scaling the implementation for the full dataset - stay tuned!

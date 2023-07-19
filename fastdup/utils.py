@@ -2,6 +2,7 @@ import os
 import glob
 import random
 import platform
+from pathlib import Path
 from fastdup.definitions import *
 from datetime import datetime
 from fastdup.sentry import fastdup_capture_exception
@@ -57,23 +58,28 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
 
 def download_from_web(url):
     import urllib.request
-    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + "yolov5s.onnx")
+    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
     urllib.request.urlretrieve(url, local_file)
     return local_file
     #url = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
 
-def find_model(model_name):
-    local_model = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(model_name))
+def find_model(model_name, url):
+    local_model = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
     
     if not os.path.isfile(local_model):
-        print("Trying to download yolov5s model from ", YOLOV5S_MODEL)
-        local_model = download_from_web(YOLOV5S_MODEL)
+        print(f"Trying to download {model_name} model from {url}")
+        local_model = download_from_web(url)
     return local_model
 
 def check_latest_version(curversion):
     try:
         import requests
-        from packaging.version import parse
+        try:
+            from packaging.version import parse
+        except ModuleNotFoundError as ex:
+            print("Failed to find packaging module, please install via `pip install setuptools`")
+            fastdup_capture_exception("check_latest_version", ex, True)
+            return False
 
         # Search for the package on PyPI using the PyPI API
         response = requests.get('https://pypi.org/pypi/fastdup/json')
@@ -187,8 +193,8 @@ def expand_list_to_files(the_list):
     files = []
     found = False
     for f in the_list:
-        if isinstance(f, str):
-            if f.startswith("s3://") or f.startswith("minio://"):
+        if isinstance(f, str) or isinstance(f, Path):
+            if isinstance(f, str) and (f.startswith("s3://") or f.startswith("minio://")):
                 for suffix in IMAGE_SUFFIXES:
                     if f.lower().endswith(suffix):
                         found = True
@@ -241,7 +247,8 @@ def load_filenames(work_dir, kwargs):
     assert len(filenames), "Empty dataframe found " + local_filenames
     assert 'filename' in filenames.columns, f"Error: Failed to find filename column in {work_dir}/atrain_{FILENAME_IMAGE_LIST}"
     if load_crops and not draw_bbox:
-        filenames["crop_filename"] = filenames["filename"]
+        assert 'crop_filename' in filenames.columns, f"Failed to load crop filename {local_filenames}"
+        filenames["filename"] = filenames["crop_filename"]
     return filenames
 
 def merge_stats_with_filenames(df, filenames):
@@ -259,6 +266,7 @@ def load_stats(stats_file, work_dir, kwargs={}, usecols=None):
         if nrows is not None:
             stats = stats_file.head(nrows)
         assert work_dir is not None, "When calling with stats_file which is a pd.DataFrame need to point work_dir to the fastdup work_dir folder"
+        kwargs["external_df"] = True
 
     elif isinstance(stats_file, str):
         assert stats_file is not None and isinstance(stats_file, str) and os.path.exists(stats_file), \
@@ -274,6 +282,7 @@ def load_stats(stats_file, work_dir, kwargs={}, usecols=None):
         else:
             assert False, "Failed to find stats file " + stats_file
 
+        assert os.path.exists(local_filenames), f"Failed to read stats file {local_filenames} please make sure fastdup was run and this file was created."
         stats = pd.read_csv(local_filenames, nrows=nrows, usecols=usecols)
         assert len(stats), "Empty dataframe found " + local_filenames
     else:
@@ -310,8 +319,9 @@ def load_labels(get_label_func, kwargs={}):
     return df_labels
 
 def merge_with_filenames(df, filenames):
-    df = df.merge(filenames, left_on='from', right_on='index').merge(filenames, left_on='to', right_on='index')
-    assert len(df), "Failed to merge similarity/outliers with atrain_features.dat.csv file"
+    df2 = df.merge(filenames, left_on='from', right_on='index').merge(filenames, left_on='to', right_on='index')
+    assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file, \n{df.head()}, \n{filenames.head()}"
+    df = df2
     del df['from']
     del df['to']
     del df['index_x']
@@ -320,8 +330,15 @@ def merge_with_filenames(df, filenames):
     return df
 
 def merge_with_filenames_one_sided(df, filenames):
-    df = df.merge(filenames, left_on='from', right_on='index')
-    assert len(df), "Failed to merge similarity/outliers with atrain_features.dat.csv file"
+    df2 = df.merge(filenames, left_on='from', right_on='index')
+    assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file \n{df.head()}, \n{filenames.head()}"
+    df = df2
+    return df
+
+def merge_with_filenames_search(df, filenames):
+    df2 = df.merge(filenames, left_on='to', right_on='index')
+    assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file \n{df.head()}, \n{filenames.head()}"
+    df = df2
     return df
 def get_bounding_box_func_helper(get_bounding_box_func):
     if get_bounding_box_func is None:

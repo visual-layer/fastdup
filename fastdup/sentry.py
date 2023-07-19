@@ -62,8 +62,15 @@ def init_sentry():
         )
         unit_test = 'UNIT_TEST' in os.environ
         try:
-            with open(os.path.join(os.environ.get('HOME', '/tmp'),".token"), "w") as f:
+            filename = os.path.join(os.environ.get('HOME', '/tmp'),".token")
+            if platform.system() == "Windows":
+                filename = os.path.join(os.environ.get('USERPROFILE',"c:\\"),".token")
+            with open(filename, "w") as f:
                 f.write(token)
+                #if platform.system() == "Windows":
+                #    f.write("\n")
+                #    LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
+                #    f.write(LOCAL_DIR)
         except:
             pass
 
@@ -98,7 +105,7 @@ def fastdup_performance_capture(section, start_time):
                 scope.set_tag("runtime-sec", time.time()-start_time)
                 scope.set_tag("platform", platform.platform())
                 scope.set_tag("platform.version", platform.version())
-                scope.set_tag("python", sys.version)
+                scope.set_tag("python", sys.version.strip().replace("\n", " "))
                 sentry_sdk.capture_message("Performance", scope=scope)
         finally:
             sentry_sdk.flush(timeout=5)
@@ -108,8 +115,8 @@ def fastdup_capture_log_debug_state(config):
     if 'SENTRY_OPT_OUT' not in os.environ:
         breadcrumb = {'type':'debug', 'category':'setup', 'message':'snapshot', 'level':'info', 'timestamp':time.time() }
         breadcrumb['data'] = config
-        with sentry_sdk.configure_scope() as scope:
-            scope.clear_breadcrumbs()
+        #with sentry_sdk.configure_scope() as scope:
+        #    scope.clear_breadcrumbs()
         sentry_sdk.add_breadcrumb(breadcrumb)
 
 

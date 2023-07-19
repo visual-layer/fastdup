@@ -9,15 +9,14 @@ from pathlib import Path
 import fastdup
 from pandas.errors import EmptyDataError
 import shutil
-import fastdup.fastup_constants as FD
+import fastdup.definitions as FD
 #import boto3
-from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception
+from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception, fastdup_capture_log_debug_state
 from fastdup.definitions import FOLDER_FULL_IMAGE_RUN
 import re
 
 
 class FastdupController:
-    @v1_sentry_handler
     def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path] = None):
         """
         This class serves as a proxy for fastdup basic usage,
@@ -44,6 +43,8 @@ class FastdupController:
         self._config = None
         self._dtype = None
         self._bbox = None
+        self._valid_bbox_annot = False
+        self._valid_rotated_annot = False
 
         if self._fastdup_applied:
             assert not isinstance(input_dir, list), \
@@ -53,6 +54,11 @@ class FastdupController:
 
         self._has_split = self._df_annot is not None and FD.ANNOT_SPLIT in self._df_annot
         self._has_label = self._df_annot is not None and FD.ANNOT_LABEL in self._df_annot
+        fastdup_capture_log_debug_state({"fastdup_applied": self._fastdup_applied, "run_mode":self._run_mode,
+                                         "bbox": self._bbox, "has_split": self._has_split, "has_label": self._has_label})
+
+    def get_status_string(self):
+        return f"self._run_mode={self._run_mode} self._dtype={self._dtype} self._bbox={self._bbox} self._has_label={self._has_label}"
 
     def get_annotations_dataframe(self):
         return self._df_annot
@@ -81,10 +87,11 @@ class FastdupController:
         :param input_dir: folder containing the data
         :param df_annot: df with annotations
         :param subset: subset of files to run fastdup on
-        :param embeddings: pre-calculated embeddings for images/bounding boxes
+        :param embeddings: pre-calculated embeddings for images/bounding boxes, np.ndarray of type float32
         :param data_type: image or bbox
         :param overwrite: overwrite existing fastdup state (delete work_dir)
         """
+        fastdup_capture_log_debug_state(locals())
         if overwrite:
             clean_work_dir(self._work_dir)
             #shutil.rmtree(self._work_dir, ignore_errors=True)
@@ -105,9 +112,20 @@ class FastdupController:
             self._run_mode = FD.MODE_ROTATED_BBOX
             self._dtype = FD.BBOX
             self._bbox = bbox_mode
+        elif self._dtype == FD.BBOX:
+            self._bbox = 'xywh_bbox'
+        else:
+            self._bbox = None
+
+        if self._dtype == FD.BBOX:
+            fastdup_args['bounding_box'] = self._bbox
 
         if embeddings is not None:
+            assert isinstance(embeddings, np.ndarray), "embedding parameter must be np.ndarray"
+            assert embeddings.dtype == 'float32', "embeddings dtype must be float32. You can generate the array using the" \
+                                                "command: features = np.zeros((rows, cols), dtype='float32')"
             self._run_mode = FD.MODE_EMBEDDING
+            self._embeddings_dim = embeddings.shape[1]
 
         self._fastdup_applied = is_fastdup_dir(self._work_dir)
 
@@ -153,7 +171,7 @@ class FastdupController:
             else self._df_annot
         return len(df_annot[FD.ANNOT_FILENAME].unique()) if self._df_annot is not None else 0
 
-    @v1_sentry_handler
+
     def annotations(self, valid_only=True):
         """
         Get annotation as data frame
@@ -166,7 +184,7 @@ class FastdupController:
             else self._df_annot
         return df_annot
 
-    @v1_sentry_handler
+
     def similarity(self, data: bool = True, split: Union[str, List[str]] = None,
                    include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
         """
@@ -179,18 +197,19 @@ class FastdupController:
         """
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
-        df = self._fetch_df(csv_name=FD.SIMILARITY_CSV, load_crops=load_crops, force_error=False)
-        assert df is not None, f'No similarity file found {FD.SIMILARITY_CSV}'
+        df = self._fetch_df(csv_name=FD.FILENAME_SIMILARITY, load_crops=load_crops, force_error=False)
+        assert df is not None, f'No similarity file found {FD.FILENAME_SIMILARITY}'
 
         if df.empty:
             warnings.warn(f'No similarities found, try using a lower threshold')
             return df
-        return self._add_annot_and_split(df, data, merge_on=[FD.SIM_SRC_IMG, FD.SIM_DST_IMG],
+        merged = self._add_annot_and_split(df, data, merge_on=[FD.SIM_SRC_IMG, FD.SIM_DST_IMG],
                                          split=split, unannotated=include_unannotated, load_crops=load_crops)
+        assert len(merged), f"Failed to merge {df.head()} {data.head()}"
+        return merged
 
-    @v1_sentry_handler
     def outliers(self, data: bool = True, split: Union[str, List[str]] = None,
-                 include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
+                 include_unannotated: bool = False, load_crops: bool = False, fast_mode: bool = False) -> pd.DataFrame:
         """
         Get fastdup outlier file
         :param data: add annotation
@@ -203,23 +222,23 @@ class FastdupController:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         # get df and rename columns (from, to, score) -> (outlier, nearest_neighbor, score)
-        df = self._fetch_df(csv_name=FD.OUTLIERS_CSV, load_crops=load_crops)
-        assert df is not None, f'No outliers found {FD.OUTLIERS_CSV}'
+        df = self._fetch_df(csv_name=FD.FILENAME_OUTLIERS, load_crops=load_crops)
+        assert df is not None, f'No outliers found {FD.FILENAME_OUTLIERS}'
         if df.empty:
             warnings.warn(f'No outliers found')
             return df
         df = df.rename({
             FD.SIM_SRC_IMG: FD.OUT_ID, FD.SIM_DST_IMG: FD.OUT_NEAREST_NEIGHBOR
         }, axis=1)
-        df = self._add_annot_and_split(df, data, merge_on=[FD.OUT_ID, FD.OUT_NEAREST_NEIGHBOR], split=split,
-                                       unannotated=include_unannotated, suffix=True)
+        if not fast_mode:
+            df = self._add_annot_and_split(df, data, merge_on=[FD.OUT_ID, FD.OUT_NEAREST_NEIGHBOR], split=split,
+                                           unannotated=include_unannotated, suffix=True)
         assert len(df), "df has no rows"
         if FD.OUT_SCORE not in df.columns: #no outliers
             return df
         df = df.sort_values(FD.OUT_SCORE).groupby(FD.OUT_ID).head(1).reset_index(drop=True)
         return df
 
-    @v1_sentry_handler
     def invalid_instances(self):
         """
         Get fastdup invalid file
@@ -229,7 +248,6 @@ class FastdupController:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         return self._df_annot.query(f'not {FD.ANNOT_VALID}').reset_index(drop=True)
 
-    @v1_sentry_handler
     def img_stats(self, data: bool = True, split: bool = None,
                   include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
         """
@@ -246,7 +264,7 @@ class FastdupController:
         if df.empty:
             return df
         assert 'width' in df.columns and 'height' in df.columns, "df is missing needed columns: width and height"
-        df = df.rename({'width': FD.ANNOT_IMG_W, 'height': FD.ANNOT_IMG_H, FD.STATS_INST_ID: FD.ANNOT_FD_ID}, axis=1)
+        df = df.rename({'width': FD.ANNOT_IMG_W, 'height': FD.ANNOT_IMG_H}, axis=1)
         return self._add_annot_and_split(df, data, merge_on=[FD.ANNOT_FD_ID], split=split, suffix=False,
                                          unannotated=include_unannotated)
 
@@ -260,9 +278,8 @@ class FastdupController:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         return self._config
 
-    @v1_sentry_handler
     def connected_components(self, data: bool = True, split: Union[str, List[str]] = None,
-                             include_unannotated: bool = False, load_crops: bool = False) \
+                             include_unannotated: bool = False, load_crops: bool = False, fast_mode:bool = False) \
             -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Get fastdup connected components file
@@ -276,19 +293,20 @@ class FastdupController:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         # get connected components and add annotation
-        df_cc = self._fetch_df(csv_name=FD.CC_CSV, load_crops=load_crops)
-        assert df_cc is not None, f'No connected components found {FD.CC_CSV}'
+        df_cc = self._fetch_df(csv_name=FD.FILENAME_CONNECTED_COMPONENTS, load_crops=load_crops)
+        assert df_cc is not None, f'No connected components found {FD.FILENAME_CONNECTED_COMPONENTS}'
         assert FD.CC_INST_ID in df_cc.columns, f'Missing column {FD.CC_INST_ID} in connected component file'
         if df_cc.empty:
             warnings.warn(f'No connected components found, try using a lower threshold')
             return df_cc, None
         assert FD.CC_INST_ID in df_cc.columns, f'Missing column {FD.CC_INST_ID} in connected component file'
         df_cc = df_cc.rename({FD.CC_INST_ID: FD.ANNOT_FD_ID}, axis=1)
-        df_cc = self._add_annot_and_split(df_cc, data, merge_on=[FD.ANNOT_FD_ID], split=split, suffix=False,
-                                          unannotated=include_unannotated)
-        df_info = self._fetch_df(csv_name=FD.CC_INFO_CSV)
+        if not fast_mode:
+            df_cc = self._add_annot_and_split(df_cc, data, merge_on=[FD.ANNOT_FD_ID], split=split, suffix=False,
+                                              unannotated=include_unannotated)
+        df_info = self._fetch_df(csv_name=FD.FILENAME_COMPONENT_INFO)
         if df_info is None or df_info.empty:
-            print(f"Warning: Missing file {self.work_dir}{FD.CC_INFO_CSV}")
+            print(f"Warning: Missing file {self.work_dir}/{FD.FILENAME_COMPONENT_INFO}")
         return df_cc, df_info
 
     @v1_sentry_handler
@@ -309,17 +327,23 @@ class FastdupController:
              - bbox_x, bbox_y, bbox_h, bbox_w (Optional): bounding box arguments. Alternatively x1,y2,x2,y2,x3,y3,x4,x4 for rotated bounding box.
              - split (Optional): data split, e.g. train, test, etc ...
         :param subset: (Optional) subset of images to analyze
-        :param embeddings: (Optional) pre-calculated embeddings
+        :param embeddings: (Optional) pre-calculated feature embeddings. Data type of np.ndarray of size n x d, n is the number of data points, d is the feature vector length.
+            data type must be 'float32'.
         :param data_type: (Optional) data type, one of 'image', 'bbox'
         :param overwrite: (Optional) overwrite existing files
         :param print_summary: Print summary report of fastdup run results
         :param fastdup_kwargs: (Optional) fastdup run arguments, see fastdup.run() documentation
         """
+        fastdup_capture_log_debug_state(locals())
+
         if self._fastdup_applied and not overwrite:
             warnings.warn('Fastdup was already applied, use overwrite=True to re-run')
             return
         if annotations is not None:
             assert isinstance(annotations, pd.DataFrame) and not annotations.empty and "filename" in annotations.columns, f"Got wrong annotation parameter, should be pd.DataFrame with the mandatory columns: filename {annotations}"
+            first_filename = annotations['filename'].values[0]
+            if (str(input_dir)) != ".":
+                assert first_filename.startswith(str(input_dir)), f"annotation dataframe should contain full path filenames, starting with {input_dir}"
         self._init_run(input_dir, annotations, subset, embeddings, data_type, overwrite, fastdup_kwargs)
 
         # get user's fastdup kwargs or use default
@@ -386,7 +410,7 @@ class FastdupController:
         # Images belonging to clusters
         # X percent of images belong to Y clusters, the largest of ZZ images.
         try:
-            cc_df, _ = self.connected_components()
+            cc_df, _ = self.connected_components(fast_mode=True)
             number_of_ccs = cc_df[cc_df['count'] != 0]['count'].nunique()
             images_in_ccs = int((cc_df['count'] != 0).sum() / 2)
             images_not_in_ccs = total_image_count - images_in_ccs
@@ -408,7 +432,7 @@ class FastdupController:
     
         try:
             # Outlier counts
-            outlier_df = self.outliers()
+            outlier_df = self.outliers(fast_mode=True)
             number_of_outliers = len(outlier_df)
             outlier_threhold = 100 * self._config.get('lower_threshold', 0.05)
             summary_stats.append(f"Outliers: {pct(number_of_outliers):.2f}% ({number_of_outliers:,d}) of images are "\
@@ -484,7 +508,8 @@ class FastdupController:
         self._df_annot['fd_index'] = self._df_annot[FD.ANNOT_FD_ID].fillna(
             pd.Series(np.arange(len(self._df_annot))) + self._max_fd_id + 1
         )
-        self._df_annot = self._df_annot.set_index('fd_index')
+        self._df_annot = self._df_annot.set_index('index', drop=False)
+        self._df_annot.index.name = None
 
     def _save_artifacts(self, fastdup_kwargs):
         """
@@ -568,7 +593,7 @@ class FastdupController:
             df_annot = self._df_annot.copy()
             assert FD.ANNOT_FILENAME in self._df_annot.columns, f"Failed to find column {FD.ANNOT_FILENAME} in annotations columns"
 
-            df_annot['full_path'] = df_annot[FD.ANNOT_FILENAME].apply(lambda fname: self._input_dir / fname)
+            df_annot['filename'] = df_annot[FD.ANNOT_FILENAME].apply(lambda fname: self._input_dir / fname)
             df_annot = df_annot.astype({FD.ANNOT_FD_ID: int})
 
             # convert column names input expected: "filename,col_x,row_y,width,height"
@@ -577,12 +602,11 @@ class FastdupController:
                                  FD.ANNOT_ROT_BBOX_X3, FD.ANNOT_ROT_BBOX_Y3, FD.ANNOT_ROT_BBOX_X4, FD.ANNOT_ROT_BBOX_Y4, 
                                  FD.ANNOT_LABEL]
             if set(rotated_bbox_cols).issubset(df_annot.columns):
-                main_cols = [FD.ANNOT_FD_ID, 'full_path'] + rotated_bbox_cols
-                df_annot = df_annot[main_cols].rename({FD.ANNOT_FD_ID: 'index', 'full_path': 'filename'}, axis=1)
+                main_cols = [FD.ANNOT_FD_ID, 'filename'] + rotated_bbox_cols
+                df_annot = df_annot[main_cols]
             elif set(bbox_cols).issubset(df_annot.columns):
-                main_cols = [FD.ANNOT_FD_ID, 'full_path'] + bbox_cols
-                fast_dup_cols = ['index', 'filename', 'col_x', 'row_y', 'width', 'height']
-                df_annot = df_annot[main_cols].rename(dict(zip(main_cols, fast_dup_cols)), axis=1)
+                main_cols = [FD.ANNOT_FD_ID, 'filename'] + bbox_cols
+                df_annot = df_annot[main_cols]
             else:
                 assert False, f"Found wrong columns in annotation files {df_annot.columns} should include bounding box in the format {bbox_cols} or {rotated_bbox_cols}"
             # run fastdup on a file with full path
@@ -611,16 +635,15 @@ class FastdupController:
         if self._bbox in ["face","yolov5s"]:
             if self._bbox == "face":
                 df_annot = self._fetch_df(FD.MAPPING_CSV, True, force_error=True)
-                #df_annot = df_annot.rename({"index":FD.ANNOT_FD_ID,"filename":"img_filename"}, axis=1)
             elif self._bbox == "yolov5s":
                 df_annot = self._fetch_df(FD.MAPPING_CSV, False, force_error=True)
-                #df_annot = df_annot.rename({"index": FD.ANNOT_FD_ID, "filename": "img_filename"}, axis=1)
                 df_crops = self._fetch_df(FD.CROPS_CSV, False, force_error=True)
-                #df_crops = df_crops.rename({"index": FD.ANNOT_FD_ID}, axis=1)
                 assert len(df_crops) == len(df_annot), f"Wrong length detected"
                 if "filename" in df_annot:
                     del df_annot["filename"]
-                df_annot = df_annot.merge(df_crops, on=FD.ANNOT_FD_ID)
+                df_annot2 = df_annot.merge(df_crops, on=FD.ANNOT_FD_ID)
+                assert len(df_annot2), f"Failed to merge {df_annot.head()} {df_crops.head()} " + self.get_status_string()
+                df_annot = df_annot2
 
             #self._df_annot = df_annot
             original_col_names = df_annot.columns
@@ -629,7 +652,11 @@ class FastdupController:
                 if len(merge_on) > 1:
                     df_annot.columns = df_annot.columns.map(
                     lambda x: f'{str(x)}_{col_name}' if (x != FD.ANNOT_FD_ID) else str(x))
-                df = pd.merge(df, df_annot, left_on=col_name, right_on=FD.ANNOT_FD_ID, how='left')
+                if df.empty or df_annot.empty:
+                    return df
+                df2 = pd.merge(df, df_annot, left_on=col_name, right_on=FD.ANNOT_FD_ID, how='left')
+                assert len(df2), f"Failed to merge {df.head()} {df_annot.head()}" + self.get_status_string()
+                df = df2
                 df_annot.columns = original_col_names
                 if len(df) == 0:
                     assert len(
@@ -676,13 +703,13 @@ class FastdupController:
         assert len(df), "Bug: got empty df"
         df2 = df if inplace else df.copy()
         df_annot = self._df_annot.copy()
-        df_annot = df_annot[~df_annot[FD.ANNOT_FD_ID].isna()].set_index(FD.ANNOT_FD_ID)
+        df_annot = df_annot[~df_annot[FD.ANNOT_FD_ID].isna()]
         if not unannotated:
             df_annot = df_annot[df_annot[FD.ANNOT_VALID]]
             assert len(df_annot), f"Failed to find valid annotations"
-            df2 = df2[df2[left_on].isin(df_annot.index).all(axis=1)]
-            assert len(df2), f"Failed to find index in col {left_on} {df_annot.head()} {df.head()}"
-        df_annot = df_annot.reset_index()
+            #df2 = df2[df2[left_on].isin(df_annot.index).all(axis=1)]
+            #assert len(df2), f"Failed to find index in col {left_on} {df_annot.head()} {df.head()}"
+        #df_annot = df_annot.reset_index()
         original_col_names = df_annot.columns
 
         for col_name in left_on:
@@ -692,7 +719,8 @@ class FastdupController:
             df_annot.columns = original_col_names
             if len(df3) == 0:
                 assert len(df3), f"Failed to merge df with annotations {col_name} {df_annot.columns} {df2.head()} {df_annot.head()}"
-        return df3
+            df2 = df3
+        return df2
 
     def _fetch_df(self, csv_name: str, load_crops: bool = False, force_error: bool = False) -> pd.DataFrame:
         """
@@ -738,13 +766,15 @@ class FastdupController:
                 self._df_annot = df_mapping
 
         else:
-            assert "index" not in self._df_annot
+            assert "index" not in self._df_annot, f"Found index in self._df_annot {self._df_annot.head()}"
             if df_bad_files is not None and not df_bad_files.empty:
                 total = pd.concat([df_mapping, df_bad_files])
             else:
                 total = df_mapping
-            self._df_annot = pd.merge(self._df_annot, total, on=FD.ANNOT_FILENAME, how='left')
-            assert len(self._df_annot), "Failed to merge to find indexes"
+            assert len(total), "Failed to find annotations"
+            df_annot = pd.merge(self._df_annot, total, on=FD.ANNOT_FILENAME, how='left')
+            assert len(df_annot), f"Failed to merge to find indexes {self._df_annot.head()} {total.head()}" + self.get_status_string()
+            self._df_annot = df_annot
             self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].astype(pd.UInt32Dtype())
 
     def _expand_annot_df(self):
@@ -770,32 +800,13 @@ class FastdupController:
             assert df_crops_annot is not None and not df_crops_annot.empty, f"Failed to find {self.work_dir}/{FD.CROPS_CSV} in work_dir"
             assert 'index' in df_crops_annot.columns, f"Failed to find 'index' column in {self.work_dir}/{FD.CROPS_CSV}"
             assert "crop_filename" in df_crops_annot.columns, "Failed to fidn crop_filename in columns"
-            #df_crops_annot = df_crops_annot.rename({'index': FD.ANNOT_FD_ID}, axis=1)
-
-            #df_mapping = self._fetch_df(FD.MAPPING_CSV)
-            #assert df_mapping is not None and not df_mapping.empty, f"Failed to find {self.work_dir}/{FD.MAPPING_CSV} in work_dir"
-
-
-            #assert len(df_mapping) == len(df_crops_annot), "Length of mapping (atrain_features.data.csv) and crop file (atrain_crops.csv) should be similar"
-
-            #new_index_dict = pd.Series( df_crops_annot[FD.ANNOT_FD_ID], range(0, len(df_crops_annot))).to_dict()
-
-            #self._df_annot = pd.merge(self._df_annot, df_crops_annot, on=FD.ANNOT_FD_ID, how='left')
-            #self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].apply(
-            #    lambda x: int(new_index_dict.get(x, len(self._df_annot)+x))).astype(np.uint32)
-
             if "filename" in self._df_annot:
                 del self._df_annot["filename"]
-            self._df_annot = pd.merge(self._df_annot, df_crops_annot, on=FD.ANNOT_FD_ID
+            df_annot = pd.merge(self._df_annot, df_crops_annot, on=FD.ANNOT_FD_ID
                                                                           , how='left')
-            #self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].apply(lambda x: new_index_dict.get(x,-1)).astype(np.uint32)
-            #self._df_annot[FD.ANNOT_FILENAME] = self._df_annot[FD.ANNOT_FILENAME].apply(
-            #    lambda fname: str(Path('crops') / fname))
-            assert len(self._df_annot), f"Empty merge result when reading crop file from {df_crops_annot} "
-            #assert FD.MAP_FILENAME in self._df_annot.columns, \
-            #    f"Failed to find {FD.MAP_FILENAME} column, avilable columns {str(self._df_annot.columns)}"
-            self._df_annot.rename({'col_x': FD.ANNOT_BBOX_X, 'row_y': FD.ANNOT_BBOX_Y,
-                                   'height': FD.ANNOT_BBOX_H, 'width': FD.ANNOT_BBOX_W}, axis=1, inplace=True)
+            assert len(df_annot), f"Empty merge result when reading crop file from {df_crops_annot} first was {self._df_annot.head()} second was {df_crops_annot.head()}" + self.get_status_string()
+            self._df_annot = df_annot
+
         if self._run_mode == FD.MODE_ROTATED_BBOX:
             self._df_annot = self._df_annot[list(set(self._df_annot.columns).difference({
                 FD.ANNOT_BBOX_X, FD.ANNOT_BBOX_Y, FD.ANNOT_BBOX_H, FD.ANNOT_BBOX_W,
@@ -803,16 +814,10 @@ class FastdupController:
 
         # 1. collect subsets for error types analysis (MISSING_ANNOTATION, MISSING_IMAGE, FD-ERROR, VALID)
         df_bad_files = self._fetch_df(FD.BAD_CSV, False)
-        # if self._run_mode == FD.MODE_CROP or self._run_mode == FD.MODE_ROTATED_BBOX:
-        #     invalid_crop = self._df_annot[self._df_annot[FD.ANNOT_CROP_FILENAME].isna()]
-        #     if invalid_crop is not None and not invalid_crop.empty:
-        #         invalid_crop.loc[:,FD.ANNOT_ERROR] = 'INVALID_CROP'
-        #         invalid_crop = invalid_crop[[FD.ANNOT_FD_ID, FD.ANNOT_FILENAME, FD.ANNOT_ERROR]].rename(
-        #             {FD.ANNOT_FD_ID: FD.BAD_FD_ID, FD.ANNOT_FILENAME: FD.BAD_FILENAME}, axis=1)
-        #         df_bad_files = pd.concat([df_bad_files, invalid_crop])
+
         df_mapping = self._fetch_df(FD.MAPPING_CSV, False)
         assert df_mapping is not None and not df_mapping.empty,  f"Failed to find {FD.MAPPING_CSV} in work_dir"
-        assert 'index' in df_mapping.columns and 'filename' in df_mapping.columns
+        assert 'index' in df_mapping.columns and 'filename' in df_mapping.columns, f"Failed to find index and filename columns is df_mapping. available cols are: {df_mapping.head()}"
 
         if FD.MAP_INST_ID not in df_mapping.columns:
             df_mapping[FD.MAP_INST_ID] = df_mapping.index
@@ -829,6 +834,7 @@ class FastdupController:
         # 3. add not-in-annot instances (but in fastdup mapping) to df_annot
         merged =  pd.merge(df_annot_in_subset, df_mapping,
                      on=FD.ANNOT_FD_ID, how='outer', suffixes=('', '_map'))
+        assert len(merged), f"Failed ot merge {df_annot_in_subset.head()} {df_mapping.head()}" + self.get_status_string()
         self._df_annot = pd.concat([merged,
             df_annot_not_in_subset])
         self._df_annot[FD.ANNOT_FILENAME].fillna(self._df_annot[FD.ANNOT_FILENAME + '_map'], inplace=True)
@@ -911,7 +917,7 @@ class FastdupController:
         if requested_dtype == FD.IMG and not isinstance(self._input_dir, list):
             return FD.BBOX if bbox_cols_available else FD.IMG
 
-        assert requested_dtype != FD.BBOX or bbox_cols_available, f"missing df-annotations or bounding box columns"
+        assert requested_dtype != FD.BBOX or bbox_cols_available, f"missing df-annotations or missing bounding box columns in annotation df: {bbox_cols} or {rotated_bbox_cols}"
         return requested_dtype
 
     def _verify_fastdup_run_args(self, input_dir, work_dir, df_annot, subset, data_type, pre_calc_features):
@@ -989,7 +995,7 @@ class FastdupController:
                 'if you wish to run on bounding boxes, make sure to provide the relevant columns'
             if data_type == FD.IMG:
                 assert df_annot[FD.ANNOT_FILENAME].nunique() == len(df_annot[FD.ANNOT_FILENAME]), \
-                    'df_annot must contain unique filenames'
+                    'df_annot must contain unique filenames, found repeating filenames'
             elif data_type == FD.BBOX:
                 bbox_cols = {FD.ANNOT_FILENAME, FD.ANNOT_BBOX_X, FD.ANNOT_BBOX_Y, FD.ANNOT_BBOX_W, FD.ANNOT_BBOX_H}
                 rotated_bbox_cols = {FD.ANNOT_FILENAME, FD.ANNOT_ROT_BBOX_X1, FD.ANNOT_ROT_BBOX_Y1, FD.ANNOT_ROT_BBOX_X2,
@@ -1011,45 +1017,25 @@ class FastdupController:
                 if len(df_annot) < len_df_annot:
                     print(f"Warning: removed {len_df_annot - len(df_annot)} duplicate bounding boxes")
 
-        # verify input dir exists
-        verify_input_dirs_or_s3_paths_exist(input_dir)
-
-
-def verify_input_dirs_or_s3_paths_exist(input_dir_or_list):
-    def verify_single_path(path):
-        if path is None:
-            pass
-        elif (str(path).startswith('minio://') or str(path).startswith('smb://')) or (isinstance(path, list) \
-            and len(path) and (str(path[0]).startswith("minio://") or str(path[0]).startswith('smb://'))):
-            pass
-        elif str(path).startswith('s3://') or (isinstance(path, list) \
-            and len(path) and str(path[0]).startswith("s3://")):
-            assert s3_folder_exists_and_not_empty(path), f'Could not access S3 path {str(path)}'
-        else:
-            assert os.path.isdir(str(path)), f'input_dir {str(path)} is not a directory'
-
-    if isinstance(input_dir_or_list, list):
-        for d in input_dir_or_list:
-            verify_single_path(d)
-    else:
-        verify_single_path(input_dir_or_list)
 
 
 def is_fastdup_dir(work_dir):
     return os.path.exists(Path(work_dir) / FD.MAPPING_CSV) and \
-           os.path.exists(Path(work_dir) / FD.NNF_INDEX) and \
+           os.path.exists(Path(work_dir) / FD.FILENAME_NNF_INDEX) and \
            os.path.exists(Path(work_dir) / FD.ANNOT_PKL)
 
 
 def clean_work_dir(work_dir):
     if os.path.isfile(str(Path(work_dir) / FD.MAPPING_CSV)):
         os.remove(str(Path(work_dir) / FD.MAPPING_CSV))
-    if os.path.isfile(str(Path(work_dir) / FD.NNF_INDEX)):
-        os.remove(str(Path(work_dir) / FD.NNF_INDEX))
+    if os.path.isfile(str(Path(work_dir) / FD.FILENAME_NNF_INDEX)):
+        os.remove(str(Path(work_dir) / FD.FILENAME_NNF_INDEX))
     if os.path.isfile(str(Path(work_dir) / FD.ANNOT_PKL)):
         os.remove(str(Path(work_dir) / FD.ANNOT_PKL))
     if os.path.isfile(str(Path(work_dir) / FD.FEATURES_DATA)):
         os.remove(str(Path(work_dir) / FD.FEATURES_DATA))
+    if os.path.isfile(str(Path(work_dir) / FD.FILENAME_ERROR_MSG)):
+        os.remove(str(Path(work_dir) / FD.FILENAME_ERROR_MSG))
 
 
 def set_fastdup_kwargs(input_kwargs: dict) -> dict:
@@ -1098,7 +1084,7 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
 
     for key, value in input_kwargs.items():
         if key not in fastdup_params and key not in turi_params:
-            raise ValueError(f'invalid argument {key}')
+            raise ValueError(f'invalid argument {key}, allowed fastdup params are {fastdup_params}, allowed turi_param values are {turi_params}')
 
     turi_kwargs = []
     for arg_name, param in turi_params.items():
@@ -1112,49 +1098,6 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
     return fastdup_kwargs
 
 
-# def fastdup_convert_to_relpath(work_dir: Union[Path, str], input_dir: Union[Path, str]):
-#     """
-#     create mapping files, relative path to img-id/features/stats
-#     :param work_dir: location of files
-#     :param input_dir: base dir for images
-#     """
-#     if isinstance(input_dir, list):
-#         return
-#
-#     work_dir, input_dir = Path(work_dir), Path(input_dir)
-#     fastdup_src_files = [FD.BAD_CSV, FD.MAPPING_CSV, FD.CROPS_CSV]
-#
-#     input_dir = '' if input_dir is None else input_dir
-#     input_dir = input_dir if (str(input_dir).endswith("/") or input_dir == '') else f'{input_dir}/'
-#
-#     def remove_working_dir(full_path: str):
-#         if full_path.startswith(input_dir) or str(Path.cwd() / full_path).startswith(str(input_dir)):
-#             full_path = os.path.relpath(full_path, input_dir)
-#         elif full_path.startswith(str(work_dir)) or str(Path.cwd() / full_path).startswith(str(work_dir)):
-#             full_path = os.path.relpath(full_path, work_dir)
-#         return full_path
-#
-#     # loop files, remove prefix and save files
-#     for src_file in fastdup_src_files:
-#         fname = work_dir / src_file
-#         if not fname.exists():
-#             continue
-#         try:
-#             df = pd.read_csv(fname)
-#         except EmptyDataError as e:
-#             continue
-#
-#         except Exception as e:
-#             fastdup_capture_exception(f"fatdup_convert_to_relpath {fname}", e)
-#             raise RuntimeError(f"fatdup_convert_to_relpath {fname}")
-#
-#         df['filename'] = df.filename.apply(remove_working_dir)
-#         if 'crop_filename' in df.columns:
-#             df['crop_filename'] = df['crop_filename'].apply(remove_working_dir)
-#         df.to_csv(work_dir / src_file, index=False)
-#         assert os.path.exists(work_dir / src_file), f"Failed to overwrite file {src_file}"
-
-
 def get_input_dir(_input_dir):
     def pathlib_or_s3_cast(c):
         c = str(c)
@@ -1162,23 +1105,3 @@ def get_input_dir(_input_dir):
     return [pathlib_or_s3_cast(f) for f in _input_dir] if isinstance(_input_dir, list)\
         else pathlib_or_s3_cast(_input_dir)
 
-
-def s3_folder_exists_and_not_empty(s3_path:str) -> bool:
-    '''
-    Folder should exist.
-    Folder should not be empty.
-    '''
-    return True
-    #def split_s3_path(s3_path):
-    #    path_parts = s3_path.replace("s3://", "").split("/")
-    #    bucket = path_parts.pop(0)
-    #    key = "/".join(path_parts)
-    #    return bucket, key
-    #bucket, key = split_s3_path(s3_path)
-
-    #DB: should be fixed later, made a collision in ubuntu with my awscli setup
-    s3 = boto3.client('s3')
-    if not key.endswith('/'):
-        key = key+'/'
-    resp = s3.list_objects(Bucket=bucket, Prefix=key, Delimiter='/',MaxKeys=1)
-    return 'Contents' in resp

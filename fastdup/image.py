@@ -97,6 +97,7 @@ def truncate_folder_name(path):
         return path[pos+len(S3_TEST_TEMP_FOLDER)+1:]
     return None
 
+
 def fastdup_imread(img1_path, input_dir, kwargs):
     """
     Read an image from local file, or from a tar file, or from s3/minio path using minio client mc
@@ -107,6 +108,7 @@ def fastdup_imread(img1_path, input_dir, kwargs):
     Returns:
         img1 (np.array): the image
     """
+    assert img1_path is not None, f"img1_path should not be None {input_dir}, {kwargs}"
 
     is_minio_or_s3 = False
     if input_dir is not None:
@@ -115,7 +117,6 @@ def fastdup_imread(img1_path, input_dir, kwargs):
         else:
             is_minio_or_s3 = True
 
-    #print('Got fastdup_imread', img1_path, input_dir)
 
     if os.path.exists(img1_path):
         img = cv2.imread(img1_path, cv2.IMREAD_UNCHANGED)
@@ -241,7 +242,7 @@ def my_resize(img, max_width):
     if max_width is not None and w > max_width:
         w1 = max_width
     aspect = h/w
-    if h > w1 or w > w1:
+    if (h > w1 or w > w1) and aspect > 0 and int(w1/aspect) > 0 and w1 > 0:
         img = cv2.resize(img, (int(w1/aspect), w1))
     return img
 
@@ -313,6 +314,11 @@ def create_triplet_img(row, work_dir, save_path, extract_filenames, get_bounding
     assert rimg1.shape[0] > 0 and rimg2.shape[0] > 0
 
     alpha = 0.5
+    if rimg1.shape != rimg2.shape: # combination of grayscale and color
+        if len(rimg1.shape) == 2:
+            rimg1 = cv2.cvtColor(rimg1, cv2.COLOR_GRAY2RGB)
+        if len(rimg2.shape) == 2:
+            rimg2 = cv2.cvtColor(rimg2, cv2.COLOR_GRAY2RGB)
     cimage = cv2.addWeighted(rimg1,alpha,rimg2,1-alpha,0)
 
     hierarchical_run = kwargs is not None and 'hierarchical_run' in kwargs and kwargs['hierarchical_run']

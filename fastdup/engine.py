@@ -83,7 +83,7 @@ class Fastdup(FastdupController):
                 - image_filename: {Mandatory}. Relative path to the image wtr to input_dir
                 - split: (Optional). 'train' or 'test'
                 - label: (Optional). Class of the image
-                - bbox_x, bbox_y, bbox_h, bbox_w: (Optional). Bounding box of the object in the image
+                - row_y, col_x, height, width: (Optional). Bounding box of the object in the image
                     if provided, fastdup will run on the bounding box instead of the whole image
                 - x1, y1, x2, y2, x3, y3, x4, y4: (Optional). Bounding box of the object in the image
                     if provided, and bounding_box=='rotated_bbox' fastdup will run on the rotated bounding box.
@@ -148,8 +148,9 @@ class Fastdup(FastdupController):
                                    verbose=verbose,
                                    license='' if license is None else license,
                                    high_accuracy=high_accuracy)
-        if model_path is not None:
-            assert 'd' in kwargs, 'Please provide d parameter to indicate the model output dimension'
+        if (model_path is not None):
+            if 'dinov2s' not in model_path and 'dinov2b' not in model_path:
+                assert 'd' in kwargs, 'Please provide d parameter to indicate the model output dimension'
             fastdup_func_params['model_path'] = model_path
         fastdup_func_params.update(kwargs)
 
