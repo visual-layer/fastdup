@@ -695,19 +695,17 @@ See [LICENSE](./LICENSE).
 
 For any queries, reach us at info@visual-layer.com
 
-## Disclaimer
-<details>
-  <summary><b>Usage Tracking</b></summary>
+## Telemetry Usage Tracking and Sentry
 
 We have added an experimental crash report collection, using [sentry.io](https://github.com/getsentry/). It does not collect user data other than anonymized IP address data, and it only logs fastdup library's own actions. We do NOT collect folder names, user names, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores, etc. Collecting fastdup crashes will help us improve stability. 
 
-The code for the data collection is found [here](./src/sentry.hpp). On MAC we use [Google crashpad](https://chromium.googlesource.com/crashpad/crashpad). 
+The code for the data collection is found [here](./src/sentry.hpp) (cpp) and [here](./fastdup/sentry.py) (python) . On MAC we use [Google crashpad](https://chromium.googlesource.com/crashpad/crashpad). 
 
 It is always possible to opt out of the experimental crash report collection via either of the following two options:
 - Define an environment variable called `SENTRY_OPT_OUT`
 - or run() with `turi_param='run_sentry=0'`
 
-</details>
+
 
 ## About Visual-Layer
 
