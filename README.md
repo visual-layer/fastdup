@@ -73,7 +73,7 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
-  <a href="https://cutt.ly/9wyxhZAI" target="_blank" rel="noopener noreferrer">
+  <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup" target="_blank" rel="noopener noreferrer">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
