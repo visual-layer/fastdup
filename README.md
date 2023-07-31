@@ -686,6 +686,7 @@ The following are community-contributed blog posts about fastdup -
 ## What our users say
 
 ![feedback](./gallery/user_quotes.jpg)
+![feedback2](./gallery/loved by our users2.png)
 
 ## License
 fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
