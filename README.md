@@ -368,44 +368,43 @@ This section shows how you can load data from various sources to be analyzed wit
 
 
 <table>
-<tr>
-      <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-         <img src="./gallery/hf_thumbnail.jpg" width="200">
-         </a>
-      </td>
-      <td rowspan="4">
-         <b>🤗 Analyze Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
-      </td>
-      <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/nbviewer_logo.png" height="30">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/github_logo.png" height="25">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/colab_logo.png" height="20">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="25">
-         </a>
-      </td>
-   </tr>
-   <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+                <img src="./gallery/hf_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.</td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
 </table>
+
 
 ## Exciting New Features
 
