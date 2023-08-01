@@ -363,13 +363,12 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
+## Data Loading Examples
+This section shows how you can load data from various sources to be analyzed with fastdup.
 
-## Exciting New Features
-
-> **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
 <table>
-   <tr>
+<tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
          <img src="./gallery/hf_thumbnail.jpg" width="200">
@@ -406,6 +405,13 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
       </td>
    </tr>
    <!-- ------------------------------------------------------------------- -->
+</table>
+
+## Exciting New Features
+
+> **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
+
+<table>
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/getting-started">
