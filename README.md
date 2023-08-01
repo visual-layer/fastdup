@@ -408,7 +408,7 @@ This section shows how you can load data from various sources and analyze them w
                 <img src="./gallery/ninja_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze datasets from <a href="https://kaggle.com">Kaggle</a>. Load and analyze any computer vision dataset hosted on Kaggle using the Kaggle API.</td>
+        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.</td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
