@@ -364,8 +364,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 
 ## Data Loading Examples
-This section shows how you can load data from various sources to be analyzed with fastdup.
-
+This section shows how you can load data from various sources and analyze them with fastdup.
 
 <table>
     <tr>
