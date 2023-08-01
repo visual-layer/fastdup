@@ -369,7 +369,7 @@ This notebooks in this section shows how you can load data from various sources 
 <table>
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+            <a href="https://visual-layer.readme.io/docs/">
                 <img src="./gallery/hf_thumbnail.jpg" width="200" />
             </a>
         </td>
@@ -404,7 +404,7 @@ This notebooks in this section shows how you can load data from various sources 
     <!-- ------------------------------------------------------------------- -->
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+            <a href="https://visual-layer.readme.io/docs/">
                 <img src="./gallery/ninja_thumbnail.jpg" width="200" />
             </a>
         </td>
@@ -439,7 +439,7 @@ This notebooks in this section shows how you can load data from various sources 
     <!-- ------------------------------------------------------------------- -->
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+            <a href="https://visual-layer.readme.io/docs/">
                 <img src="./gallery/universe_thumbnail.jpg" width="200" />
             </a>
         </td>
