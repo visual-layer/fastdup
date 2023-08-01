@@ -408,30 +408,30 @@ This section shows how you can load data from various sources and analyze them w
                 <img src="./gallery/ninja_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze datasets from <a href="https://kaggle.com">Kaggle</a>. Perfect if you already have a dataset hosted on Kaggle.</td>
+        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze datasets from <a href="https://kaggle.com">Kaggle</a>. Load and analyze any computer vision dataset hosted on Kaggle using the Kaggle API.</td>
         <td align="center" width="80">
-            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
             </a>
         </td>
     </tr>
     <tr>
         <td align="center">
-            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/github_logo.png" height="25" />
             </a>
         </td>
     </tr>
     <tr>
         <td align="center">
-            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/colab_logo.png" height="20" />
             </a>
         </td>
     </tr>
     <tr>
         <td align="center">
-            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/kaggle_logo.png" height="25" />
             </a>
         </td>
