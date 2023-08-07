@@ -363,49 +363,123 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
+## Data Loading
+This notebooks in this section shows how you can load data from various sources and analyze them with fastdup.
+
+<table>
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/">
+                <img src="./gallery/hf_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.</td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/">
+                <img src="./gallery/ninja_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.</td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/">
+                <img src="./gallery/universe_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.</td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+</table>
+
 
 ## Exciting New Features
 
 > **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
 <table>
-   <tr>
-      <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-         <img src="./gallery/hf_thumbnail.jpg" width="200">
-         </a>
-      </td>
-      <td rowspan="4">
-         <b>🤗 Analyze Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.
-      </td>
-      <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/nbviewer_logo.png" height="30">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/github_logo.png" height="25">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/colab_logo.png" height="20">
-         </a>
-      </td>
-   </tr>
-   <tr>
-      <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
-         <img src="./gallery/kaggle_logo.png" height="25">
-         </a>
-      </td>
-   </tr>
-   <!-- ------------------------------------------------------------------- -->
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/getting-started">
