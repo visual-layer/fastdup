@@ -751,6 +751,8 @@ Get help from the fastdup team or community members via the following channels -
 
 ## Community Contributions
 
+The following are community-contributed blog posts about fastdup - 
+
 <table>
 <tr>
     <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
@@ -790,14 +792,6 @@ Get help from the fastdup team or community members via the following channels -
 </table>
 
 
-
-The following are community-contributed blog posts about fastdup - 
-
-- [Master Data Integrity to Clean Your Computer Vision Datasets.
-](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
-- [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
-- [Clean Up Your Digital Life: How I Found 1929 Fully Identical Images, Dark, Bright and Blurry Shots in Minutes, For Free.](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
-- [The weighty significance of data cleanliness — or as I like to call it, “cleanliness is next to model-ness” — cannot be overstated.](https://alexlanseedoo.medium.com/the-weighty-significance-of-data-cleanliness-eb03dce1d0f8)
 ## What our users say
 
 ![feedback](./gallery/user_quotes.jpg)
