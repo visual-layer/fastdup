@@ -1,4 +1,4 @@
-
+i
 <!-- PROJECT SHIELDS -->
 <!--
 *** I'm using markdown "reference style" links for readability.
@@ -750,6 +750,18 @@ Get help from the fastdup team or community members via the following channels -
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
 ## Community Contributions
+
+<table>
+  <tr>
+    <td><img src="gallery/community_data_integration_thumbnail.jpg" width="200"></td>
+    <td>
+      <a href="https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596">Master Data Integrity to Clean Your Computer Vision Datasets.</a><br>
+      🖋️ <a href="https://pauliusztin.medium.com/">Paul Iusztin</a> &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; 📅 19 December 2022
+    </td>
+  </tr>
+</table>
+
+
 The following are community-contributed blog posts about fastdup - 
 
 - [Master Data Integrity to Clean Your Computer Vision Datasets.
