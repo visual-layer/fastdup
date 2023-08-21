@@ -752,6 +752,13 @@ Get help from the fastdup team or community members via the following channels -
 ## Community Contributions
 
 <table>
+<tr>
+    <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
+    <td>
+      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/amp/">How to Reduce Dataset Size in Computer Vision</a><br>
+      🖋️ <a href="author_link_here">Arty Ariuntuya</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 9 August 2023
+    </td>
+  </tr>
   <tr>
     <td><img src="gallery/community_weighted_thumbnail.jpg" width="200"></td>
     <td>
