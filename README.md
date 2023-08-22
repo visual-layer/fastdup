@@ -75,9 +75,9 @@
   </p>
   <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
-    <img alt="VL Profiler." src="./gallery/vl_profiler_promo.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/github_banner_profiler.gif" width=1000>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/github_banner_profiler.gif" width=1000>
+    <img alt="VL Profiler." src="./gallery/github_banner_profiler.gif">
     </picture>
   </a>
   <br />
