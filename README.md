@@ -77,7 +77,7 @@
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/vl_profiler_promo.svg" width=1000>
-    <img alt="VL Profiler." src="./gallery/vl_profiler_promo.svg">
+    <img alt="VL Profiler." src="./gallery/github_banner_profiler.gif">
     </picture>
   </a>
   <br />
