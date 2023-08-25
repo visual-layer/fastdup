@@ -1,4 +1,4 @@
-
+i
 <!-- PROJECT SHIELDS -->
 <!--
 *** I'm using markdown "reference style" links for readability.
@@ -750,13 +750,48 @@ Get help from the fastdup team or community members via the following channels -
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
 ## Community Contributions
+
 The following are community-contributed blog posts about fastdup - 
 
-- [Master Data Integrity to Clean Your Computer Vision Datasets.
-](https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596)
-- [fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.](https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/)
-- [Clean Up Your Digital Life: How I Found 1929 Fully Identical Images, Dark, Bright and Blurry Shots in Minutes, For Free.](https://dicksonneoh.com/blog/clean_up_your_digital_life/)
-- [The weighty significance of data cleanliness — or as I like to call it, “cleanliness is next to model-ness” — cannot be overstated.](https://alexlanseedoo.medium.com/the-weighty-significance-of-data-cleanliness-eb03dce1d0f8)
+<table>
+<tr>
+    <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
+    <td>
+      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/amp/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
+      🖋️ <a href="author_link_here">Arty Ariuntuya</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 9 August 2023
+    </td>
+  </tr>
+  <tr>
+    <td><img src="gallery/community_weighted_thumbnail.jpg" width="200"></td>
+    <td>
+      <a href="https://alexlanseedoo.medium.com/the-weighty-significance-of-data-cleanliness-eb03dce1d0f8">The weighty significance of data cleanliness — or as I like to call it, “cleanliness is next to model-ness” — cannot be overstated.</a><br>
+      🖋️ <a href="https://alexlanseedoo.medium.com/">Alexander Lan</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 9 March 2023
+    </td>
+  </tr>
+  <tr>
+    <td><img src="gallery/community_cleanup_thumbnail.gif" width="200"></td>
+    <td>
+      <a href="https://dicksonneoh.com/blog/clean_up_your_digital_life/">Clean Up Your Digital Life: How I Found 1929 Fully Identical Images, Dark, Bright and Blurry Shots in Minutes, For Free.</a><br>
+      🖋️ <a href="https://medium.com/@dickson.neoh">Dickson Neoh</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 23 February 2023
+    </td>
+  </tr>
+  <tr>
+    <td><img src="gallery/community_powerful_thumbnail.gif" width="200"></td>
+    <td>
+      <a href="https://dicksonneoh.com/portfolio/fastdup_manage_clean_curate/">fastdup: A Powerful Tool to Manage, Clean & Curate Visual Data at Scale on Your CPU - For Free.</a><br>
+      🖋️ <a href="https://medium.com/@dickson.neoh">Dickson Neoh</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 3 January 2023
+    </td>
+  </tr>
+  <tr>
+    <td><img src="gallery/community_data_integration_thumbnail.jpg" width="200"></td>
+    <td>
+      <a href="https://towardsdatascience.com/master-data-integrity-to-clean-your-computer-vision-datasets-df432cf9e596">Master Data Integrity to Clean Your Computer Vision Datasets.</a><br>
+      🖋️ <a href="https://pauliusztin.medium.com/">Paul lusztin</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 19 December 2022
+    </td>
+  </tr>
+</table>
+
+
 ## What our users say
 
 ![feedback](./gallery/user_quotes.jpg)
