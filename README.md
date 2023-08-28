@@ -408,7 +408,8 @@ This notebooks in this section shows how you can load data from various sources 
                 <img src="./gallery/ninja_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.</td>
+        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.<br><br>
+        <a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -443,7 +444,8 @@ This notebooks in this section shows how you can load data from various sources 
                 <img src="./gallery/universe_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.</td>
+        <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.<br><br>
+        <a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
