@@ -372,7 +372,7 @@ This notebooks in this section shows how you can load data from various sources 
                 <img src="./gallery/hf_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.</td>
+        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.<br><br><a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Docs.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
