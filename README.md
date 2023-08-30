@@ -759,7 +759,7 @@ The following are community-contributed blog posts about fastdup -
 <tr>
     <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
     <td>
-      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/amp/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
+      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
       🖋️ <a href="author_link_here">Arty Ariuntuya</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 9 August 2023
     </td>
   </tr>
