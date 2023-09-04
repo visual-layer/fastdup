@@ -1,4 +1,3 @@
-i
 <!-- PROJECT SHIELDS -->
 <!--
 *** I'm using markdown "reference style" links for readability.
@@ -369,11 +368,12 @@ This notebooks in this section shows how you can load data from various sources 
 <table>
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/">
+            <a href="https://visual-layer.readme.io/docs/hugging-face-datasets">
                 <img src="./gallery/hf_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.</td>
+        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.<br><br>
+        <a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -404,11 +404,12 @@ This notebooks in this section shows how you can load data from various sources 
     <!-- ------------------------------------------------------------------- -->
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/">
+            <a href="https://visual-layer.readme.io/docs/kaggle">
                 <img src="./gallery/ninja_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.</td>
+        <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.<br><br>
+        <a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -439,11 +440,12 @@ This notebooks in this section shows how you can load data from various sources 
     <!-- ------------------------------------------------------------------- -->
     <tr>
         <td rowspan="4" width="160">
-            <a href="https://visual-layer.readme.io/docs/">
+            <a href="https://visual-layer.readme.io/docs/roboflow-universe">
                 <img src="./gallery/universe_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.</td>
+        <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.<br><br>
+        <a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -757,7 +759,7 @@ The following are community-contributed blog posts about fastdup -
 <tr>
     <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
     <td>
-      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/amp/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
+      <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
       🖋️ <a href="author_link_here">Arty Ariuntuya</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 9 August 2023
     </td>
   </tr>
