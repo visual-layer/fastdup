@@ -11,7 +11,7 @@ def generate_labels(filenames, kwargs):
         import torch
     except Exception as e:
         fastdup_capture_exception("Auto generate labels", e)
-        print("For auto captioning images need to install transforms and torch packages using `pip install transformers torch`")
+        print("For auto captioning images need to install transformers and torch packages using `pip install transformers torch`")
         return [MISSING_LABEL]*len(filenames)
 
     try:
@@ -54,7 +54,7 @@ def generate_blip_labels(filenames, kwargs):
         from PIL import Image
     except Exception as e:
         fastdup_capture_exception("Auto generate labels", e)
-        print("For auto captioning images need to install transforms and torch packages using `pip install transformers`")
+        print("For auto captioning images need to install transformers and torch packages using `pip install transformers`")
         return [MISSING_LABEL] * len(filenames)
 
     try:
@@ -85,7 +85,7 @@ def generate_blip2_labels(filenames, kwargs, text=None):
         import torch
     except Exception as e:
         fastdup_capture_exception("Auto generate labels", e)
-        print("For auto captioning images need to install transforms and torch packages using `pip install transformers torch`")
+        print("For auto captioning images need to install transformers and torch packages using `pip install transformers torch`")
         return [MISSING_LABEL] * len(filenames)
 
     try:
@@ -124,7 +124,7 @@ def generate_vqa_labels(filenames, text, kwargs):
     except Exception as e:
         fastdup_capture_exception("Auto generate labels", e)
         print(
-            "For auto captioning images need to install transforms and torch packages using `pip install transformers`")
+            "For auto captioning images need to install transformers and torch packages using `pip install transformers`")
         return [MISSING_LABEL] * len(filenames)
 
     try:
@@ -154,7 +154,13 @@ def generate_vqa_labels(filenames, text, kwargs):
 
 
 def generate_age_labels(filenames, kwargs):
-    from transformers import ViTFeatureExtractor, ViTForImageClassification
+    try:
+        from transformers import ViTFeatureExtractor, ViTForImageClassification
+    except Exception as e:
+        fastdup_capture_exception("Auto generate labels", e)
+        print(
+            "For auto captioning images need to install transformers and torch packages using `pip install transformers`")
+        return [MISSING_LABEL] * len(filenames)
     model = ViTForImageClassification.from_pretrained('nateraw/vit-age-classifier')
     transforms = ViTFeatureExtractor.from_pretrained('nateraw/vit-age-classifier')
 
