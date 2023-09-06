@@ -29,8 +29,8 @@ class Fastdup(FastdupController):
     df_cc, cc_info = fd.connected_components()
     """
 
-    def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path] = None):
-        super().__init__(work_dir, input_dir=input_dir)
+    def __init__(self, work_dir: Union[str, Path]=None, input_dir: Union[str, Path] = None):
+        super().__init__(work_dir=work_dir, input_dir=input_dir)
         self.vis = FastdupVisualizer(self)
 
     def run(self,
@@ -149,10 +149,10 @@ class Fastdup(FastdupController):
                                    license='' if license is None else license,
                                    high_accuracy=high_accuracy)
         if (model_path is not None):
-            if 'dinov2s' not in model_path and 'dinov2b' not in model_path:
+            if 'dinov2s' not in model_path and 'dinov2b' not in model_path and 'resnet50' not in model_path and 'efficientnet' not in model_path and 'clip' not in model_path and 'clip336' not in model_path and 'clip14' not in model_path:
                 assert 'd' in kwargs, 'Please provide d parameter to indicate the model output dimension'
             fastdup_func_params['model_path'] = model_path
         fastdup_func_params.update(kwargs)
 
-        super().run(annotations=annotations, input_dir=input_dir, subset=subset, data_type=data_type,
+        return super().run(annotations=annotations, input_dir=input_dir, subset=subset, data_type=data_type,
                     overwrite=overwrite, embeddings=embeddings, **fastdup_func_params)

@@ -30,7 +30,7 @@ def save_labels_tsv(labels, filepath, log_dir):
         for label in labels:
             f.write('{}\n'.format(label))
 
-def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None, h = 0, w = 0, alternative_filename = None, alternative_width=None, max_width=None):
+def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None, h = 0, w = 0, alternative_filename = None, alternative_width=None, max_width=None, kwargs={}):
     # Generate sprite image
     images_pil = []
 
@@ -54,6 +54,13 @@ def generate_sprite_image(img_path, sample_size, log_dir, get_label_func = None,
         if (alternative_width < sample_size):
             sample_size = alternative_width
         height = 1
+    elif kwargs and 'force_width' in kwargs and 'force_height' in kwargs:
+        assert isinstance(kwargs['force_width'], int), "force_width must be an integer"
+        assert isinstance(kwargs['force_height'], int), "force_height must be an integer"
+        if kwargs['force_width'] * kwargs['force_height'] > len(img_path):
+            print(f"Warning: missing images for a full grid, requested {kwargs['force_width'] * kwargs['force_height']} got {len(img_path)}")
+        NUM_IMAGES_WIDTH = kwargs['force_width']
+        height = kwargs['force_width']
     else:
         NUM_IMAGES_WIDTH = int(1.4*np.ceil(np.sqrt(min(sample_size, len(img_path)))))
         divs = int(np.ceil(min(sample_size,len(img_path)) / NUM_IMAGES_WIDTH))

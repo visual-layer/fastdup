@@ -74,7 +74,7 @@ def init_sentry():
         except:
             pass
 
-def fastdup_capture_exception(section, e, warn_only=False):
+def fastdup_capture_exception(section, e, warn_only=False, extra=""):
     if not warn_only:
         traceback.print_exc()
     if 'SENTRY_OPT_OUT' not in os.environ:
@@ -84,7 +84,10 @@ def fastdup_capture_exception(section, e, warn_only=False):
             scope.set_tag("token", token)
             scope.set_tag("platform", platform.platform())
             scope.set_tag("platform.version", platform.version())
-            scope.set_tag("python", sys.version)
+            scope.set_tag("python", sys.version.strip().replace("\n", " "))
+            scope.set_tag("production", "FASTDUP_PRODUCTION" in os.environ)
+            if extra != "":
+                scope.set_tag("extra", extra)
             capture_exception(e, scope=scope)
 
 
@@ -106,6 +109,7 @@ def fastdup_performance_capture(section, start_time):
                 scope.set_tag("platform", platform.platform())
                 scope.set_tag("platform.version", platform.version())
                 scope.set_tag("python", sys.version.strip().replace("\n", " "))
+                scope.set_tag("production", "FASTDUP_PRODUCTION" in os.environ)
                 sentry_sdk.capture_message("Performance", scope=scope)
         finally:
             sentry_sdk.flush(timeout=5)

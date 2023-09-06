@@ -2,15 +2,26 @@ import os
 import glob
 import random
 import platform
-from pathlib import Path
 from fastdup.definitions import *
 from datetime import datetime
 from fastdup.sentry import fastdup_capture_exception
 import warnings
 import itertools
+import pathlib
+import subprocess
+import time
+import os
 
-
-IMAGE_SUFFIXES = ['jpg', 'jpeg','png','gif','tif', 'tiff', 'bmp', 'heif', 'heic']
+def read_local_error_file(ret, local_error_file):
+    if (ret != 0 and 'JPY_PARENT_PID' in os.environ) or 'COLAB_JUPYTER_IP' in os.environ:
+        if os.path.exists(local_error_file):
+            # windows can generate non ascii printouts
+            with open(local_error_file, "r", encoding="utf-8") as f:
+                error = f.read()
+                data_type = "error" if ret != 0 else "info"
+                print(f"fastdup C++ {data_type} received: ", error[:5000], "\n")
+                if ret != 0:
+                    fastdup_capture_exception("C++ error", RuntimeError(error[:5000]))
 
 def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     """
@@ -56,23 +67,32 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     return input_dir
 
 
-def download_from_web(url):
+def download_from_web(url, local_model=None):
     import urllib.request
-    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
+    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url if local_model is None else local_model))
     urllib.request.urlretrieve(url, local_file)
+    assert os.path.isfile(local_file), f"Failed to download url {url} to local file {local_file}, please try to download manually"
     return local_file
     #url = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
 
 def find_model(model_name, url):
     local_model = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
-    
-    if not os.path.isfile(local_model):
-        print(f"Trying to download {model_name} model from {url}")
-        local_model = download_from_web(url)
+    #handle clip model where all models are called visual.onnx and thus may override which other
+    if 'clip336' in model_name:
+        local_model = local_model.replace('visual.onnx', 'visual336.onnx')
+    elif 'clip14' in model_name:
+        local_model = local_model.replace('visual.onnx', 'visual14.onnx')
+
+    if not os.path.isfile(os.path.expanduser(local_model)):
+        print(f"Trying to download {model_name} model from {url} to {local_model}")
+        local_model = download_from_web(url, local_model)
     return local_model
 
 def check_latest_version(curversion):
     try:
+        if 'FASTDUP_PRODUCTION' in os.environ:
+            return False
+
         import requests
         try:
             from packaging.version import parse
@@ -82,13 +102,17 @@ def check_latest_version(curversion):
             return False
 
         # Search for the package on PyPI using the PyPI API
-        response = requests.get('https://pypi.org/pypi/fastdup/json')
+        response = requests.get('https://pypi.org/pypi/fastdup/json', timeout=2)
 
         # Get the latest version number from the API response
         latest_version = parse(response.json()['info']['version'])
+        latest_version_num = int(str(latest_version).split(".")[0])
+        latest_version_frac = int(str(latest_version).split(".")[1])
 
-        latest_version = (int)(float(str(latest_version))*1000)
-        if latest_version > (int)(float(curversion)*1000)+10:
+        latest_version = latest_version_num*1000+latest_version_frac
+        cur_version_num = int(curversion.split(".")[0])
+        cur_version_frac = int(curversion.split(".")[1])
+        if latest_version > cur_version_num*1000+cur_version_frac+25:
             return True
 
     except Exception as e:
@@ -97,6 +121,20 @@ def check_latest_version(curversion):
 
     return False
 
+
+
+def convert_v1_to_v02(df):
+    if 'filename_from' in df.columns and 'filename_to' in df.columns:
+        del df['from']
+        del df['to']
+        df = df.rename(columns={'filename_from':'from', 'filename_to':'to'})
+    if 'filename_outlier' in df.columns and 'filename_nearest' in df.columns:
+        df = df.rename(columns={'filename_outlier': 'from', 'filename_nearest': 'to'})
+    if 'label_from' in df.columns and 'label_to' in df.columns:
+        df = df.rename(columns={'label_from':'label', 'label_to':'label2'})
+    if 'label_outlier' in df.columns :
+        df = df.rename(columns={'label_outlier': 'label'})
+    return df
 
 
 def record_time():
@@ -157,6 +195,8 @@ def list_subfolders_from_file(file_path):
 
 
 def shorten_path(path):
+    if isinstance(path, pathlib.Path):
+        path = str(path)
     if path.startswith('~'):
         path = os.path.expanduser(path)
     elif path.startswith('./'):
@@ -191,19 +231,17 @@ def save_as_csv_file_list(filenames, files_path):
 def expand_list_to_files(the_list):
     assert len(the_list), "Got an empty list for input"
     files = []
-    found = False
     for f in the_list:
-        if isinstance(f, str) or isinstance(f, Path):
-            if isinstance(f, str) and (f.startswith("s3://") or f.startswith("minio://")):
-                for suffix in IMAGE_SUFFIXES:
-                    if f.lower().endswith(suffix):
-                        found = True
-                        files.append(f)
-                        break
+        if isinstance(f, str) or isinstance(f, pathlib.PosixPath):
+            f = str(f)
+            if f.startswith("s3://") or f.startswith("minio://"):
+                if os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS or os.path.splitext(f.lower()) in SUPPORTED_VID_FORMATS:
+                    files.append(f)
+                    break
 
-                assert found, f"Unsupported mode: can not run on lists of s3 folders, please list all image or video files " \
-                              f"in s3 and give a list of all files each one in a new row, file was {f}"
-
+                assert False, f"Unsupported mode: can not run on lists of s3 folders, please list all image or video files " \
+                              f"in s3 (using `aws s3 ls <bucket name>` into a text file, and run fastdup pointing to this text file. " \
+                              f"File was {f}, supported image and video formats are {SUPPORTED_IMG_FORMATS}, {SUPPORTED_VID_FORMATS}"
             elif os.path.isfile(f):
                 files.append(f)
             elif os.path.isdir(f):
@@ -393,6 +431,131 @@ def sample_from_components(row, metric, kwargs, howmany):
         # Extract the filenames from the selected subset
         filenames = [sorted_combined[t][0] for t in sindices]
         return filenames
+
+
+
+
+
+def s3_partial_sync(uri: str, work_dir: str, num_images: int, verbose:bool, check_interval: int, *args) -> None:
+    from tqdm import tqdm
+    assert os.path.exists(work_dir)
+
+    local_dir = os.path.join(work_dir, "tmp")
+    if os.path.exists(local_dir):
+        assert False, f"Error: found folder {local_dir}, please remove it and try again"
+
+    if not os.path.exists(local_dir):
+        os.mkdir(local_dir)
+        assert os.path.exists(local_dir), "Failed to find work dir"
+
+    if not verbose:
+        arglist = ['aws', 's3', 'sync', uri, local_dir, '--quiet', *args]
+    else:
+        arglist = ['aws', 's3', 'sync', uri, local_dir, *args]
+
+    if verbose:
+      print('Going to run', arglist)
+    process = subprocess.Popen(arglist)
+    pbar = tqdm(desc='files', total=num_images)
+
+    while process.poll() is None:
+        time.sleep(check_interval)
+        files = os.listdir(local_dir)
+        #files = [f for f in files if (os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS) or (os.path.splitext(f.lower()) in SUPPORTED_VID_FORMATS)]
+        pbar.update(len(files) - pbar.n)
+
+        if len(files) >= num_images:
+            process.terminate()
+            return_code = process.wait(5)
+
+            if return_code != 0:
+                process.kill()
+
+            break
+    return local_dir
+
+
+
+
+def convert_coco_dict_to_df(coco_dict: dict, input_dir: str):
+    """
+    Convert dictionary in COCO format object annotations to a Fastdup DF
+    :param coco_dict:
+    :return: a Dataframe in the expected format for fastdup bboxes.
+    """
+
+    # merge between bounding box annotations and their image ids
+    assert "images" in coco_dict, f"Invalid coco format, expected 'images' field inside the dictionary, {str(coco_dict)[:250]}"
+    assert "annotations" in coco_dict, f"Invalid coco format, expected 'annotations' field inside the dictionary {str(coco_dict)[:250]}"
+    assert "categories" in coco_dict, f"Failed to find categories in dict {str(coco_dict)[:250]}"
+    assert isinstance(input_dir, str) or isinstance(input_dir, pathlib.Path), f"input_dir should be a str pointing to the absolute path of image location, got {input_dir}"
+    import pandas as pd
+    df = pd.merge(pd.DataFrame(coco_dict['images']).rename(columns={'width':'img_w', 'height':'img_h'}),
+                  pd.DataFrame(coco_dict['annotations']),
+                  left_on='id', right_on='image_id')
+    assert len(df), f"Failed to merge coco dict {str(coco_dict)[:250]}"
+    if 'rot_bb_view' in df.columns:
+        rotated_bb = list(df['rot_bb_view'].apply(lambda x: {'x1':x[0][0], 'y1':x[1][0],
+                                                           'x2':x[0][1], 'y2':x[1][1],
+                                                           'x3':x[0][2], 'y3':x[1][2],
+                                                           'x4':x[0][3], 'y4':x[1][3]}).values)
+        assert len(rotated_bb) == len(df), f"Failed to find any bounding boxes {str(coco_dict)[:250]}"
+        df = pd.concat([df, pd.DataFrame(rotated_bb)], axis=1)
+        assert len(df), f"Failed to add rotated cols {str(coco_dict)[:250]}"
+    else:
+        bbox_df = list(df['bbox'].apply(lambda x: {'col_x': x[0], 'row_y': x[1], 'width': x[2], 'height': x[3]}).values)
+        assert len(bbox_df), f"Failed to find any bounding boxes {str(coco_dict)[:250]}"
+        df = pd.concat([df, pd.DataFrame(bbox_df)], axis=1)
+        assert len(df), f"Failed to add bbox cols {str(coco_dict)[:250]}"
+
+    #merge category id to extrac the category name
+    df = df.merge(pd.DataFrame(coco_dict['categories']), left_on='category_id', right_on='id')
+    assert len(df), f"Failed to merge coco dict with labels {str(coco_dict)[:250]}"
+    df = df.rename(columns={'file_name':'filename','name':'label'})
+
+
+
+    #df['filename'] = df['filename'].apply(lambda x: os.path.join(input_dir, x))
+    #those are the required fields needed by fastdup
+    assert 'filename' in df.columns, f"Failed to find columns in coco label dataframe {str(coco_dict)[:250]}"
+    if 'col_x' in df.columns:
+        df = df[['filename','col_x','row_y','width','height','label']]
+    else:
+        assert 'label' in df.columns, "When working with rotated bounding boxes, fastdup requires label column : <name>"
+        df = df[['filename', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4', 'label']]
+
+    return df
+
+def find_model_path(model_path, d):
+    if model_path.lower().startswith('dinov2') or model_path.lower() in ['efficientnet', 'resnet50', 'clip', 'clip336', 'clip14']:
+        # use DINOv2s/DINOv2b to run with DINOv2 models,
+        # case insensitive naming, e.g., dinov2s, DINOv2s, ...
+        if model_path.lower() == 'dinov2s':
+            model_path = find_model(model_path.lower(), DINOV2S_MODEL)
+            d = DINOV2S_MODEL_DIM
+        elif model_path.lower() == 'dinov2b':
+            model_path = find_model(model_path.lower(), DINOV2B_MODEL)
+            d = DINOV2B_MODEL_DIM
+        elif model_path.lower() == 'clip':
+            model_path = find_model(model_path.lower(), CLIP_MODEL)
+            d = CLIP_MODEL_DIM
+        elif model_path.lower() == 'clip336':
+            model_path = find_model(model_path.lower(), CLIP_MODEL2)
+            d = CLIP_MODEL2_DIM
+        elif model_path.lower() == 'clip14':
+            model_path = find_model(model_path.lower(), CLIP_MODEL14)
+            d = CLIP_MODEL14_DIM
+        elif model_path.lower() == "resnet50":
+            model_path = find_model(model_path.lower(), RESNET50_MODEL)
+            d = RESNET50_MODEL_DIM
+        elif model_path.lower() == "efficientnet":
+            model_path = find_model(model_path.lower(), EFFICIENTNET_MODEL)
+            d = EFFICIENTNET_MODEL_DIM
+        else:
+            assert False, f"Supporting dinov2 models are dinov2s and dinov2b, got {model_path}"
+
+    return model_path, d
+
 
 if __name__ == "__main__":
     import fastdup

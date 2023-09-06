@@ -13,11 +13,13 @@ import fastdup.definitions as FD
 #import boto3
 from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception, fastdup_capture_log_debug_state
 from fastdup.definitions import FOLDER_FULL_IMAGE_RUN
+from fastdup.utils import convert_coco_dict_to_df, shorten_path
+import pathlib
 import re
 
 
 class FastdupController:
-    def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path] = None):
+    def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path, list] = None):
         """
         This class serves as a proxy for fastdup basic usage,
         the class wraps fastdup-run call provides quick access to
@@ -28,10 +30,18 @@ class FastdupController:
             - Ability to add annotation file and quickly merge it to any of fastdup inputs
         Currently the class support running fastdup on images and object
         :param work_dir: target output dir or existing output dir
-        :param input_dir: (Optional) path to data dir
+        :param input_dir: (Optional) path to data dir, or a list of files
         """
+
+        # allow for users to run without specifying work_dir, in this case a default work dir named work_dir is created
+        if work_dir is None:
+            print('Warning: fastdup create() without work_dir argument, output is stored in a folder named work_dir in your current working path.')
+            work_dir = "work_dir"
+
         # check if fastdup was already applied
         self._fastdup_applied = is_fastdup_dir(work_dir)
+        if isinstance(work_dir, str):
+            work_dir = shorten_path(work_dir)
         self._work_dir = Path(work_dir)
         self._input_dir = input_dir if input_dir is None else get_input_dir(input_dir)
 
@@ -99,12 +109,18 @@ class FastdupController:
 
         # set run mode & data type
         if df_annot is not None:
-            assert isinstance(df_annot, pd.DataFrame), f"wrong df_annot type {df_annot}"
+            assert isinstance(df_annot, pd.DataFrame) and not df_annot.empty, f"wrong df_annot type {df_annot}"
         self._dtype = self._infer_dtype(requested_dtype=data_type, df_annot=df_annot)
         self._run_mode = FD.MODE_DEFAULT
 
         bbox_mode = fastdup_args.get('bounding_box', 'none')
-        if bbox_mode in ['yolov5s', 'face']:
+        if bbox_mode in ['yolov5s', 'face', 'ocr']:
+            if bbox_mode == "ocr":
+                try:
+                    import paddle
+                    import paddleocr
+                except Exception as ex:
+                    assert False, "For running with bounding_box='ocr' need to install paddlepaddle and paddleocr, using 'pip install -U paddlepaddle \"padleocr>=2.0.6\" \"numpy==1.23\" \"PyMuPDF==1.21.1\""
             self._run_mode = FD.MODE_CROP
             self._dtype = FD.BBOX
             self._bbox = bbox_mode
@@ -144,7 +160,7 @@ class FastdupController:
 
     def __getitem__(self, instance_id):
         # anything above max_fd_id is an artificial id - not in fastdup-mapping - invalid instance
-        if instance_id not in self._df_annot.index or instance_id > self._max_fd_id:
+        if instance_id not in self._df_annot.index:
             raise IndexError(f'instance_id: {instance_id} is invalid')
         return dict(self._df_annot.loc[instance_id])
 
@@ -232,12 +248,75 @@ class FastdupController:
         }, axis=1)
         if not fast_mode:
             df = self._add_annot_and_split(df, data, merge_on=[FD.OUT_ID, FD.OUT_NEAREST_NEIGHBOR], split=split,
-                                           unannotated=include_unannotated, suffix=True)
+                                           unannotated=include_unannotated, suffix=True, load_crops=load_crops)
         assert len(df), "df has no rows"
         if FD.OUT_SCORE not in df.columns: #no outliers
             return df
         df = df.sort_values(FD.OUT_SCORE).groupby(FD.OUT_ID).head(1).reset_index(drop=True)
         return df
+
+
+    def embeddings(self, d = 576):
+        """
+        Get fastdup embeddings
+        :param d: feature vector width, on default 576
+
+        :return: tuple: (list, np.array) list of filenamed with their features, np matrix of size len(list) with one feature per row
+        """
+        from fastdup import load_binary_feature
+        return load_binary_feature(self._work_dir, d)
+
+    def feature_vector(self, img_path, model_path=None, d=576):
+        """
+        Compute feature vector for a single image
+
+        Args:
+            img_path (str): a path pointing to an image, could be local or s3 or minio path, see run() documentation
+            model_path: optional path pointing to onnx/ort model, see run() documentation
+            d:o ptional feature vector width of the onnx/ort model, see run() documentation
+
+        Returns:
+            embeddings: 1 x d numpy matrix contains feature embeddings (row vector)
+            files: the image filename used to genrate the embedding (should be equal to img_path)
+
+
+        """
+        assert isinstance(img_path, str) or isinstance(img_path, pathlib.Path)
+        ret = self.run(input_dir=[img_path], model_path=model_path, d=d, overwrite=True, print_summary=False, run_mode=1)
+        if ret != 0:
+            return ret
+        files, embs = self.embeddings()
+        assert len(files) != 0, "Failed to extract embeddings"
+
+        return embs, files
+
+    def feature_vectors(self, img_paths, model_path=None, d=576):
+        """
+        Compute feature vectors to a list of images
+
+        Args:
+            img_path (list): a list of local images, or a folder name
+            model_path: optional path pointing to onnx/ort model, see run() documentation
+            d:o ptional feature vector width of the onnx/ort model, see run() documentation
+
+        Returns:
+            embeddings: num_images x d numpy matrix contains feature embeddings, one per each row
+            files: list of filenames used to create the embedding. Note that when some images are corrupted they will not appear in the valid filenames returned.
+                   Use fd.annotations(valid_only=False) to get the bad image files report
+
+        """
+        if isinstance(img_paths, pd.DataFrame):
+            assert "filename" in img_paths.columns, "Need to provide a dataframe with 'filename' column pointing to the full path of the images"
+        elif isinstance(img_paths, list):
+            assert len(img_paths), "Found ana empty list on img_paths2 variable"
+            img_paths = pd.DataFrame({'filename': img_paths})
+        ret = self.run(input_dir='.', model_path=model_path, d=d, overwrite=True, annotations=img_paths, print_summary=False, run_mode=1)
+        if ret != 0:
+            return ret
+        files, embs = self.embeddings()
+        if len(files) != len(img_paths):
+            print("Warning: failed to generate feature vectors for some images. Run ")
+        return embs, files
 
     def invalid_instances(self):
         """
@@ -246,19 +325,23 @@ class FastdupController:
         """
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
-        return self._df_annot.query(f'not {FD.ANNOT_VALID}').reset_index(drop=True)
+        return self._df_annot.query(f'not {FD.ANNOT_VALID}')
 
     def img_stats(self, data: bool = True, split: bool = None,
-                  include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
+                  include_unannotated: bool = False, load_crops: bool = None) -> pd.DataFrame:
         """
         Get fastdup stats file
         :param data: add annotation
         :param split: filter by split
         :param include_unannotated: include instances that are not represented in the annotations
+        :param load_crops: Load crop data in case present (default is None)
         :return: requested dataframe
         """
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
+
+        if load_crops is None:
+            load_crops = self._dtype == FD.BBOX
         df = self._fetch_df(csv_name=FD.STATS_CSV, load_crops=load_crops)
         assert df is not None, f'No stats file found in {self._work_dir}'
         if df.empty:
@@ -288,7 +371,7 @@ class FastdupController:
         :param include_unannotated: include instances that are not represented in the annotations
         :param load_crops: return components of crops (if load_crops=True) otherwise return similarity of full images
 
-        :return: requested dataframe
+        :return: requested dataframe, Each raw contains a single image, and colum contains component_id for that image.
         """
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
@@ -296,6 +379,8 @@ class FastdupController:
         df_cc = self._fetch_df(csv_name=FD.FILENAME_CONNECTED_COMPONENTS, load_crops=load_crops)
         assert df_cc is not None, f'No connected components found {FD.FILENAME_CONNECTED_COMPONENTS}'
         assert FD.CC_INST_ID in df_cc.columns, f'Missing column {FD.CC_INST_ID} in connected component file'
+        df_cc = df_cc[df_cc['sum'] != 0] # remove singletons
+
         if df_cc.empty:
             warnings.warn(f'No connected components found, try using a lower threshold')
             return df_cc, None
@@ -303,16 +388,83 @@ class FastdupController:
         df_cc = df_cc.rename({FD.CC_INST_ID: FD.ANNOT_FD_ID}, axis=1)
         if not fast_mode:
             df_cc = self._add_annot_and_split(df_cc, data, merge_on=[FD.ANNOT_FD_ID], split=split, suffix=False,
-                                              unannotated=include_unannotated)
-        df_info = self._fetch_df(csv_name=FD.FILENAME_COMPONENT_INFO)
+                                              unannotated=include_unannotated, load_crops=load_crops)
+        df_info = self._fetch_df(csv_name=FD.FILENAME_COMPONENT_INFO, load_crops=load_crops)
         if df_info is None or df_info.empty:
             print(f"Warning: Missing file {self.work_dir}/{FD.FILENAME_COMPONENT_INFO}")
         return df_cc, df_info
 
+
+    def connected_components_grouped(self, sort_by: str = 'comp_size', ascending: bool = True, metric = None, load_crops: bool = None, group_by: str = "visual", kwargs = {}) -> pd.DataFrame:
+        """
+        Get a dataframe where each row is a component (=cluster) and in the column list of images belonging to that cluster
+        :param sort_by: parameter to sort by, on default by comp_size
+        :param asecnding: sorting order
+        :param metric: include image statistic metric like blur, mean, min, max, etc
+        :param load_crops: load crops
+
+        :return: requested dataframe, Each raw contains a component with all images belonging to that cocmponent
+        """
+        assert group_by in ["visual", "label"], "group_by can be either 'visual' (grouping by similar images) or 'label' (groupinbg by labels) "
+
+        if 'draw_bbox' in kwargs and kwargs['draw_bbox']:
+            load_crops = False
+        external_df = self.connected_components(load_crops=load_crops)
+
+        assert isinstance(external_df, tuple), f"Wrong return values from connected components {external_df}"
+        external_df = external_df[0]
+        if group_by == "label":
+            assert "label" in external_df.columns, "Failed to find label columns so can not group by labels."
+
+        external_df = external_df.dropna(subset='filename')
+        from fastdup.galleries import  load_and_merge_stats
+        external_df = load_and_merge_stats(external_df, metric, self.work_dir, kwargs)
+        assert 'filename' in external_df.columns, f"Failed to find filename column in {external_df.head()}"
+        if metric is not None:
+            assert metric in external_df.columns, f"Failed to find metric {metric} in columns {external_df.head()}"
+
+        group_by_col = "component_id" if group_by == "visual" else "label"
+        files = external_df.groupby(group_by_col)['filename'].apply(list)
+        files_ids = external_df.groupby(group_by_col)['index'].apply(list)
+        distance = external_df.groupby(group_by_col)['min_distance'].apply(np.min)
+        crop_files = None
+        if 'crop_filename' in external_df.columns:
+            crop_files = external_df.groupby(group_by_col)['crop_filename'].apply(list)
+        labels = None
+        if group_by == 'visual' and 'label' in external_df.columns:
+            labels = external_df.groupby(group_by_col)['label'].apply(list)
+        elif group_by == "label":
+            components = external_df.groupby(group_by_col)['component_id'].apply(list)
+
+        if metric is not None:
+            metrics = external_df.groupby(group_by_col)[metric].apply(np.mean)
+
+        external_df = pd.DataFrame({'files': files.values, 'component_id': files.index.values if group_by == "visual" else components,
+                                    'files_ids': files_ids.values if crop_files is None else crop_files.values,
+                                    'distance': distance.values})
+
+        if crop_files is not None:
+            external_df['crop_filename'] = crop_files.values
+        if labels is not None and group_by == "visual":
+            external_df['label'] = labels.values
+        elif group_by == "label":
+            external_df = external_df.reset_index()
+        external_df['len'] = external_df['files'].apply(lambda x: len(x))
+        if metric is not None:
+            external_df[metric] = metrics.values
+        external_df = external_df[external_df['len'] >= 2]
+        if sort_by == 'comp_size':
+            external_df = external_df.sort_values('len', ascending=ascending)
+        else:
+            assert sort_by in external_df.columns, f"Wrong sort_by column, missing column {sort_by} available columns: {external_df.columns}"
+            external_df = external_df.sort_values(sort_by, ascending=ascending)
+
+        return external_df
+
     @v1_sentry_handler
-    def run(self, input_dir: Union[str, Path] = None, annotations: pd.DataFrame = None, subset: list = None,
+    def run(self, input_dir: Union[str, Path] = None, annotations: Union[pd.DataFrame,list] = None, subset: list = None,
             embeddings=None, data_type: str = FD.IMG, overwrite: bool = False,
-            print_summary: bool = True, **fastdup_kwargs):
+            print_summary: bool = True, print_vl_datasets_ref: bool = True, **fastdup_kwargs):
         """
         This function
             1. calculate subset of images to analyze
@@ -321,11 +473,14 @@ class FastdupController:
             4. expand annotation csv to include files that are not in annotation but is in subset
             5. create a version of annotation that is grouped by image
         :param input_dir: input directory containing images
-        :param annotations: (Optional) annotations file, the expected column convention is:
+        :param annotations: (Optional) annotations dataframe, the expected column convention is:
              - filename: input_dir-relative filenames
              - img_h, img_w (Optional): image height and width
              - bbox_x, bbox_y, bbox_h, bbox_w (Optional): bounding box arguments. Alternatively x1,y2,x2,y2,x3,y3,x4,x4 for rotated bounding box.
              - split (Optional): data split, e.g. train, test, etc ...
+             Alternatively, a list of filenames
+             Alternatively, a filename of json coco format contains bounding box annotations
+             Alternatively, a dictionry containing coco format annotations
         :param subset: (Optional) subset of images to analyze
         :param embeddings: (Optional) pre-calculated feature embeddings. Data type of np.ndarray of size n x d, n is the number of data points, d is the feature vector length.
             data type must be 'float32'.
@@ -340,10 +495,27 @@ class FastdupController:
             warnings.warn('Fastdup was already applied, use overwrite=True to re-run')
             return
         if annotations is not None:
+            if isinstance(annotations, list):
+                annotations = pd.DataFrame({'filename':annotations})
+            elif isinstance(annotations, dict):
+                assert isinstance(self.input_dir, str), f"When working with COCO annotations need to provide fastdup.create(input_dur=...) with input_dir which is a single assolute path pointing to root folder with all images, got {self._input_dir}"
+                annotations = convert_coco_dict_to_df(annotations, self._input_dir)
+            elif isinstance(annotations, str) or isinstance(annotations, pathlib.Path):
+                if isinstance(annotations, str):
+                    annotations = shorten_path(annotations)
+                assert os.path.isfile(annotations), f"Failed to find annotations file {annotations}"
+                if annotations.endswith('.csv'):
+                    annotations = pd.read_csv(annotations)
+                elif annotations.endswith('.json'):
+                    import json
+                    label = json.loads(open(annotations, 'r').read())
+                    annotations = convert_coco_dict_to_df(label, self._input_dir)
+                else:
+                    assert False, "Unknown annotation file format, should end with .csv or .json"
+
+
             assert isinstance(annotations, pd.DataFrame) and not annotations.empty and "filename" in annotations.columns, f"Got wrong annotation parameter, should be pd.DataFrame with the mandatory columns: filename {annotations}"
             first_filename = annotations['filename'].values[0]
-            if (str(input_dir)) != ".":
-                assert first_filename.startswith(str(input_dir)), f"annotation dataframe should contain full path filenames, starting with {input_dir}"
         self._init_run(input_dir, annotations, subset, embeddings, data_type, overwrite, fastdup_kwargs)
 
         # get user's fastdup kwargs or use default
@@ -370,14 +542,18 @@ class FastdupController:
 
         # expand annotation csv to include files that are not in annotation but is in subset
         self._expand_annot_df()
-        self._index_annot_df()
+        if self._dtype != FD.BBOX:
+            self._index_annot_df()
 
         self._save_artifacts(fastdup_kwargs)
         self._fastdup_applied = True
         if print_summary:
             self.summary()
+        if print_vl_datasets_ref:
+            self.vl_datasets_ref_printout()
 
-    @v1_sentry_handler
+        return 0
+
     def summary(self, verbose=True, blur_threshold: float = 150.0, brightness_threshold: float = 253.0,
                 darkness_threshold: float = 4.0) -> List[str]:
         """
@@ -397,12 +573,13 @@ class FastdupController:
         def pct(x):
             return 100 * x / total_image_count
 
-        summary_stats.append(f"Dataset contains {total_image_count} images")
+        object = "images" if (self._bbox is None or (self._bbox not in ['xywh_bbox','rotated','yolov5s', 'face', 'ocr'])) else "objects"
+        summary_stats.append(f"Dataset contains {total_image_count} {object}")
 
         invalid_data_df = self.invalid_instances()
         invalid_image_count = len(invalid_data_df)
         valid_image_count = total_image_count - invalid_image_count
-        invalid_stats = f"Valid images are {pct(valid_image_count):.2f}% ({valid_image_count:,d}) of the data, "\
+        invalid_stats = f"Valid {object} are {pct(valid_image_count):.2f}% ({valid_image_count:,d}) of the data, "\
                         f"invalid are {pct(invalid_image_count):.2f}% ({invalid_image_count:,d}) of the data"
         summary_stats.append(invalid_stats)
         if invalid_image_count:
@@ -412,7 +589,7 @@ class FastdupController:
         try:
             cc_df, _ = self.connected_components(fast_mode=True)
             number_of_ccs = cc_df[cc_df['count'] != 0]['count'].nunique()
-            images_in_ccs = int((cc_df['count'] != 0).sum() / 2)
+            images_in_ccs = int((cc_df['count'] != 0).sum())
             images_not_in_ccs = total_image_count - images_in_ccs
             largest_cc_image_count = int(cc_df['count'].max())
             summary_stats.append(f"Similarity:  {pct(images_in_ccs):.2f}% ({images_in_ccs:,d}) belong to "\
@@ -438,7 +615,7 @@ class FastdupController:
             summary_stats.append(f"Outliers: {pct(number_of_outliers):.2f}% ({number_of_outliers:,d}) of images are "\
                           f"possible outliers, and fall in the bottom {outlier_threhold:.2f}% of "\
                           f"similarity values.")
-            summary_stats.append(f"For a detailed list of outliers, use `.outliers()`.")
+            summary_stats.append(f"For a detailed list of outliers, use `.outliers()`.\n")
         except Exception as e:
             summary_stats.append(f"Outliers: Unable to calculate outliers.")
         
@@ -459,12 +636,25 @@ class FastdupController:
             stats_str = f"Unable to calculate blur, brightness and darkness.\n"
 
         if verbose:
-            print('\n', 88 * '#')
+            print('\n', FD.PRINTOUT_BAR_WIDTH * '#')
             print(f"\nDataset Analysis Summary: \n")
             for line in summary_stats:
                 print(f"    {line}")
 
         return summary_stats
+
+    def vl_datasets_ref_printout(self, vl_datasets_link='https://app.visual-layer.com/vl-datasets?utm_source=fastdup'):
+        """
+        Next steps:
+            1. Add UTM tracking
+            2. Make this visible during the progress bar for long-running data ("Meanwhile, why won't you check out...")
+            3. Make this visible after a run is completed
+            4. Make this visible during gallery generation (Optional: add a deprecation warning for the HTML galleries)
+        """
+        print(FD.PRINTOUT_BAR_WIDTH * "#")
+        print(f"Would you like to see awesome visualizations for some of the most popular academic datasets?")
+        print(f"Click here to see and learn more: {vl_datasets_link}")
+        print(FD.PRINTOUT_BAR_WIDTH * "#")
 
     def img_grouped_annot(self, image_level_columns=None) -> pd.DataFrame:
         """
@@ -568,17 +758,32 @@ class FastdupController:
             fastdup.save_binary_feature(self.work_dir, self._df_annot[FD.ANNOT_FILENAME].to_list(), self._pre_calc_features)
             assert self.input_dir is not None, "Failed to find input dir"
             return self.input_dir
-        # image data type - return input dir or subset (and edit annot by intersecting over subset)
+            # image data type - return input dir or subset (and edit annot by intersecting over subset)
         elif self._dtype == FD.IMG or self._run_mode == FD.MODE_CROP:
-            if self._subset is None:
-                return str(self._input_dir) if not isinstance(self._input_dir, list) else self._input_dir
+            # In case we have annotations, but no bounding box just class labels
+            if self._df_annot is not None:
+                assert FD.ANNOT_FILENAME in self._df_annot.columns, f"Failed to find {FD.ANNOT_FILENAME} in annotations dataframe, this colum should contain the path (relative or absolute) to image or video filenamesfilename"
+                assert not self._df_annot.empty, "Found empty annotations df"
+                if self._subset is not None:
+                    df_annot = self._df_annot[self._df_annot[FD.ANNOT_FILENAME].isin(self._subset)]
+                    assert not self._df_annot.empty, "Failed to find any annotations in the subset"
+                else:
+                    df_annot = self._df_annot
+
+                with tempfile.NamedTemporaryFile(delete=False) as temp:
+                    temp_name = f'{temp.name}.csv'
+                    df_annot[[FD.ANNOT_FILENAME]].to_csv(temp_name, index=False)
+                    assert os.path.exists(temp_name), f"Failed to write annotations to file {temp_name}"
+                    return temp_name
+
             else:
-                if self._df_annot is not None:
-                    assert FD.ANNOT_FILENAME in self._df_annot.columns, f"Failed to find {FD.ANNOT_FILENAME} in annotations dataframe, this colum should contain the path (relative or absolute) to image or video filenamesfilename"
-                    self._df_annot = self._df_annot[self._df_annot[FD.ANNOT_FILENAME].isin(self._subset)]
-                subset = [str(self._input_dir / s) for s in self._subset] if self._subset is not None else self._subset
-                assert subset is not None and subset != [], "Failed to find input dir"
-                return subset
+                if self._subset is None:
+                    return str(self._input_dir) if not isinstance(self._input_dir, list) else self._input_dir
+                else:
+                    subset = [str(self._input_dir / s) for s in
+                              self._subset] if self._subset is not None else self._subset
+                    assert subset is not None and subset != [], "Failed to find input dir"
+                    return subset
 
         elif self._dtype == FD.BBOX:
             if self._subset is not None:
@@ -613,6 +818,7 @@ class FastdupController:
             with tempfile.NamedTemporaryFile(delete=False) as temp:
                 temp_name = f'{temp.name}.csv'
                 df_annot.to_csv(temp_name, index=False)
+                assert os.path.exists(temp_name), f"Failed to write annotations to file {temp_name}"
                 return temp_name
 
 
@@ -632,7 +838,7 @@ class FastdupController:
 
         # yolo and face detection do not get annotationm, instead they run on the data and produce output annotations
         # those annotations are read back
-        if self._bbox in ["face","yolov5s"]:
+        if self._bbox in ["face", "yolov5s", "ocr"]:
             if self._bbox == "face":
                 df_annot = self._fetch_df(FD.MAPPING_CSV, True, force_error=True)
             elif self._bbox == "yolov5s":
@@ -642,8 +848,13 @@ class FastdupController:
                 if "filename" in df_annot:
                     del df_annot["filename"]
                 df_annot2 = df_annot.merge(df_crops, on=FD.ANNOT_FD_ID)
-                assert len(df_annot2), f"Failed to merge {df_annot.head()} {df_crops.head()} " + self.get_status_string()
+                assert len(
+                    df_annot2), f"Failed to merge {df_annot.head()} {df_crops.head()} " + self.get_status_string()
                 df_annot = df_annot2
+            elif self._bbox == "ocr":
+                self._df_annot = self._fetch_df(FD.CROPS_CSV, True, force_error=True)
+                self._df_annot[FD.ANNOT_VALID] = True
+                df_annot = self._df_annot
 
             #self._df_annot = df_annot
             original_col_names = df_annot.columns
@@ -773,9 +984,16 @@ class FastdupController:
                 total = df_mapping
             assert len(total), "Failed to find annotations"
             df_annot = pd.merge(self._df_annot, total, on=FD.ANNOT_FILENAME, how='left')
-            assert len(df_annot), f"Failed to merge to find indexes {self._df_annot.head()} {total.head()}" + self.get_status_string()
+            assert len(
+                df_annot), f"Failed to merge to find indexes. First dataframe was \n{self._df_annot.head()}\nSecond dataframe:\n{total.head()}" + self.get_status_string()
+
+            if len(df_annot) > 1 and df_annot['index'].isnull().sum() == len(df_annot):
+                assert False, f"Failed to merge to find indexes. First dataframe was \n{self._df_annot.head()}\n Second dataframe:\n{total.head()}\n please check your input_dir" + self.get_status_string()
+
             self._df_annot = df_annot
-            self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].astype(pd.UInt32Dtype())
+
+    # self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].astype(pd.UInt32Dtype())
+
 
     def _expand_annot_df(self):
         """
@@ -793,17 +1011,30 @@ class FastdupController:
         assert self._df_annot is not None, "Fastdup got to a bad state, no image info found please file a github issue"
 
         # add crops to annotation df (available in case bounding box is not available=='face'/'yolov5s')
-        if self._run_mode == FD.MODE_CROP or self._run_mode == FD.MODE_ROTATED_BBOX:
-            #complication: crops are not sorted according their input order due to multithreading in the c side, need to rearrange
-            #according to the input order
+        if (self._run_mode == FD.MODE_CROP or self._run_mode == FD.MODE_ROTATED_BBOX or self._dtype == FD.BBOX) and self._bbox != "ocr":
+            # complication: crops are not sorted according their input order due to multithreading in the c side, need to rearrange
+            # according to the input order
             df_crops_annot = self._fetch_df(FD.CROPS_CSV, False)
             assert df_crops_annot is not None and not df_crops_annot.empty, f"Failed to find {self.work_dir}/{FD.CROPS_CSV} in work_dir"
             assert 'index' in df_crops_annot.columns, f"Failed to find 'index' column in {self.work_dir}/{FD.CROPS_CSV}"
             assert "crop_filename" in df_crops_annot.columns, "Failed to fidn crop_filename in columns"
             if "filename" in self._df_annot:
                 del self._df_annot["filename"]
-            df_annot = pd.merge(self._df_annot, df_crops_annot, on=FD.ANNOT_FD_ID
-                                                                          , how='left')
+            df_annot = pd.merge(self._df_annot, df_crops_annot[["crop_filename", "filename", "index"]],
+                                on=FD.ANNOT_FD_ID
+                                , how='left')
+            assert len(
+                df_annot), f"Empty merge result when reading crop file from {df_crops_annot} first was {self._df_annot.head()} second was {df_crops_annot.head()}" + self.get_status_string()
+            self._df_annot = df_annot
+        elif self._bbox == "ocr":
+            df_crops_annot = self._fetch_df(FD.CROPS_CSV, False)
+            assert df_crops_annot is not None and not df_crops_annot.empty, f"Failed to find {self.work_dir}/{FD.CROPS_CSV} in work_dir"
+            assert 'index' in df_crops_annot.columns, f"Failed to find 'index' column in {self.work_dir}/{FD.CROPS_CSV}"
+            assert "crop_filename" in df_crops_annot.columns, "Failed to fidn crop_filename in columns"
+            if "filename" in self._df_annot:
+                del self._df_annot["filename"]
+            df_annot = pd.merge(self._df_annot, df_crops_annot[["crop_filename", "filename", "index", "label"]],
+                                on=FD.ANNOT_FD_ID, how='left')
             assert len(df_annot), f"Empty merge result when reading crop file from {df_crops_annot} first was {self._df_annot.head()} second was {df_crops_annot.head()}" + self.get_status_string()
             self._df_annot = df_annot
 
@@ -814,7 +1045,6 @@ class FastdupController:
 
         # 1. collect subsets for error types analysis (MISSING_ANNOTATION, MISSING_IMAGE, FD-ERROR, VALID)
         df_bad_files = self._fetch_df(FD.BAD_CSV, False)
-
         df_mapping = self._fetch_df(FD.MAPPING_CSV, False)
         assert df_mapping is not None and not df_mapping.empty,  f"Failed to find {FD.MAPPING_CSV} in work_dir"
         assert 'index' in df_mapping.columns and 'filename' in df_mapping.columns, f"Failed to find index and filename columns is df_mapping. available cols are: {df_mapping.head()}"
@@ -822,50 +1052,61 @@ class FastdupController:
         if FD.MAP_INST_ID not in df_mapping.columns:
             df_mapping[FD.MAP_INST_ID] = df_mapping.index
         df_mapping = df_mapping.reset_index()[[FD.ANNOT_FILENAME, FD.ANNOT_FD_ID]]
-        seen_by_fastdup = set(df_bad_files[FD.BAD_FD_ID]).union(set(df_mapping[FD.ANNOT_FD_ID]))
-        df_mapping_not_in_annot = df_mapping[~df_mapping[FD.ANNOT_FD_ID].isin(self._df_annot[FD.ANNOT_FD_ID])]
-        df_annot_in_subset = self._df_annot[self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
-        df_annot_not_in_subset = self._df_annot[~self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
 
-        # 2. set NaN fastdup-id for instances that are not in df_mapping
-        self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].mask(~self._df_annot[FD.ANNOT_FD_ID].
-                                                                             isin(df_mapping[FD.ANNOT_FD_ID]))
+        if self._dtype == FD.BBOX and self._bbox == "xywh_bbox":
+            assert 'crop_filename' not in df_mapping.columns
+            df_mapping = df_mapping.rename(columns={'index': 'new_index', 'filename': 'crop_filename'})
+            # del self._df_annot['filename']
+            annot = self._df_annot.merge(df_mapping, left_on='crop_filename', right_on='crop_filename', how='left')
+            del annot['index']
+            annot = annot.rename(columns={'new_index': 'index'})
+            annot[FD.ANNOT_VALID] = annot['index'].apply(lambda x: False if pd.isnull(x) else True)
+            self._df_annot = annot
+        else:
+            seen_by_fastdup = set(df_bad_files[FD.BAD_FD_ID]).union(set(df_mapping[FD.ANNOT_FD_ID]))
+            df_mapping_not_in_annot = df_mapping[~df_mapping[FD.ANNOT_FD_ID].isin(self._df_annot[FD.ANNOT_FD_ID])]
+            df_annot_in_subset = self._df_annot[self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
+            df_annot_not_in_subset = self._df_annot[~self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
 
-        # 3. add not-in-annot instances (but in fastdup mapping) to df_annot
-        merged =  pd.merge(df_annot_in_subset, df_mapping,
-                     on=FD.ANNOT_FD_ID, how='outer', suffixes=('', '_map'))
-        assert len(merged), f"Failed ot merge {df_annot_in_subset.head()} {df_mapping.head()}" + self.get_status_string()
-        self._df_annot = pd.concat([merged,
-            df_annot_not_in_subset])
-        self._df_annot[FD.ANNOT_FILENAME].fillna(self._df_annot[FD.ANNOT_FILENAME + '_map'], inplace=True)
-        self._df_annot.drop(FD.ANNOT_FILENAME + '_map', axis=1, inplace=True)
+            # 2. set NaN fastdup-id for instances that are not in df_mapping
+            self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].mask(~self._df_annot[FD.ANNOT_FD_ID].
+                                                                                 isin(df_mapping[FD.ANNOT_FD_ID]))
 
-        # 4. mark default error type as VALID
-        self._df_annot[FD.ANNOT_ERROR] = 'VALID'
+            # 3. add not-in-annot instances (but in fastdup mapping) to df_annot
+            merged =  pd.merge(df_annot_in_subset, df_mapping,
+                         on=FD.ANNOT_FD_ID, how='outer', suffixes=('', '_map'))
+            assert len(merged), f"Failed to merge {df_annot_in_subset.head()} {df_mapping.head()}" + self.get_status_string()
+            self._df_annot = pd.concat([merged,
+                df_annot_not_in_subset])
+            self._df_annot[FD.ANNOT_FILENAME].fillna(self._df_annot[FD.ANNOT_FILENAME + '_map'], inplace=True)
+            self._df_annot.drop(FD.ANNOT_FILENAME + '_map', axis=1, inplace=True)
 
-        # 5. mark error type of not-in-annot as  MISSING_ANNOTAION
-        self._df_annot[FD.ANNOT_ERROR] = self._df_annot[FD.ANNOT_ERROR].mask(
-            self._df_annot[FD.ANNOT_FD_ID].isin(df_mapping_not_in_annot[FD.ANNOT_FD_ID]), 'MISSING_ANNOTATION')
+            # 4. mark default error type as VALID
+            self._df_annot[FD.ANNOT_ERROR] = 'VALID'
 
-        # 6. mark error type of not-in-mapping as MISSING_IMAGE
-        self._df_annot[FD.ANNOT_ERROR] = self._df_annot[FD.ANNOT_ERROR].mask(
-            ~self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup), FD.ERROR_MISSING_IMAGE)
-        self._df_annot[FD.ANNOT_ERROR] = self._df_annot.apply(lambda x: FD.ERROR_MISSING_IMAGE if ('crop_filename' in x
-                        and pd.isnull(x['crop_filename'])) else x[FD.ANNOT_ERROR], axis=1)
+            # 5. mark error type of not-in-annot as  MISSING_ANNOTAION
+            self._df_annot[FD.ANNOT_ERROR] = self._df_annot[FD.ANNOT_ERROR].mask(
+                self._df_annot[FD.ANNOT_FD_ID].isin(df_mapping_not_in_annot[FD.ANNOT_FD_ID]), 'MISSING_ANNOTATION')
 
-        # 7. mark error types from bad-files
-        if df_bad_files is not None and not df_bad_files.empty:
-            fd_errors = df_bad_files.set_index('index')[FD.ANNOT_ERROR]
-            self._df_annot[FD.ANNOT_ERROR] = self._df_annot.apply(
-                lambda row: fd_errors.get(row[FD.ANNOT_FD_ID], row[FD.ANNOT_ERROR]), axis=1)
+            # 6. mark error type of not-in-mapping as MISSING_IMAGE
+            self._df_annot[FD.ANNOT_ERROR] = self._df_annot[FD.ANNOT_ERROR].mask(
+                ~self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup), FD.ERROR_MISSING_IMAGE)
+            self._df_annot[FD.ANNOT_ERROR] = self._df_annot.apply(lambda x: FD.ERROR_MISSING_IMAGE if ('crop_filename' in x
+                            and pd.isnull(x['crop_filename'])) else x[FD.ANNOT_ERROR], axis=1)
 
-        # 8. convert fastdup-id to UInt32Dtype and label to categorical (for memory efficiency)
-        self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].astype(dtype=pd.UInt32Dtype())
-        if self._has_label:
-            self._df_annot[FD.ANNOT_LABEL] = self._df_annot[FD.ANNOT_LABEL].astype(dtype="category")
+            # 7. mark error types from bad-files
+            if df_bad_files is not None and not df_bad_files.empty:
+                fd_errors = df_bad_files.set_index('index')[FD.ANNOT_ERROR]
+                self._df_annot[FD.ANNOT_ERROR] = self._df_annot.apply(
+                    lambda row: fd_errors.get(row[FD.ANNOT_FD_ID], row[FD.ANNOT_ERROR]), axis=1)
 
-        # 9. add is-valid column and set to True for VALID instances
-        self._df_annot[FD.ANNOT_VALID] = self._df_annot[FD.ANNOT_ERROR] == 'VALID'
+            # 8. convert fastdup-id to UInt32Dtype and label to categorical (for memory efficiency)
+            #self._df_annot[FD.ANNOT_FD_ID] = self._df_annot[FD.ANNOT_FD_ID].astype(dtype=pd.UInt32Dtype())
+            if self._has_label:
+                self._df_annot[FD.ANNOT_LABEL] = self._df_annot[FD.ANNOT_LABEL].astype(dtype="category")
+
+            # 9. add is-valid column and set to True for VALID instances
+            self._df_annot[FD.ANNOT_VALID] = self._df_annot[FD.ANNOT_ERROR] == 'VALID'
 
     def _verify_bbox(self):
         invalid_valid_col = (
@@ -969,7 +1210,7 @@ class FastdupController:
 
         if pre_calc_features is not None and df_annot is not None:
             assert pre_calc_features.shape[0] == df_annot.shape[0], \
-                'pre_calc_features and df_annot must have the same number of rows'
+                f'pre_calc_features and df_annot must have the same number of rows, got {pre_calc_features.shape[0]} vs. {df_annot.shape[0]}, {df_annot.head()}'
 
         # verify arguments combinations
         assert any(
@@ -1016,6 +1257,8 @@ class FastdupController:
 
                 if len(df_annot) < len_df_annot:
                     print(f"Warning: removed {len_df_annot - len(df_annot)} duplicate bounding boxes")
+            else:
+                assert False, f"Wrong data type {data_type}"
 
 
 
@@ -1069,6 +1312,7 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
         'augmentation_additive_margin': {'map': None, 'default': 0},
         'num_onnx_inter_threads': {'map': None, 'default': 0},
         'num_onnx_intra_threads': {'map': None, 'default': 0},
+        'is_clip14_model':  {'map': {True: 1, False: 0}, 'default': False},
         #'run_labels': {'map': {True: 1, False: 0}, 'default': True},
         #'run_read_filenames': {'map': {True: 1, False: 0}, 'default': True},
         #'min_file_size': {'map': None, 'default': 0},
@@ -1079,7 +1323,9 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
         #'is_ultraface_model': {'map': {True: 1, False: 0}, 'default': False},
         #'is_yolo_model': {'map': {True: 1, False: 0}, 'default': False},
         'min_input_image_height': {'map': None, 'default': 10},
-        'min_input_image_width': {'map': None, 'default': 10}
+        'min_input_image_width': {'map': None, 'default': 10},
+        'save_thumbnails': {'map': {True: 1, False: 0}, 'default': False},
+        'find_regex': {'map': None, 'default': ""}
     }
 
     for key, value in input_kwargs.items():

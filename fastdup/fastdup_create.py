@@ -6,7 +6,7 @@ import fastdup.fastdup_controller as FD
 
 
 @v1_sentry_handler
-def create(work_dir: Union[str, Path], input_dir: Union[str, Path] = None) -> Fastdup:
+def create(work_dir: Union[str, Path] = None, input_dir: Union[str, Path, list] = None) -> Fastdup:
     """
     Create fastdup analyzer instance.
     Usage example

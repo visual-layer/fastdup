@@ -10,12 +10,12 @@ import time
 import numpy as np
 import traceback
 import shutil
-from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images, pad_image, enhance_image
+from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images, pad_image, enhance_image, fastdup_imwrite
 from fastdup.definitions import *
 import re
 from multiprocessing import Pool
 from fastdup.sentry import *
-from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir
+from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir, convert_v1_to_v02
 
 try:
     from tqdm import tqdm
@@ -124,6 +124,7 @@ def slice_df(df, slice, colname, kwargs=None):
 
     split_sentence_to_label_list = kwargs is not None and 'split_sentence_to_label_list' in kwargs and kwargs['split_sentence_to_label_list']
     debug_labels = kwargs is not None and 'debug_labels' in kwargs and kwargs['debug_labels']
+    grouped = kwargs is not None and 'grouped' in kwargs and kwargs['grouped']
 
     if slice is not None:
         if isinstance(slice, str):
@@ -138,7 +139,10 @@ def slice_df(df, slice, colname, kwargs=None):
                     print('label without split sentence', labels[:10])
 
             is_list = isinstance(labels[0], list)
-            if is_list:
+            if grouped:
+                df = df[df[colname].apply(lambda x: slice in x)]
+                assert len(df), f"Failed to find any labels with value={slice}"
+            elif is_list:
                 labels = [item for sublist in labels for item in sublist]
                 if debug_labels:
                     print('labels after merging sublists', labels[:10])
@@ -170,6 +174,8 @@ def slice_two_labels(df, slice):
     return df
 
 def lookup_filename(filename, work_dir):
+    assert isinstance(filename, str), f"Wrong for type {filename} {type(filename)}"
+
     if os.path.exists(filename):
         return filename
     if filename.startswith(S3_TEMP_FOLDER + get_sep())  or filename.startswith(S3_TEST_TEMP_FOLDER + get_sep()):
@@ -190,6 +196,7 @@ def extract_filenames(row, work_dir, save_path, kwargs):
         if debug_hierarchical:
             print('was in extract_filenames', impath1, impath2)
     else:
+        assert not pd.isnull(row['to']) and not pd.isnull(row['from']), f"Found nan in row {row}"
         impath1 = lookup_filename(row['from'], work_dir)
         impath2 = lookup_filename(row['to'], work_dir)
 
@@ -325,6 +332,8 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     save_dir = calc_save_dir(save_path)
 
     df = similarity_file
+    df = convert_v1_to_v02(df)
+
     if df['from'].dtype in [int, np.int64]:
         assert df['to'].dtype in [int, np.int64], "Wrong types, expect both str or both int"
         filenames = load_filenames(work_dir, kwargs)
@@ -347,7 +356,9 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
     if 'external_df' not in kwargs: # external_df contains sorting by the user
         df = df.sort_values('distance', ascending=not descending)
-    df = df.drop_duplicates(subset=['from', 'to'])
+        if 'crop_filename_from' not in df.columns:
+            df = df.drop_duplicates(subset=['from', 'to'])
+
     if get_label_func is not None and slice is not None:
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
         df = slice_df(df, slice, 'label', kwargs)
@@ -370,7 +381,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
     subdf = df.head(num_images)
     # lazy eval of labels as this may be slow
-    if get_label_func is not None and slice is None:
+    if get_label_func is not None and slice is None and 'label' not in subdf.columns and 'label2' not in subdf.columns:
         subdf = find_label(get_label_func, subdf, 'from', 'label', kwargs)
         subdf = find_label(get_label_func, subdf, 'to', 'label2', kwargs)
 
@@ -382,11 +393,15 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
     indexes = []
     for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
-        im1, im2 = str(row['from']), str(row['to'])
+        if 'crop_filename_from' in row:
+            im1, im2 = str(row['crop_filename_from']), str(row['crop_filename_to'])
+        else:
+            im1, im2 = str(row['from']), str(row['to'])
+
         if im1 + '_' + im2 in sets:
             continue
         try:
-            img, imgpath = create_triplet_img(row, work_dir, save_dir, extract_filenames, get_bounding_box_func,
+            img, imgpath = create_triplet_img(i, row, work_dir, save_dir, extract_filenames, get_bounding_box_func,
                                               input_dir, kwargs)
             sets[im1 +'_' + im2] = True
             sets[im2 +'_' + im1] = True
@@ -413,7 +428,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     subdf = subdf.rename(columns={'from':'From', 'to':'To'}, inplace=False)
     subdf = subdf.rename(columns={'distance':'Distance'}, inplace=False)
     fields = ['Image', 'Distance', 'From', 'To']
-    if get_label_func is not None:
+    if get_label_func is not None or ('label' in subdf.columns and 'label2' in subdf.columns):
         subdf = subdf.rename(columns={'label':'From_Label','label2':'To_Label'}, inplace=False)
         fields.extend(['From_Label', 'To_Label'])
 
@@ -478,17 +493,16 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
 
 def load_one_image_for_outliers(args):
     row, work_dir, input_dir, get_bounding_box_func, max_width, save_path, kwargs = args
-
-    outlier_id = row['from']
-    #imgpath_suffix = f'_{outlier_id}' if 'id_to_filename_func' in kwargs else ''
-    #if 'id_to_filename_func' in kwargs:
-    #    id_to_file = kwargs['id_to_filename_func']
-    #    row[['from', 'to']] = [id_to_file(row['from']), id_to_file(row['to'])]
     impath1, impath2, dist, ptype = extract_filenames(row, work_dir, save_path, kwargs)
 
     try:
         img = fastdup_imread(impath1, input_dir, kwargs)
         assert img is not None, f"Failed to read image from {impath1} {input_dir}"
+        #find the index to retreive the bounding box.
+        if 'crop_filename_outlier' in row:
+          outlier_id = row['crop_filename_outlier']
+        else:
+          outlier_id = row['from']
         img = plot_bounding_box(img, get_bounding_box_func, outlier_id)
         assert img is not None, f"Failed to plot bb from {impath1} {input_dir}"
         img = my_resize(img, max_width=max_width)
@@ -500,8 +514,7 @@ def load_one_image_for_outliers(args):
         #make sure image file is unique, so add also folder name into the imagefile
         lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
         imgpath = calc_image_path(lazy_load, save_path, impath1, "")
-        cv2.imwrite(imgpath, img)
-        assert os.path.exists(imgpath), "Failed to save img to " + imgpath
+        fastdup_imwrite(imgpath, img)
 
     except Exception as ex:
         fastdup_capture_exception(f"load_one_image_for_outliers", ex)
@@ -575,6 +588,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
     kwargs['lazy_load'] = lazy_load
 
     df = outliers_file
+    df = convert_v1_to_v02(df)
     if df['from'].dtype in [int, np.int64]:
         filenames = load_filenames(work_dir, kwargs)
         df = merge_with_filenames(df, filenames)
@@ -591,6 +605,9 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         assert len(dups), "Error: Failed to locate similarity file file " + dups_file
         dups = dups[dups['distance'] >= dups['distance'].astype(float).mean()]
         assert len(dups), f"Did not find any images with similarity more than the mean {dups['distance'].mean()}"
+        if dups['from'].dtype in [int, np.int64]:
+            filenames = load_filenames(work_dir, kwargs)
+            dups = merge_with_filenames(dups, filenames)
 
         joined = df.merge(dups, on='from', how='left')
         joined = joined[pd.isnull(joined['distance_y'])]
@@ -618,7 +635,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         df = df.sort_values(by='distance', ascending=not descending)
     df = df.head(num_images)
 
-    if get_label_func is not None and slice is None:
+    if get_label_func is not None and slice is None and 'label' not in df.columns:
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
 
     all_args = []
@@ -683,7 +700,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 def load_one_image(args):
     try:
         f, fid, input_dir, get_bounding_box_func, kwargs = args
-        assert f is not None, f"Got None image name {fid} {input_dir} {kwargs}"
+        assert not pd.isnull(f), f"Got None image name {fid} {input_dir} {kwargs}"
         img = fastdup_imread(f, input_dir, kwargs)
         assert img is not None, f"Failed to read image {f} {input_dir} {kwargs}"
         img = plot_bounding_box(img, get_bounding_box_func, fid)
@@ -766,9 +783,20 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     MAX_IMAGES_IN_GRID = 54
     #v1 = 'id_to_filename_func' in kwargs
 
-    if isinstance(work_dir, pd.DataFrame) and 'distance' in work_dir.columns and 'component_id' in work_dir.columns \
-        and 'files' in work_dir.columns and 'len' in work_dir.columns and 'files_ids' in work_dir.columns and len(work_dir):
-        top_components = work_dir
+    if isinstance(work_dir, pd.DataFrame):
+        if 'distance' in work_dir.columns and 'component_id' in work_dir.columns \
+                and 'files' in work_dir.columns and 'len' in work_dir.columns and 'files_ids' in work_dir.columns and len(
+            work_dir):
+            if slice is not None:
+                assert 'label' in work_dir.columns, "Failed to find 'label' in dataframe, when using slice string need to provide label column"
+            kwargs['grouped'] = True
+            top_components = slice_df(work_dir, slice, 'label', kwargs)
+
+        else:
+            assert False, f"Got dataframe with the columns: {work_dir.columns} while expecting to get the columns: \
+               ['component_id', 'distance', 'files', 'files_ids', 'len'] and optionally label and or crop_filename. \
+               component_id is integer index of cluster, files, files_ids, label, crop_filename are lists of files in the component. files include the filenames, files_ids are integer unique indexe for the files\
+               label is an optional list of labels per ima, crop_filename are optional list of crops. "
     else:
         top_components = do_find_top_components(work_dir=work_dir, get_label_func=get_label_func, group_by=group_by,
                                                 slice=slice, threshold=threshold, metric=metric, descending=descending,
@@ -790,6 +818,11 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     assert top_components is not None and len(top_components), f"Failed to find components with more than {min_items} images. Try to run fastdup.run() with turi_param='ccthreshold=0.9' namely to lower the threshold for grouping components"
     comp_col = "component_id" if comp_type == "component" else "cluster"
 
+    save_dir = calc_save_dir(save_path)
+    save_dir = os.path.join(save_dir, "images")
+    lazy_load = kwargs.get('lazy_load', False)
+    subfolder = "" if not lazy_load else "images/"
+    os.makedirs(os.path.join(save_dir, subfolder), exist_ok=True)
 
     # iterate over the top components
     img_paths = []
@@ -824,7 +857,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             w,h = [], []
             val_array = []
             for f, fid in zip(files, files_ids):
-                assert f is not None, f"Found None image name on {fid} {input_dir} {row}"
+                assert not pd.isnull(f), f"Found None image name on {fid} {input_dir} {row}"
                 #if v1:
                 #    assert isinstance(fid, (int,np.uint32)), f"found a wrong file_id {fid} {type(fid)}"
                 val_array.append([f, fid, input_dir, get_bounding_box_func, kwargs])
@@ -883,13 +916,12 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
             all_labels.append(labels)
             #all_files.append(files)
-            lazy_load = kwargs.get('lazy_load', False)
-            subfolder = "" if not lazy_load else "images/"
-            save_dir = calc_save_dir(save_path)
-            save_dir = os.path.join(save_dir, "images")
-            os.makedirs(os.path.join(save_dir, subfolder), exist_ok=True)
-            local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{component_id}.jpg')
-            cv2.imwrite(local_file, img)
+
+            if group_by == "label":
+                local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{row["label"]}.jpg')
+            else:
+                local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{component_id}.jpg')
+            fastdup_imwrite(local_file, img)
             img_paths.append(local_file)
             counter+=1
 
@@ -1020,6 +1052,31 @@ def remove_frames_from_overlapping_videos(comps):
 
     return comps
 
+
+def load_and_merge_stats(components, metric, work_dir, kwargs):
+
+    if metric is not None:
+        cols_to_use = ['index', metric]
+        if metric == 'size':
+            cols_to_use = ['index', 'width', 'height']
+        stats = load_stats(work_dir,  None, kwargs, usecols=cols_to_use)
+        assert len(stats), f"Failed to load stats {work_dir}"
+
+        if metric == 'size':
+            stats['size'] = stats.apply(lambda x: x['width']*x['height'], axis=1)
+
+        if len(stats) != len(components):
+            col_key = '__id' if '__id' in components.columns else 'index'
+            if col_key == 'index':
+                del stats['filename']
+            assert col_key in components.columns, f"Failed to find key columns {col_key} in df {components.head()}"
+            components = components.merge(stats, left_on=col_key, right_on='index', how='left')
+        else:
+            components[metric] = stats[metric]
+            del stats
+        assert metric in components.columns, "Failed to find metric"
+    return components
+
 def do_find_top_components(work_dir, get_label_func=None, group_by='visual', slice=None, threshold=None, metric=None,
                            descending=True, min_items=None, max_items = None, keyword=None, save_path=None,
                            comp_type="component", input_dir=None, kwargs=None):
@@ -1082,25 +1139,8 @@ def do_find_top_components(work_dir, get_label_func=None, group_by='visual', sli
     assert components is not None and len(components), f"Failed to read components file {work_dir} or found no images to cluster to components. Try to run fastdup again with lower ccthreshold." \
                                                        f"Value ccthreshold values are 0 to 1, where 1 no images are cluster together and zero means all images are clustered together."
 
-    if metric is not None:
-        cols_to_use = ['index', metric]
-        if metric == 'size':
-            cols_to_use = ['index', 'width', 'height']
-        stats = load_stats(work_dir,  None, kwargs, usecols=cols_to_use)
 
-        if metric == 'size':
-            stats['size'] = stats.apply(lambda x: x['width']*x['height'], axis=1)
-
-        if len(stats) != len(components):
-            components = components.merge(stats, left_on='__id', right_on='index', how='left')
-        else:
-            components[metric] = stats[metric]
-            del stats
-        assert metric in components.columns, "Failed to find metric"
-
-
-    # find the components that have the largest number of images included
-
+    components = load_and_merge_stats(components, metric, work_dir, kwargs)
 
     if (get_label_func is not None):
         assert 'label' in components.columns, "Failed to find label column in components dataframe"
@@ -1518,7 +1558,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     if metric is not None:
         subtitle = ", Sorted by " + metric + " descending" if descending else "Sorted by " + metric + " ascending"
 
-    ret = ret[['image','info', 'label']] if 'label' in subdf.columns else ret[['image','info']]
+    ret = ret[['image','info', 'label']] if 'label' in ret.columns else ret[['image','info']]
     if callable(get_extra_col_func):
         ret['files'] = subdf['files'].values#.apply(lambda x: [get_extra_col_func(y) for y in x])
     fastdup.html_writer.write_to_html_file(ret, title, out_file, None, subtitle, max_width,
@@ -1622,8 +1662,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
             img = my_resize(img, max_width)
 
             imgpath = calc_image_path(lazy_load, save_dir, filename)
-            cv2.imwrite(imgpath, img)
-            assert os.path.exists(imgpath), "Failed to save img to " + imgpath
+            fastdup_imwrite(imgpath, img)
 
         except Exception as ex:
             traceback.print_exc()
@@ -1670,7 +1709,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
         cols.append('width')
         cols.append('height')
 
-    if 'label' in df.columns:
+    if 'label' in subdf.columns:
         cols.append('label')
 
     subdf['info'] = swap_dataframe(subdf, cols)
@@ -1748,12 +1787,16 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     #v1 = 'id_to_filename_func' in kwargs
     df = similarity_file
     if debug_sim:
-        pd.set_option('display.max_columns', 500)
-        pd.set_option('display.width', 1000)
         print("sim df", df.head())
     get_bounding_box_func = get_bounding_box_func_helper(get_bounding_box_func)
     reformat_disp_path = kwargs.get('get_display_filename_func', lambda x: x)
     load_crops = kwargs.get('load_crops', False)
+
+    save_dir = calc_save_dir(save_path)
+    subdir = os.path.join(save_dir, "images")
+    if not os.path.exists(subdir):
+        os.mkdir(subdir)
+
     if 'from_filename' not in df.columns and 'to_filename' not in df.columns:
         if load_crops:
             assert "filename" not in df.columns
@@ -1772,6 +1815,8 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 df = merge_with_filenames(df, filenames)
                 if debug_sim:
                     print("after merge", df.head())
+    else:
+        df = convert_v1_to_v02(df)
 
     if get_label_func is not None and ('label' not in df.columns or 'label2' not in df.columns):
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
@@ -1867,15 +1912,9 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 img = enhance_image(img)
 
             image_suffix = ''
-            save_dir = calc_save_dir(save_path)
 
-            subdir = os.path.join(save_dir, "images")
-            if not os.path.exists(subdir):
-                os.mkdir(subdir)
             imgpath = calc_image_path(lazy_load, subdir, filename, filename_suffix=image_suffix)
-            cv2.imwrite(imgpath, img)
-            assert os.path.exists(imgpath), "Failed to save img to " + imgpath
-
+            fastdup_imwrite(imgpath, img)
 
             MAX_IMAGES = 10
             to_impaths_ = row["to"][:MAX_IMAGES]
@@ -1919,8 +1958,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 imgpath2 = calc_image_path(lazy_load, save_dir, imgpath2, filename_suffix=image_suffix)
                 if 'enhance_image' in kwargs and kwargs['enhance_image']:
                     im = enhance_image(im)
-                cv2.imwrite(imgpath2, im)
-                assert os.path.exists(imgpath2), "Failed to save img to " + imgpath
+                fastdup_imwrite(imgpath2, im)
                 to_impaths.append(imgpath2)
 
             distances = row['distance'][:MAX_IMAGES]
@@ -2152,7 +2190,8 @@ if __name__ == "__main__":
         shutil.rmtree('frames_out')
         fd = fastdup.create(input_dir='frames', work_dir='frames_out')
         fd.run(bounding_box='face', license=os.environ["LICENSE"],threshold=0.85)
-        fd.vis.component_gallery(load_crops=True)
+        fd.vis.component_gallery()
+
         fd.vis.component_gallery(load_crops=False, draw_bbox=True)
         fd.vis.duplicates_gallery(load_crops=True, draw_bbox=True)
         fd.vis.outliers_gallery(load_crops=True, draw_bbox=False)
@@ -2160,6 +2199,7 @@ if __name__ == "__main__":
         fd.vis.outliers_gallery(load_crops=False, draw_bbox=False)
         fd.vis.duplicates_gallery(load_crops=True, draw_bbox=False)
         fd.vis.duplicates_gallery(load_crops=True, draw_bbox=True)
+        fd.vis.stats_gallery() # no load_crops, should load
         fd.vis.stats_gallery(load_crops=True, draw_bbox=True)
         fd.vis.stats_gallery(load_crops=False, draw_bbox=False)
     elif False:
@@ -2214,7 +2254,7 @@ if __name__ == "__main__":
         #fastdup.run('../fight-frames', work_dir='tmp_out')
         #fastdup.create_outliers_gallery('tmp_out', '.', get_label_func='automatic')
         #fd.run(num_images=15,ccthreshold=0.7)
-    elif True:
+    elif False:
         import fastdup
         os.chdir('/Users/dannybickson/visual_database/cxx/unittests/')
         fd = fastdup.create(input_dir='two_images', work_dir='roi_bug2')
@@ -2267,7 +2307,14 @@ if __name__ == "__main__":
         fastdup.run('mafat.csv', 'new_output', license=os.environ['LICENSE'], bounding_box='rotated',
                     turi_param='augmentation_additive_margin=25,ccthreshold=0.9',
                     verbose=False, model_path='dinov2s')
-    else:
+    elif False:
+        import os
+        files = os.listdir('/mnt/data/sku110k')
+        files = [os.path.join('/mnt/data/sku110k/',f) for f in files]
+        # create a fastdup with the input files and run it
+        fd = fastdup.create(work_dir="/tmp/fastdub_workdir", input_dir=files[:10])
+        fd.run(ccthreshold=0.9)
+    elif False:
         import fastdup
         os.chdir("../unittests")
         fd = fastdup.create(input_dir='hilitu', work_dir='out1111')
@@ -2275,6 +2322,316 @@ if __name__ == "__main__":
         fd.vis.component_gallery()
         im = fastdup_imread('hilitu/#real or #fake _🙃_test.png', 'hilitu', {})
         assert im is not None
+    elif False:
+        import fastdup
+        import shutil
+        try:
+            shutil.rmtree("tmp1234/tmp")
+        except:
+            pass
+        fd = fastdup.create(input_dir='s3://visualdb/sku110k/', work_dir='tmp1234')
+        fd.run(sync_s3_to_local=True, verbose=True, overwrite=True, num_images=100)
+        fd.vis.outliers_gallery()
+        #fastdup.run('s3://visualdb/sku110k/', 'tmp1234', turi_param='sync_s3_to_local=1', num_images=100, verbose=1)
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
 
-    #ret= fd.vis.stats_gallery(load_crops=True)
-    #ret= fd.vis.duplicates_gallery(load_crops=True)
+        files = os.listdir("two_images")
+        files = ['two_images/' + f for f in files]
+        import pandas as pd
+        df = pd.DataFrame({'filename':files, 'label':['A','N']})
+        fd = fastdup.create(input_dir='two_images', work_dir='tmp11111')
+        fd.run(overwrite=True, annotations=df,ccthreshold=0.3,threshold=0.3)
+        #fd.vis.outliers_gallery()
+        fd.vis.similarity_gallery(slice='A')
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
+        fd = fastdup.create(input_dir='hilitu', work_dir='out1111')
+        #fd.run(overwrite=True, verbose=True)
+        fd.run(overwrite=True, model_path='dinov2s', verbose=False,num_threads=1,print_summary=False)
+        fd.run(overwrite=True, verbose=True, num_threads=1,print_summary=False,d=576)
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
+        flist = ["two_images/test_1234.jpg", 'two_images/train_1274.jpg']
+        import numpy as np
+        matrix = np.random.rand(2, 576).astype('float32')
+        fd2 = fastdup.create(input_dir='two_images/', work_dir='out3')
+        fd2.run(annotations=flist, embeddings=matrix, print_summary=False, overwrite=True, verbose=True)
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
+        flist = ["two_images/test_1234.jpg", 'two_images/train_1274.jpg']
+        import numpy as np
+        matrix = np.random.rand(2, 576).astype('float32')
+        import shutil
+        shutil.rmtree('output')
+        os.mkdir('output')
+        fastdup.save_binary_feature('output', flist, matrix)
+        fastdup.run(input_dir='two_images', work_dir='output', run_mode=2, verbose=True)
+    elif False:
+        coco_csv = '/mnt/data/coco_minitrain_25k/annotations/coco_minitrain2017.csv'
+        coco_annotations = pd.read_csv(coco_csv, header=None, names=['filename', 'col_x', 'row_y',
+                                                                     'width', 'height', 'label', 'ext'])
+        #coco_annotations['split'] = 'train'  # Only train files were loaded
+        coco_annotations['filename'] = coco_annotations['filename'].apply(
+            lambda x: '/mnt/data/coco_minitrain_25k/images/train2017/' + x)
+        coco_annotations = coco_annotations.drop_duplicates()
+        coco_annotations.reset_index().head(1000)[['index', 'filename', 'col_x', 'row_y',
+                                        'width', 'height']].to_csv('coco.csv', index=False)
+        input_dir = '.'
+        work_dir = 'fastdup_minicoco'
+        import shutil
+        if os.path.exists(work_dir):
+            shutil.rmtree(work_dir)
+        import fastdup
+        fd = fastdup.create(work_dir=work_dir, input_dir=input_dir)
+        ret = fd.run(annotations=coco_annotations.head(1000), overwrite=True, num_images=1000, cc_threshold=0.97, threshold=0.97, print_summary=False, verbose=0, num_threads=6, save_thumbnails=1)
+        assert ret == 0
+        ret = fd.vis.component_gallery(draw_bbox=True, load_crops=False, slice='airplane', label_col='label',debug_labels=True, group_by='label')
+        #sys.exit(0)
+        assert ret == 0
+        df = fd.connected_components_grouped(ascending=False)
+        assert len(df) == 7
+        #assert df['len'].max() == 3
+        assert df['len'].min() == 2
+        assert set(df[df['distance'].max() == df['distance']]['label'].values[0]) == set(['car','truck'])
+        ret = fd.vis.component_gallery(draw_bbox=False, load_crops=True)
+
+
+        assert os.path.exists(os.path.join(work_dir, 'galleries', 'components.html'))
+        ret = fd.vis.component_gallery(metric='size', slice='diff',draw_bbox=False)
+        assert ret == 0
+        assert os.path.exists(os.path.join(work_dir, 'galleries', 'components.html'))
+
+        fd.vis.duplicates_gallery(draw_bbox=True)
+        ret = fd.vis.outliers_gallery(draw_bbox=True)
+        assert ret == 0
+        ret = fd.vis.outliers_gallery(draw_bbox=False)
+        assert ret == 0
+        a,b = fd.embeddings()
+        assert isinstance(a, list)
+        assert isinstance(b, np.ndarray)
+        assert b.shape[0] == len(a)
+    elif False:
+        coco_csv = '/mnt/data/coco_minitrain_25k/annotations/coco_minitrain2017.csv'
+        coco_annotations = pd.read_csv(coco_csv, header=None, names=['filename', 'col_x', 'row_y',
+                                                                     'width', 'height', 'label', 'ext'])
+        #coco_annotations['split'] = 'train'  # Only train files were loaded
+        coco_annotations['filename'] = coco_annotations['filename'].apply(
+            lambda x: '/mnt/data/coco_minitrain_25k/images/train2017/' + x)
+        coco_annotations = coco_annotations.drop_duplicates()
+        coco_annotations.reset_index()[['index','filename','col_x','row_y',
+        'width','height']].head(1000).to_csv('coco2.csv',index=False)
+        work_dir = 'fastdup_minicoco2'
+        import shutil
+        if os.path.exists(work_dir):
+            shutil.rmtree(work_dir)
+        import fastdup
+        ret = fastdup.run(input_dir='coco2.csv', work_dir=work_dir, num_images=1000, turi_param='ccthreshold=0.95,store_int=1' ,threshold=0.95, verbose=0, num_threads=6, bounding_box='xywh_bbox')
+        fastdup.create_components_gallery(work_dir, work_dir, draw_bbox=True, input_dir='/mnt/data/coco_minitrain_25k/images/train2017/')
+
+    elif False:
+        coco_csv = '/mnt/data/coco_minitrain_25k/annotations/coco_minitrain2017.csv'
+        coco_annotations = pd.read_csv(coco_csv, header=None, names=['filename', 'col_x', 'row_y',
+                                                                     'width', 'height', 'label', 'ext'])
+        coco_annotations['split'] = 'train'  # Only train files were loaded
+        coco_annotations['filename'] = coco_annotations['filename'].apply(
+            lambda x: 'train2017/' + x)
+        coco_annotations = coco_annotations.drop_duplicates()
+        input_dir = '/mnt/data/coco_minitrain_25k/images/'
+        work_dir = 'fastdup_minicoco'
+        import fastdup
+        fd = fastdup.create(work_dir=work_dir, input_dir=input_dir)
+        fd.run(annotations=coco_annotations, overwrite=True, num_images=1000, cc_threshold=0.96, threshold=0.96)
+        ret = fd.vis.component_gallery(metric='size', slice='diff')
+        ret = fd.vis.component_gallery(metric='size', slice='diff')
+        ret = fd.vis.outliers_gallery(draw_bbox=True)
+        assert ret == 0
+        ret = fd.vis.outliers_gallery(draw_bbox=False)
+        assert ret == 0
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
+        input_dir = 'omer_test'
+        work_dir = 'fastdup_workdir'
+        #
+        df_annot = pd.DataFrame([
+            {'filename': 'omer_test/000000001.jpg', 'label': 'dup1'},
+            {'filename': 'omer_test/test_1234.jpg', 'label': 'dup2'},
+            {'filename': 'omer_test/test_1234a.jpg', 'label': 'dup3'},
+            {'filename': 'omer_test/test_1234b.jpg', 'label': 'dup2'},
+            {'filename': 'omer_test/train_1274.jpg', 'label': 'foo'},
+        ])
+        #
+        fd = fastdup.create(work_dir=work_dir, input_dir=input_dir)
+        ret = fd.run(threshold=0.8, overwrite=True, annotations=df_annot, verbose=True)
+        assert ret == 0
+        print(fd.invalid_instances())
+        df = fd.annotations(valid_only=False)
+        print(df)
+        assert len(df) == 5
+        assert df['error_code'].nunique() == 4
+    elif False:
+        # create a fastdup object, the input dir is "." since we added the folder name into the filename before.
+        import fastdup
+        fd = fastdup.create(work_dir='tiny-coco3', input_dir='/mnt/data/tiny-coco/small_coco/train_2017_small/')
+        fd.run(annotations='/mnt/data/tiny-coco/small_coco/instances_train2017_small.json')
+    elif False:
+        import fastdup
+        fd = fastdup.create(work_dir='outtest', input_dir='/Users/dannybickson/visual_database/cxx/unittests/two_images')
+        fd.run(model_path='clip', verbose=True, overwrite=True)
+    elif False:
+        import fastdup
+        os.chdir("../unittests")
+        df = pd.read_csv('tom_apostrophe/test_annot.csv')
+        print(df)
+        fd = fastdup.create(input_dir='tom_apostrophe', work_dir='tom_out')
+        ret = fd.run( overwrite=True, annotations=df, threshold=0.2, ccthreshold=0.2)
+        assert ret == 0
+        assert len(fd.annotations()) == 2
+        ret = fd.vis.duplicates_gallery()
+        fd.vis.stats_gallery()
+        assert ret == 0
+    elif False:
+        import pathlib
+        dir = pathlib.Path('~/')
+        from fastdup.utils import shorten_path
+        dir = shorten_path(dir)
+        assert os.path.exists(dir)
+        dir = pathlib.Path('~')
+        dir = shorten_path(dir)
+        assert os.path.exists(dir)
+    elif False:
+        import os
+        if os.path.exists('sprite123.png'):
+            os.unlink("sprite123.png")
+        files = os.listdir('/mnt/data/sku110k')[:25]
+        files = [os.path.join('/mnt/data/sku110k',f) for f in files]
+        kwargs = {}
+        kwargs['force_width'] = 5
+        kwargs['force_height'] = 5
+        if not os.path.exists('tmplog'):
+            os.makedirs('tmplog')
+        fastdup.generate_sprite_image(files[:23], 23, 'tmplog',force_width=5, force_height=5, alternative_filename='sprite123.png')
+        assert os.path.exists('sprite123.png')
+    elif False:
+        os.chdir('/Users/dannybickson/Downloads/elbit2')
+        import fastdup
+        fd = fastdup.create(input_dir="21425910_not_rotated", work_dir="output")
+        fd.run(annotations="21425910_not_rotated/annotations_910/instances_default_rotated_fixed.json",
+               overwrite=True, license=os.environ["LICENSE"])
+        os.chdir('/tmp')
+        import fastdup
+        fd = fastdup.create(input_dir="/Users/dannybickson/Downloads/elbit2/21425910_not_rotated", work_dir="output")
+        fd.run(annotations="/Users/dannybickson/Downloads/elbit2/21425910_not_rotated/annotations_910/instances_default_rotated_fixed.json",
+               overwrite=True, license=os.environ["LICENSE"])
+    elif False:
+        import fastdup
+        fd = fastdup.create(input_dir='../unittests/two_images')
+        fd.run(overwrite=True,verbose=True,run_advanced_stats=1)
+        stats = fd.img_stats()
+        for i in stats.columns:
+            print(f"assert stats['{i}'].values[0] == {stats[i].values[0]}")
+
+        import math
+        assert len(stats) == 2
+        assert stats['index'].values[0] == 0
+        assert stats['img_w'].values[0] == 2448
+        assert stats['img_h'].values[0] == 3264
+        assert stats['unique'].values[0] == 256
+        assert stats['blur'].values[0] == 5328.6621
+        assert stats['mean'].values[0] == 91.513
+        assert stats['min'].values[0] == 0.0
+        assert stats['max'].values[0] == 255.0
+        assert stats['stdv'].values[0] == 60.5834
+        assert stats['file_size'].values[0] == 894163
+        assert stats['rms_contrast'].values[0] == 0.6619
+        assert stats['mean_rel_intensity_r'].values[0] == 1.0
+        assert stats['mean_rel_intensity_b'].values[0] == 1.2026
+        assert stats['mean_rel_intensity_g'].values[0] == 1.0323
+        assert stats['contrast'].values[0] == 1.0
+        assert stats['mean_hue'].values[0] == 69.3986
+        assert stats['mean_saturation'].values[0] == 106.3207
+        assert stats['mean_val'].values[0] == 116.1325
+        assert stats['edge_density'].values[0] == 0.2416
+        assert stats['mean_r'].values[0] == 84.868
+        assert stats['mean_g'].values[0] == 102.0607
+        assert stats['mean_b'].values[0] == 87.6103
+        assert stats['filename'].values[0] == '../unittests/two_images/test_1234.jpg'
+        assert stats['error_code'].values[0] == 'VALID'
+        assert stats['is_valid'].values[0] == True
+        assert stats['fd_index'].values[0] == 0
+
+    elif False:
+        os.chdir('/Users/dannybickson/Downloads/tiktok_yael/frames/tmp')
+        import fastdup
+        import pandas as pd
+        df = pd.read_csv('ocr.csv')
+        fd = fastdup.create(input_dir='.', work_dir='../work')
+        fd.run(annotations=df, license=os.environ['LICENSE'])
+
+    elif False:
+        import fastdup
+        from fastdup.image import inner_read
+        img = inner_read('/Users/dannybickson/visual_database/cxx/unittests/heic/colors-no-alpha.heic')
+    elif False:
+        import fastdup
+        from fastdup.image import fastdup_imread
+        fastdup_imread('~/visual_database/cxx/unittests/two_images/test_1234.jpg',
+                            '~/visual_database/cxx/unittests/two_images/', {})
+    elif False:
+        import fastdup
+        import shutil
+        os.chdir('/Users/dannybickson/Downloads/tiktok_videos')
+        if os.path.exists('ocr_out'):
+            shutil.rmtree('ocr_out')
+
+        fd = fastdup.create(input_dir='frames/datatiktokdownload.online_1672753738821.mp4', work_dir='ocr_out')
+        fd.run(bounding_box='ocr', license=os.environ['LICENSE'], verbose=True, overwrite=True)
+        fd.vis.component_gallery()
+    elif False:
+        import fastdup
+        fd = fastdup.create(input_dir=".", work_dir='out')
+        ret = fd.feature_vector('../unittests/two_images/test_1234.jpg')
+        assert len(ret) == 2
+        ret = ret[0]
+        assert ret.shape[1] == 576
+        assert ret.shape[0] == 1
+
+        ret = fd.feature_vectors(['../unittests/two_images/test_1234.jpg','../unittests/two_images/train_1274.jpg'])
+        assert len(ret) == 2
+        ret = ret[0]
+        assert ret.shape[1] == 576
+        assert ret.shape[0] == 2
+    elif True:
+        import os
+        os.chdir('/Users/dannybickson/Downloads/Kitti_bug')
+        import fastdup
+        import pandas as pd
+
+        data = pd.read_csv('kitti_annotations.csv')
+        #data['index'] = range(len(data))
+        #data = data[data['width'] > 20]
+        print(data)
+        fd = fastdup.create(input_dir='.')
+        fd.run(annotations=data, overwrite=True, augmentation_additive_margin=15, verbose=1, num_threads=1, num_images=20)
+        print(fd.invalid_instances())
+        #fd.vis.duplicates_gallery(load_crops=True)
+        fd.vis.duplicates_gallery(load_crops=False, draw_bbox=True)
+        #fd.vis.stats_gallery(load_crops=True)
+        #fd.vis.stats_gallery(load_crops=False)
+        #fd.vis.outliers_gallery(load_crops=True)
+
+    else:
+        import fastdup
+        os.chdir('/Users/dannybickson/Downloads/stuttgart/')
+        if os.path.exists('out/atrain_croos.csv'):
+            os.unlink('out/atrain_crops.csv')
+        fd = fastdup.create(input_dir='frames', work_dir='/Users/dannybickson/Downloads/stuttgart/out2')
+        fd.run(bounding_box='ocr', verbose=True, overwrite=True, num_images=3, threshold=0.3)
+        fd.vis.duplicates_gallery()
+
+

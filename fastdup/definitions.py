@@ -45,9 +45,11 @@ INPUT_TEST_FILE_LOCATION = "testfiles.txt"
 DEFAULT_MODEL_FEATURE_WIDTH = 576
 HIGH_ACCURACY_MODEL_FEATURE_WIDTH = 960
 
+PRINTOUT_BAR_WIDTH = 88
+
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "0.927"
+VERSION__ = "1.38"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 
@@ -56,7 +58,7 @@ MATPLOTLIB_ERROR_MSG = "Warning: failed to import matplotlib, plot is not genera
 "and special care needs to select the right backend for your OS/Hardware combination. You can install matplot lib using "
 "python3.8 -m pip install matplotlib matplotlib-inline. (change the python3.8 to your python version). "
 
-SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".heic", ".heif"]
+SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".tiff", ".heic", ".heif", ".bmp", ".webp"]
 SUPPORTED_VID_FORMATS = ["mp4", ".avi"]
 
 RUN_ALL = 0
@@ -76,6 +78,17 @@ DINOV2S_MODEL = "https://vl-company-website.s3.us-east-2.amazonaws.com/model_art
 DINOV2S_MODEL_DIM = 384
 DINOV2B_MODEL = "https://vl-company-website.s3.us-east-2.amazonaws.com/model_artifacts/dinov2/dinov2_vitb14.onnx"
 DINOV2B_MODEL_DIM = 768
+CLIP_MODEL = "https://clip-as-service.s3.us-east-2.amazonaws.com/models-436c69702d61732d53657276696365/onnx/ViT-B-32/visual.onnx"
+CLIP_MODEL_DIM = 512
+CLIP_MODEL2 = "https://clip-as-service.s3.us-east-2.amazonaws.com/models-436c69702d61732d53657276696365/onnx/ViT-L-14@336px/visual.onnx"
+CLIP_MODEL2_DIM = 768
+CLIP_MODEL14 = "https://clip-as-service.s3.us-east-2.amazonaws.com/models-436c69702d61732d53657276696365/onnx/ViT-L-14/visual.onnx"
+CLIP_MODEL14_DIM = 768
+
+EFFICIENTNET_MODEL = "https://github.com/onnx/models/raw/main/vision/classification/efficientnet-lite4/model/efficientnet-lite4-11.onnx"
+EFFICIENTNET_MODEL_DIM = 1000
+RESNET50_MODEL = "https://github.com/onnx/models/raw/main/vision/classification/resnet/model/resnet50-v1-12.onnx"
+RESNET50_MODEL_DIM = 1000
 
 CAPTION_MODEL1_NAME = 'automatic'
 CAPTION_MODEL2_NAME = 'blip'

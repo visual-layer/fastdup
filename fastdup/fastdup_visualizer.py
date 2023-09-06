@@ -6,12 +6,15 @@ from datetime import datetime
 from typing import Union, Tuple
 
 import fastdup
+from fastdup.utils import shorten_path
 import numpy as np
 from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception
 from fastdup.fastdup_controller import FastdupController
 from fastdup import create_outliers_gallery, create_duplicates_gallery, create_components_gallery, \
     create_similarity_gallery, find_top_components, create_stats_gallery
 import fastdup.definitions as FD
+
+from fastdup.galleries import load_and_merge_stats
 import pandas as pd
 
 
@@ -25,6 +28,18 @@ class FastdupVisualizer:
         self._default_config = dict() if default_config is None else default_config
         self._controller = controller
         self._availavle_columns = None
+
+    def _compute_label_col(self, label_col, load_crops):
+
+        if self._controller._bbox == 'ocr':
+            load_crops = True
+        if self._controller._df_annot is not None and not self._controller._df_annot.empty and ('label' in self._controller._df_annot.columns):
+            if load_crops and 'crop_filename' in self._controller._df_annot.columns:
+                label_col = pd.Series(self._controller._df_annot["label"].values,
+                                      index=self._controller._df_annot["crop_filename"]).to_dict()
+            else:
+                label_col = pd.Series(self._controller._df_annot["label"].values,index=self._controller._df_annot["filename"]).to_dict()
+        return label_col
 
     def _get_available_columns(self):
         """
@@ -60,11 +75,15 @@ class FastdupVisualizer:
             html_dst_path = html_src_path if lazy_load else save_dir.parent / out_html_fname
         # if lazy_load - assume users_input is a directory
         elif lazy_load:
+            if isinstance(users_input, str):
+                users_input = shorten_path(users_input)
             save_dir = Path(users_input)
             html_src_path = save_dir / out_html_fname
             html_dst_path = save_dir / out_html_fname
         # if not lazy_load - assume users_input is an html file path
         else:
+            if isinstance(users_input, str):
+                users_input = shorten_path(users_input)
             html_dst_path = Path(users_input)
             save_dir = html_dst_path.parent / f'artifacts_{html_dst_path.name.split(".")[0]}_{date_suffix}'
             html_src_path = save_dir / out_html_fname
@@ -77,7 +96,7 @@ class FastdupVisualizer:
     def outliers_gallery(self, save_path: str = None, label_col: str = None, draw_bbox: bool = False,
                          num_images: int = 20, max_width: int = None, lazy_load: bool = False, how: str = 'one',
                          slice: Union[str, list] = None, ascending: bool = True,
-                         save_artifacts: bool = False, show: bool = True, load_crops: bool = False, external_df: pd.DataFrame = None,
+                         save_artifacts: bool = False, show: bool = True, load_crops: bool = None, external_df: pd.DataFrame = None,
                          **kwargs):
         """
         Create gallery of outliers, i.e. images that are not similar to any other images in the dataset.
@@ -98,7 +117,7 @@ class FastdupVisualizer:
         :param ascending: (Optional) sort ascending or descending
         :param save_artifacts: save artifacts to disk
         :param show: show gallery in notebook
-        :param load_crops: load crops instead of full images
+        :param load_crops: load crops instead of full images, on default is None which means load crop when they are present
         :param external_df: optional dataframe including data for report.
                Example usage:
                ```
@@ -127,6 +146,20 @@ class FastdupVisualizer:
         jupyter_html = 'JPY_PARENT_PID' in os.environ and show
         if draw_bbox:
             load_crops = True
+        if load_crops is None:
+            load_crops = self._controller._dtype == FD.BBOX
+
+        label_col = self._compute_label_col(label_col, load_crops)
+        if draw_bbox and external_df is None:
+            external_df = self._controller.outliers(load_crops=load_crops)
+            external_df = external_df.dropna()
+        elif self._controller._dtype == FD.BBOX and external_df is None:
+            external_df = self._controller.similarity(load_crops=load_crops)
+            if load_crops and 'crop_filename_from' in external_df.columns and 'crop_filename_to' in external_df.columns:
+                external_df['filename_from'] = external_df['crop_filename_from']
+                external_df['filename_to'] = external_df['crop_filename_to']
+            external_df = external_df.sort_values('distance', ascending=ascending)
+
         ret = create_outliers_gallery(self._controller.work_dir  if external_df is None else external_df,
                                       work_dir=self._controller.work_dir, save_path=html_dst_path,
                                 get_bounding_box_func=self._get_bbox_func(draw_bbox),
@@ -142,13 +175,15 @@ class FastdupVisualizer:
         if ret != 0:
             return ret
         if show:
+            self._controller.vl_datasets_ref_printout()
             self._disp_jupyter(html_dst_path)
+        return 0
 
     @v1_sentry_handler
     def duplicates_gallery(self, save_path: str = None, label_col: str = None, draw_bbox: bool = False,
                            num_images: int = 20, max_width: int = None, lazy_load: bool = False,
                            slice: Union[str, list] = None, ascending: bool = False, threshold: float = None,
-                           save_artifacts: bool = False, show: bool = True, load_crops: bool = False, external_df: pd.DataFrame = None,
+                           save_artifacts: bool = False, show: bool = True, load_crops: bool = None, external_df: pd.DataFrame = None,
                            **kwargs):
         """
         Generate gallery of duplicate images, i.e. images that are similar to other images in the dataset.
@@ -167,7 +202,7 @@ class FastdupVisualizer:
         :param threshold: (Optional) threshold to filter out images with similarity score below the threshold.
         :param save_artifacts: save artifacts to disk
         :param show: show gallery in notebook
-        :param load_crops: load crops instead of full images
+        :param load_crops: load crops instead of full images, on default is None which means load crop when they are present
         :param external_df: optional dataframe including data for report.
         :param kwargs: additional parameters to pass to create_duplicates_gallery
         """
@@ -186,6 +221,18 @@ class FastdupVisualizer:
         jupyter_html = 'JPY_PARENT_PID' in os.environ and show
         if draw_bbox:
             load_crops = True
+        label_col = self._compute_label_col(label_col, load_crops)
+        if load_crops is None:
+            load_crops = self._controller._dtype == FD.BBOX
+        if draw_bbox and external_df is None:
+            external_df = self._controller.similarity(load_crops=load_crops)
+        elif self._controller._dtype == FD.BBOX and external_df is None:
+            external_df = self._controller.similarity(load_crops=load_crops)
+            if load_crops and 'crop_filename_from' in external_df.columns and 'crop_filename_to' in external_df.columns:
+                external_df['filename_from'] = external_df['crop_filename_from']
+                external_df['filename_to'] = external_df['crop_filename_to']
+            external_df = external_df.sort_values('distance', ascending=ascending)
+
         ret = create_duplicates_gallery(self._controller.work_dir if external_df is None else external_df,
                                         work_dir=self._controller.work_dir, save_path=html_dst_path, lazy_load=lazy_load,
                                   get_bounding_box_func=self._get_bbox_func(draw_bbox),
@@ -199,13 +246,15 @@ class FastdupVisualizer:
         if ret != 0:
             return ret
         if show:
+            self._controller.vl_datasets_ref_printout()
             self._disp_jupyter(html_dst_path)
+        return 0
 
     @v1_sentry_handler
     def similarity_gallery(self, save_path: str = None, label_col: str = None, draw_bbox: bool = False,
                            num_images: int = 20, max_width: int = None, lazy_load: bool = False,
-                           slice: Union[str, list] = None, ascending: bool = False, threshold: float = None,
-                           show: bool = True, load_crops: bool = False, external_df: pd.DataFrame = None, **kwargs):
+                           slice: Union[str, list] = None, ascending: bool = None, threshold: float = None,
+                           show: bool = True, load_crops: bool = None, external_df: pd.DataFrame = None, **kwargs):
         """
         Generate gallery of similar images, i.e. images that are similar to other images in the dataset.
         :param save_path: path for saving the gallery. If None, saves to work_dir/galleries
@@ -220,10 +269,10 @@ class FastdupVisualizer:
         :param max_width: max width of the gallery
         :param draw_bbox: draw bounding box on the images
         :param threshold: (Optional) threshold to filter out images with similarity score below the threshold.
-        :param slice: (Optional) list/single label for filtering similarity dataframe
+        :param slice: (Optional) list/single label for filtering similarity dataframe. Reserved slice keywords are "diff" and "same" for finding similar images from different class label or same class label
         :param ascending: (Optional) sort ascending or descending
         :param show: show gallery in notebook
-        :param load_crops: load crops instead of full images
+        :param load_crops: load crops instead of full images, on default is None which means load crop when they are present
         :param external_df: optional dataframe including data for report.
         :param kwargs: additional parameters to pass to create_duplicates_gallery
         """
@@ -242,6 +291,27 @@ class FastdupVisualizer:
         jupyter_html = 'JPY_PARENT_PID' in os.environ and show
         if draw_bbox:
             load_crops = True
+        if load_crops is None:
+            load_crops = self._controller._dtype == FD.BBOX
+        label_col = self._compute_label_col(label_col, load_crops)
+        if ascending is None and slice is not None and isinstance(slice, str):
+            if slice == "diff":
+                ascending = True
+                slice = "label_score"
+            elif slice == "same":
+                ascending = False
+                slice = "label_score"
+        elif ascending is None:
+            ascending = True
+        if draw_bbox and external_df is None:
+            external_df = self._controller.similarity(load_crops=load_crops)
+        elif self._controller._dtype == FD.BBOX and external_df is None:
+            external_df = self._controller.similarity(load_crops=load_crops)
+            if load_crops and 'crop_filename_from' in external_df.columns and 'crop_filename_to' in external_df.columns:
+                external_df['filename_from'] = external_df['crop_filename_from']
+                external_df['filename_to'] = external_df['crop_filename_to']
+
+
         ret = create_similarity_gallery(self._controller.work_dir if external_df is None else external_df,
                                   work_dir=self._controller.work_dir, save_path=html_dst_path, lazy_load=lazy_load,
                                   get_bounding_box_func=self._get_bbox_func(draw_bbox),
@@ -256,14 +326,15 @@ class FastdupVisualizer:
             return -1
         #self._clean_temp_dir(save_dir, html_src_path, html_dst_path, lazy_load=lazy_load)
         if show:
+            self._controller.vl_datasets_ref_printout()
             self._disp_jupyter(html_dst_path)
         return ret
 
 
-    def stats_gallery(self, save_path: str = None, metric: str = 'dark',
+    def stats_gallery(self, save_path: str = None, metric: str = 'dark', draw_bbox: bool = False,
                       slice: Union[str, list] = None, ascending: bool = None,
                       label_col: str = None, lazy_load: bool = False, show: bool = True,
-                      load_crops: bool = False, external_df: pd.DataFrame = None, **kwargs):
+                      load_crops: bool = None, external_df: pd.DataFrame = None, **kwargs):
         """
         Generate gallery of images sorted by a specific metric.
         :param save_path: path for saving the gallery. If None, saves to work_dir/galleries
@@ -272,8 +343,8 @@ class FastdupVisualizer:
         :param ascending: (Optional) sort ascending or descending
         :param label_col: (Optional) column name of label in annotation dataframe. fastdup beta: to generate automated
          image captions use either 'automatic', 'automatic2', or 'indoor_outdoor'
-        :param lazy_load: load images on demand, otherwise load all images into html
-        :param load_crops: load crops instead of full images
+        :param lazy_load: load images on demand, otherwise load all images into html. On default loads the crops in case they are present.
+        :param load_crops: load crops instead of full images, on default is None which means load crop when they are present
         :param show: show gallery in notebook
         :param external_df: optional dataframe including data for report.
 
@@ -299,7 +370,16 @@ class FastdupVisualizer:
             html_dst_path = os.path.join(self._controller.work_dir, "galleries", out_fname)
 
         jupyter_html = 'JPY_PARENT_PID' in os.environ and show
-        fastdup.create_stats_gallery(self._controller.work_dir if external_df is None else external_df,
+        label_col = self._compute_label_col(label_col, load_crops)
+
+        if load_crops is None:
+            load_crops = self._controller._dtype == FD.BBOX
+        if draw_bbox:
+            load_crops = True
+        if (draw_bbox or self._controller._dtype == FD.BBOX) and external_df is None:
+            external_df = self._controller.img_stats(load_crops=load_crops)
+
+        ret = fastdup.create_stats_gallery(self._controller.work_dir if external_df is None else external_df,
                                      save_path=html_dst_path,
                                      get_label_func=label_col,
                                      metric=metric,
@@ -310,8 +390,12 @@ class FastdupVisualizer:
                                      id_to_filename_func=self._get_filneme_func(load_crops),
                                      jupyter_html=jupyter_html, slice=slice, **kwargs)
 
+        if ret != 0:
+            return ret
         if show:
+            self._controller.vl_datasets_ref_printout()
             self._disp_jupyter(html_dst_path)
+        return 0
 
     @v1_sentry_handler
     def component_gallery(self, save_path: str = None, label_col: str = None, draw_bbox: bool = False,
@@ -319,7 +403,7 @@ class FastdupVisualizer:
                           slice: Union[str, list] = None, group_by: str = 'visual', min_items: int = None,
                           max_items: int = None, threshold: float = None, metric: str = None,
                           sort_by: str = 'comp_size', ascending: bool = False,
-                          save_artifacts: bool = False, show: bool = True, load_crops: bool = False,
+                          save_artifacts: bool = False, show: bool = True, load_crops: bool = None,
                           external_df: pd.DataFrame = None, **kwargs):
         """
 
@@ -344,7 +428,7 @@ class FastdupVisualizer:
         :param ascending: (Optional) sort ascending or descending
         :param show: show gallery in notebook
         :param save_artifacts: save artifacts to disk
-        :param load_crops: load crops instead of full images
+        :param load_crops: load crops instead of full images, on default is None which means load crop when they are present
         :param external_df: optional dataframe including data for report.
         :return:
         """
@@ -362,6 +446,14 @@ class FastdupVisualizer:
         jupyter_html = 'JPY_PARENT_PID' in os.environ and show
         if draw_bbox:
             load_crops = True
+        if load_crops is None:
+            load_crops = self._controller._dtype == FD.BBOX
+        label_col = self._compute_label_col(label_col, load_crops)
+        if draw_bbox and external_df is None:
+            kwargs2 = kwargs.copy()
+            kwargs2['draw_bbox'] = draw_bbox
+            external_df = self._controller.connected_components_grouped(sort_by, ascending, metric, load_crops, group_by, kwargs=kwargs2)
+
         ret = create_components_gallery(work_dir=self._controller.work_dir if external_df is None else external_df, save_path=html_dst_path, input_dir=self._controller.input_dir if not load_crops else self._controller.work_dir,
                                   get_bounding_box_func=self._get_bbox_func(draw_bbox),
                                   get_label_func=label_col, save_artifacts=save_artifacts,
@@ -374,7 +466,10 @@ class FastdupVisualizer:
             return ret
 
         if show:
+            self._controller.vl_datasets_ref_printout()
             self._disp_jupyter(html_dst_path)
+
+        return 0
 
     def _get_filneme_func(self, load_crops: bool = False):
         if load_crops and FD.ANNOT_CROP_FILENAME in self._get_available_columns():
@@ -430,7 +525,7 @@ class FastdupVisualizer:
         # return  [x1, y1, x2, y2]
         def bbox_func(fastdup_id):
             if isinstance(fastdup_id, str):
-                annot = self._controller._df_annot[self._controller._df_annot[FD.ANNOT_FILENAME] == fastdup_id]
+                annot = self._controller._df_annot[self._controller._df_annot[FD.ANNOT_CROP_FILENAME] == fastdup_id]
                 if len(annot) == 0:
                     return [[]]
                 annot = annot.head(1).to_dict('records')[0]

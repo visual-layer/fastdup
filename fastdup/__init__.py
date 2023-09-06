@@ -1,4 +1,3 @@
-#!/bin/python3.8
 #FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.
 #This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives
 #4.0 International license. Please reach out to info@databasevisual.com for licensing options.
@@ -41,7 +40,7 @@ except:
     tqdm = lambda x, total=None: x
 
 
-__version__="0.925"
+__version__="1.13"
 CONTACT_EMAIL="info@visual-layer.com"
 
 init_sentry()
@@ -153,6 +152,8 @@ def do_run(input_dir='',
         return 0
 
     assert input_dir is not None and isinstance(input_dir, (str,list)), "input_dir must be a string or a list"
+    if isinstance(input_dir, str):
+        input_dir = shorten_path(input_dir)
 
     if 'sync_s3_to_local=1' in turi_param and isinstance(input_dir, str):
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
@@ -180,6 +181,7 @@ def do_run(input_dir='',
 
     # in case of failure crash report store current config
     fastdup_capture_log_debug_state(config)
+    assert isinstance(work_dir, (str, pathlib.Path))
     work_dir = shorten_path(work_dir)
     try:
         if not work_dir.startswith('smb://'):
@@ -216,7 +218,8 @@ def do_run(input_dir='',
             if input_dir.startswith('33://') and 'sync_s3_to_local=1' not in turi_param:
                 print("Warning: Reading images directly with s3 may result in slow execution. If you have enough disk space it is recommened to run with sync_s3_to_local=True. This will download the s3 content first to the local drive and then run fastdup.")
         else:
-            assert False, f"Failed to find input dir {input_dir} please check your input."
+            if run_mode != RUN_NN and run_mode != RUN_NNF_SEARCH_STORED_FEATURES:
+                assert False, f"Failed to find input dir {input_dir} please check your input."
     else:
         if os.path.isfile(input_dir):
             try:
@@ -317,7 +320,17 @@ def do_run(input_dir='',
             turi_param = turi_param.replace('delete_img=1', '')
         if 'delete_img=0' not in turi_param:
             turi_param += ',delete_img=0'
-        input_dir = download_from_s3(input_dir, work_dir, verbose, False)
+
+        if (num_images > 0):
+            print(f"Fast mode detected, downloading  {num_images} images from s3")
+            start_time = time.time()
+            input_dir = s3_partial_sync(input_dir, work_dir, num_images, verbose, check_interval=int((num_images / 100000)*60+1))
+            elapsed_time = time.time() - start_time
+            print(f"S3 download time: {elapsed_time // 3600:.0f}:{(elapsed_time % 3600) // 60:02.0f}:{elapsed_time % 60:02.0f}. Note that this is download time from s3 bucket using aws s3 sync before fastdup is run. To speed up fastdup we recommend using EBS volume attached to the ec2 compute node.")
+
+        else:
+            print(f"Warning: synching s3 input dir {input_dir} to local folder. ")
+            input_dir = download_from_s3(input_dir, work_dir, verbose, False)
 
         if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
             test_dir = download_from_s3(test_dir, work_dir, verbose, True)
@@ -329,7 +342,7 @@ def do_run(input_dir='',
 
     char_type = c_char_p if not is_windows else c_wchar_p
     encoding = lambda x: bytes(x, 'utf-8') if not is_windows else x
-   
+
     #Calling the C++ side
     dll.do_main.restype = c_int
     dll.do_main.argtypes = [char_type,
@@ -387,16 +400,7 @@ def do_run(input_dir='',
                           batch_size,
                           resume)
 
-        if (ret != 0 and 'JPY_PARENT_PID' in os.environ) or 'COLAB_JUPYTER_IP' in os.environ:
-            if os.path.exists(local_error_file):
-                # windows can generate non ascii printouts
-                with open(local_error_file,  "r", encoding="utf-8") as f:
-                    error = f.read()
-                    data_type = "error" if ret != 0 else "info"
-                    print(f"fastdup C++ {data_type} received: ", error[:5000], "\n")
-                    if ret != 0:
-                        fastdup_capture_exception("C++ error", RuntimeError(error[:5000]))
-
+        read_local_error_file(ret, local_error_file)
         fastdup_performance_capture("do_run", start_time)
         return ret
 
@@ -408,26 +412,26 @@ def do_run(input_dir='',
 This is a wrapper function to call the fastdup c++ code
 """
 
-def run(input_dir='',             
-        work_dir='.', 
+def run(input_dir='',
+        work_dir='.',
         test_dir='',
-        compute='cpu',    
-        verbose=False,     
-        num_threads=-1,     
-        num_images=0,        
-        turi_param='nnmodel=0',  
+        compute='cpu',
+        verbose=False,
+        num_threads=-1,
+        num_images=0,
+        turi_param='nnmodel=0',
         distance='cosine',     #distance metric for the nearest neighbor model.
         threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
         lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
         model_path=model_path_full,
         license='',            #license string
-        version=False,          #show version and exit      
-        nearest_neighbors_k=2, 
+        version=False,          #show version and exit
+        nearest_neighbors_k=2,
         d=576,
         run_mode=0,
         nn_provider='nnf',
         min_offset=0,
-        max_offset=0, 
+        max_offset=0,
         nnf_mode="HNSW32",
         nnf_param="",
         bounding_box="",
@@ -568,33 +572,22 @@ def run(input_dir='',
 
     _input_dir = input_dir
     fd_model = False
-    if model_path.lower().startswith('dinov2'):
-        # use DINOv2s/DINOv2b to run with DINOv2 models,
-        # case insensitive naming, e.g., dinov2s, DINOv2s, ...
-        if model_path.lower() == 'dinov2s':
-            model_path = find_model(model_path.lower(), DINOV2S_MODEL)
-            d = DINOV2S_MODEL_DIM
-        elif model_path.lower() == 'dinov2b':
-            model_path = find_model(model_path.lower(), DINOV2B_MODEL)
-            d = DINOV2B_MODEL_DIM
-        else:
-            assert False, f"Supporting dinov2 models are dinov2s and dinov2b, got {model_path}"
-        print("""Warning: This file includes artifacts from the DINOv2 repository, which is licensed under the
-        Creative Commons Attribution-NonCommercial 4.0 International License.
-        You are free to use this code as long as you provide attribution to the original author
-        and use it in accordance with the terms of the license.
-        For more information, please see: https://github.com/facebookresearch/dinov2/blob/main/LICENSE""")
+    model_path, d = find_model_path(model_path, d)
 
-    if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox']:
-        local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
-        if bounding_box == 'yolov5s':
+
+
+
+    if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr']:
+        if bounding_box == 'face':
+            local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
+        elif bounding_box == 'yolov5s':
             assert "dinov2" not in os.path.basename(model_path), "Can not run a combination of yolov5s and dinov2 models, please remove one of them"
             local_model = find_model(bounding_box, YOLOV5S_MODEL)
-        elif bounding_box in ['rotated', 'xywh_bbox']:
+        elif bounding_box in ['rotated', 'xywh_bbox', 'ocr']:
             local_model = model_path
 
         turi_param = turi_param.replace('save_crops=0','') + ",save_crops=1"
-        if 'augmentation_horiz' not in turi_param and 'augmentation_vert' not in turi_param and not 'augmentation_additive_margin' not in turi_param:
+        if 'augmentation_horiz' not in turi_param and 'augmentation_vert' not in turi_param and 'augmentation_additive_margin' not in turi_param:
             turi_param += ",augmentation_horiz=0.2,augmentation_vert=0.2"
         ret = do_run(input_dir=input_dir,
                      work_dir=work_dir,
@@ -618,7 +611,7 @@ def run(input_dir='',
                      max_offset=max_offset,
                      nnf_mode=nnf_mode,
                      nnf_param=nnf_param,
-                     bounding_box='',
+                     bounding_box='ocr' if bounding_box == 'ocr' else '',
                      batch_size = batch_size,
                      resume = resume,
                      high_accuracy=high_accuracy)
@@ -635,6 +628,8 @@ def run(input_dir='',
             backup_dir = os.path.join(work_dir, FOLDER_FULL_IMAGE_RUN)
             os.makedirs(backup_dir, exist_ok=True)
             safe_file_move(work_dir, backup_dir, 'atrain_stats.csv')
+
+            #safe_file_move(work_dir, backup_dir, 'atrain_thumbnails.csv')
             safe_file_move(work_dir, backup_dir,  'outliers.csv')
             safe_file_move(work_dir, backup_dir,  'similarity.csv')
             safe_file_move(work_dir, backup_dir,  'connected_components.csv')
@@ -645,44 +640,52 @@ def run(input_dir='',
             print('Warning, exception', ex)
 
         input_dir = os.path.join(tempfile.gettempdir(), 'crops_input.csv')
-        if bounding_box in ['face', 'yolov5s','rotated', 'xywh_bbox']:
+        if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr']:
+            local_file = os.path.join(work_dir, 'atrain_crops.csv')
+            assert os.path.isfile(local_file), f"Failed to find output file {local_file}"
+
             if bounding_box in ['face', 'yolov5s']:
-                out_df = pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
+                out_df = pd.read_csv(local_file)[[
+                    'index', 'crop_filename']]
+            elif bounding_box == "ocr":
+                out_df = pd.read_csv(local_file)[[
                     'index', 'crop_filename']]
             elif bounding_box == 'rotated':
-                out_df = pd.read_csv(os.path.join(work_dir, 'atrain_crops.csv'))[[
+                out_df = pd.read_csv(local_file)[[
                     'index', 'crop_filename']]
             elif bounding_box == 'xywh_bbox':
-                crops_file = os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST)
-                assert os.path.isfile(crops_file), f"Failed to find output file {crops_file}"
-                out_df = pd.read_csv(crops_file)
-                assert len(out_df), f"Failed to read any rows from {crops_file}"
-                assert 'filename' in out_df.columns, f"Failed to find filename column in {crops_file}"
+                out_df = pd.read_csv(local_file)
+                assert 'filename' in out_df.columns, f"Failed to find filename column in {local_file}"
                 del out_df['filename']
                 out_df = out_df[["index", "crop_filename"]]
-
-
             # BR CAREFUL, FASTDUP C++ CAN NOT SUPPORT UNORDERED OR MISSING OFFSETS, NEED TO COMPLETE CORRUPT
             # CROPS WITH THEIR MATCHING OFFSETS
 
-            out_df = out_df.rename({'crop_filename':'filename'}, axis=1)
-            # handle the case some crops are missing, we need a placeholder not to change the offsets
-            out_df  = out_df.sort_values('index')
-            max_index = out_df['index'].max()  # Get the maximum index value
-            index_range = range(max_index + 1)  # Create the desired index range
+            out_df = out_df.rename({'crop_filename': 'filename'}, axis=1)
+            out_df = out_df.sort_values('index')
 
-            # Create a new DataFrame with the desired index range
-            new_df = pd.DataFrame({'index': index_range})
+            if bounding_box in ['xywh_bbox', 'rotated']:
+                assert "index" in out_df, f"Missing index column found cols {out_df.columns} {out_df.head()}"
+                assert len(out_df), f"No rows found"
+                # handle the case some crops are missing, we need a placeholder not to change the offsets
+                max_index = out_df['index'].max()  # Get the maximum index value
+                assert max_index >= 0, f"Failed to find max_index {out_df.columns} {out_df.head()}"
+                index_range = range(max_index + 1)  # Create the desired index range
 
-            # Merge the new DataFrame with the existing DataFrame using a left join
-            out_df = pd.merge(new_df, out_df, on='index', how='left')
+                # Create a new DataFrame with the desired index range
+                new_df = pd.DataFrame({'index': index_range})
+                assert len(new_df) >= len(out_df), f"Failed to find max_index {new_df.head()} {out_df.head()} {len(out_df)} {len(new_df)}"
 
-            # Optionally, you can fill in the empty rows with NaN values using the `fillna()` method
-            out_df = out_df.fillna(value='missing_file')
-            assert len(out_df) == max_index + 1, "Failed to merge to fill in holes"
+                # Merge the new DataFrame with the existing DataFrame using a left join
+                out_df = pd.merge(new_df, out_df, on='index', how='left')
+
+                # Optionally, you can fill in the empty rows with NaN values using the `fillna()` method
+                out_df = out_df.fillna(value='missing_file')
+                assert len(out_df) == max_index + 1, "Failed to merge to fill in holes"
             out_df.to_csv(input_dir, index=False)
 
         turi_param = turi_param.replace(',save_crops=1', '')
+        turi_param = turi_param.replace(',save_thumbnails=1', '')
 
     ret = do_run(input_dir=input_dir,
              work_dir=work_dir,
@@ -777,9 +780,10 @@ def load_binary_feature(filename, d=576):
 
     '''
 
-    if not os.path.exists(filename) or not os.path.exists(filename + '.csv'):
-        print("Error: failed to find the binary feature file:", filename, ' and the filenames csv file:', filename + '.csv')
-        return None
+    assert isinstance(filename, str) or isinstance(filename, pathlib.Path)
+    if os.path.isdir(filename):
+        filename = os.path.join(filename, 'atrain_features.dat')
+    assert os.path.exists(filename) and os.path.exists(filename + '.csv'), f"Error: failed to find the binary feature file: {filename} and {filename}.csv"
     assert(d > 0), "Feature vector length d has to be larger than zero"
 
     with open(filename, 'rb') as f:
@@ -822,12 +826,12 @@ def save_binary_feature(save_path, filenames, np_array):
                               "command: features = np.zeros((rows, cols), dtype='float32')"
     assert np_array.shape[0] == len(filenames), "np_array should contain rows matching to the filenames list"
 
-    
+
     try:
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        
-        df = pd.DataFrame({'filename': filenames})
+
+        df = pd.DataFrame({'index':range(len(filenames)), 'filename': filenames})
         local_filename = os.path.join(save_path, 'atrain_features.dat')
         df.to_csv(local_filename + '.csv', index=False)
         bytes_array = np_array.tobytes()
@@ -933,11 +937,15 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
 
         config = load_config(os.path.dirname(file_type))
         file_type = pd.read_csv(file_type, nrows=nrows)
-        if load_crops:
-            local_crop_file = os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST)
-            assert os.path.exists(local_crop_file), f"Failed to find crop file {local_crop_file}"
-            crop_file = pd.read_csv(os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST))
-            assert crop_file is not None and len(crop_file), f"Failed to find crop file {local_crop_file}"
+        # if load_crops:
+        #     local_crop_file = os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST)
+        #     assert os.path.exists(local_crop_file), f"Failed to find crop file {local_crop_file}"
+        #     crop_file = pd.read_csv(os.path.join(work_dir, "atrain_" + FILENAME_CROP_LIST))
+        #     assert crop_file is not None and len(crop_file), f"Failed to find crop file {local_crop_file}"
+        #     del file_type["filename"]
+        #     merged = file_type.merge(crop_file[["index", "filename", "crop_filename"]], left_on='from', right_on="index")
+        #     assert len(merged), f"Failed to merge {file_type.head()} with {crop_file.head()}"
+        #     file_type = merged
 
         if input_dir is None and config is not None  and 'input_dir' in config:
             input_dir = config['input_dir']
@@ -950,8 +958,10 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
 
     assert isinstance(file_type, pd.DataFrame)
     assert len(file_type), "Found empty dataframe"
+    file_type = convert_v1_to_v02(file_type)
+
     for col in cols:
-        assert col in file_type.columns, f"Failed to find column {col} in dataframe"
+        assert col in file_type.columns, f"Failed to find column {col} in dataframe, availble cols are {file_type.columns}"
     return file_type, input_dir, work_dir
 
 
@@ -1299,9 +1309,9 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
             in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
 
         kwargs (dict): Optional parameter to pass additional parameters to the function.
-        
+
         split_sentence_to_label_list (boolean): Optional parameter to split the label into a list of labels. Default is False.
-           
+
         limit_labels_printed (int): Optional parameter to limit the number of labels printed in the html report. Default is max_items.
         nrows (int): limit the number of read rows for debugging purposes of the report
         save_artifacts (bool): Optional param to save intermediate artifacts like image paths used for generating the component
@@ -1329,10 +1339,16 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
             assert input_dir is not None, "When passing dataframe need to point input_dir to the previous work_dir"
             assert len(work_dir), "Empty dataframe encountered"
             assert 'component_id' in work_dir.columns, "Connected components dataframe should contain 'component_id' column"
-            assert '__id' in work_dir.columns or 'len' in work_dir.columns, "Connected components dataframe should contain '__id' column"
+            # if 'index' in work_dir.columns and '__id' not in work_dir.columns:
+            #     work_dir = work_dir.rename(columns={'index':'__id'})
+            #     # 'distance' in work_dir.columns and 'component_id' in work_dir.columns \
+            #     # and 'files' in work_dir.columns and 'len' in work_dir.columns and 'files_ids' in work_dir.columns and len(
+            #     #     work_dir):
+            #
+            # assert '__id' in work_dir.columns or 'len' in work_dir.columns, f"Connected components dataframe should contain '__id' column {work_dir.columns}"
             kwargs['external_df'] = True
         else:
-            assert False, f"Wrong work_dir type {type(work_dir)}"
+            assert False, f"Wrong work_dir type {type(work_dir)} {work_dir}"
 
         ret = do_create_components_gallery(work_dir, save_path, num_images, lazy_load, get_label_func, group_by, slice,
                                             max_width, max_items, min_items, get_bounding_box_func,
@@ -1431,7 +1447,7 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
     Function to visualize the kmeans clusters.
 
     Args:
-    
+
         work_dir (str): path to fastdup work_dir
 
         save_path (str): output folder location for the visuals
@@ -1892,7 +1908,7 @@ def read_coco_labels(path):
 
 
 
-def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h=0, w=0, alternative_filename=None, alternative_width = None, max_width=None):
+def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h=0, w=0, alternative_filename=None, alternative_width = None, max_width=None, **kwargs):
     '''
     Generate a sprite image of images for tensorboard projector. A sprite image is a large image composed of grid of smaller images.
 
@@ -1917,6 +1933,11 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
 
         max_width (int): optional parameter to control the rsulting width of the image
 
+        force_width (int): optional width for the number of images tiled
+
+        force_height (int): optional height for the number of images tiled
+
+
     Returns:
         path (str): path to sprite image
         labels (list): list of labels
@@ -1925,9 +1946,13 @@ def generate_sprite_image(img_list, sample_size, log_dir, get_label_func=None, h
     try:
         assert len(img_list), "Image list is empty"
         assert sample_size > 0
+        if alternative_filename is None:
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir, exist_ok=True)
+
         from fastdup.tensorboard_projector import generate_sprite_image as tgenerate_sprite_image
         ret = tgenerate_sprite_image(img_list, sample_size, log_dir, get_label_func, h=h, w=w,
-                                      alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width)
+                                      alternative_filename=alternative_filename, alternative_width=alternative_width, max_width=max_width, kwargs=kwargs)
         return ret
     except Exception as ex:
         fastdup_capture_exception("generate_sprite_image", ex)
@@ -2027,6 +2052,12 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
     '''
 
     try:
+        local_error_file = os.path.join(search_work_dir, FILENAME_ERROR_MSG)
+        if os.path.exists(local_error_file):
+            os.unlink(local_error_file)
+
+        model_path, d = find_model_path(model_path, d)
+
         start_time = time.time()
         search_model_path = model_path
         search_d = d
@@ -2049,6 +2080,8 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
         ret = fun(k, bytes(work_dir, 'utf-8'),
                   d, bytes(model_path, 'utf-8'),
                   int(verbose), bytes(license, 'utf-8'))
+
+        read_local_error_file(ret, local_error_file)
         if ret != 0:
             print("Failed to initialize search")
             return ret
@@ -2056,6 +2089,8 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
         fastdup_performance_capture("init_search", start_time)
     except Exception as e:
         fastdup_capture_exception("init_search", e)
+
+    print("init_search() initialized OK.")
     return 0
 
 
@@ -2078,6 +2113,10 @@ def search(filename, img=None, verbose=False):
     global search_work_dir
     assert search_work_dir != "", "Must call init_search() first before calling search()"
 
+    local_error_file = os.path.join(search_work_dir, FILENAME_ERROR_MSG)
+    if os.path.exists(local_error_file):
+        os.unlink(local_error_file)
+    assert isinstance(filename, str), f"Must provide str filename as argument, got {type(filename)}"
 
     try:
         start_time = time.time()
@@ -2088,14 +2127,16 @@ def search(filename, img=None, verbose=False):
             assert isinstance(filename, str) and filename != "", f"Failed to load image from {filename}"
             assert os.path.isfile(filename), f"Failed to find image file {filename}"
             img = Image.open(filename)
+            assert img is not None, f"Failed to read image form {filename}"
             if search_model_path == model_path_full:
                 if hasattr(Image, 'Resampling'):  # Pillow<9.0
                     img = img.resize((224, 224), Image.Resampling.NEAREST)
                 else:
                     img = img.resize((224, 224))
                 if len(img.mode) == 1:
-                    img = cv2.cvtColor(img.convert("RGB"))
+                    img = img.convert("RGB")
                 img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+            img = np.array(img)
 
         from numpy.ctypeslib import ndpointer
         fun = dll.search
@@ -2106,8 +2147,11 @@ def search(filename, img=None, verbose=False):
         elems = img.shape[0]*img.shape[1]
         if len(img.shape) > 2:
             elems *= img.shape[2]
-        img_arr = np.ascontiguousarray(np.array(img),dtype=np.uint8)
+       
+        img_arr = np.ascontiguousarray(img,dtype=np.uint8)
         ret = fun(img_arr, int(elems), int(verbose), bytes(filename, 'utf-8'))
+        read_local_error_file(ret, local_error_file)
+
         assert ret == 0,"Failed to search for image"
         local_sim = os.path.join(search_work_dir, FILENAME_SIMILARITY)
         assert os.path.isfile(local_sim), f"Failed to read search result from {local_sim} "
@@ -2128,6 +2172,68 @@ def search(filename, img=None, verbose=False):
         fastdup_capture_exception("search", e)
 
 
+
+
+def vector_search(filename = "query_vector", vec=None, verbose=False):
+    '''
+    Search for similar embeddings to a given vector
+
+    Args:
+        filename: vector name (used for debugging)
+        vec (numpy): Mandatory numpy matrix of size 1xd or a vector of size d
+        verbose (bool): (Optiona) run in verbose mode, default is False
+    Returns:
+        ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
+    '''
+
+    global search_model_path
+    global search_d
+    global search_work_dir
+    assert search_work_dir != "", "Must call init_search() first before calling search()"
+    assert vec is not None
+    assert isinstance(filename, str)
+    assert isinstance(vec, np.ndarray),f"Found vec of type {type(vec)}"
+    assert (len(vec.shape) == 1 or (len(vec.shape) == 2 and vec.shape[0] == 1)), f"vec command line argument should be a numpy ndarray of type float {vec.shape}"
+    assert isinstance(filename, str), f"Must provide str filename as argument, got {type(filename)}"
+    assert isinstance(search_d, int)
+
+    try:
+        local_error_file = os.path.join(search_work_dir, FILENAME_ERROR_MSG)
+        if os.path.exists(local_error_file):
+            os.unlink(local_error_file)
+
+        start_time = time.time()
+        fastdup_capture_log_debug_state(locals())
+        from numpy.ctypeslib import ndpointer
+        fun = dll.vector_search
+        fun.restype = c_int
+        fun.argtypes = [ndpointer(dtype=np.float32, flags="C_CONTIGUOUS"),
+                        c_int, c_int, c_char_p]
+
+        elems = vec.shape[0]*vec.shape[1] if len(vec.shape) == 2 else vec.shape[0]
+        assert elems == search_d, f"Wrong vector width got {elems} instead of expected d={search_d}"
+        img_arr = np.ascontiguousarray(vec,dtype=np.float32)
+        ret = fun(vec, int(elems), int(verbose), bytes(filename, 'utf-8'))
+        read_local_error_file(ret, local_error_file)
+
+        assert ret == 0,"Failed to search for vector"
+        local_sim = os.path.join(search_work_dir, FILENAME_SIMILARITY)
+        assert os.path.isfile(local_sim), f"Failed to read search result from {local_sim} "
+        df = pd.read_csv(local_sim)
+        assert not df.empty and len(df), f"Failed to read search result from {local_sim} or empty df"
+
+        if df["from"].dtype in [int, np.int64] and df['to'].dtype in [int, np.int64]:
+            filenames = load_filenames(search_work_dir, {})
+            df["from"] = filename
+            df = merge_with_filenames_search(df, filenames)
+            del df['to']
+            del df['index']
+            df = df.rename(columns={'filename':'to'})
+
+        fastdup_performance_capture("vector_search", start_time)
+        return df
+    except Exception as e:
+        fastdup_capture_exception("vector_search", e)
 
 
 
@@ -2215,8 +2321,12 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
         if ret != 0:
             return ret
 
-        assert metric in ['blur','size','mean','min','max','unique','stdv', 'file_size','rms_contrast','mean_rel_intensity_r',
-                          'mean_rel_intensity_b','mean_rel_intensity_g','contrast','mean_saturation','mean_hue', 'mean_val', 'edge_density','mean_r', 'mean_g','mean_b'], "Unknown metric value: " + metric
+        assert isinstance(metric, str), "Metric should be a str with one of the following values: ['blur','size','mean','min','max','unique','stdv', 'file_size','rms_contrast','mean_rel_intensity_r', \
+                                'mean_rel_intensity_b','mean_rel_intensity_g','contrast','mean_saturation','mean_hue', 'mean_val', 'edge_density','mean_r', 'mean_g','mean_b']"
+        assert metric in ['blur', 'size', 'mean', 'min', 'max', 'unique', 'stdv', 'file_size', 'rms_contrast',
+                          'mean_rel_intensity_r', 'mean_rel_intensity_b', 'mean_rel_intensity_g', 'contrast', 'mean_saturation', 'mean_hue',
+                          'mean_val', 'edge_density', 'mean_r', 'mean_g', 'mean_b'], "Unknown metric value: " + metric + " should be one of ['blur','size','mean','min','max','unique','stdv', 'file_size','rms_contrast','mean_rel_intensity_r', \
+                                'mean_rel_intensity_b','mean_rel_intensity_g','contrast','mean_saturation','mean_hue', 'mean_val', 'edge_density','mean_r', 'mean_g','mean_b']"
 
         stats_file = load_stats(stats_file, work_dir, kwargs)
         assert isinstance(stats_file, pd.DataFrame), f"Failed to read stats file {stats_file}"
@@ -2298,7 +2408,7 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         similarity_file, input_dir, work_dir = load_dataframe(similarity_file, "similarity", input_dir, work_dir, kwargs, ["from", "to", "distance"])
 
         ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
-            slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, 
+            slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func,
             input_dir,  work_dir, min_items, max_items, **kwargs)
         fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
@@ -2817,7 +2927,7 @@ from typing import Union
 import fastdup.fastdup_controller as FD
 
 @v1_sentry_handler
-def create(work_dir: Union[str, Path], input_dir: Union[str, Path] = None) -> Fastdup:
+def create(work_dir: Union[str, Path]=None, input_dir: Union[str, Path] = None) -> Fastdup:
     fd = Fastdup(work_dir=work_dir, input_dir=input_dir)
     return fd
 
