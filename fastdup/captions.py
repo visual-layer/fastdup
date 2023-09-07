@@ -4,7 +4,7 @@ from fastdup.galleries import fastdup_imread
 import cv2
 
 
-def generate_labels(filenames, modelname='automatic', batch_size=8, max_length=20):
+def generate_labels(filenames, modelname='automatic', batch_size=8):
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -14,7 +14,6 @@ def generate_labels(filenames, modelname='automatic', batch_size=8, max_length=2
             - BLIP-2: 'blip2'
             - BLIP: 'blip'
         - batch_size: the size of image batches to caption (default: 8)
-        - max_length: the maximum number of tokens to return per caption (default: 20)
     '''
 
     # confirm necessary dependencies are installed, and import them
@@ -48,7 +47,7 @@ def generate_labels(filenames, modelname='automatic', batch_size=8, max_length=2
         captions = []
         for image_path in tqdm(filenames):
             img = Image.open(image_path)
-            pred = captioner(img, max_length = max_length)
+            pred = captioner(img)
             caption = pred[0]['generated_text']
             captions.append(caption)
         return captions
