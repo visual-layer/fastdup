@@ -77,9 +77,7 @@ DINOV2S_MODEL_DIM = 384
 DINOV2B_MODEL = "https://vl-company-website.s3.us-east-2.amazonaws.com/model_artifacts/dinov2/dinov2_vitb14.onnx"
 DINOV2B_MODEL_DIM = 768
 
-CAPTION_MODEL1_NAME = 'automatic'
-CAPTION_MODEL2_NAME = 'blip'
-CAPTION_MODEL3_NAME = 'blip2'
+CAPTION_MODEL_NAMES = ['automatic', 'vitgpt2', 'blip', 'blip2']
 VQA_MODEL1_NAME = "indoors_outdoors"
 AGE_LABEL1_NAME = 'age'
 
