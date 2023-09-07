@@ -95,7 +95,7 @@ class FastdupHFDataset(Dataset):
             self._save_as_image_files()
             self._cache_metadata(current_hash)
         else:
-            logging.info(f"No changes in dataset in folder: {jpg_img_folder}. Skipping image conversion.")
+            logging.info(f"No changes in dataset folder: {jpg_img_folder}. Skipping image conversion.")
 
     @property
     def img_dir(self) -> str:
