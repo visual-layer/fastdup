@@ -49,11 +49,13 @@ class FastdupHFDataset(Dataset):
         cache_dir: Optional[str] = None,
         img_key: str = "image",
         label_key: str = "label",
-        reconvert: bool = False,
+        reconvert_jpg: bool = False,
+        jpg_save_dir: str = "jpg_images",
         **kwargs: Any,
     ) -> None:
         self.img_key: str = img_key
         self.label_key: str = label_key
+        self.jpg_save_dir = jpg_save_dir
 
         if cache_dir:
             self.cache_dir: str = cache_dir
@@ -72,25 +74,34 @@ class FastdupHFDataset(Dataset):
             self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split
         )
 
+        # If jpg folder does not exist, run conversion and cache the folder
+        jpg_img_folder = os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name, self.jpg_save_dir)
+        if not os.path.exists(jpg_img_folder):
+            logging.info(f"Running image conversion. Destination: {jpg_img_folder}")
+            self._save_as_image_files()
+            current_hash: str = self._generate_img_folder_hash()
+            self._cache_metadata(current_hash)
+            return
+
         try:
-            current_hash: str = self._generate_cache_dir_hash()
+            current_hash: str = self._generate_img_folder_hash()
             previous_hash: Optional[str] = self._retrieve_cached_metadata()
         except Exception as e:
             logging.error(f"Error generating or retrieving hash: {e}")
             return
 
-        if (current_hash != previous_hash) or reconvert:
-            logging.info("Running image conversion.")
+        if (current_hash != previous_hash) or reconvert_jpg:
+            logging.info(f"Running image conversion. Destination: {jpg_img_folder}")
             self._save_as_image_files()
             self._cache_metadata(current_hash)
         else:
-            logging.info("No changes in dataset. Skipping image conversion.")
+            logging.info(f"No changes in dataset in folder: {jpg_img_folder}. Skipping image conversion.")
 
     @property
     def img_dir(self) -> str:
         return os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name)
 
-    def _generate_cache_dir_hash(self) -> str:
+    def _generate_img_folder_hash(self) -> str:
         files = []
 
         def scan_dir(directory: str) -> None:
@@ -101,12 +112,12 @@ class FastdupHFDataset(Dataset):
                     elif entry.is_dir():
                         scan_dir(entry.path)
 
-        scan_dir(self.cache_dir)
+        scan_dir(os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name, self.jpg_save_dir))
         data: str = "".join(files)
         return hashlib.sha256(data.encode()).hexdigest()
 
     def _cache_metadata(self, cache_hash: str) -> None:
-        cache_file: str = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
+        cache_file: str = os.path.join(self.cache_dir, f"dataset_dir_hash_{self.jpg_save_dir}.txt")
         try:
             with open(cache_file, "w") as f:
                 f.write(cache_hash)
@@ -114,7 +125,7 @@ class FastdupHFDataset(Dataset):
             logging.error(f"Error caching metadata: {e}")
 
     def _retrieve_cached_metadata(self) -> Optional[str]:
-        cache_file: str = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
+        cache_file: str = os.path.join(self.cache_dir, f"dataset_dir_hash_{self.jpg_save_dir}.txt")
         if os.path.exists(cache_file):
             try:
                 with open(cache_file, "r") as f:
@@ -131,7 +142,7 @@ class FastdupHFDataset(Dataset):
                 os.path.join(
                     f"{self.cache_dir}",
                     f"{self.hf_dataset.info.dataset_name}",
-                    "jpg_images",
+                    f"{self.jpg_save_dir}",
                 ),
                 str(label),
             )
@@ -153,7 +164,7 @@ class FastdupHFDataset(Dataset):
 
     @property
     def annotations(self) -> pd.DataFrame:
-        path: str = os.path.join(self.img_dir, "jpg_images")
+        path: str = os.path.join(self.img_dir, self.jpg_save_dir)
         filenames: list[str] = []
         labels: list[str] = []
 
