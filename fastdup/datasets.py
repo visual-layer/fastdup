@@ -99,7 +99,7 @@ class FastdupHFDataset(Dataset):
 
     @property
     def img_dir(self) -> str:
-        return os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name)
+        return os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name, self.jpg_save_dir)
 
     def _generate_img_folder_hash(self) -> str:
         files = []
