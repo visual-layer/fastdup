@@ -4,7 +4,7 @@ from fastdup.galleries import fastdup_imread
 import cv2
 
 
-def generate_labels(filenames, modelname='vitgpt2', batch_size=8, max_length=20):
+def generate_labels(filenames, modelname='automatic', batch_size=8, max_length=20):
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -32,6 +32,7 @@ def generate_labels(filenames, modelname='vitgpt2', batch_size=8, max_length=20)
 
     # dictionary of captioning models
     models = {
+        'automatic' : "nlpconnect/vit-gpt2-image-captioning",
         'vitgpt2' : "nlpconnect/vit-gpt2-image-captioning",
         'blip2' : "Salesforce/blip2-opt-2.7b",
         'blip' : "Salesforce/blip-image-captioning-large"

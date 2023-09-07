@@ -13,6 +13,7 @@ from fastdup.fastdup_controller import FastdupController
 from fastdup import create_outliers_gallery, create_duplicates_gallery, create_components_gallery, \
     create_similarity_gallery, find_top_components, create_stats_gallery
 import fastdup.definitions as FD
+from fastdup.definitions import *
 
 from fastdup.galleries import load_and_merge_stats
 import pandas as pd
@@ -30,7 +31,12 @@ class FastdupVisualizer:
         self._availavle_columns = None
 
     def _compute_label_col(self, label_col, load_crops):
-
+        if label_col in CAPTION_MODEL_NAMES:
+            return label_col
+        if label_col == VQA_MODEL1_NAME:
+            return label_col
+        if label_col == AGE_LABEL1_NAME:
+            return label_col
         if self._controller._bbox == 'ocr':
             load_crops = True
         if self._controller._df_annot is not None and not self._controller._df_annot.empty and ('label' in self._controller._df_annot.columns):
