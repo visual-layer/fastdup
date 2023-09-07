@@ -4,90 +4,93 @@ from datasets import load_dataset, Dataset
 from datasets.config import HF_DATASETS_CACHE
 from tqdm.auto import tqdm
 import hashlib
+import logging
+from typing import Optional, Any
+from concurrent.futures import ThreadPoolExecutor
 
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 class FastdupHFDataset(Dataset):
     """
-    FastdupHFDataset is a subclass of the Dataset class from the Hugging Face's `datasets` library.
-    It is designed to load datasets from the Hugging Face dataset hub, cache them, and perform image conversion
-    if the dataset has changed since the last cached version.
+    FastdupHFDataset is a subclass of Hugging Face's Dataset, tailored for usage in fastdup.
 
     Attributes:
-        dataset_name (Dataset): The dataset object from the Hugging Face dataset library.
-        img_key (str): The key used to access image data in the dataset.
-        label_key (str): The key used to access label data in the dataset.
-        cache_dir (str): The directory where the dataset cache will be stored.
-        split (str): The dataset split.
-        reconvert (bool): Whether to run the reconvertion of the dataset into jpg locally.
-        
+        img_key (str): Key to access image data.
+        label_key (str): Key to access label data.
+        cache_dir (str): Directory for caching datasets.
+        reconvert (bool): Flag to force reconversion of images from .parquet to .jpg.
 
     Methods:
-        _generate_cache_dir_hash(): Generates a SHA-256 hash of the current dataset directory.
-        _cache_metadata(str): Caches the current dataset directory hash to a file.
-        _retrieve_cached_metadata(): Retrieves the previously cached dataset directory hash.
-        _save_as_image_files(): Converts the dataset items to .jpg image files and saves them in the cache directory.
+        _generate_cache_dir_hash(): Creates a hash of the dataset directory.
+        _cache_metadata(): Caches the hash.
+        _retrieve_cached_metadata(): Retrieves the cached hash.
+        _save_as_image_files(): Converts and saves images in .jpg format.
+        _save_single_image(): Saves a single image (internal use).
 
     Properties:
-        images_dir (str) : Returns the path where the dataset is downloaded.
-        annotations (pd.DataFrame): Returns a DataFrame containing filenames and their corresponding labels.
+        images_dir (str): Directory where images are stored.
+        annotations (pd.DataFrame): Dataframe of filenames and labels.
 
-    Example Usage:
-        >>> dataset = FastdupHFDataset(dataset_name='your_dataset_name', split='train')
-        >>> annotations_df = dataset.annotations 
-        >>> dataset.images_dir
+    Example:
+        >>> from fastdup.datasets import FastdupHFDataset
+        >>> dataset = FastdupHFDataset('your_dataset_name', split='train')
+        >>> import fastdup
+        >>> fd = fastdup.create(input_dir=dataset.images_dir)
+        >>> fd.run(annotations=dataset.annotations)
     """
 
     def __init__(
         self,
-        dataset_name,
-        split="train",
-        cache_dir=None,
-        img_key="image",
-        label_key="label",
-        reconvert=False,
-        **kwargs,
-    ):
-        self.img_key = img_key
-        self.label_key = label_key
-        self.reconvert_jpg = reconvert
+        dataset_name: str,
+        split: str = "train",
+        cache_dir: Optional[str] = None,
+        img_key: str = "image",
+        label_key: str = "label",
+        reconvert: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        self.img_key: str = img_key
+        self.label_key: str = label_key
 
         if cache_dir:
-            self.cache_dir = cache_dir
+            self.cache_dir: str = cache_dir
         else:
-            self.cache_dir = HF_DATASETS_CACHE  # default location for storing cache
+            self.cache_dir: str = HF_DATASETS_CACHE
 
-        self.hf_dataset = load_dataset(
-            dataset_name, split=split, cache_dir=self.cache_dir, **kwargs
-        )
+        try:
+            self.hf_dataset = load_dataset(
+                dataset_name, split=split, cache_dir=self.cache_dir, **kwargs
+            )
+        except Exception as e:
+            logging.error(f"Error loading dataset: {e}")
+            return
 
-        super().__init__(
-            self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split
-        )
+        super().__init__(self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split)
 
-        # Get hash for the current dataset downloaded in the cache_dir
-        current_hash = self._generate_cache_dir_hash()
+        try:
+            current_hash: str = self._generate_cache_dir_hash()
+            previous_hash: Optional[str] = self._retrieve_cached_metadata()
+        except Exception as e:
+            logging.error(f"Error generating or retrieving hash: {e}")
+            return
 
-        # Retrieve the hash of the previously processed dataset, if exists
-        previous_hash = self._retrieve_cached_metadata()
-
-        # Compare hashes
         if (current_hash != previous_hash) or reconvert:
-            print("Running image conversion.")
+            logging.info("Running image conversion.")
             self._save_as_image_files()
-
-            # Update the cache with the new hash
             self._cache_metadata(current_hash)
         else:
-            print("No changes in dataset. Skipping image conversion.")
+            logging.info("No changes in dataset. Skipping image conversion.")
 
     @property
-    def images_dir(self):
+    def images_dir(self) -> str:
         return os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name)
 
-    def _generate_cache_dir_hash(self):
+    def _generate_cache_dir_hash(self) -> str:
         files = []
-
-        def scan_dir(directory):
+        
+        def scan_dir(directory: str) -> None:
             with os.scandir(directory) as entries:
                 for entry in entries:
                     if entry.is_file():
@@ -96,34 +99,32 @@ class FastdupHFDataset(Dataset):
                         scan_dir(entry.path)
 
         scan_dir(self.cache_dir)
-        files.sort()  # Ensure consistent order
-        data = "".join(files)
+        data: str = "".join(files)
         return hashlib.sha256(data.encode()).hexdigest()
 
-    def _cache_metadata(self, cache_hash):
-        cache_file = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
-        with open(cache_file, "w") as f:
-            f.write(cache_hash)
+    def _cache_metadata(self, cache_hash: str) -> None:
+        cache_file: str = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
+        try:
+            with open(cache_file, "w") as f:
+                f.write(cache_hash)
+        except Exception as e:
+            logging.error(f"Error caching metadata: {e}")
 
-    def _retrieve_cached_metadata(self):
-        cache_file = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
+    def _retrieve_cached_metadata(self) -> Optional[str]:
+        cache_file: str = os.path.join(self.cache_dir, "dataset_dir_hash.txt")
         if os.path.exists(cache_file):
-            with open(cache_file, "r") as f:
-                return f.read()
+            try:
+                with open(cache_file, "r") as f:
+                    return f.read()
+            except Exception as e:
+                logging.error(f"Error reading cached metadata: {e}")
         return None
 
-    def _save_as_image_files(self):
-        for idx, item in tqdm(
-            enumerate(self.hf_dataset),
-            total=len(self.hf_dataset),
-            desc="Converting to .jpg images",
-        ):
-            # extract the image and label
+    def _save_single_image(self, idx: int, item: dict, pbar) -> None:
+        try:
             image = item[self.img_key]
             label = item[self.label_key]
-
-            # create a directory for the class if it doesn't exist
-            label_dir = os.path.join(
+            label_dir: str = os.path.join(
                 os.path.join(
                     f"{self.cache_dir}",
                     f"{self.hf_dataset.info.dataset_name}",
@@ -132,24 +133,33 @@ class FastdupHFDataset(Dataset):
                 str(label),
             )
             os.makedirs(label_dir, exist_ok=True)
-
-            # save the image to the appropriate directory
             image.save(os.path.join(label_dir, f"{idx}.jpg"))
+            pbar.update(1)
+        except Exception as e:
+            logging.error(f"Error in saving image at index {idx}: {e}")
+
+    def _save_as_image_files(self) -> None:
+        with tqdm(total=len(self.hf_dataset), desc="Converting to .jpg images") as pbar:
+            with ThreadPoolExecutor() as executor:
+                executor.map(self._save_single_image, range(len(self.hf_dataset)), self.hf_dataset, [pbar]*len(self.hf_dataset))
 
     @property
-    def annotations(self):
-        """Returns a Pandas DataFrame with filename, label column"""
-        path = os.path.join(self.images_dir, "images")
-        filenames = []
-        labels = []
+    def annotations(self) -> pd.DataFrame:
+        path: str = os.path.join(self.images_dir, "images")
+        filenames: list[str] = []
+        labels: list[str] = []
 
-        for entry in os.scandir(path):
-            if entry.is_dir():
-                label = entry.name
-                for subentry in os.scandir(entry.path):
-                    if subentry.is_file():
-                        filenames.append(subentry.path)
-                        labels.append(label)
+        try:
+            for entry in os.scandir(path):
+                if entry.is_dir():
+                    label: str = entry.name
+                    for subentry in os.scandir(entry.path):
+                        if subentry.is_file():
+                            filenames.append(subentry.path)
+                            labels.append(label)
+        except Exception as e:
+            logging.error(f"Error in generating annotations: {e}")
+            return pd.DataFrame()
 
-        df = pd.DataFrame({"filename": filenames, "label": labels})
+        df: pd.DataFrame = pd.DataFrame({"filename": filenames, "label": labels})
         return df
