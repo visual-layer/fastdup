@@ -131,7 +131,7 @@ class FastdupHFDataset(Dataset):
                 os.path.join(
                     f"{self.cache_dir}",
                     f"{self.hf_dataset.info.dataset_name}",
-                    "images",
+                    "jpg_images",
                 ),
                 str(label),
             )
@@ -153,7 +153,7 @@ class FastdupHFDataset(Dataset):
 
     @property
     def annotations(self) -> pd.DataFrame:
-        path: str = os.path.join(self.img_dir, "images")
+        path: str = os.path.join(self.img_dir, "jpg_images")
         filenames: list[str] = []
         labels: list[str] = []
 
