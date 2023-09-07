@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+
 class FastdupHFDataset(Dataset):
     """
     FastdupHFDataset is a subclass of Hugging Face's Dataset, tailored for usage in fastdup.
@@ -30,14 +31,14 @@ class FastdupHFDataset(Dataset):
         _save_single_image(): Saves a single image (internal use).
 
     Properties:
-        images_dir (str): Directory where images are stored.
+        img_dir (str): Directory where images are stored.
         annotations (pd.DataFrame): Dataframe of filenames and labels.
 
     Example:
         >>> from fastdup.datasets import FastdupHFDataset
         >>> dataset = FastdupHFDataset('your_dataset_name', split='train')
         >>> import fastdup
-        >>> fd = fastdup.create(input_dir=dataset.images_dir)
+        >>> fd = fastdup.create(input_dir=dataset.img_dir)
         >>> fd.run(annotations=dataset.annotations)
     """
 
@@ -67,7 +68,9 @@ class FastdupHFDataset(Dataset):
             logging.error(f"Error loading dataset: {e}")
             return
 
-        super().__init__(self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split)
+        super().__init__(
+            self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split
+        )
 
         try:
             current_hash: str = self._generate_cache_dir_hash()
@@ -84,12 +87,12 @@ class FastdupHFDataset(Dataset):
             logging.info("No changes in dataset. Skipping image conversion.")
 
     @property
-    def images_dir(self) -> str:
+    def img_dir(self) -> str:
         return os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name)
 
     def _generate_cache_dir_hash(self) -> str:
         files = []
-        
+
         def scan_dir(directory: str) -> None:
             with os.scandir(directory) as entries:
                 for entry in entries:
@@ -141,11 +144,16 @@ class FastdupHFDataset(Dataset):
     def _save_as_image_files(self) -> None:
         with tqdm(total=len(self.hf_dataset), desc="Converting to .jpg images") as pbar:
             with ThreadPoolExecutor() as executor:
-                executor.map(self._save_single_image, range(len(self.hf_dataset)), self.hf_dataset, [pbar]*len(self.hf_dataset))
+                executor.map(
+                    self._save_single_image,
+                    range(len(self.hf_dataset)),
+                    self.hf_dataset,
+                    [pbar] * len(self.hf_dataset),
+                )
 
     @property
     def annotations(self) -> pd.DataFrame:
-        path: str = os.path.join(self.images_dir, "images")
+        path: str = os.path.join(self.img_dir, "images")
         filenames: list[str] = []
         labels: list[str] = []
 
