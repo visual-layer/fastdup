@@ -90,9 +90,7 @@ EFFICIENTNET_MODEL_DIM = 1000
 RESNET50_MODEL = "https://github.com/onnx/models/raw/main/vision/classification/resnet/model/resnet50-v1-12.onnx"
 RESNET50_MODEL_DIM = 1000
 
-CAPTION_MODEL1_NAME = 'automatic'
-CAPTION_MODEL2_NAME = 'blip'
-CAPTION_MODEL3_NAME = 'blip2'
+CAPTION_MODEL_NAMES = ['automatic', 'vitgpt2', 'blip', 'blip2']
 VQA_MODEL1_NAME = "indoors_outdoors"
 AGE_LABEL1_NAME = 'age'
 
