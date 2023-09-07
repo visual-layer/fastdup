@@ -164,7 +164,7 @@ class FastdupHFDataset(Dataset):
 
     @property
     def annotations(self) -> pd.DataFrame:
-        path: str = os.path.join(self.img_dir, self.jpg_save_dir)
+        path: str = os.path.join(self.img_dir)
         filenames: list[str] = []
         labels: list[str] = []
 
