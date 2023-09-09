@@ -30,7 +30,8 @@ class FastdupVisualizer:
         self._availavle_columns = None
 
     def _compute_label_col(self, label_col, load_crops):
-
+        if label_col in FD.CAPTION_MODEL_NAMES or label_col == FD.VQA_MODEL1_NAME or label_col == FD.AGE_LABEL1_NAME:
+            return label_col
         if self._controller._bbox == 'ocr':
             load_crops = True
         if self._controller._df_annot is not None and not self._controller._df_annot.empty and ('label' in self._controller._df_annot.columns):
