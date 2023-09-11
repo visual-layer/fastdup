@@ -1260,7 +1260,7 @@ class FastdupController:
             else:
                 assert False, f"Wrong data type {data_type}"
 
-    def caption(self, modelname='automatic', subset: list = None,) -> pd.DataFrame:
+    def caption(self, modelname='automatic', subset: list = None, kwargs=None) -> pd.DataFrame:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
 
