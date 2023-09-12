@@ -373,7 +373,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.<br><br>
-        <a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -409,7 +410,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.<br><br>
-        <a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
