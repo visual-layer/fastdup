@@ -858,4 +858,5 @@ fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [
     <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> Twitter </a>
 </div>
 
-[🔝 Back to Top](#top)
+<div align="right"><a href="#top">🔝 Back to Top</a></div>
+
