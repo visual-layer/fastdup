@@ -756,7 +756,14 @@ Get help from the fastdup team or community members via the following channels -
 The following are community-contributed blog posts about fastdup - 
 
 <table>
-<tr>
+  <tr>
+    <td><img src="gallery/community_cleaning_image_spotlight.jpg" width="200"></td>
+    <td>
+      <a href="https://medium.com/@daniel-klitzke/cleaning-image-classification-datasets-with-fastdup-and-renumics-spotlight-e68deb4730a3">Renumics: Cleaning Image Classification Datasets With fastdup and Renumics Spotlight</a><br>
+      🖋️ <a href="author_link_here">Daniel Klitzke</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 4 September 2023
+    </td>
+  </tr>
+  <tr>
     <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
     <td>
       <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
