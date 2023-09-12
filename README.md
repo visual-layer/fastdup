@@ -445,7 +445,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.<br><br>
-        <a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
