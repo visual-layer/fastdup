@@ -39,6 +39,7 @@ try:
 except:
     tqdm = lambda x, total=None: x
 
+from .ascii_art import get_ascii_art
 
 __version__="1.13"
 CONTACT_EMAIL="info@visual-layer.com"
@@ -150,6 +151,8 @@ def do_run(input_dir='',
         print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
               "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
         return 0
+    
+    print(get_ascii_art())
 
     assert input_dir is not None and isinstance(input_dir, (str,list)), "input_dir must be a string or a list"
     if isinstance(input_dir, str):
