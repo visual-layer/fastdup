@@ -28,7 +28,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer" name="top">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
@@ -844,4 +844,18 @@ It is always possible to opt out of the experimental crash report collection via
 
 fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate) - [Danny Bickson](https://www.linkedin.com/in/dr-danny-bickson-835b32), [Carlos Guestrin](https://www.linkedin.com/in/carlos-guestrin-5352a869) and [Amir Alush](https://www.linkedin.com/in/amiralush).
 
-Learn more about Visual Layer [here](https://visual-layer.com).
+<center> 
+   <a href="https://visual-layer.com/about" target="_blank" style="text-decoration: none;"> About Us </a> •
+    <a href="https://medium.com/visual-layer" target="_blank" style="text-decoration: none;"> Blog </a> •
+    <a href="https://visual-layer.readme.io/" target="_blank" style="text-decoration: none;"> Documentation </a>
+    
+</center>
+
+<center> 
+    <a href="https://visual-layer.slack.com/" target="_blank" style="text-decoration: none;"> Slack Community </a> •
+    <a href="https://visual-layer.readme.io/discuss" target="_blank" style="text-decoration: none;"> Discussion Forum </a> •
+    <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" style="text-decoration: none;"> LinkedIn </a> •
+    <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> Twitter </a>
+</center>
+
+[🔝 Back to Top](#top)
