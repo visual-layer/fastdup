@@ -18,7 +18,7 @@ from fastdup.sentry import *
 from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir, convert_v1_to_v02
 
 try:
-    from tqdm import tqdm
+    from tqdm.auto import tqdm
 except:
     tqdm = (lambda x, total=None: x)
 
@@ -386,7 +386,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         subdf['ratio'] = subdf['ratio'].apply(lambda x: round(x,3))
 
     indexes = []
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
         if 'crop_filename_from' in row:
             im1, im2 = str(row['crop_filename_from']), str(row['crop_filename_to'])
         else:
@@ -633,7 +633,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
 
     all_args = []
-    for i, row in tqdm(df.iterrows(), total=min(num_images, len(df))):
+    for i, row in tqdm(df.iterrows(), total=min(num_images, len(df)), desc="Generating gallery"):
         args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_dir, kwargs
         all_args.append(args)
 
@@ -823,7 +823,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     counter = 0
     #filname_transform_func = kwargs.get('id_to_filename_func', lambda x: x)
     all_labels = []
-    for i,row in tqdm(top_components.iterrows(), total = len(top_components)):
+    for i,row in tqdm(top_components.iterrows(), total = len(top_components), desc="Generating gallery"):
         try:
             # find the component id
             component_id = row[comp_col]
@@ -1647,7 +1647,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     save_dir = calc_save_dir(save_path)
     stat_info = ""
     filename = "N/A"
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
         try:
             filename = lookup_filename(row['filename'], work_dir)
             img = fastdup_imread(filename, None, None)
@@ -1853,7 +1853,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         stat_info = None
     else:
         assert len(subdf), "Empty dataframe"
-        for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
+        for i, row in tqdm(subdf.iterrows(), total=len(subdf), desc="Generating gallery"):
             filename = str(row["from"])
             filename = lookup_filename(filename, work_dir)
 
@@ -1873,7 +1873,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df2 = subdf.copy()
         subdf = subdf.head(num_images)
 
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
 
         info_df = None
         info0_df = None
