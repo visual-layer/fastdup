@@ -13,6 +13,7 @@ jobs:
       env:
         SENTRY_OPT_OUT: True
       strategy:
+        fail-fast: false
         matrix:
             os: [ubuntu-22.04, macos-13] # windows-2022 macos-13
             python: ['3.10']
@@ -39,7 +40,7 @@ jobs:
             python -m pip install --upgrade pip
             pip install pytest pytest-cov datasets
             pip install opencv-python-headless
-            pip install fastdup==1.38 --no-deps -U
+            pip install fastdup --no-deps -U
           
         - name: Run Tests
           run: |
