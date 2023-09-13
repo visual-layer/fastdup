@@ -19,6 +19,8 @@ def generate_labels(filenames, modelname='automatic', batch_size=8):
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import pipeline
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm
@@ -62,6 +64,8 @@ def generate_vqa_labels(filenames, text, kwargs):
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import ViltProcessor, ViltForQuestionAnswering
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm
@@ -102,6 +106,8 @@ def generate_age_labels(filenames, kwargs):
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import ViTFeatureExtractor, ViTForImageClassification
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm

@@ -74,7 +74,7 @@ def swap_dataframe(subdf, cols):
 
 
 
-def find_label(get_label_func, df, in_col, out_col, vqa_prompt: str = None,, kwargs=None):
+def find_label(get_label_func, df, in_col, out_col, vqa_prompt: str = None, kwargs=None):
 
 
     if (get_label_func is not None):
