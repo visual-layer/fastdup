@@ -2128,14 +2128,39 @@ def search(filename, img=None, verbose=False):
             assert os.path.isfile(filename), f"Failed to find image file {filename}"
             img = Image.open(filename)
             assert img is not None, f"Failed to read image form {filename}"
+            
+            # If using fastdup model do the following preprocessing
             if search_model_path == model_path_full:
                 if hasattr(Image, 'Resampling'):  # Pillow<9.0
                     img = img.resize((224, 224), Image.Resampling.NEAREST)
                 else:
                     img = img.resize((224, 224))
-                if len(img.mode) == 1:
-                    img = img.convert("RGB")
-                img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+            
+            # If using custom model get the image size of the custom onnx model
+            else:       
+                try:
+                    import onnxruntime
+                except ImportError:
+                    raise ImportError("The onnxruntime package is not installed. Please run `pip install onnxruntime`.")
+
+                session = onnxruntime.InferenceSession(search_model_path)
+                
+                # Get the input shape of the custom model
+                input_shape = session.get_inputs()[0].shape
+
+                # Extract the height and width
+                height, width = input_shape[2], input_shape[3]
+                
+                # Resize image
+                if hasattr(Image, 'Resampling'):  # Pillow<9.0
+                    img = img.resize((width, height), Image.Resampling.NEAREST)
+                else:
+                    img = img.resize((width, height))
+
+            if len(img.mode) == 1:
+                img = img.convert("RGB")
+            
+            img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
             img = np.array(img)
 
         from numpy.ctypeslib import ndpointer

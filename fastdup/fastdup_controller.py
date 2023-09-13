@@ -643,6 +643,17 @@ class FastdupController:
 
         return summary_stats
 
+    def init_search(self, k, verbose=False):
+        return fastdup.init_search(k=k, 
+                                   work_dir=self.config['work_dir'], 
+                                   d=self.config['d'],
+                                   model_path=self.config['model_path'],
+                                   verbose=verbose
+                                   )
+
+    def search(self, filename, img=None, verbose=False):
+        return fastdup.search(filename=filename, img=img, verbose=verbose)
+    
     def vl_datasets_ref_printout(self, vl_datasets_link='https://app.visual-layer.com/vl-datasets?utm_source=fastdup'):
         """
         Next steps:
