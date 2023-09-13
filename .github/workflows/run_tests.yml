@@ -1,0 +1,37 @@
+name: Run Tests
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+jobs:
+    test_imports:
+      runs-on: ${{ matrix.os }}
+      env:
+        SENTRY_OPT_OUT: True
+      strategy:
+        matrix:
+            os: [ubuntu-22.04, macos-13, windows-2022]
+            python: ['3.8']
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+          with:
+           fetch-depth: 0
+  
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: ${{ matrix.python }}
+
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install fastdup pytest pytest-cov datasets
+        
+        - name: Run Tests
+          run: |
+            pytest --cov=fastdup
