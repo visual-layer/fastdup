@@ -1264,16 +1264,19 @@ class FastdupController:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
 
-        df = self.annotations(valid_only=True)
+        if subset:
+            df = pd.DataFrame(subset , columns =['filename'])
+        else:
+            df = self.annotations(valid_only=True)
         assert len(df), "No images found."
 
-        if modelname in FD.CAPTION_MODEL_NAMES:
+        if model_name in FD.CAPTION_MODEL_NAMES:
             from fastdup.captions import generate_labels
-            df['caption'] = generate_labels(df['filename'], modelname)
-        elif modelname == FD.VQA_MODEL1_NAME:
+            df['caption'] = generate_labels(df['filename'], model_name)
+        elif model_name == FD.VQA_MODEL1_NAME:
             from fastdup.captions import generate_vqa_labels
             df['caption'] = generate_vqa_labels(df['filename'], "Is the photo taken indoors or outdoors", kwargs)
-        elif modelname == FD.AGE_LABEL1_NAME:
+        elif model_name == FD.AGE_LABEL1_NAME:
             from fastdup.captions import generate_age_labels
             df['caption'] = generate_age_labels(df['filename'], kwargs)
         else:
