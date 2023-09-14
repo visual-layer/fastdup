@@ -1,7 +1,9 @@
-# Install
+# Running Tests Locally
 
-`pip install pytest pytest-cov`
+To run the tests first install `pytest`:
 
-# Run
+```pip install pytest pytest-cov```
 
-`pytest --cov=fastdup`
+Then `cd` into the fastdup repo root directory and run:
+
+```pytest --cov=fastdup```
