@@ -4,7 +4,7 @@ from fastdup.galleries import fastdup_imread
 import cv2
 
 
-def generate_labels(filenames, modelname='automatic', batch_size=8):
+def generate_labels(filenames, model_name='automatic', device = -1, batch_size=8):
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -14,7 +14,9 @@ def generate_labels(filenames, modelname='automatic', batch_size=8):
             - BLIP-2: 'blip2'
             - BLIP: 'blip'
         - batch_size: the size of image batches to caption (default: 8)
+        - device: whether to use a GPU (default: -1, CPU only ; set to 0 for GPU)
     '''
+    # use GPU if device is specified
 
     # confirm necessary dependencies are installed, and import them
     try:
@@ -39,12 +41,11 @@ def generate_labels(filenames, modelname='automatic', batch_size=8):
         'blip': "Salesforce/blip-image-captioning-large"
     }
 
-    model = models[modelname]
+    model = models[model_name]
 
     # generate captions
     try:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        captioner = pipeline("image-to-text", model=model, device=device, batch_size=batch_size)
+        captioner = pipeline("image-to-text", model=model, device=device, batch_size=batch_size, device=device)
 
         captions = []
         for image_path in tqdm(filenames):

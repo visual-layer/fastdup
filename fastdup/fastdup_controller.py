@@ -1260,7 +1260,7 @@ class FastdupController:
             else:
                 assert False, f"Wrong data type {data_type}"
 
-    def caption(self, model_name='automatic', subset: list = None, vqa_prompt: str = None, kwargs=None) -> pd.DataFrame:
+    def caption(self, model_name='automatic', device = -1, batch_size: int = 8, subset: list = None, vqa_prompt: str = None, kwargs=None) -> pd.DataFrame:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
 
@@ -1272,7 +1272,7 @@ class FastdupController:
 
         if model_name in FD.CAPTION_MODEL_NAMES:
             from fastdup.captions import generate_labels
-            df['caption'] = generate_labels(df['filename'], model_name)
+            df['caption'] = generate_labels(df['filename'], model_name, device, batch_size)
         elif model_name == FD.VQA_MODEL1_NAME:
             from fastdup.captions import generate_vqa_labels
             df['caption'] = generate_vqa_labels(df['filename'], vqa_prompt, kwargs)
