@@ -4,7 +4,7 @@ from fastdup.galleries import fastdup_imread
 import cv2
 
 
-def generate_labels(filenames, model_name='automatic', device = -1, batch_size=8):
+def generate_labels(filenames, model_name='automatic', device = 'cpu', batch_size=8):
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -17,6 +17,12 @@ def generate_labels(filenames, model_name='automatic', device = -1, batch_size=8
         - device: whether to use a GPU (default: -1, CPU only ; set to 0 for GPU)
     '''
     # use GPU if device is specified
+    if device == 'gpu':
+        device = 0
+    elif device == 'cpu':
+        device = -1
+    else:
+        assert False, "Incompatible device name entered. Available device names are gpu and cpu."
 
     # confirm necessary dependencies are installed, and import them
     try:
@@ -45,14 +51,21 @@ def generate_labels(filenames, model_name='automatic', device = -1, batch_size=8
 
     # generate captions
     try:
-        captioner = pipeline("image-to-text", model=model, device=device, batch_size=batch_size, device=device)
+        captioner = pipeline("image-to-text", model=model, device=device)
 
         captions = []
-        for image_path in tqdm(filenames):
+
+        for pred in captioner(filenames, batch_size=batch_size):
+            #caption = pred['generated_text']
+            caption = ''.join([d['generated_text'] for d in pred])
+            captions.append(caption)
+
+
+        '''for image_path in tqdm(filenames):
             img = Image.open(image_path)
             pred = captioner(img)
             caption = pred[0]['generated_text']
-            captions.append(caption)
+            captions.append(caption)'''
         return captions
 
 
