@@ -1,11 +1,9 @@
-name: Run Tests
+name: Daily Run Tests on PyPI Wheels
 
-on:
-  push:
-    branches: ["main"]
+on: 
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
+  schedule:
+    - cron: '0 16 * * *' # Trigger at 4PM every day
 
 jobs:
     run_unit_tests:

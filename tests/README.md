@@ -2,8 +2,20 @@
 
 To run the tests first install `pytest`:
 
-```pip install pytest```
+```
+pip install pytest
+```
 
-Then `cd` into the fastdup repo root directory and run:
+Then `cd` into the fastdup site-packages root directory. 
 
-```pytest```
+For example
+
+```
+cd /home/dnth/anaconda3/envs/tests/lib/python3.10/site-packages/fastdup
+```
+
+and run:
+
+```
+pytest
+```
