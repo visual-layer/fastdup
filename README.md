@@ -28,7 +28,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer" name="top">
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
@@ -373,7 +373,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.<br><br>
-        <a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -409,7 +410,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🏆 Kaggle:</b> Load and analyze any computer vision datasets from <a href="https://kaggle.com">Kaggle</a>. Get ahead of your competition with data insights.<br><br>
-        <a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/kaggle">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-kaggle-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -445,7 +447,8 @@ This notebooks in this section shows how you can load data from various sources 
             </a>
         </td>
         <td rowspan="4"><b>🌎 Roboflow Universe:</b> Load and analyze any computer vision datasets from <a href="https://universe.roboflow.com/">Roboflow Universe</a>. Analyze any of the 200,000 datasets on Roboflow Universe.<br><br>
-        <a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></td>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/roboflow-universe">🔗 Learn More.</a></div>
+        </td>
         <td align="center" width="80">
             <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-roboflow-datasets.ipynb">
                 <img src="./gallery/nbviewer_logo.png" height="30" />
@@ -756,7 +759,14 @@ Get help from the fastdup team or community members via the following channels -
 The following are community-contributed blog posts about fastdup - 
 
 <table>
-<tr>
+  <tr>
+    <td><img src="gallery/community_cleaning_image_spotlight.jpg" width="200"></td>
+    <td>
+      <a href="https://medium.com/@daniel-klitzke/cleaning-image-classification-datasets-with-fastdup-and-renumics-spotlight-e68deb4730a3">Renumics: Cleaning Image Classification Datasets With fastdup and Renumics Spotlight</a><br>
+      🖋️ <a href="author_link_here">Daniel Klitzke</a> &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; 🗓 4 September 2023
+    </td>
+  </tr>
+  <tr>
     <td><img src="gallery/community_reduce_dataset_thumbnail.jpg" width="200"></td>
     <td>
       <a href="https://blog.roboflow.com/how-to-reduce-dataset-size-computer-vision/">Roboflow: How to Reduce Dataset Size Without Losing Accuracy</a><br>
@@ -837,4 +847,19 @@ It is always possible to opt out of the experimental crash report collection via
 
 fastdup is founded by the authors of [XGBoost](https://github.com/apache/tvm), [Apache TVM](https://github.com/apache/tvm) & [Turi Create](https://github.com/apple/turicreate) - [Danny Bickson](https://www.linkedin.com/in/dr-danny-bickson-835b32), [Carlos Guestrin](https://www.linkedin.com/in/carlos-guestrin-5352a869) and [Amir Alush](https://www.linkedin.com/in/amiralush).
 
-Learn more about Visual Layer [here](https://visual-layer.com).
+<div align="center">
+   <a href="https://visual-layer.com/about" target="_blank" style="text-decoration: none;"> About Us </a> •
+    <a href="https://medium.com/visual-layer" target="_blank" style="text-decoration: none;"> Blog </a> •
+    <a href="https://visual-layer.readme.io/" target="_blank" style="text-decoration: none;"> Documentation </a>
+    
+</div>
+
+<div align="center">
+    <a href="https://visual-layer.slack.com/" target="_blank" style="text-decoration: none;"> Slack Community </a> •
+    <a href="https://visual-layer.readme.io/discuss" target="_blank" style="text-decoration: none;"> Discussion Forum </a> •
+    <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" style="text-decoration: none;"> LinkedIn </a> •
+    <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> Twitter </a>
+</div>
+
+<div align="right"><a href="#top">🔝 Back to Top</a></div>
+
