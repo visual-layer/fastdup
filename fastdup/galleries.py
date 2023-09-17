@@ -74,7 +74,7 @@ def swap_dataframe(subdf, cols):
 
 
 
-def find_label(get_label_func, df, in_col, out_col, kwargs=None):
+def find_label(get_label_func, df, in_col, out_col, vqa_prompt: str = None, kwargs=None):
 
 
     if (get_label_func is not None):
@@ -87,10 +87,10 @@ def find_label(get_label_func, df, in_col, out_col, kwargs=None):
                 df[out_col] = df['label']
             elif get_label_func in CAPTION_MODEL_NAMES:
                 from fastdup.captions import generate_labels
-                df[out_col] = generate_labels(df[in_col], kwargs)
+                df[out_col] = generate_labels(df[in_col], get_label_func, device='cpu')
             elif get_label_func == VQA_MODEL1_NAME:
                 from fastdup.captions import generate_vqa_labels
-                df[out_col] = generate_vqa_labels(df[in_col], "Is the photo taken indoors or outdoors", kwargs)
+                df[out_col] = generate_vqa_labels(df[in_col], vqa_prompt, kwargs)
             elif get_label_func == AGE_LABEL1_NAME:
                 from fastdup.captions import generate_age_labels
                 df[out_col] = generate_age_labels(df[in_col], kwargs)

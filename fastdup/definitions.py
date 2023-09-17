@@ -91,7 +91,7 @@ RESNET50_MODEL = "https://github.com/onnx/models/raw/main/vision/classification/
 RESNET50_MODEL_DIM = 1000
 
 CAPTION_MODEL_NAMES = ['automatic', 'vitgpt2', 'blip', 'blip2']
-VQA_MODEL1_NAME = "indoors_outdoors"
+VQA_MODEL1_NAME = "vqa"
 AGE_LABEL1_NAME = 'age'
 
 # dtypes

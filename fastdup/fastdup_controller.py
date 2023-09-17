@@ -1260,6 +1260,30 @@ class FastdupController:
             else:
                 assert False, f"Wrong data type {data_type}"
 
+    def caption(self, model_name='automatic', device = 'cpu', batch_size: int = 8, subset: list = None, vqa_prompt: str = None, kwargs=None) -> pd.DataFrame:
+        if not self._fastdup_applied:
+            raise RuntimeError('Fastdup was not applied yet, call run() first')
+
+        if subset:
+            df = pd.DataFrame(subset , columns =['filename'])
+        else:
+            df = self.annotations(valid_only=True)
+        assert len(df), "No images found."
+
+        if model_name in FD.CAPTION_MODEL_NAMES:
+            from fastdup.captions import generate_labels
+            df['caption'] = generate_labels(df['filename'].tolist(), model_name, device, batch_size)
+        elif model_name == FD.VQA_MODEL1_NAME:
+            from fastdup.captions import generate_vqa_labels
+            df['caption'] = generate_vqa_labels(df['filename'], vqa_prompt, kwargs)
+        elif model_name == FD.AGE_LABEL1_NAME:
+            from fastdup.captions import generate_age_labels
+            df['caption'] = generate_age_labels(df['filename'], kwargs)
+        else:
+            assert False, "Unknown model name provided. Available models for caption generation are 'vitgpt2', 'blip2', and 'blip'.\n Available models for VQA are 'vqa' and 'age'."
+
+        return df
+
 
 
 def is_fastdup_dir(work_dir):

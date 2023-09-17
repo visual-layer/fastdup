@@ -4,7 +4,7 @@ from fastdup.galleries import fastdup_imread
 import cv2
 
 
-def generate_labels(filenames, modelname='automatic', batch_size=8):
+def generate_labels(filenames, model_name='automatic', device = 'cpu', batch_size=8):
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -14,11 +14,21 @@ def generate_labels(filenames, modelname='automatic', batch_size=8):
             - BLIP-2: 'blip2'
             - BLIP: 'blip'
         - batch_size: the size of image batches to caption (default: 8)
+        - device: whether to use a GPU (default: -1, CPU only ; set to 0 for GPU)
     '''
+    # use GPU if device is specified
+    if device == 'gpu':
+        device = 0
+    elif device == 'cpu':
+        device = -1
+    else:
+        assert False, "Incompatible device name entered. Available device names are gpu and cpu."
 
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import pipeline
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm
@@ -37,19 +47,25 @@ def generate_labels(filenames, modelname='automatic', batch_size=8):
         'blip': "Salesforce/blip-image-captioning-large"
     }
 
-    model = models[modelname]
+    model = models[model_name]
 
     # generate captions
     try:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        captioner = pipeline("image-to-text", model=model, device=device, batch_size=batch_size)
+        captioner = pipeline("image-to-text", model=model, device=device)
 
         captions = []
-        for image_path in tqdm(filenames):
+
+        for pred in captioner(filenames, batch_size=batch_size):
+            #caption = pred['generated_text']
+            caption = ''.join([d['generated_text'] for d in pred])
+            captions.append(caption)
+
+
+        '''for image_path in tqdm(filenames):
             img = Image.open(image_path)
             pred = captioner(img)
             caption = pred[0]['generated_text']
-            captions.append(caption)
+            captions.append(caption)'''
         return captions
 
 
@@ -62,6 +78,8 @@ def generate_vqa_labels(filenames, text, kwargs):
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import ViltProcessor, ViltForQuestionAnswering
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm
@@ -102,6 +120,8 @@ def generate_age_labels(filenames, kwargs):
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import ViTFeatureExtractor, ViTForImageClassification
+        from transformers.utils import logging
+        logging.set_verbosity_info()
         import torch
         from PIL import Image
         from tqdm import tqdm
