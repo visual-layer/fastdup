@@ -484,7 +484,7 @@ This notebooks in this section shows how you can load data from various sources 
                 <img src="./gallery/labelbox_thumbnail.jpg" width="200" />
             </a>
         </td>
-        <td rowspan="4"><b>📦 Labelbox:</b> Load and analyze vision datasets from <a href="https://labelbox.com/">Labelbox</a>.<br><br>
+        <td rowspan="4"><b>📦 Labelbox:</b> Load and analyze vision datasets from <a href="https://labelbox.com/">Labelbox</a> - A data-centric AI platform for building intelligent applications.<br><br>
         <div align="right"><a href="https://visual-layer.readme.io/docs/analyzing-labelbox-datasets">🔗 Learn More.</a></div>
         </td>
         <td align="center" width="80">
