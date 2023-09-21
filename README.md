@@ -477,6 +477,44 @@ This notebooks in this section shows how you can load data from various sources 
         </td>
     </tr>
     <!-- ------------------------------------------------------------------- -->
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/analyzing-labelbox-datasets">
+                <img src="./gallery/labelbox_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>📦 Labelbox:</b> Load and analyze vision datasets from <a href="https://labelbox.com/">Labelbox</a>.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/analyzing-labelbox-datasets">🔗 Learn More.</a></div>
+        </td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
 </table>
 
 
