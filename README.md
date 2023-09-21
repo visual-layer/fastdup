@@ -640,7 +640,7 @@ This notebooks in this section shows how you can load data from various sources 
          </a>
       </td>
       <td rowspan="4">
-         <b>➡️ Use Your Own Feature Vectors:</b> Read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your feature vectors.
+         <b>➡️ Use Your Own Feature Vectors:</b> Run fastdup on pre-computed feature vectors and surface data quality issues.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
