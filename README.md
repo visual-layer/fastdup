@@ -362,7 +362,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
-## Data Loading
+## Data Sources
 This notebooks in this section shows how you can load data from various sources and analyze them with fastdup.
 
 <table>
@@ -477,6 +477,117 @@ This notebooks in this section shows how you can load data from various sources 
         </td>
     </tr>
     <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/analyzing-labelbox-datasets">
+                <img src="./gallery/labelbox_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>📦 Labelbox:</b> Load and analyze vision datasets from <a href="https://labelbox.com/">Labelbox</a> - A data-centric AI platform for building intelligent applications.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/analyzing-labelbox-datasets">🔗 Learn More.</a></div>
+        </td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-labelbox-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/analyzing-torchvision-datasets">
+                <img src="./gallery/torch_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🔦 Torchvision Datasets:</b> Load and analyze vision datasets from <a href="https://pytorch.org/vision/main/datasets.html">Torchvision Datasets</a>.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/analyzing-torchvision-datasets">🔗 Learn More.</a></div>
+        </td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-torchvision-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-torchvision-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-torchvision-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-torchvision-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/analyzing-tensorflow-datasets">
+                <img src="./gallery/tfds_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>💦 Tensorflow Datasets:</b> Load and analyze vision datasets from <a href="https://www.tensorflow.org/datasets">Tensorflow Datasets</a>.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/analyzing-tensorflow-datasets">🔗 Learn More.</a></div>
+        </td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-tensorflow-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-tensorflow-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-tensorflow-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-tensorflow-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
 </table>
 
 
@@ -529,7 +640,7 @@ This notebooks in this section shows how you can load data from various sources 
          </a>
       </td>
       <td rowspan="4">
-         <b>➡️ Use Your Own Feature Vectors:</b> Read fastdup generated feature vectors in Python and use them for downstream processing, or run fastdup on your feature vectors.
+         <b>➡️ Use Your Own Feature Vectors:</b> Run fastdup on pre-computed feature vectors and surface data quality issues.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/feature_vectors.ipynb">
@@ -673,35 +784,35 @@ This notebooks in this section shows how you can load data from various sources 
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
-         <img src="gallery/surveillance_thumbnail.jpg" width="200">
+         <img src="gallery/caption_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b>📑 Captioning with BLIP:</b> Enrich your dataset by captioning them using <a href="https://github.com/salesforce/BLIP">BLIP</a>.
+         <b>📑 Image Captioning & Visual Question Answering (VQA):</b> Enrich your dataset by captioning them using <a href="https://github.com/salesforce/BLIP">BLIP</a>, <a href="https://github.com/salesforce/LAVIS/tree/main/projects/blip2">BLIP-2</a>, or <a href="https://huggingface.co/ydshieh/vit-gpt2-coco-en-ckpts">ViT-GPT2</a> model. Alternatively, use VQA models and ask question about the content of your images with <a href="https://github.com/dandelin/ViLT">Vilt-b32</a> or <a href="https://huggingface.co/nateraw/vit-age-classifier">ViT-Age</a> model.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
