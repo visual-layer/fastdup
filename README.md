@@ -784,35 +784,35 @@ This notebooks in this section shows how you can load data from various sources 
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/running-over-extracted-features">
-         <img src="gallery/surveillance_thumbnail.jpg" width="200">
+         <img src="gallery/caption_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b>📑 Captioning with BLIP:</b> Enrich your dataset by captioning them using <a href="https://github.com/salesforce/BLIP">BLIP</a>.
+         <b>📑 Image Captioning & Visual Question Answering (VQA):</b> Enrich your dataset by captioning them using <a href="https://github.com/salesforce/BLIP">BLIP</a>, <a href="https://github.com/salesforce/LAVIS/tree/main/projects/blip2">BLIP-2</a>, or <a href="https://huggingface.co/ydshieh/vit-gpt2-coco-en-ckpts">ViT-GPT2</a> model. Alternatively, use VQA models and ask question about the content of your images with <a href="https://github.com/dandelin/ViLT">Vilt-b32</a> or <a href="https://huggingface.co/nateraw/vit-age-classifier">ViT-Age</a> model.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/surveillance_videos.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/caption_generation.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
