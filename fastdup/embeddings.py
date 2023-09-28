@@ -7,16 +7,43 @@ from tqdm.auto import tqdm
 try:
     import torch
 except ImportError:
-    raise ImportError("The `torch` package is not installed. Please run `pip install torch` or equivalent.")
+    raise ImportError(
+        "The `torch` package is not installed. Please run `pip install torch` or equivalent."
+    )
 
 try:
     import timm
 except ImportError:
-    raise ImportError("The `timm` package is not installed. Please run `pip install timm`.")
+    raise ImportError(
+        "The `timm` package is not installed. Please run `pip install timm`."
+    )
 
 logging.basicConfig(level=logging.INFO)
 
+
 class FastdupTimmWrapper:
+    """
+    A wrapper class for TIMM (PyTorch Image Models) to simplify model initialization and
+    feature extraction for image datasets.
+
+    Attributes:
+        model_name (str): The name of the model architecture to use.
+        num_classes (int): The number of classes for the model. Use num_features=0 to exclude the last layer. 
+        pretrained (bool): Whether to load pretrained weights.
+        embeddings (np.ndarray): The computed embeddings for the images.
+        file_paths (list): The file paths corresponding to the computed embeddings.
+        img_folder (str): The folder path containing images for which embeddings are computed.
+
+    Methods:
+        __init__(model_name, num_classes=0, pretrained=True, **kwargs): Initialize the wrapper.
+        _initialize_model(**kwargs): Internal method to initialize the TIMM model.
+        compute_embeddings(image_folder_path, save_dir="."): Compute and save embeddings in a local folder.
+
+    Example:
+        >>> wrapper = FastdupTimmWrapper(model_name='resnet18')
+        >>> wrapper.compute_embeddings('path/to/image/folder')
+    """
+
     def __init__(self, model_name, num_classes=0, pretrained=True, **kwargs):
         self.model_name = model_name
         self.num_classes = num_classes
@@ -46,9 +73,7 @@ class FastdupTimmWrapper:
         file_paths = []
         img_extensions = (".jpg", ".png", ".jpeg")
         total_images = sum(
-            1
-            for f in os.listdir(image_folder_path)
-            if f.endswith(img_extensions)
+            1 for f in os.listdir(image_folder_path) if f.endswith(img_extensions)
         )
 
         for image_file in tqdm(
