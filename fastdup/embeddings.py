@@ -21,7 +21,12 @@ class FastdupTimmWrapper:
         self.model_name = model_name
         self.num_classes = num_classes
         self.pretrained = pretrained
+        self._initialize_model(**kwargs)
+        self.embeddings = None
+        self.file_paths = None
+        self.img_folder = None
 
+    def _initialize_model(self, **kwargs):
         self.model = timm.create_model(
             self.model_name,
             num_classes=self.num_classes,
@@ -30,10 +35,6 @@ class FastdupTimmWrapper:
         )
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.device)
-
-        self.embeddings = None
-        self.file_paths = None
-        self.img_folder = None
 
     def compute_embeddings(self, image_folder_path, save_dir="."):
         self.img_folder = image_folder_path
