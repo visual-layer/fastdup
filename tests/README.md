@@ -6,6 +6,12 @@ To run the tests first install `pytest`:
 pip install pytest
 ```
 
+Also install all packages related to be tested:
+
+```
+pip install datasets timm
+```
+
 Then `cd` into the fastdup site-packages root directory. 
 
 For example
