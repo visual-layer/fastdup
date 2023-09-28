@@ -43,10 +43,11 @@ class FastdupTimmWrapper:
 
         embeddings_list = []
         file_paths = []
+        img_extensions = (".jpg", ".png", ".jpeg")
         total_images = sum(
             1
             for f in os.listdir(image_folder_path)
-            if f.endswith((".jpg", ".png", ".jpeg"))
+            if f.endswith(img_extensions)
         )
 
         for image_file in tqdm(
@@ -55,7 +56,7 @@ class FastdupTimmWrapper:
             total=total_images,
             unit=" images",
         ):
-            if image_file.endswith((".jpg", ".png", ".jpeg")):
+            if image_file.endswith(img_extensions):
                 img_path = os.path.join(image_folder_path, image_file)
 
                 img = Image.open(img_path)
