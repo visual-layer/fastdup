@@ -1,19 +1,19 @@
 import os
-from fastdup.embeddings import FastdupTimmWrapper 
+from fastdup.embeddings import FastdupTimmModel 
 def test_initialization():
-    wrapper = FastdupTimmWrapper(model_name='mobilenetv2_050')
-    assert wrapper.model_name == 'mobilenetv2_050'
-    assert wrapper.pretrained == True
-    assert wrapper.num_classes == 0
+    timm_model = FastdupTimmModel(model_name='mobilenetv2_050')
+    assert timm_model.model_name == 'mobilenetv2_050'
+    assert timm_model.pretrained == True
+    assert timm_model.num_classes == 0
 
 def test_compute_embeddings():
-    wrapper = FastdupTimmWrapper(model_name='mobilenetv2_050')
-    wrapper.compute_embeddings('tests/sample_images_for_tests')
+    timm_model = FastdupTimmModel(model_name='mobilenetv2_050')
+    timm_model.compute_embeddings('tests/sample_images_for_tests')
     
-    assert wrapper.embeddings is not None
-    assert wrapper.file_paths is not None
-    assert wrapper.embeddings.shape == (74, 1280)
-    assert len(wrapper.embeddings) == len(wrapper.file_paths)
+    assert timm_model.embeddings is not None
+    assert timm_model.file_paths is not None
+    assert timm_model.embeddings.shape == (74, 1280)
+    assert len(timm_model.embeddings) == len(timm_model.file_paths)
 
     # Remove created files during test to avoid clutter
     os.remove("mobilenetv2_050_embeddings.npy")
@@ -21,10 +21,10 @@ def test_compute_embeddings():
     
 
 def test_save_files_embeddings():
-    wrapper = FastdupTimmWrapper(model_name='mobilenetv2_050')
+    timm_model = FastdupTimmModel(model_name='mobilenetv2_050')
     save_dir = "saved_embeddings_files"
 
-    wrapper.compute_embeddings('tests/sample_images_for_tests', save_dir=save_dir) 
+    timm_model.compute_embeddings('tests/sample_images_for_tests', save_dir=save_dir) 
 
     embeddings_file = os.path.join(save_dir, 'mobilenetv2_050_embeddings.npy')
     file_paths_file = os.path.join(save_dir, 'mobilenetv2_050_file_paths.txt')

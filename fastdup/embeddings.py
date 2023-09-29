@@ -21,7 +21,7 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 
 
-class FastdupTimmWrapper:
+class FastdupTimmModel:
     """
     A wrapper class for TIMM (PyTorch Image Models) to simplify model initialization and
     feature extraction for image datasets.
