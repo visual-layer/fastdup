@@ -19,9 +19,10 @@ except ImportError:
     )
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('fastdup.embeddings.timm')
 
 
-class FastdupTimmModel:
+class FastdupTimmEncoder:
     """
     A wrapper class for TIMM (PyTorch Image Models) to simplify model initialization and
     feature extraction for image datasets.
@@ -40,7 +41,7 @@ class FastdupTimmModel:
         compute_embeddings(image_folder_path, save_dir="."): Compute and save embeddings in a local folder.
 
     Example:
-        >>> wrapper = FastdupTimmWrapper(model_name='resnet18')
+        >>> wrapper = FastdupTimmEmbeddingModel(model_name='resnet18')
         >>> wrapper.compute_embeddings('path/to/image/folder')
     """
 
@@ -99,7 +100,7 @@ class FastdupTimmModel:
                     file_paths.append(os.path.abspath(img_path))
 
                 except Exception as e:
-                    logging.error(f"Skipping {img_path} due to error: {e}")
+                    logger.error(f"Skipping {img_path} due to error: {e}")
 
         self.embeddings = np.vstack(embeddings_list)
         self.file_paths = file_paths
