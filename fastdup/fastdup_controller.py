@@ -201,6 +201,49 @@ class FastdupController:
         return df_annot
 
 
+    def init_search(self, k, verbose=False):
+        """
+        Initialize search
+        Args:
+            k (int): number of returned images
+            verbose (bool): verbose level
+
+        Returns:
+
+        """
+        return fastdup.init_search(k=k,
+                                   work_dir=self.config['work_dir'],
+                                   d=self.config['d'],
+                                   model_path=self.config['model_path'],
+                                   verbose=verbose
+                                   )
+
+    def search(self, filename, img=None, verbose=False):
+        '''
+           Search for similar images in the image database.
+
+           Args:
+               filename (str): full path pointing to an image.
+               img (PIL.Image): (Optional) loaded and resized PIL.Image, in case given it is not red from filename
+               verbose (bool): (Optiona) run in verbose mode, default is False
+           Returns:
+               ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
+           '''
+        return fastdup.search(filename=filename, img=img, verbose=verbose)
+
+    def vector_search(self, filename="query_vector", vec=None, verbose=False):
+        '''
+        Search for similar embeddings to a given vector
+
+        Args:
+            filename: vector name (used for debugging)
+            vec (numpy): Mandatory numpy matrix of size 1xd or a vector of size d
+            verbose (bool): (Optiona) run in verbose mode, default is False
+        Returns:
+            ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
+        '''
+        return fastdup.vector_search(filename, vec, d=self.config['d'], verbose=verbose)
+
     def similarity(self, data: bool = True, split: Union[str, List[str]] = None,
                    include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
         """
@@ -1260,6 +1303,7 @@ class FastdupController:
             else:
                 assert False, f"Wrong data type {data_type}"
 
+
     def caption(self, model_name='automatic', device = 'cpu', batch_size: int = 8, subset: list = None, vqa_prompt: str = None, kwargs=None) -> pd.DataFrame:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
@@ -1283,8 +1327,45 @@ class FastdupController:
             assert False, "Unknown model name provided. Available models for caption generation are 'vitgpt2', 'blip2', and 'blip'.\n Available models for VQA are 'vqa' and 'age'."
 
         return df
+    
+    def enrich(self, task, model, input_df=None, user_tags='None', num_rows=None):
 
+        if input_df is None:
+            df = self.annotations(valid_only=True)
+            df.drop(['index', 'error_code', 'is_valid', 'fd_index'], axis=1, inplace=True)
 
+        else: df = input_df
+
+        if num_rows:
+            df = df.head(num_rows)
+
+        if task == "tagging":
+            if model=='ram':
+                from fastdup.models.ram import RecognizeAnythingModel
+                tagging_model = RecognizeAnythingModel()
+                df['ram_tags'] = df['filename'].apply(tagging_model.run_inference)
+
+            elif model=='tag2text':
+                from fastdup.models.tag2text import Tag2TextModel
+                tagging_model = Tag2TextModel()
+                df['tag2text_tags'] = df['filename'].apply(lambda x: tagging_model.run_inference(x)[0].replace(' | ', ' . '))
+                df['tag2text_caption'] = df['filename'].apply(lambda x: tagging_model.run_inference(x)[2])
+                if user_tags != "None":
+                    df['tag2text_user_caption'] = df['filename'].apply(lambda x: tagging_model.run_inference(x, user_tags=user_tags)[2])
+        
+        elif task == "grounding-object-detection":
+
+            if model == "grounding_dino":
+                from fastdup.models.grounding_dino import GroundingDINO
+                grounding_dino = GroundingDINO()
+
+                def compute_bbox(row):
+                    results = grounding_dino.run_inference(row['filename'], text_prompt=row['ram_tags'])
+                    return results['boxes'], results['scores'], results['labels']
+                
+                df['grounding_dino_bbox'], df['scores'], df['labels'] = zip(*df.apply(compute_bbox, axis=1))
+
+        return df
 
 def is_fastdup_dir(work_dir):
     return os.path.exists(Path(work_dir) / FD.MAPPING_CSV) and \
