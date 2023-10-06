@@ -62,3 +62,13 @@ class RecognizeAnythingModel:
         results = inference_ram(image, self.model)
         tags = results[0].replace(" | ", " . ")
         return tags
+
+    def unload_model(self):
+        # Move the model to CPU
+        self.model.cpu()
+
+        # Remove model references
+        del self.model
+
+        # Explicitly clear CUDA cache
+        torch.cuda.empty_cache()

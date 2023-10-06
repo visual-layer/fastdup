@@ -1342,29 +1342,49 @@ class FastdupController:
         if task == "tagging":
             if model=='ram':
                 from fastdup.models.ram import RecognizeAnythingModel
-                tagging_model = RecognizeAnythingModel()
-                df['ram_tags'] = df['filename'].apply(tagging_model.run_inference)
+                enrichment_model = RecognizeAnythingModel()
+                df['ram_tags'] = df['filename'].apply(enrichment_model.run_inference)
 
             elif model=='tag2text':
                 from fastdup.models.tag2text import Tag2TextModel
-                tagging_model = Tag2TextModel()
-                df['tag2text_tags'] = df['filename'].apply(lambda x: tagging_model.run_inference(x)[0].replace(' | ', ' . '))
-                df['tag2text_caption'] = df['filename'].apply(lambda x: tagging_model.run_inference(x)[2])
+                enrichment_model = Tag2TextModel()
+                df['tag2text_tags'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x)[0].replace(' | ', ' . '))
+                df['tag2text_caption'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x)[2])
                 if user_tags != "None":
-                    df['tag2text_user_caption'] = df['filename'].apply(lambda x: tagging_model.run_inference(x, user_tags=user_tags)[2])
+                    df['tag2text_user_caption'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x, user_tags=user_tags)[2])
         
         elif task == "grounding-object-detection":
-
             if model == "grounding_dino":
                 from fastdup.models.grounding_dino import GroundingDINO
-                grounding_dino = GroundingDINO()
+                enrichment_model = GroundingDINO()
 
                 def compute_bbox(row):
-                    results = grounding_dino.run_inference(row['filename'], text_prompt=row['ram_tags'])
+                    results = enrichment_model.run_inference(row['filename'], text_prompt=row['ram_tags'])
                     return results['boxes'], results['scores'], results['labels']
                 
                 df['grounding_dino_bbox'], df['scores'], df['labels'] = zip(*df.apply(compute_bbox, axis=1))
 
+        elif task == "segmentation":
+            if model == "sam":
+                from fastdup.models.sam import SegmentAnythingModel 
+                import torch
+                enrichment_model = SegmentAnythingModel()
+
+                # Convert the grounding_dino_bbox directly into a tensor.
+                tensor_list = [torch.tensor(bbox, dtype=torch.float32) for bbox in df["grounding_dino_bbox"]]
+
+                def preprocess_and_run(filename, bbox):
+                    result = enrichment_model.run_inference(filename, bboxes=bbox)
+                    
+                    # Transfer result to CPU if it's a tensor on CUDA
+                    if isinstance(result, torch.Tensor) and result.device.type == 'cuda':
+                        result = result.cpu()
+                    
+                    return result
+
+                df['sam_masks'] = [preprocess_and_run(filename, bbox) for filename, bbox in zip(df['filename'], tensor_list)]
+        
+        enrichment_model.unload_model()        
         return df
 
 def is_fastdup_dir(work_dir):

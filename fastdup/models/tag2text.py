@@ -71,3 +71,13 @@ class Tag2TextModel:
         image = transform(Image.open(image_path)).unsqueeze(0).to(self.device)
         results = inference_tag2text(image, self.model, user_tags)
         return results
+
+    def unload_model(self):
+        # Move the model to CPU
+        self.model.cpu()
+
+        # Remove model references
+        del self.model
+
+        # Explicitly clear CUDA cache
+        torch.cuda.empty_cache()

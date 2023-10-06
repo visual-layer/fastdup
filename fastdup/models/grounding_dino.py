@@ -48,9 +48,16 @@ class GroundingDINO:
     def _download_file(self, target_path, download_url):
         """Helper function to download a file if it doesn't exist."""
         if not os.path.exists(target_path):
-            logger.info(f"File not found at {target_path}. Downloading from {download_url}...")
+            logger.info(
+                f"File not found at {target_path}. Downloading from {download_url}..."
+            )
             try:
-                subprocess.run(["wget", "-O", target_path, download_url], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, check=True)
+                subprocess.run(
+                    ["wget", "-O", target_path, download_url],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
+                    check=True,
+                )
                 logger.info("File downloaded successfully")
             except subprocess.CalledProcessError:
                 logger.error(f"Error downloading file from {download_url}")
@@ -70,14 +77,16 @@ class GroundingDINO:
         logger.info(f"Loading model checkpoint - {self.model_weights}")
         gdino_args = Config.fromfile(self.model_config)
         model = build_model(gdino_args)
-        
+
         checkpoint = torch.load(self.model_weights, map_location=self.device)
-        
+
         # Ensure the checkpoint contains the necessary "model" key
         if "model" not in checkpoint:
-            logger.error("The model checkpoint does not contain the expected 'model' key.")
+            logger.error(
+                "The model checkpoint does not contain the expected 'model' key."
+            )
             raise ValueError("Invalid checkpoint format")
-            
+
         model.load_state_dict(clean_state_dict(checkpoint["model"]), strict=False)
         model.eval()
         model.to(self.device)
@@ -145,8 +154,9 @@ class GroundingDINO:
             pred_labels = []
             pred_scores = []
             for logit, box in zip(logits_filt, boxes_filt):
-                pred_phrase = get_phrases_from_posmap(logit > text_threshold,
-                                                      tokenized, tokenlizer)
+                pred_phrase = get_phrases_from_posmap(
+                    logit > text_threshold, tokenized, tokenlizer
+                )
                 pred_labels.append(pred_phrase)
                 pred_scores.append(round(float(logit.max().item()), 4))
 
@@ -257,3 +267,13 @@ class GroundingDINO:
                     positive_map_label_to_token[labels[j]].append(i)
 
         return positive_map_label_to_token
+
+    def unload_model(self):
+        # Move the model to CPU
+        self.model.cpu()
+
+        # Remove model references
+        del self.model
+
+        # Explicitly clear CUDA cache
+        torch.cuda.empty_cache()
