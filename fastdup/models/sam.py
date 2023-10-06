@@ -40,7 +40,7 @@ class SegmentAnythingModel:
             logger.info(
                 f"Model file not found. Downloading model from {download_url}..."
             )
-            subprocess.run(["wget", "-O", self.model_path, download_url])
+            subprocess.run(["wget", "-O", self.weights, download_url])
             logger.info("Model downloaded.")
         build_sam = sam_model_registry[self.vit_type]
         sam_model = SamPredictor(build_sam(checkpoint=self.weights))
