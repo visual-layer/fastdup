@@ -1339,8 +1339,8 @@ class FastdupController:
         if num_rows:
             df = df.head(num_rows)
 
-        if task == "tagging":
-            if model=='ram':
+        if task == "zero-shot-classification":
+            if model=='recognize-anything-model':
                 from fastdup.models.ram import RecognizeAnythingModel
                 enrichment_model = RecognizeAnythingModel()
                 df['ram_tags'] = df['filename'].apply(enrichment_model.run_inference)
@@ -1353,8 +1353,8 @@ class FastdupController:
                 if user_tags != "None":
                     df['tag2text_user_caption'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x, user_tags=user_tags)[2])
         
-        elif task == "grounding-object-detection":
-            if model == "grounding_dino":
+        elif task == "zero-shot-detection":
+            if model == "grounding-dino":
                 from fastdup.models.grounding_dino import GroundingDINO
                 enrichment_model = GroundingDINO()
 
@@ -1364,8 +1364,8 @@ class FastdupController:
                 
                 df['grounding_dino_bbox'], df['scores'], df['labels'] = zip(*df.apply(compute_bbox, axis=1))
 
-        elif task == "segmentation":
-            if model == "sam":
+        elif task == "zero-shot-segmentation":
+            if model == "segment-anything":
                 from fastdup.models.sam import SegmentAnythingModel 
                 import torch
                 enrichment_model = SegmentAnythingModel()
@@ -1384,7 +1384,10 @@ class FastdupController:
 
                 df['sam_masks'] = [preprocess_and_run(filename, bbox) for filename, bbox in zip(df['filename'], tensor_list)]
         
-        enrichment_model.unload_model()        
+        try:
+            enrichment_model.unload_model()  
+        except Exception as e:
+            print('Please select a valid enrichment task or model')
         return df
 
 def is_fastdup_dir(work_dir):
