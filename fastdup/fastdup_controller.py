@@ -1328,66 +1328,94 @@ class FastdupController:
 
         return df
     
-    def enrich(self, task, model, input_df=None, user_tags='None', num_rows=None):
+    def enrich(self, task, model, input_df=None, user_tags="None", num_rows=None):
 
         if input_df is None:
             df = self.annotations(valid_only=True)
-            df.drop(['index', 'error_code', 'is_valid', 'fd_index'], axis=1, inplace=True)
+            df.drop(["index", "error_code", "is_valid", "fd_index"], axis=1, inplace=True)
+        else:
+            df = input_df
 
-        else: df = input_df
+        if "filename" not in df.columns:
+            raise KeyError(
+                "Column `filename` does not exist in the DataFrame. Please ensure the DataFrame contains the column `filename`."
+            )
 
         if num_rows:
             df = df.head(num_rows)
 
         if task == "zero-shot-classification":
-            if model=='recognize-anything-model':
+            if model == "recognize-anything-model":
                 from fastdup.models.ram import RecognizeAnythingModel
+                
                 enrichment_model = RecognizeAnythingModel()
-                df['ram_tags'] = df['filename'].apply(enrichment_model.run_inference)
-
-            elif model=='tag2text':
+                
+                df["ram_tags"] = df["filename"].apply(enrichment_model.run_inference)
+            elif model == "tag2text":
                 from fastdup.models.tag2text import Tag2TextModel
+
                 enrichment_model = Tag2TextModel()
-                df['tag2text_tags'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x)[0].replace(' | ', ' . '))
-                df['tag2text_caption'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x)[2])
+                df["tag2text_tags"] = df["filename"].apply(
+                    lambda x: enrichment_model.run_inference(x)[0].replace(" | ", " . ")
+                )
+                df["tag2text_caption"] = df["filename"].apply(
+                    lambda x: enrichment_model.run_inference(x)[2]
+                )
                 if user_tags != "None":
-                    df['tag2text_user_caption'] = df['filename'].apply(lambda x: enrichment_model.run_inference(x, user_tags=user_tags)[2])
-        
+                    df["tag2text_user_caption"] = df["filename"].apply(
+                        lambda x: enrichment_model.run_inference(x, user_tags=user_tags)[2]
+                    )
+
         elif task == "zero-shot-detection":
             if model == "grounding-dino":
                 from fastdup.models.grounding_dino import GroundingDINO
+
                 enrichment_model = GroundingDINO()
 
                 def compute_bbox(row):
-                    results = enrichment_model.run_inference(row['filename'], text_prompt=row['ram_tags'])
-                    return results['boxes'], results['scores'], results['labels']
-                
-                df['grounding_dino_bbox'], df['scores'], df['labels'] = zip(*df.apply(compute_bbox, axis=1))
+                    results = enrichment_model.run_inference(
+                        row["filename"], text_prompt=row["ram_tags"]
+                    )
+                    return results["boxes"], results["scores"], results["labels"]
+
+                df["grounding_dino_bbox"], df["scores"], df["labels"] = zip(
+                    *df.apply(compute_bbox, axis=1)
+                )
 
         elif task == "zero-shot-segmentation":
             if model == "segment-anything":
-                from fastdup.models.sam import SegmentAnythingModel 
                 import torch
+                from fastdup.models.sam import SegmentAnythingModel
+
                 enrichment_model = SegmentAnythingModel()
 
-                # Convert the grounding_dino_bbox directly into a tensor.
-                tensor_list = [torch.tensor(bbox, dtype=torch.float32) for bbox in df["grounding_dino_bbox"]]
+                try:
+                    tensor_list = [
+                        torch.tensor(bbox, dtype=torch.float32)
+                        for bbox in df["grounding_dino_bbox"]
+                    ]
+                except Exception as e:
+                    raise KeyError(
+                        "Column `grounding_dino_bbox` does not exist. Please run enrichment with Grounding DINO model first"
+                    )
 
                 def preprocess_and_run(filename, bbox):
                     result = enrichment_model.run_inference(filename, bboxes=bbox)
-                    
-                    # Transfer result to CPU if it's a tensor on CUDA
-                    if isinstance(result, torch.Tensor) and result.device.type == 'cuda':
+
+                    if isinstance(result, torch.Tensor) and result.device.type == "cuda":
                         result = result.cpu()
-                    
+
                     return result
 
-                df['sam_masks'] = [preprocess_and_run(filename, bbox) for filename, bbox in zip(df['filename'], tensor_list)]
-        
+                df["sam_masks"] = [
+                    preprocess_and_run(filename, bbox)
+                    for filename, bbox in zip(df["filename"], tensor_list)
+                ]
+
         try:
-            enrichment_model.unload_model()  
+            enrichment_model.unload_model()
         except Exception as e:
-            print('Please select a valid enrichment task or model')
+            raise ValueError("Please select a valid enrichment model")
         return df
 
 def is_fastdup_dir(work_dir):
