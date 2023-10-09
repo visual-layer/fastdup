@@ -1,14 +1,19 @@
 import logging
+from fastdup.utils import find_model
+from fastdup.image import fastdup_imread
+from fastdup.sentry import fastdup_capture_exception
 from PIL import Image
 import contextlib
 import io
-import os
-import subprocess
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("fastdup.model.tag2text")
 
 try:
     import torch
-except ImportError:
-    raise ImportError(
+except ImportError as e:
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
+    logger.error(
         "The `torch` package is not installed. Please run `pip install torch` or equivalent."
     )
 
@@ -16,37 +21,40 @@ try:
     from ram.models import tag2text
     from ram import inference_tag2text
     from ram import get_transform
-except ImportError:
-    raise ImportError(
-        "The `recognize-anything` package is not installed. Please run `pip install --upgrade setuptools && pip install -U git+https://github.com/xinyu1205/recognize-anything.git`."
+except ImportError as e:
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
+    logger.error(
+        f"The `recognize-anything` package is not installed. Please run `pip install -U git+https://github.com/xinyu1205/recognize-anything.git`."
     )
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fastdup.model.tag2text")
+WEIGHTS_DOWNLOAD_URL = "https://huggingface.co/spaces/xinyu1205/Recognize_Anything-Tag2Text/resolve/main/tag2text_swin_14m.pth"
 
 
 class Tag2TextModel:
-    def __init__(
-        self, model_path: str = "tag2text_swin_14m.pth", device: str = "cuda"
-    ) -> None:
-        self.model_path = model_path
-        self.device = device
-        self.model = self._load_model()
+    def __init__(self, model_weights: str = None, device: str = None) -> None:
+        # If no config/weights provided, search on local path, if not found, download from URL
+        self.model_weights = (
+            model_weights
+            if model_weights is not None
+            else find_model("tag2text_swin_14m.pth", WEIGHTS_DOWNLOAD_URL)
+        )
+
+        # Pick available device if not specified.
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
+
+        try:
+            self.model = self._load_model()
+        except Exception as e:
+            fastdup_capture_exception("model_checkpoint_corrupted", e, True)
+            logger.error(
+                f"Failed to load model checkpoint from {self.model_weights}. Verify the checkpoint file is not corrupted or re-download the model checkpoint."
+            )
 
     def _load_model(self) -> torch.nn.Module:
-        if not os.path.exists(self.model_path):
-            download_url = "https://huggingface.co/spaces/xinyu1205/Recognize_Anything-Tag2Text/resolve/main/tag2text_swin_14m.pth"
-            logger.info(
-                f"Model file not found. Downloading model from {download_url}..."
-            )
-            subprocess.run(
-                ["wget", "-O", self.model_path, download_url],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-            )
-            logger.info("Model downloaded.")
-
-        logger.info(f"Loading model checkpoint - {self.model_path}")
+        logger.info(f"Loading model checkpoint from - {self.model_weights}")
 
         # Hide the printing during model loading
         with contextlib.redirect_stdout(io.StringIO()):
@@ -55,7 +63,7 @@ class Tag2TextModel:
             delete_tag_index = [127, 2961, 3351, 3265, 3338, 3355, 3359]
 
             model = tag2text(
-                pretrained=self.model_path,
+                pretrained=self.model_weights,
                 image_size=384,
                 vit="swin_b",
                 delete_tag_index=delete_tag_index,
@@ -67,8 +75,10 @@ class Tag2TextModel:
         return model
 
     def run_inference(self, image_path: str, user_tags="None") -> tuple:
+        img = fastdup_imread(image_path, input_dir=None, kwargs=None)
+        image = Image.fromarray(img)
         transform = get_transform(image_size=384)
-        image = transform(Image.open(image_path)).unsqueeze(0).to(self.device)
+        image = transform(image).unsqueeze(0).to(self.device)
         results = inference_tag2text(image, self.model, user_tags)
         return results
 

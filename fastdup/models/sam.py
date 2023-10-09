@@ -1,54 +1,67 @@
+import logging
+import logging
+import cv2
+from fastdup.utils import find_model
+from fastdup.image import fastdup_imread
+from fastdup.sentry import fastdup_capture_exception
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("fastdup.model.sam")
+
 try:
     import torch
-except ImportError:
-    raise ImportError(
+except ImportError as e:
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
+    logger.error(
         "The `torch` package is not installed. Please run `pip install torch` or equivalent."
     )
 
 try:
     from segment_anything import SamPredictor, sam_model_registry
-except ImportError:
-    raise ImportError(
-        "The `segment-anything` package is not installed. Please run `pip install git+https://github.com/facebookresearch/segment-anything.git`."
+except ImportError as e:
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
+    logger.error(
+        f"The `segment-anything` package is not installed. Please run `pip install git+https://github.com/facebookresearch/segment-anything.git`."
     )
 
-
-import os
-import logging
-import subprocess
-import cv2
-import torch
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fastdup.model.tag2text")
+WEIGHTS_DOWNLOAD_URL = (
+    "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
+)
 
 
 class SegmentAnythingModel:
-    def __init__(
-        self, vit_type="vit_h", weights="sam_vit_h_4b8939.pth", device="cuda"
-    ) -> None:
-        self.vit_type = vit_type
-        self.weights = weights
-        self.device = device
-        self.model = self._load_model()
+    def __init__(self, model_weights: str = None, device: str = None) -> None:
+        # If no config/weights provided, search on local path, if not found, download from URL
+        self.model_weights = (
+            model_weights
+            if model_weights is not None
+            else find_model("sam_vit_h_4b8939.pth", WEIGHTS_DOWNLOAD_URL)
+        )
+
+        # Pick available device if not specified.
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
+
+        try:
+            self.model = self._load_model()
+        except Exception as e:
+            fastdup_capture_exception("model_checkpoint_corrupted", e, True)
+            logger.error(
+                f"Failed to load model checkpoint from {self.model_weights}. Verify the checkpoint file is not corrupted or re-download the model checkpoint."
+            )
 
     def _load_model(self):
-        if not os.path.exists(self.weights):
-            download_url = (
-                "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
-            )
-            logger.info(
-                f"Model file not found. Downloading model from {download_url}..."
-            )
-            subprocess.run(["wget", "-O", self.weights, download_url])
-            logger.info("Model downloaded.")
-        build_sam = sam_model_registry[self.vit_type]
-        sam_model = SamPredictor(build_sam(checkpoint=self.weights))
-        sam_model.mode = sam_model.model.to(self.device)
-        return sam_model
+        logger.info(f"Loading model checkpoint from - {self.model_weights}")
+
+        build_sam = sam_model_registry["vit_h"]
+        model = SamPredictor(build_sam(checkpoint=self.model_weights))
+        model.mode = model.model.to(self.device)
+        return model
 
     def run_inference(self, image_path, bboxes):
-        image = cv2.imread(image_path)
+        image = fastdup_imread(image_path, input_dir=None, kwargs=None)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         self.model.set_image(image)

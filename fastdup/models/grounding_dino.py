@@ -11,7 +11,9 @@ try:
     import torch
 except ImportError as e:
     fastdup_capture_exception("enrichment_missing_dependencies", e, True)
-    logger.error("The `torch` package is not installed. Please run `pip install torch` or equivalent.")
+    logger.error(
+        "The `torch` package is not installed. Please run `pip install torch` or equivalent."
+    )
 
 try:
     from mmengine.config import Config
@@ -33,11 +35,11 @@ except ImportError as e:
     installation = (
         "`pip install mmengine "
         "groundingdino-py "
-        "git+https://github.com/facebookresearch/segment-anything.git "
         "git+https://github.com/open-mmlab/mmdetection.git` "
     )
-    logger.error(f"Your system is missing some dependencies. Please install with {installation}")
-
+    logger.error(
+        f"Your system is missing some dependencies. Please install with {installation}."
+    )
 
 
 # Download URLs
