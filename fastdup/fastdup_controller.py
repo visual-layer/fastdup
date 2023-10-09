@@ -198,50 +198,7 @@ class FastdupController:
         df_annot = self._df_annot.query(f'{FD.ANNOT_VALID}') if valid_only and self._df_annot is not None \
             else self._df_annot
         return df_annot
-
-
-    def init_search(self, k, verbose=False):
-        """
-        Initialize search
-        Args:
-            k (int): number of returned images
-            verbose (bool): verbose level
-
-        Returns:
-
-        """
-        return fastdup.init_search(k=k,
-                                   work_dir=self.config['work_dir'],
-                                   d=self.config['d'],
-                                   model_path=self.config['model_path'],
-                                   verbose=verbose
-                                   )
-
-    def search(self, filename, img=None, verbose=False):
-        '''
-           Search for similar images in the image database.
-
-           Args:
-               filename (str): full path pointing to an image.
-               img (PIL.Image): (Optional) loaded and resized PIL.Image, in case given it is not red from filename
-               verbose (bool): (Optiona) run in verbose mode, default is False
-           Returns:
-               ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
-           '''
-        return fastdup.search(filename=filename, img=img, verbose=verbose)
-
-    def vector_search(self, filename="query_vector", vec=None, verbose=False):
-        '''
-        Search for similar embeddings to a given vector
-
-        Args:
-            filename: vector name (used for debugging)
-            vec (numpy): Mandatory numpy matrix of size 1xd or a vector of size d
-            verbose (bool): (Optiona) run in verbose mode, default is False
-        Returns:
-            ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
-        '''
-        return fastdup.vector_search(filename, vec, d=self.config['d'], verbose=verbose)
+    
 
     def similarity(self, data: bool = True, split: Union[str, List[str]] = None,
                    include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
