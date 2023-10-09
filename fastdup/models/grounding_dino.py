@@ -1,11 +1,20 @@
 import logging
-import os
-import subprocess
+from fastdup.utils import find_model
+from fastdup.image import fastdup_imread
+from fastdup.sentry import fastdup_capture_exception
+from PIL import Image
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("fastdup.models.grounding_dino")
+
+try:
+    import torch
+except ImportError as e:
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
+    logger.error("The `torch` package is not installed. Please run `pip install torch` or equivalent.")
 
 try:
     from mmengine.config import Config
-    from PIL import Image
-    import torch
     import groundingdino
     import groundingdino.datasets.transforms as T
     from groundingdino.models import build_model
@@ -20,61 +29,51 @@ try:
         ]
     )
 except ImportError as e:
-    print(e)
+    fastdup_capture_exception("enrichment_missing_dependencies", e, True)
     installation = (
-        "pip install mmengine "
+        "`pip install mmengine "
         "groundingdino-py "
         "git+https://github.com/facebookresearch/segment-anything.git "
-        "git+https://github.com/open-mmlab/mmdetection.git "
+        "git+https://github.com/open-mmlab/mmdetection.git` "
     )
-    print(f"Please install with {installation}")
+    logger.error(f"Your system is missing some dependencies. Please install with {installation}")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fastdup.models.grounding_dino")
+
+
+# Download URLs
+CONFIG_DOWNLOAD_URL = "https://raw.githubusercontent.com/open-mmlab/playground/main/mmdet_sam/configs/GroundingDINO_SwinT_OGC.py"
+WEIGHTS_DOWNLOAD_URL = "https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth"
 
 
 class GroundingDINO:
     def __init__(
         self,
-        model_config: str = "GroundingDINO_SwinT_OGC.py",
-        model_weights: str = "groundingdino_swint_ogc.pth",
-        device: str = "cuda",
+        model_config: str = None,
+        model_weights: str = None,
+        device: str = None,
     ) -> None:
-        self.model_config = model_config
-        self.model_weights = model_weights
-        self.device = device
+        # If no config/weights provided, search on local path, if not found, download from URL
+        self.model_config = (
+            model_config
+            if model_config is not None
+            else find_model("GroundingDINO_SwinT_OGC.py", CONFIG_DOWNLOAD_URL)
+        )
+        self.model_weights = (
+            model_weights
+            if model_weights is not None
+            else find_model("groundingdino_swint_ogc.pth", WEIGHTS_DOWNLOAD_URL)
+        )
+
+        # Pick available device if not specified.
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
+
         self.model = self._load_model()
 
-    def _download_file(self, target_path, download_url):
-        """Helper function to download a file if it doesn't exist."""
-        if not os.path.exists(target_path):
-            logger.info(
-                f"File not found at {target_path}. Downloading from {download_url}..."
-            )
-            try:
-                subprocess.run(
-                    ["wget", "-O", target_path, download_url],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.STDOUT,
-                    check=True,
-                )
-                logger.info("File downloaded successfully")
-            except subprocess.CalledProcessError:
-                logger.error(f"Error downloading file from {download_url}")
-                raise
-
     def _load_model(self):
-        """Load the model by downloading config and weights if necessary."""
-        # Download config file if not present
-        config_download_url = "https://raw.githubusercontent.com/open-mmlab/playground/main/mmdet_sam/configs/GroundingDINO_SwinT_OGC.py"
-        self._download_file(self.model_config, config_download_url)
-
-        # Download weights file if not present
-        weights_download_url = "https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth"
-        self._download_file(self.model_weights, weights_download_url)
-
-        # Load the model with the downloaded config and weights
-        logger.info(f"Loading model checkpoint - {self.model_weights}")
+        logger.info(f"Loading model checkpoint from - {self.model_weights}")
         gdino_args = Config.fromfile(self.model_config)
         model = build_model(gdino_args)
 
@@ -88,8 +87,11 @@ class GroundingDINO:
             raise ValueError("Invalid checkpoint format")
 
         model.load_state_dict(clean_state_dict(checkpoint["model"]), strict=False)
+
         model.eval()
         model.to(self.device)
+        logger.info(f"Model loaded on device - {self.device}")
+
         return model
 
     def run_inference(
@@ -101,7 +103,8 @@ class GroundingDINO:
         apply_original_groundingdino=False,
     ):
         pred_dict = {}
-        image_pil = Image.open(image_path).convert("RGB")  # load image
+        img = fastdup_imread(image_path, input_dir=None, kwargs=None)
+        image_pil = Image.fromarray(img)
         image_pil = self._apply_exif_orientation(image_pil)
         image, _ = grounding_dino_transform(image_pil, None)  # 3, h, w
 
