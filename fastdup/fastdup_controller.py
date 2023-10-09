@@ -17,7 +17,6 @@ from fastdup.utils import convert_coco_dict_to_df, shorten_path
 import pathlib
 import re
 
-
 class FastdupController:
     def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path, list] = None):
         """
@@ -1328,7 +1327,7 @@ class FastdupController:
 
         return df
     
-    def enrich(self, task, model, input_df=None, user_tags="None", num_rows=None):
+    def enrich(self, task, model, input_df=None, user_tags="None", num_rows=None, input_col=None, output_col=None, device=None):
 
         if input_df is None:
             df = self.annotations(valid_only=True)
@@ -1348,13 +1347,13 @@ class FastdupController:
             if model == "recognize-anything-model":
                 from fastdup.models.ram import RecognizeAnythingModel
                 
-                enrichment_model = RecognizeAnythingModel()
-                
+                enrichment_model = RecognizeAnythingModel(device=device)
                 df["ram_tags"] = df["filename"].apply(enrichment_model.run_inference)
+            
             elif model == "tag2text":
                 from fastdup.models.tag2text import Tag2TextModel
 
-                enrichment_model = Tag2TextModel()
+                enrichment_model = Tag2TextModel(device=device)
                 df["tag2text_tags"] = df["filename"].apply(
                     lambda x: enrichment_model.run_inference(x)[0].replace(" | ", " . ")
                 )
@@ -1370,15 +1369,15 @@ class FastdupController:
             if model == "grounding-dino":
                 from fastdup.models.grounding_dino import GroundingDINO
 
-                enrichment_model = GroundingDINO()
+                enrichment_model = GroundingDINO(device=device)
 
                 def compute_bbox(row):
                     results = enrichment_model.run_inference(
-                        row["filename"], text_prompt=row["ram_tags"]
+                        row["filename"], text_prompt=row[input_col]
                     )
                     return results["boxes"], results["scores"], results["labels"]
 
-                df["grounding_dino_bbox"], df["scores"], df["labels"] = zip(
+                df["grounding_dino_bboxes"], df["grounding_dino_scores"], df["grounding_dino_labels"] = zip(
                     *df.apply(compute_bbox, axis=1)
                 )
 
@@ -1387,16 +1386,16 @@ class FastdupController:
                 import torch
                 from fastdup.models.sam import SegmentAnythingModel
 
-                enrichment_model = SegmentAnythingModel()
+                enrichment_model = SegmentAnythingModel(device=device)
 
                 try:
                     tensor_list = [
                         torch.tensor(bbox, dtype=torch.float32)
-                        for bbox in df["grounding_dino_bbox"]
+                        for bbox in df[input_col]
                     ]
                 except Exception as e:
                     raise KeyError(
-                        "Column `grounding_dino_bbox` does not exist. Please run enrichment with Grounding DINO model first"
+                        f"Column `{input_col}` does not exist."
                     )
 
                 def preprocess_and_run(filename, bbox):
@@ -1417,6 +1416,7 @@ class FastdupController:
         except Exception as e:
             raise ValueError("Please select a valid enrichment model")
         return df
+
 
 def is_fastdup_dir(work_dir):
     return os.path.exists(Path(work_dir) / FD.MAPPING_CSV) and \
