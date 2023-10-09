@@ -11,6 +11,8 @@ import pathlib
 import subprocess
 import time
 import os
+import requests
+import tqdm.auto as tqdm
 
 def read_local_error_file(ret, local_error_file):
     if (ret != 0 and 'JPY_PARENT_PID' in os.environ) or 'COLAB_JUPYTER_IP' in os.environ:
@@ -66,14 +68,32 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     input_dir = f'{work_dir}/{local_folder}'
     return input_dir
 
-
 def download_from_web(url, local_model=None):
-    import urllib.request
-    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url if local_model is None else local_model))
-    urllib.request.urlretrieve(url, local_file)
-    assert os.path.isfile(local_file), f"Failed to download url {url} to local file {local_file}, please try to download manually"
+    # Determine the home directory and separator based on the platform
+    local_directory = os.environ["USERPROFILE"] if platform.system() == "Windows" else os.path.expanduser("~")
+
+    # Generate the local file path
+    filename = os.path.basename(url if local_model is None else local_model)
+    local_file = os.path.join(local_directory, filename)
+
+    # Request the URL with streaming enabled
+    response = requests.get(url, stream=True)
+    response.raise_for_status()  # Raise an exception for HTTP errors
+
+    # Get the total size of the file from the response headers (if available)
+    total_size = int(response.headers.get('content-length', 0))
+    
+    # Open the local file for writing as binary
+    with open(local_file, 'wb') as f:
+        # Use tqdm to show the progress bar
+        for chunk in tqdm.tqdm(response.iter_content(chunk_size=8192), total=total_size//8192, unit='KB', desc="Downloading: "):
+            f.write(chunk)
+
+    # Check if the file exists at the local path and raise an exception if not
+    if not os.path.isfile(local_file):
+        raise Exception(f"Failed to download url {url} to local file {local_file}. Please try downloading manually.")
+
     return local_file
-    #url = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
 
 def find_model(model_name, url):
     local_model = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
