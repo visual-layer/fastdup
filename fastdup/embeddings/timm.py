@@ -96,7 +96,7 @@ class TimmEncoder:
 
         logger.info(f"Model loaded on device - {self.device}")
 
-    def compute_embeddings(self, image_folder_path, save_dir="."):
+    def compute_embeddings(self, image_folder_path, save_dir="saved_embeddings"):
         self.img_folder = image_folder_path
 
         data_config = timm.data.resolve_model_data_config(self.model)
@@ -135,6 +135,8 @@ class TimmEncoder:
 
         self.embeddings = np.vstack(embeddings_list)
         self.file_paths = file_paths
+
+        os.makedirs(save_dir, exist_ok=True)
 
         logger.info(f"Saving embeddings in directory - {save_dir} .")
 
