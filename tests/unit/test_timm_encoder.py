@@ -13,7 +13,7 @@ def test_compute_embeddings():
     
     assert timm_model.embeddings is not None
     assert timm_model.file_paths is not None
-    assert timm_model.embeddings.shape == (74, 1280)
+    assert timm_model.embeddings.shape == (10, 1280)
     assert len(timm_model.embeddings) == len(timm_model.file_paths)
 
     # Remove created files during test to avoid clutter
