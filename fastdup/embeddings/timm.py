@@ -4,6 +4,8 @@ import logging
 from PIL import Image
 from tqdm.auto import tqdm
 from fastdup.sentry import fastdup_capture_exception
+from fastdup.image import fastdup_imread
+from fastdup.utils import get_images_from_path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fastdup.embeddings.timm")
@@ -36,6 +38,7 @@ class TimmEncoder:
         pretrained (bool): Whether to load pretrained weights.
         device (str): Which device to load the model on. Choices: "cuda" or "cpu".
         torch_compile (bool): Whether to use torch.compile to optimize model.
+
         embeddings (np.ndarray): The computed embeddings for the images.
         file_paths (list): The file paths corresponding to the computed embeddings.
         img_folder (str): The folder path containing images for which embeddings are computed.
@@ -101,10 +104,9 @@ class TimmEncoder:
 
         embeddings_list = []
         file_paths = []
-        img_extensions = (".jpg", ".png", ".jpeg")
-        total_images = sum(
-            1 for f in os.listdir(image_folder_path) if f.endswith(img_extensions)
-        )
+
+        # Get images with extensions supported in fastdup
+        total_images = len(get_images_from_path(image_folder_path))
 
         for image_file in tqdm(
             os.listdir(image_folder_path),
@@ -112,24 +114,24 @@ class TimmEncoder:
             total=total_images,
             unit=" images",
         ):
-            if image_file.endswith(img_extensions):
-                img_path = os.path.join(image_folder_path, image_file)
+            img_path = os.path.join(image_folder_path, image_file)
 
-                img = Image.open(img_path)
+            try:
+                img = fastdup_imread(img_path, input_dir=None, kwargs=None)
+                img = img[:, :, ::-1]  # Convert to RGB
+                img = Image.fromarray(img)
+                img_tensor = transforms(img).unsqueeze(0).to(self.device)
 
-                try:
-                    img_tensor = transforms(img).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    output = self.model.forward_features(img_tensor)
+                    output = self.model.forward_head(output, pre_logits=True)
 
-                    with torch.no_grad():
-                        output = self.model.forward_features(img_tensor)
-                        output = self.model.forward_head(output, pre_logits=True)
+                embeddings = output.cpu().numpy()
+                embeddings_list.append(embeddings)
+                file_paths.append(os.path.abspath(img_path))
 
-                    embeddings = output.cpu().numpy()
-                    embeddings_list.append(embeddings)
-                    file_paths.append(os.path.abspath(img_path))
-
-                except Exception as e:
-                    logger.error(f"Skipping {img_path} due to error: {e}")
+            except Exception as e:
+                logger.error(f"Skipping {img_path} due to error: {e}")
 
         self.embeddings = np.vstack(embeddings_list)
         self.file_paths = file_paths
