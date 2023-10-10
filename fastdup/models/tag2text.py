@@ -76,6 +76,7 @@ class Tag2TextModel:
 
     def run_inference(self, image_path: str, user_tags="None") -> tuple:
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
+        img = img[:, :, ::-1]  # Convert to RGB
         image = Image.fromarray(img)
         transform = get_transform(image_size=384)
         image = transform(image).unsqueeze(0).to(self.device)

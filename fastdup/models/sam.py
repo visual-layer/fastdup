@@ -62,7 +62,8 @@ class SegmentAnythingModel:
 
     def run_inference(self, image_path, bboxes):
         image = fastdup_imread(image_path, input_dir=None, kwargs=None)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        img = img[:, :, ::-1]  # Convert to RGB
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         self.model.set_image(image)
         transformed_boxes = self.model.transform.apply_boxes_torch(

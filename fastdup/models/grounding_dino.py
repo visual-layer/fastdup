@@ -106,6 +106,7 @@ class GroundingDINO:
     ):
         pred_dict = {}
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
+        img = img[:, :, ::-1]  # Convert to RGB
         image_pil = Image.fromarray(img)
         image_pil = self._apply_exif_orientation(image_pil)
         image, _ = grounding_dino_transform(image_pil, None)  # 3, h, w
