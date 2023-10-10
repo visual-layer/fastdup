@@ -3,23 +3,26 @@ import numpy as np
 import logging
 from PIL import Image
 from tqdm.auto import tqdm
+from fastdup.sentry import fastdup_capture_exception
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("fastdup.embeddings.timm")
 
 try:
     import torch
-except ImportError:
-    raise ImportError(
+except ImportError as e:
+    fastdup_capture_exception("embeddings_missing_pytorch_install", e, True)
+    logger.error(
         "The `torch` package is not installed. Please run `pip install torch` or equivalent."
     )
 
 try:
     import timm
-except ImportError:
-    raise ImportError(
-        "The `timm` package is not installed. Please run `pip install timm`."
+except ImportError as e:
+    fastdup_capture_exception("embeddings_missing_timm_install", e, True)
+    logger.error(
+        "The `timm` package is not installed. Please run `pip install timm` or equivalent."
     )
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('fastdup.embeddings.timm')
 
 
 class TimmEncoder:
@@ -29,8 +32,10 @@ class TimmEncoder:
 
     Attributes:
         model_name (str): The name of the model architecture to use.
-        num_classes (int): The number of classes for the model. Use num_features=0 to exclude the last layer. 
+        num_classes (int): The number of classes for the model. Use num_features=0 to exclude the last layer.
         pretrained (bool): Whether to load pretrained weights.
+        device (str): Which device to load the model on. Choices: "cuda" or "cpu".
+        torch_compile (bool): Whether to use torch.compile to optimize model.
         embeddings (np.ndarray): The computed embeddings for the images.
         file_paths (list): The file paths corresponding to the computed embeddings.
         img_folder (str): The folder path containing images for which embeddings are computed.
@@ -45,28 +50,52 @@ class TimmEncoder:
         >>> wrapper.compute_embeddings('path/to/image/folder')
     """
 
-    def __init__(self, model_name, num_classes=0, pretrained=True, **kwargs):
+    def __init__(
+        self,
+        model_name: str,
+        num_classes: int = 0,
+        pretrained: bool = True,
+        device: str = None,
+        torch_compile: bool = False,
+        **kwargs,
+    ):
         self.model_name = model_name
         self.num_classes = num_classes
         self.pretrained = pretrained
+        self.torch_compile = torch_compile
+
+        # Pick available device if not specified.
+        if device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = device
+
         self._initialize_model(**kwargs)
         self.embeddings = None
         self.file_paths = None
         self.img_folder = None
 
     def _initialize_model(self, **kwargs):
+        logger.info(f"Initializing model - {self.model_name}.")
         self.model = timm.create_model(
             self.model_name,
             num_classes=self.num_classes,
             pretrained=self.pretrained,
             **kwargs,
         )
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        if self.torch_compile:
+            logger.info("Running torch.compile.")
+            self.model = torch.compile(self.model, mode="max-autotune")
+
+        self.model.eval()
         self.model = self.model.to(self.device)
+
+        logger.info(f"Model loaded on device - {self.device}")
 
     def compute_embeddings(self, image_folder_path, save_dir="."):
         self.img_folder = image_folder_path
-        self.model.eval()
+
         data_config = timm.data.resolve_model_data_config(self.model)
         transforms = timm.data.create_transform(**data_config, is_training=False)
 
@@ -105,12 +134,16 @@ class TimmEncoder:
         self.embeddings = np.vstack(embeddings_list)
         self.file_paths = file_paths
 
+        logger.info(f"Saving embeddings in directory - {save_dir} .")
+
         np.save(
-            os.path.join(save_dir, f"{self.model_name}_embeddings.npy"), self.embeddings
+            os.path.join(save_dir, f"{self.model_name.split('/')[-1]}_embeddings.npy"),
+            self.embeddings,
         )
 
         with open(
-            os.path.join(save_dir, f"{self.model_name}_file_paths.txt"), "w"
+            os.path.join(save_dir, f"{self.model_name.split('/')[-1]}_file_paths.txt"),
+            "w",
         ) as f:
             for path in self.file_paths:
                 f.write(f"{path}\n")
