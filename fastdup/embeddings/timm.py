@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('fastdup.embeddings.timm')
 
 
-class FastdupTimmEncoder:
+class TimmEncoder:
     """
     A wrapper class for TIMM (PyTorch Image Models) to simplify model initialization and
     feature extraction for image datasets.
@@ -41,7 +41,7 @@ class FastdupTimmEncoder:
         compute_embeddings(image_folder_path, save_dir="."): Compute and save embeddings in a local folder.
 
     Example:
-        >>> wrapper = FastdupTimmEmbeddingModel(model_name='resnet18')
+        >>> wrapper = TimmEncoder(model_name='resnet18')
         >>> wrapper.compute_embeddings('path/to/image/folder')
     """
 

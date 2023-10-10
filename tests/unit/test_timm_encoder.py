@@ -1,14 +1,14 @@
 import os
 import shutil
-from fastdup.embeddings.timm import FastdupTimmEncoder 
+from fastdup.embeddings.timm import TimmEncoder 
 def test_initialization():
-    timm_model = FastdupTimmEncoder(model_name='mobilenetv2_050')
+    timm_model = TimmEncoder(model_name='mobilenetv2_050')
     assert timm_model.model_name == 'mobilenetv2_050'
     assert timm_model.pretrained == True
     assert timm_model.num_classes == 0
 
 def test_compute_embeddings():
-    timm_model = FastdupTimmEncoder(model_name='mobilenetv2_050')
+    timm_model = TimmEncoder(model_name='mobilenetv2_050')
     timm_model.compute_embeddings('tests/sample_images_for_tests')
     
     assert timm_model.embeddings is not None
@@ -22,7 +22,7 @@ def test_compute_embeddings():
     
 
 def test_save_files_embeddings():
-    timm_model = FastdupTimmEncoder(model_name='mobilenetv2_050')
+    timm_model = TimmEncoder(model_name='mobilenetv2_050')
     save_dir = "saved_embeddings_files"
 
     os.makedirs(save_dir, exist_ok=True)
