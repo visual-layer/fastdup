@@ -4,6 +4,7 @@ from fastdup.image import fastdup_imread
 from fastdup.sentry import fastdup_capture_exception
 from PIL import Image
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fastdup.models.grounding_dino")
 

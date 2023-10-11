@@ -1284,43 +1284,30 @@ class FastdupController:
 
         return df
     
-    def enrich(self, task, model, input_df=None, user_tags="None", num_rows=None, input_col=None, output_col=None, device=None):
+    def enrich(self, task, model, input_df, input_col, num_rows=None, device=None):
 
-        if input_df is None:
-            df = self.annotations(valid_only=True)
-            df.drop(["index", "error_code", "is_valid", "fd_index"], axis=1, inplace=True)
-        else:
-            df = input_df
-
-        if "filename" not in df.columns:
-            raise KeyError(
-                "Column `filename` does not exist in the DataFrame. Please ensure the DataFrame contains the column `filename`."
-            )
-
+        self._fastdup_applied = True # Hack: Allow users to run enrichment without first running fastdup
         if num_rows:
-            df = df.head(num_rows)
+            df = input_df.head(num_rows)
+        else: df = input_df
 
         if task == "zero-shot-classification":
             if model == "recognize-anything-model":
                 from fastdup.models.ram import RecognizeAnythingModel
                 
                 enrichment_model = RecognizeAnythingModel(device=device)
-                df["ram_tags"] = df["filename"].apply(enrichment_model.run_inference)
+                df["ram_tags"] = df[input_col].apply(enrichment_model.run_inference)
             
             elif model == "tag2text":
                 from fastdup.models.tag2text import Tag2TextModel
 
                 enrichment_model = Tag2TextModel(device=device)
-                df["tag2text_tags"] = df["filename"].apply(
+                df["tag2text_tags"] = df[input_col].apply(
                     lambda x: enrichment_model.run_inference(x)[0].replace(" | ", " . ")
                 )
-                df["tag2text_caption"] = df["filename"].apply(
+                df["tag2text_caption"] = df[input_col].apply(
                     lambda x: enrichment_model.run_inference(x)[2]
                 )
-                if user_tags != "None":
-                    df["tag2text_user_caption"] = df["filename"].apply(
-                        lambda x: enrichment_model.run_inference(x, user_tags=user_tags)[2]
-                    )
 
         elif task == "zero-shot-detection":
             if model == "grounding-dino":
