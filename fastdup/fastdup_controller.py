@@ -1293,13 +1293,13 @@ class FastdupController:
 
         if task == "zero-shot-classification":
             if model == "recognize-anything-model":
-                from fastdup.models.ram import RecognizeAnythingModel
+                from fastdup.models_ram import RecognizeAnythingModel
                 
                 enrichment_model = RecognizeAnythingModel(device=device)
                 df["ram_tags"] = df[input_col].apply(enrichment_model.run_inference)
             
             elif model == "tag2text":
-                from fastdup.models.tag2text import Tag2TextModel
+                from fastdup.models_tag2text import Tag2TextModel
 
                 enrichment_model = Tag2TextModel(device=device)
                 df["tag2text_tags"] = df[input_col].apply(
@@ -1311,7 +1311,7 @@ class FastdupController:
 
         elif task == "zero-shot-detection":
             if model == "grounding-dino":
-                from fastdup.models.grounding_dino import GroundingDINO
+                from fastdup.models_grounding_dino import GroundingDINO
 
                 enrichment_model = GroundingDINO(device=device)
 
@@ -1328,7 +1328,7 @@ class FastdupController:
         elif task == "zero-shot-segmentation":
             if model == "segment-anything":
                 import torch
-                from fastdup.models.sam import SegmentAnythingModel
+                from fastdup.models_sam import SegmentAnythingModel
 
                 enrichment_model = SegmentAnythingModel(device=device)
 

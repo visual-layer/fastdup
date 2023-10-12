@@ -1,6 +1,6 @@
 import os
 import shutil
-from fastdup.embeddings.timm import TimmEncoder 
+from fastdup.embeddings_timm import TimmEncoder 
 def test_initialization():
     timm_model = TimmEncoder(model_name='mobilenetv2_050')
     assert timm_model.model_name == 'mobilenetv2_050'
