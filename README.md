@@ -603,7 +603,7 @@ This notebooks in this section shows how you can load data from various sources 
          </a>
       </td>
       <td rowspan="4">
-         <b> 🧠 TIMM Embeddings:</b> Compute your embeddings using <a href="https://github.com/huggingface/pytorch-image-models">TIMM (PyTorch Image Models)</a> and run fastdup over the them to analyze for issues.  model. Runs on CPU and GPU.
+         <b> 🧠 TIMM Embeddings:</b> Compute dataset embeddings using <a href="https://github.com/huggingface/pytorch-image-models">TIMM (PyTorch Image Models)</a> and run fastdup over the them to surface dataset issues. Runs on CPU and GPU.
       </td>
       <td align="center" width="80">
          <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/embeddings-timm.ipynb">
