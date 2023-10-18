@@ -151,3 +151,4 @@ class TimmEncoder:
         ) as f:
             for path in self.file_paths:
                 f.write(f"{path}\n")
+

@@ -5,6 +5,7 @@ import json
 from PIL import Image
 import numpy as np
 
+
 def convert_to_coco_format(df, bbox_col, label_col, json_filename):
     # Initialize COCO formatted dictionary
     coco_format = defaultdict(list)
@@ -70,12 +71,13 @@ def convert_to_coco_format(df, bbox_col, label_col, json_filename):
         annotation["category_id"] = category_map[annotation["category_id"]]
 
     with open(json_filename, 'w') as f:
-        json.dump(coco_format, f)   
+        json.dump(coco_format, f)
 
 
-def plot_annotations(df, image_col='filename', bbox_col=None, labels_col=None, scores_col=None, tags_col=None, masks_col=None, num_rows=5):
+def plot_annotations(df, image_col='filename', bbox_col=None, labels_col=None, scores_col=None, tags_col=None,
+                     masks_col=None, num_rows=5):
     df = df.head(num_rows)
-    
+
     if tags_col:
         unique_tags = {tag for labels in df[tags_col] for tag in labels.replace(" ", "").split('.')}
         cmap = plt.cm.get_cmap('hsv', len(unique_tags))
@@ -90,8 +92,8 @@ def plot_annotations(df, image_col='filename', bbox_col=None, labels_col=None, s
         num_subplots += 1
 
     num_rows = len(df)
-    fig, axes = plt.subplots(num_rows, num_subplots, figsize=(6*num_subplots, 6*num_rows))
-    
+    fig, axes = plt.subplots(num_rows, num_subplots, figsize=(6 * num_subplots, 6 * num_rows))
+
     if num_rows == 1:
         axes = [axes]
 
@@ -103,14 +105,14 @@ def plot_annotations(df, image_col='filename', bbox_col=None, labels_col=None, s
         except Exception as e:
             print(f"Error reading image {row[image_col]}: {e}")
             continue
-        
+
         # Original image
         axes[idx][0].imshow(image_rgb)
         axes[idx][0].set_title("Original Image")
         axes[idx][0].axis('off')
 
         subplot_idx = 1
-        
+
         # Bounding boxes
         if bbox_col:
             axes[idx][subplot_idx].imshow(image_rgb)
@@ -119,10 +121,13 @@ def plot_annotations(df, image_col='filename', bbox_col=None, labels_col=None, s
             for bbox, label, score in zip(row[bbox_col], row[labels_col], row[scores_col]):
                 x_min, y_min, x_max, y_max = bbox
                 edge_color = label_color_map.get(label, (1, 1, 1))
-                axes[idx][subplot_idx].add_patch(plt.Rectangle((x_min, y_min), x_max - x_min, y_max - y_min, linewidth=2, edgecolor=edge_color, facecolor='none'))
-                axes[idx][subplot_idx].text(x_min, y_min-5, f'{label} | {score:.2f}', color='white', bbox=dict(facecolor='black', edgecolor='black', boxstyle='round,pad=0.5'))
+                axes[idx][subplot_idx].add_patch(
+                    plt.Rectangle((x_min, y_min), x_max - x_min, y_max - y_min, linewidth=2, edgecolor=edge_color,
+                                  facecolor='none'))
+                axes[idx][subplot_idx].text(x_min, y_min - 5, f'{label} | {score:.2f}', color='white',
+                                            bbox=dict(facecolor='black', edgecolor='black', boxstyle='round,pad=0.5'))
             subplot_idx += 1
-        
+
         # Masks
         if masks_col:
             axes[idx][subplot_idx].imshow(image_rgb)

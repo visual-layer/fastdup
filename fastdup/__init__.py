@@ -13,6 +13,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import fastdup
+
 os.environ["QT_QPA_PLATFORM"] ="offscreen"
 from ctypes import *
 import pandas as pd
@@ -40,7 +42,7 @@ except:
     tqdm = lambda x, total=None: x
 
 
-__version__="1.13"
+__version__="1.39"
 CONTACT_EMAIL="info@visual-layer.com"
 
 init_sentry()
@@ -155,6 +157,13 @@ def do_run(input_dir='',
     if isinstance(input_dir, str):
         input_dir = shorten_path(input_dir)
 
+    try:
+        from .ascii_art import get_ascii_art
+        print(get_ascii_art())
+    except:
+        pass
+
+
     if 'sync_s3_to_local=1' in turi_param and isinstance(input_dir, str):
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
         if 'delete_img=1' in turi_param:
@@ -181,7 +190,7 @@ def do_run(input_dir='',
 
     # in case of failure crash report store current config
     fastdup_capture_log_debug_state(config)
-    assert isinstance(work_dir, (str, pathlib.Path))
+    assert isinstance(work_dir, (str, pathlib.Path)), f"Work dir should be a str or pathlib.Path got {work_dir}"
     work_dir = shorten_path(work_dir)
     try:
         if not work_dir.startswith('smb://'):
@@ -289,8 +298,8 @@ def do_run(input_dir='',
             if d != HIGH_ACCURACY_MODEL_FEATURE_WIDTH:
                 assert False, "Can not run high accuracy model when using user provided d, please run with high_accuracy=False, or undefine d"
 
-        if _model_path != model_path_full:
-            if _model_path.endswith('UndisclosedFastdupModel2.ort'):
+        if str(_model_path) != model_path_full:
+            if str(_model_path).endswith('UndisclosedFastdupModel2.ort'):
                 d = HIGH_ACCURACY_MODEL_FEATURE_WIDTH
             else:
                 assert False, "Error: Can not run high accuracy model when using user provided model_path, please run with high_accuracy=False"
@@ -452,7 +461,7 @@ def run(input_dir='',
                 * A file containing s3 full paths or minio paths each on its own row.
                 * A python list with absolute filenames.
                 * A python list with absolute folders, all images and videos on those folders are added recusively
-                * For run_mode=2, a folder containing fastdup binary features or a file containing list of atrain_feature.dat.csv files in multiple folders
+                * For run_mode=2, a folder containing fastdup binary featvecures or a file containing list of atrain_feature.dat.csv files in multiple folders
                 * yolov5 yaml input file containing train and test folders (single folder supported for now)
                 * We support jpg, jpeg, tiff, tif, giff, heif, heic, bmp, png, mp4, avi. In addition we support tar, tar.gz, tgz and zip files containing images.
             If you have other image extensions that are readable by opencv imread() you can give them in a file (each image on its own row) and then we do not check for the
@@ -553,7 +562,7 @@ def run(input_dir='',
             ==num_clusters=XX==, number of KMeans clusters to use. Default is 100.\
 
         bounding_box (str): Optional bounding box to crop images, given as bounding_box='row_y=xx,col_x=xx,height=xx,width=xx'. This defines a global bounding box to be used for all images.
-            Beta release features (need to sign up at https://visual-layer.com): Tt is possible to set bounding_box='face' to crop the face from the image (in case a face is present).
+            It is possible to set bounding_box='face' to crop the face from the image (in case a face is present). bounding_box='quick_face' just crops the faces without running fastdup.
             In addition, you can set bounding_box='yolov5s' and we will run yolov5s to create and crop bounding boxes on your data. (We do not host this model, it is downloaded from the relevant github proejct).
             For the face/yolov5 crop the margin around the face is defined by turi_param='augmentation_horiz=0.2,augmentation_vert=0.2' where 0.2 mean 20% additional margin around the face relative to the width and height respectively.
             It is possible to change the margin, the lowest value is 0 (no margin) and upper allowed value is 1. Default is 0.2.
@@ -577,10 +586,10 @@ def run(input_dir='',
 
 
 
-    if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr']:
-        if bounding_box == 'face':
+    if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr', 'quick_face', 'quick_yolov5s']:
+        if bounding_box == 'face' or bounding_box == 'quick_face':
             local_model = os.path.join(LOCAL_DIR, 'UndisclosedFDModel.onnx')
-        elif bounding_box == 'yolov5s':
+        elif bounding_box == 'yolov5s' or bounding_box == 'quick_yolov5s':
             assert "dinov2" not in os.path.basename(model_path), "Can not run a combination of yolov5s and dinov2 models, please remove one of them"
             local_model = find_model(bounding_box, YOLOV5S_MODEL)
         elif bounding_box in ['rotated', 'xywh_bbox', 'ocr']:
@@ -618,6 +627,10 @@ def run(input_dir='',
         if (ret != 0):
             print("Failed to run fastdup")
             return ret
+
+        if bounding_box in ['quick_face', 'quick_yolo']:
+            return 0
+
         try:
             def safe_file_move(work_dir, backup_dir, fname):
                 if os.path.exists(os.path.join(work_dir, fname)):
@@ -840,6 +853,7 @@ def save_binary_feature(save_path, filenames, np_array):
         assert os.path.exists(local_filename), "Failed to save file " + local_filename
 
     except Exception as ex:
+        fastdup_capture_exception("save_binary_feature", ex)
         print("Failed to save to " + save_path + " Exception: " + ex)
         return 1
 
@@ -854,7 +868,7 @@ def load_config(work_dir):
             with open(f'{work_dir}/config.json') as f:
                 return json.load(f)
     except:
-        print(f"Failed to read config file {work_dir}/config.json")
+        print(f"Warning: Failed to read config file {work_dir}/config.json")
         return None
 
 def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_path, max_width):
@@ -873,7 +887,7 @@ def check_params(work_dir, num_images, lazy_load, get_label_func, slice, save_pa
     if slice is not None and get_label_func is None:
         assert False, "When slicing on specific labels need to provide a function to get the label (using the parameter get_label_func"
 
-    if save_path.endswith('.html'):
+    if str(save_path).endswith('.html'):
         save_path = os.path.dirname(save_path)
     if save_path == "":
         save_path = "."
@@ -914,7 +928,8 @@ def load_dataframe(file_type, type, input_dir, work_dir, kwargs, cols):
             file_type = file_type.head(nrows)
         kwargs['external_df'] = True
 
-    elif isinstance(file_type, str):
+    elif isinstance(file_type, str) or isinstance(file_type, pathlib.Path):
+        file_type = str(file_type)
         assert os.path.exists(file_type), "Failed to find similarity file " + file_type
         if os.path.isdir(file_type):
             if work_dir is None:
@@ -1254,7 +1269,7 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
 
 
     except Exception as ex:
-            fastdup_capture_exception("create_outliers_gallery", ex)
+        fastdup_capture_exception("create_outliers_gallery", ex)
 
 def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                               group_by='visual', slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
@@ -1437,7 +1452,7 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
         return ret
 
     except Exception as ex:
-            fastdup_capture_exception("create_component_videos_gallery", ex)
+        fastdup_capture_exception("create_component_videos_gallery", ex)
 
 def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load=False, get_label_func=None,
                             slice=None, max_width=None, max_items=None, get_bounding_box_func=None,
@@ -1542,6 +1557,7 @@ def inner_delete(files, dry_run, how, save_path=None):
 
             except Exception as ex:
                 print(f'Failed to {how} file', f, ' with exception', ex)
+                fastdup_capture_exception(f"inner_delete: Failed to {how} file {f}", ex)
     if not dry_run:
         print(f'total {how}d', count, 'files')
     return 0
@@ -1568,7 +1584,7 @@ def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
         assert False, "not supported"
 
 
-def delete_components(top_components, to_delete = None,  how = 'one', dry_run = True):
+def delete_components(top_components, to_delete = None,  min_distance = 0.98, how = 'one', dry_run = True):
     '''
     function to automate deletion of duplicate images using the connected components analysis.
 
@@ -1581,6 +1597,7 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
     Args:
         top_components (pd.DataFrame): largest components as found by the function find_top_components().
         to_delete (list): a list of integer component ids to delete. On default None which means delete duplicates from all components.
+        min_distance (float): delete only components with similarity larger than min_distance.
         how (int): either 'all' (deletes all the component) or 'one' (leaves one image and delete the rest of the duplicates)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
@@ -1601,7 +1618,9 @@ def delete_components(top_components, to_delete = None,  how = 'one', dry_run = 
         assert isinstance(dry_run, bool)
 
         if to_delete is None:
-            to_delete = top_components['component_id'].tolist()
+            to_delete = top_components['component_id'].unique()
+
+        top_components = top_components[top_components['distance'] >= min_distance]
 
         total_deleted = []
 
@@ -1635,7 +1654,7 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
     Args:
         top_components (pd.DataFrame): largest components as found by the function find_top_components().
         to_delete (list): a list of integer component ids to delete
-        how (int): either 'all' (deletes all the component) or 'majority' (leaves one image with the dominant label count and delete the rest)
+        how (int): either 'all' (deletes all the component) or 'one' (leaves one image with the dominant label count and delete the rest)
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
     Returns:
@@ -1663,7 +1682,7 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
             subdf = pd.DataFrame({'files':files, 'labels':labels})
             unique, counts = np.unique(np.array(labels), return_counts=True)
             counts_df = pd.DataFrame({"counts":counts}, index=unique).sort_values('counts', ascending=False)
-            if (how == 'majority'):
+            if (how == 'one'):
                 if (np.max(counts) >= len(subdf)/ 2):
                     sample = counts_df.index.values[0]
                     files = subdf[subdf['labels'] == sample]['files'].values
@@ -2853,8 +2872,10 @@ def run_kmeans_on_extracted(input_dir='',
 
 
 
-def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num_images=0, min_offset=0, max_offset=0, turi_param="",
-                         model_path = model_path_full, d=576, resize_video=0, keyframes_only=1, license=""):
+def extract_video_frames(input_dir, work_dir, verbose=False,
+                         num_threads=-1, num_images=0, min_offset=0, max_offset=0, turi_param="",
+                         model_path = model_path_full, d=576,
+                         resize_video=0, keyframes_only=1, license="", no_sort=0, resume=0):
     """
     A function to go over a collection of videos and etract them into frames. The output is saved to the work_dir/tmp
     subfolder.
@@ -2905,20 +2926,128 @@ def extract_video_frames(input_dir, work_dir, verbose=False, num_threads=-1, num
 
         d (int): output feature vector for model
 
+        resize_video (int): 1 = resize video, 0 = no resize
+
+        keyframes_only (bool): 1 = keyframes, 0 = all frmes
+
+        no_sort (int): 1 = do not sort while listing (recommended when working with more than 1,000,000 videos), 0 = default
+
+        resume (int): 0 = default, 1 = resume running on previous dataset
 
     Returns:
         ret (int): Status code 0 = success, 1 = error.
     """
     fastdup_capture_log_debug_state(locals())
+    assert no_sort in [0,1]
+    assert resume in [0,1]
 
     t_param = f"video_keyframe_only={keyframes_only},video_no_resize={int(resize_video == 0)},run_video_extraction_only=1"
     if (turi_param != ""):
         t_param += "," + turi_param
-
+    if (no_sort):
+        t_param += f",no_sort={no_sort},save_crops=1"
 
     return run(input_dir=input_dir, work_dir=work_dir, verbose=verbose, run_mode=1,
                turi_param=t_param, num_images=num_images, num_threads=num_threads,
-               min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d, license=license)
+               min_offset=min_offset, max_offset=max_offset, model_path=model_path, d=d,
+               license=license, resume=resume)
+
+
+def remove_duplicates(input_dir, work_dir=None, distance=0.96, dry_run=False, license=""):
+    """
+    This functions removes duplicates similar more than distance.
+    Be careful! the execution deletes files in place.
+
+    Args:
+        input_dir: name of the input folder
+        work_dir: temporary working dir for storing intermediate ifles
+        distance: similarity of the images, images more similar than distance are removed from disk
+
+    Returns:
+        0 in case of success
+
+    """
+    work_dir = "work_dir" if work_dir is None else work_dir
+    if os.path.exists(f'{work_dir}/atrain_features.dat'):
+        os.unlink(f'{work_dir}/atrain_features.dat')
+    ret = fastdup.run(input_dir=input_dir, work_dir=work_dir, turi_param=f'ccthreshold={distance},run_stats=0,no_sort=1', license=license)
+    assert ret == 0, "Failed to run fastdup"
+
+    comp = fastdup.find_top_components(work_dir)
+    if comp is None or len(comp) == 0:
+        print('No components found')
+        return 0
+
+    assert len(comp), "Failed to get components"
+    ret = fastdup.delete_components(comp, dry_run=dry_run)
+    return ret
+
+
+def iterate_on_webdatasets(input_dir, work_dir=None, bounding_box=None, caption=None,
+                           device='cpu', batch_size=8, num_images=None, verbose=0, license="",
+                           use_float_16=True):
+    """
+    Function to either cpation or crop objects or faces on a collection of webdatasets
+    Be careful! the execution deletes files in place.
+
+    Args:
+        input_dir: name of the input folder
+        work_dir: temporary working dir for storing intermediate fastdup files
+        tmp_dir: temporary working dir for extracting tars
+        bounding_box: optional cropping of faces/ objects face/ yolov5s
+        caption: optional labeling (automatic/ blip/ blip2/ vitgpt2)
+        device: whether to use a GPU (default: -1, CPU only ; set to 0 for GPU)
+        batch_size: the size of image batches to caption (default: 8)
+
+    Returns:
+        0 in case of success
+
+    """
+    import os
+    from tqdm import tqdm
+    import shutil
+    assert bounding_box is not None or caption is not None, "bounding_box should be face/yolov5s or caption should be automatic/blip/blip2/vigppt2"
+    from fastdup.captions import generate_labels
+
+    temp_dir = "fastdup_temp"
+    csv_name = bounding_box if bounding_box is not None else caption
+    bounding_box = "" if bounding_box is None else bounding_box
+
+    os.makedirs(work_dir, exist_ok=True)
+
+
+
+    tars = os.listdir(input_dir)
+    tars = [t for t in tars if t.endswith('.tar')]
+    assert len(tars), f"No tars found in input_dir {input_dir}"
+    for t in tqdm(sorted(tars)):
+        try:
+            if os.path.exists(os.path.join(work_dir, f'{csv_name}_{t}.csv')):
+                continue
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+            os.makedirs(temp_dir, exist_ok=True)
+            print('going to extract tar', t)
+            ret = os.system(f'tar xf {input_dir}/{t} -C {temp_dir}')
+            assert ret == 0, "Failed to extract tar file"
+            print('done extracting tar', t)
+
+            if caption is None:
+                fd = fastdup.create(input_dir=temp_dir, work_dir=work_dir)
+                fd.run(ccthreshold=0.96, overwrite=True, license=license, num_images=num_images, run_stats=0, run_cc=0,
+                       bounding_box=bounding_box, verbose=verbose, print_summary=False)
+                os.system(f'touch {work_dir}/{csv_name}_{t}.csv')
+            else:
+                from fastdup.utils import  returnfilelist
+                file_list = returnfilelist(temp_dir)
+                captions = generate_labels(file_list, caption, device, batch_size, use_float_16=use_float_16)
+                captions_df = pd.DataFrame({'filename':file_list, 'caption':captions})
+                captions_df['caption'] = captions_df['caption'].replace(r'\n', ' ', regex=True)
+                captions_df[['filename', 'caption']].to_csv(f'{work_dir}/{csv_name}_{t}.csv')
+
+        except Exception as ex:
+            fastdup_capture_exception("failed to iterate on webdataset", ex)
+    return 0
 
 # give access to the main class
 # at the end of the file to solve circular dependencies

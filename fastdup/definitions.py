@@ -49,7 +49,7 @@ PRINTOUT_BAR_WIDTH = 88
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "1.39"
+VERSION__ = "1.50"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 
@@ -58,7 +58,7 @@ MATPLOTLIB_ERROR_MSG = "Warning: failed to import matplotlib, plot is not genera
 "and special care needs to select the right backend for your OS/Hardware combination. You can install matplot lib using "
 "python3.8 -m pip install matplotlib matplotlib-inline. (change the python3.8 to your python version). "
 
-SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".tiff", ".heic", ".heif", ".bmp", ".webp"]
+SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".tiff", ".heic", ".heif", ".bmp", ".webp", ".jp2"]
 SUPPORTED_VID_FORMATS = ["mp4", ".avi"]
 
 RUN_ALL = 0

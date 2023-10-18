@@ -32,6 +32,7 @@ import os
 import cv2
 import numpy as np
 from fastdup.image import get_shape
+from fastdup.sentry import fastdup_capture_exception
 
 def image_to_label_img_xml(img_path, cur_label, save_dir=None):
 
@@ -103,6 +104,7 @@ def do_export_to_labelimg(files, labels, save_path):
                 image_to_label_img_xml(f, None, save_path)
                 count+=1
             except Exception as ex:
+                fastdup_capture_exception("do_export_to_labelimg", ex)
                 print('Failed to retag file', f, ' with exception', ex)
     else:
         assert len(labels) == len(files), "Number of labels and files should be the same"
@@ -111,6 +113,7 @@ def do_export_to_labelimg(files, labels, save_path):
                 image_to_label_img_xml(f, l, save_path)
                 count+=1
             except Exception as ex:
+                fastdup_capture_exception("do_export_to_labelimg", ex)
                 print('Failed to retag file', f, ' with exception', ex)
 
     print('Successfully exported to labeliImg', count, 'files')

@@ -7,7 +7,7 @@ import hashlib
 import logging
 from typing import Optional, Any
 from concurrent.futures import ThreadPoolExecutor
-
+from fastdup.sentry import fastdup_capture_exception
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -67,7 +67,7 @@ class FastdupHFDataset(Dataset):
                 dataset_name, split=split, cache_dir=self.cache_dir, **kwargs
             )
         except Exception as e:
-            logging.error(f"Error loading dataset: {e}")
+            fastdup_capture_exception(f"dataset/__init__", e)
             return
 
         super().__init__(
@@ -87,7 +87,7 @@ class FastdupHFDataset(Dataset):
             current_hash: str = self._generate_img_folder_hash()
             previous_hash: Optional[str] = self._retrieve_cached_metadata()
         except Exception as e:
-            logging.error(f"Error generating or retrieving hash: {e}")
+            fastdup_capture_exception(f"Error generating or retrieving hash:", e)
             return
 
         if (current_hash != previous_hash) or reconvert_jpg:
@@ -122,6 +122,7 @@ class FastdupHFDataset(Dataset):
             with open(cache_file, "w") as f:
                 f.write(cache_hash)
         except Exception as e:
+            fastdup_capture_exception("error extracting metadata", e)
             logging.error(f"Error caching metadata: {e}")
 
     def _retrieve_cached_metadata(self) -> Optional[str]:
@@ -131,6 +132,7 @@ class FastdupHFDataset(Dataset):
                 with open(cache_file, "r") as f:
                     return f.read()
             except Exception as e:
+                fastdup_capture_exception("Error opening cache file ", e)
                 logging.error(f"Error reading cached metadata: {e}")
         return None
 
@@ -150,6 +152,7 @@ class FastdupHFDataset(Dataset):
             image.save(os.path.join(label_dir, f"{idx}.jpg"))
             pbar.update(1)
         except Exception as e:
+            fastdup_capture_exception("Error saving an image", e)
             logging.error(f"Error in saving image at index {idx}: {e}")
 
     def _save_as_image_files(self) -> None:
@@ -177,6 +180,7 @@ class FastdupHFDataset(Dataset):
                             filenames.append(subentry.path)
                             labels.append(label)
         except Exception as e:
+            fastdup_capture_exception("Error generating annotation", e)
             logging.error(f"Error in generating annotations: {e}")
             return pd.DataFrame()
 
