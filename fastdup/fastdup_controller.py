@@ -1372,12 +1372,15 @@ class FastdupController:
                     )
 
                 def preprocess_and_run(filename, bbox):
-                    result = enrichment_model.run_inference(filename, bboxes=bbox)
+                    try:
+                        result = enrichment_model.run_inference(filename, bboxes=bbox)
 
-                    if isinstance(result, torch.Tensor) and result.device.type == "cuda":
-                        result = result.cpu()
+                        if isinstance(result, torch.Tensor) and result.device.type == "cuda":
+                            result = result.cpu()
 
-                    return result
+                        return result
+                    except Exception as e:
+                        print(e)
 
                 df["sam_masks"] = [
                     preprocess_and_run(filename, bbox)

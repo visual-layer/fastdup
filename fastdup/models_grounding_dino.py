@@ -1,4 +1,5 @@
 import logging
+import cv2
 from fastdup.utils import find_model
 from fastdup.image import fastdup_imread
 from fastdup.sentry import fastdup_capture_exception
@@ -107,7 +108,7 @@ class GroundingDINO:
     ):
         pred_dict = {}
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
-        img = img[:, :, ::-1]  # Convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert to RGB
         image_pil = Image.fromarray(img)
         image_pil = self._apply_exif_orientation(image_pil)
         image, _ = grounding_dino_transform(image_pil, None)  # 3, h, w

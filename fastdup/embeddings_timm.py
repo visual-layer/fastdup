@@ -1,4 +1,5 @@
 import os
+import cv2
 import numpy as np
 import logging
 from PIL import Image
@@ -118,7 +119,7 @@ class TimmEncoder:
 
             try:
                 img = fastdup_imread(img_path, input_dir=None, kwargs=None)
-                img = img[:, :, ::-1]  # Convert to RGB
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert to RGB
                 img = Image.fromarray(img)
                 img_tensor = transforms(img).unsqueeze(0).to(self.device)
 

@@ -30,13 +30,17 @@ WEIGHTS_DOWNLOAD_URL = (
 
 
 class SegmentAnythingModel:
-    def __init__(self, model_weights: str = None, device: str = None) -> None:
+    def __init__(
+        self, model_weights: str = None, model_type: str = None, device: str = None
+    ) -> None:
         # If no config/weights provided, search on local path, if not found, download from URL
         self.model_weights = (
             model_weights
             if model_weights is not None
             else find_model("sam_vit_h_4b8939.pth", WEIGHTS_DOWNLOAD_URL)
         )
+
+        self.model_type = model_type if model_type is not None else "vit_h"
 
         # Pick available device if not specified.
         if device is None:
@@ -55,14 +59,14 @@ class SegmentAnythingModel:
     def _load_model(self):
         logger.info(f"Loading model checkpoint from - {self.model_weights}")
 
-        build_sam = sam_model_registry["vit_h"]
+        build_sam = sam_model_registry[self.model_type]
         model = SamPredictor(build_sam(checkpoint=self.model_weights))
         model.mode = model.model.to(self.device)
         return model
 
     def run_inference(self, image_path, bboxes):
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
-        img = img[:, :, ::-1]  # Convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert to RGB
 
         self.model.set_image(img)
         transformed_boxes = self.model.transform.apply_boxes_torch(

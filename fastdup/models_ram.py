@@ -5,6 +5,7 @@ from fastdup.sentry import fastdup_capture_exception
 from PIL import Image
 import contextlib
 import io
+import cv2
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fastdup.models.ram")
@@ -67,7 +68,7 @@ class RecognizeAnythingModel:
 
     def run_inference(self, image_path: str) -> str:
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
-        img = img[:, :, ::-1]  # Convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(img)
         transform = get_transform(image_size=384)
         image = transform(image).unsqueeze(0).to(self.device)

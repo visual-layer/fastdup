@@ -1,4 +1,5 @@
 import logging
+import cv2
 from fastdup.utils import find_model
 from fastdup.image import fastdup_imread
 from fastdup.sentry import fastdup_capture_exception
@@ -76,7 +77,7 @@ class Tag2TextModel:
 
     def run_inference(self, image_path: str, user_tags="None") -> tuple:
         img = fastdup_imread(image_path, input_dir=None, kwargs=None)
-        img = img[:, :, ::-1]  # Convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert to RGB
         image = Image.fromarray(img)
         transform = get_transform(image_size=384)
         image = transform(image).unsqueeze(0).to(self.device)
