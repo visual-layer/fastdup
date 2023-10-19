@@ -598,7 +598,7 @@ This notebooks in this section shows how you can load data from various sources 
 <table>
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/enrichment-ram-groundingdino-sam">
+         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot">
          <img src="./gallery/enrichment_thumbnail.jpg" width="200">
          </a>
       </td>
@@ -606,28 +606,28 @@ This notebooks in this section shows how you can load data from various sources 
          <b> 🎯 Zero-shot Data Enrichment:</b> Enrich your visual data with labels, captions, bounding boxes, and masks by running then over zero-shot models such as <a href="https://github.com/xinyu1205/recognize-anything">Recognize Anything Model</a>, <a href="https://github.com/IDEA-Research/GroundingDINO">Grounding DINO</a>, <a href="https://github.com/facebookresearch/segment-anything">Segment Anything Model</a> and more.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-ram-groundingdino-sam.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-ram-groundingdino-sam.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-ram-groundingdino-sam.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-ram-groundingdino-sam.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
