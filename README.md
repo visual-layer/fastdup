@@ -597,7 +597,43 @@ This notebooks in this section shows how you can load data from various sources 
 > **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
 
 <table>
-<tr>
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot">
+         <img src="./gallery/enrichment_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b> 🎯 Zero-shot Data Enrichment:</b> Enrich your visual data with labels, captions, bounding boxes, and masks by running then over zero-shot models such as <a href="https://github.com/xinyu1205/recognize-anything">Recognize Anything Model</a>, <a href="https://github.com/IDEA-Research/GroundingDINO">Grounding DINO</a>, <a href="https://github.com/facebookresearch/segment-anything">Segment Anything Model</a> and more.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/embeddings-timm">
          <img src="./gallery/timm_embeddings_thumbnail.jpg" width="200">
