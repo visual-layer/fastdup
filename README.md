@@ -364,7 +364,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 
 
 ## Data Sources
-This notebooks in this section shows how you can load data from various sources and analyze them with fastdup.
+The notebooks in this section shows how you can load data from various sources and analyze them with fastdup.
 
 <table>
     <tr>
@@ -591,49 +591,130 @@ This notebooks in this section shows how you can load data from various sources 
     <!-- ------------------------------------------------------------------- -->
 </table>
 
-
-## Exciting New Features
-
-> **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
+## Data Enrichment
+The notebooks in this section shows how you can enrich your visual dataset using various models supported in fastdup.
 
 <table>
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot">
-         <img src="./gallery/enrichment_thumbnail.jpg" width="200">
+         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-classification">
+         <img src="./gallery/enrichment_classification_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b> 🎯 Zero-shot Data Enrichment:</b> Enrich your visual data with labels, captions, bounding boxes, and masks by running then over zero-shot models such as <a href="https://github.com/xinyu1205/recognize-anything">Recognize Anything Model</a>, <a href="https://github.com/IDEA-Research/GroundingDINO">Grounding DINO</a>, <a href="https://github.com/facebookresearch/segment-anything">Segment Anything Model</a> and more.
+         <b> 🎞 Zero-Shot Classification:</b> Enrich your visual data with zero-shot image classification and tagging models such as <a href="https://github.com/xinyu1205/recognize-anything">Recognize Anything Model</a>, <a href="https://github.com/xinyu1205/recognize-anything">Tag2Text</a>, and more.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-classification">🔗 Learn More.</a></div>
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-classification.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-classification.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-classification.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-classification.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
    </tr>
+   <!-- ------------------------------------------------------------------- -->
    <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-detection">
+         <img src="./gallery/enrichment_detection_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b> 🧭 Zero-Shot Detection:</b> Enrich your visual data with zero-shot image detection model such as <a href="https://github.com/IDEA-Research/GroundingDINO">Grounding DINO</a> and more.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-detection">🔗 Learn More.</a></div>
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-detection.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-detection.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-detection.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-detection.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-segmentation">
+         <img src="./gallery/enrichment_segmentation_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b> 🎯 Zero-Shot Segmentation:</b> Enrich your visual data with zero-shot image segmentation model such as <a href="https://github.com/facebookresearch/segment-anything">Segment Anything Model</a> and more.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/enrichment-zero-shot-segmentation">🔗 Learn More.</a></div>
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-segmentation.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-segmentation.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-segmentation.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/enrichment-zero-shot-segmentation.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+</table>
+
+## Feature Extraction
+The notebooks in this section shows how you can run fastdup on your own embeddings in combination with frameworks like ONNX and PyTorch.
+<table>
+ <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/embeddings-timm">
          <img src="./gallery/timm_embeddings_thumbnail.jpg" width="200">
@@ -743,7 +824,13 @@ This notebooks in this section shows how you can load data from various sources 
          </a>
       </td>
    </tr>
-   <!-- ------------------------------------------------------------------- -->
+</table>
+
+## Exciting New Features
+
+> **Note**: We're happy to announce new features are out from beta testing and now available to the public, completely free of charge! We invite you to try them out and provide us with your valuable [feedback](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email)!
+
+<table>
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/video-face-detection">
