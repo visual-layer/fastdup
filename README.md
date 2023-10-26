@@ -363,7 +363,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 </table>
 
 
-## Data Sources
+## Load Data from Sources
 The notebooks in this section shows how you can load data from various sources and analyze them with fastdup.
 
 <table>
@@ -591,7 +591,7 @@ The notebooks in this section shows how you can load data from various sources a
     <!-- ------------------------------------------------------------------- -->
 </table>
 
-## Data Enrichment
+## Enrich Data using Foundation Models
 The notebooks in this section shows how you can enrich your visual dataset using various foundation models supported in fastdup.
 
 <table>
@@ -711,7 +711,7 @@ The notebooks in this section shows how you can enrich your visual dataset using
    <!-- ------------------------------------------------------------------- -->
 </table>
 
-## Feature Extraction
+## Extract Features From Dataset
 The notebooks in this section shows how you can run fastdup on your own embeddings in combination with frameworks like ONNX and PyTorch.
 <table>
  <tr>
