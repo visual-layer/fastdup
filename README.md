@@ -592,7 +592,7 @@ The notebooks in this section shows how you can load data from various sources a
 </table>
 
 ## Data Enrichment
-The notebooks in this section shows how you can enrich your visual dataset using various models supported in fastdup.
+The notebooks in this section shows how you can enrich your visual dataset using various foundation models supported in fastdup.
 
 <table>
    <tr>
