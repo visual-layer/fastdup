@@ -137,3 +137,4 @@ dmypy.json
 # images downloaded for the examples dir
 examples/*
 !examples/*.ipynb
+work_dir

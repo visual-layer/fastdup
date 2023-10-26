@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from datetime import datetime
-from jinja2 import Template
 import os
 from glob import glob
 import time
@@ -97,6 +96,7 @@ def run_comparison(device: str, num_imgs: int):
     output_dir = os.path.join(OUTPUT_DIR, f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}_{num_imgs}_imgs')
     cap_start = time.perf_counter()
     fd = fastdup.create(input_dir=IMGS_PATH)
+    fd.run()
     filenames = get_images_from_path(fd.input_dir)
     np.random.seed(123)
     chosen_filenames = np.random.choice(filenames, num_imgs, replace=False).tolist()
