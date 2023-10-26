@@ -133,3 +133,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# images downloaded for the examples dir
+examples/*
+!examples/*.ipynb
