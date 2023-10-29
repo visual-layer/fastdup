@@ -14,9 +14,41 @@ import json
 import shutil
 
 
+import torch
+from PIL import Image
+import sys
+sys.path.append('/Users/achiyajerbi/projects/misc/')
+
+from recognize_anything.ram.models import ram_plus
+from recognize_anything.ram import inference_ram as inference
+from recognize_anything.ram import get_transform
+from typing import List
+
+
+def ram_plus_inference(img_path: str):
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cpu")
+
+    transform = get_transform(image_size=384)
+
+    #######load model
+    model = ram_plus(pretrained='/Users/achiyajerbi/Downloads/ram_plus_swin_large_14m.pth',
+                             image_size=384,
+                             vit='swin_l')
+    model.eval()
+
+    model = model.to(device)
+
+    image = transform(Image.open(img_path)).unsqueeze(0).to(device)
+
+    res = inference(image, model)
+    print("Image Tags: ", res[0])
+    return res[0].replace(" | ", " . ")
+
+
 IMGS_WIDTH = 1000
 IMGS_PATH = '/Users/achiyajerbi/projects/matrix_imgs_batch_0'
-OUTPUT_DIR = f'/Users/achiyajerbi/projects/tags_vis_dir/'
+OUTPUT_DIR = '/Users/achiyajerbi/projects/tags_vis_dir'
 
 
 def resize_bboxes(bboxes, ratio):
@@ -55,7 +87,6 @@ def plot_bboxes(ax, bboxes, labels, scores):
     return ax
 
 
-
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
@@ -89,7 +120,7 @@ def generate_html(image_files, output_file_path):
 
     # Write the HTML content to a file
     with open(output_file_path, 'w') as html_file:
-        html_file.write(html_content)
+        html_file.write(html_content.encode('ascii', 'ignore').decode('ascii'))
 
 
 def run_comparison(device: str, num_imgs: int):
@@ -101,10 +132,13 @@ def run_comparison(device: str, num_imgs: int):
     np.random.seed(123)
     chosen_filenames = np.random.choice(filenames, num_imgs, replace=False).tolist()
     df = pd.DataFrame({'filename': chosen_filenames})
-    df = fd.caption(model_name='blip2', device = device, batch_size=8, subset=chosen_filenames)
+    # df = fd.caption(model_name='blip2', device = 'gpu' if device == 'cuda' else 'cpu', batch_size=8, subset=chosen_filenames)
     
     df = fd.enrich(task='zero-shot-classification', model='recognize-anything-model', device=device, input_df=df, input_col='filename')
-    df = fd.enrich(task='zero-shot-classification', model='tag2text', device=device, input_df=df, input_col='filename')
+
+    df['ram_plus_tags'] = 'N/A'
+    for i, row in df.iterrows():
+        df.iloc[i]['ram_plus_tags'] = ram_plus_inference(row['filename'])
 
     df = fd.enrich(task='zero-shot-detection', 
                model='grounding-dino', 
@@ -119,13 +153,12 @@ def run_comparison(device: str, num_imgs: int):
     df = fd.enrich(task='zero-shot-detection', 
                model='grounding-dino', 
                input_df=df, 
-               input_col='tag2text_tags'
+               input_col='ram_plus_tags'
      )
-
     df.rename(columns={
-        'grounding_dino_bboxes': 'grounding_dino_bboxes_tag2text', 
-        'grounding_dino_scores': 'grounding_dino_scores_tag2text',
-        'grounding_dino_labels': 'grounding_dino_labels_tag2text'}, inplace=True)
+        'grounding_dino_bboxes': 'grounding_dino_bboxes_ram_plus', 
+        'grounding_dino_scores': 'grounding_dino_scores_ram_plus',
+        'grounding_dino_labels': 'grounding_dino_labels_ram_plus'}, inplace=True)
 
     cap_end = time.perf_counter()
     print(f'Captioning on {device} took {cap_end - cap_start} seconds')
@@ -134,11 +167,12 @@ def run_comparison(device: str, num_imgs: int):
     os.makedirs(plots_output_path, exist_ok=True)
 
     for _, row in df.iterrows():
-        filename = row['filename']
         nice_filename = '_'.join(filename.split('/')[-2:])
+        img_output_path = os.path.join(plots_output_path, nice_filename)
+
+        filename = row['filename']
         ram_labels = row['ram_tags']
-        tag2text_labels = row['tag2text_tags']
-        tag2text_caption = row['tag2text_caption']
+        ram_plus_labels = row['ram_plus_tags']
 
         # Read the image using PIL
         image = Image.open(filename)
@@ -161,27 +195,25 @@ def run_comparison(device: str, num_imgs: int):
             labels=row['grounding_dino_labels_ram'],
             )
         axes[1].set_title('Grounding DINO + RAM tags')
-
+       
         axes[2].imshow(resized_img)
         axes[2].axis('off')
         plot_bboxes(
             ax=axes[2], 
-            bboxes=resize_bboxes(row['grounding_dino_bboxes_tag2text'], resize_ratio),
-            scores=row['grounding_dino_scores_tag2text'],
-            labels=row['grounding_dino_labels_tag2text'],
+            bboxes=resize_bboxes(row['grounding_dino_bboxes_ram_plus'], resize_ratio),
+            scores=row['grounding_dino_scores_ram_plus'],
+            labels=row['grounding_dino_labels_ram_plus'],
             )
-        axes[2].set_title('Grounding DINO + Tag2Text tags')
-        
-        img_output_path = os.path.join(plots_output_path, nice_filename)
+        axes[2].set_title('Grounding DINO + RAM++ tags')
+
         plt.savefig(img_output_path)
         plt.close()
 
         data_dict = {
             'Filename': nice_filename,
             'RAM Tags': ram_labels,
-            'Tag2Text Tags': tag2text_labels,
-            'Tag2Text Caption': tag2text_caption,
-            'BLIP2 Caption': row['caption']
+            'RAM++ Tags': ram_plus_labels,
+            # 'BLIP2 Caption': row['caption']
         }
         json.dump(data_dict, open(img_output_path.replace('.jpg', '.json'), 'w'))
 
@@ -195,5 +227,5 @@ def run_comparison(device: str, num_imgs: int):
 
 if __name__ == '__main__':
     device = 'cpu'
-    num_imgs = 3
+    num_imgs = 5
     run_comparison(device, num_imgs)
