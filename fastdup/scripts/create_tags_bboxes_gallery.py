@@ -12,43 +12,55 @@ import base64
 from fastdup.models_utils import generate_colormap
 import json
 import shutil
+from tqdm import tqdm
 
 
 import torch
 from PIL import Image
 import sys
 sys.path.append('/Users/achiyajerbi/projects/misc/')
+from typing import List, Optional
 
-from recognize_anything.ram.models import ram_plus
+from recognize_anything.ram.models import ram, ram_plus
 from recognize_anything.ram import inference_ram as inference
 from recognize_anything.ram import get_transform
-from typing import List
-
-
-def ram_plus_inference(img_path: str):
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device("cpu")
-
-    transform = get_transform(image_size=384)
-
-    #######load model
-    model = ram_plus(pretrained='/Users/achiyajerbi/Downloads/ram_plus_swin_large_14m.pth',
-                             image_size=384,
-                             vit='swin_l')
-    model.eval()
-
-    model = model.to(device)
-
-    image = transform(Image.open(img_path)).unsqueeze(0).to(device)
-
-    res = inference(image, model)
-    print("Image Tags: ", res[0])
-    return res[0].replace(" | ", " . ")
 
 
 IMGS_WIDTH = 1000
 IMGS_PATH = '/Users/achiyajerbi/projects/matrix_imgs_batch_0'
 OUTPUT_DIR = '/Users/achiyajerbi/projects/tags_vis_dir'
+
+
+def ram_inference(img_path: str, image_size: int = 384):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    transform = get_transform(image_size=image_size)
+
+    #######load model
+    model = ram(pretrained='/Users/achiyajerbi/ram_swin_large_14m.pth',
+                             image_size=image_size,
+                             vit='swin_l')
+    model.eval()
+    model = model.to(device)
+    image = transform(Image.open(img_path)).unsqueeze(0).to(device)
+    res = inference(image, model)
+    print("Image Tags: ", res[0])
+    return res[0].replace(" | ", " . ")
+
+
+def ram_plus_inference(img_path: str, image_size: int = 384):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    transform = get_transform(image_size=image_size)
+
+    #######load model
+    model = ram_plus(pretrained='/Users/achiyajerbi/Downloads/ram_plus_swin_large_14m.pth',
+                             image_size=image_size,
+                             vit='swin_l')
+    model.eval()
+    model = model.to(device)
+    image = transform(Image.open(img_path)).unsqueeze(0).to(device)
+    res = inference(image, model)
+    print("Image Tags: ", res[0])
+    return res[0].replace(" | ", " . ")
 
 
 def resize_bboxes(bboxes, ratio):
@@ -92,13 +104,15 @@ def image_to_base64(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-def generate_html(image_files, output_file_path):
+def generate_html(image_files, output_file_path, orig_tags_names: Optional[str] = None):
     # Start building the HTML content
-    html_content = "<html><body>"
+    html_content = "<html><body>   <style> .green-text {color: green;} .red-text {color: red;} </style>"
 
     # Iterate over each image
     for image_file in image_files:
         data_dict = json.load(open(image_file.replace('.jpg', '.json')))
+        assert orig_tags_names is None or orig_tags_names in data_dict, f"expected {orig_tags_names} key in data dict"
+        orig_tags = set(data_dict[orig_tags_names].split(' . '))
 
         # Open a container div for each image and table with vertical centering
         html_content += "<div style='display: flex; align-items: center;'>"
@@ -108,8 +122,14 @@ def generate_html(image_files, output_file_path):
 
         # Add table to the right of the image
         html_content += "<table border='1' style='margin-left: 10px; height: 100px;'>"
-        for key, value in data_dict.items():
-            html_content += f"<tr style='height: 50%;'><td style='font-size: 30px;'>{key}</td><td style='font-size: 30px;'>{value}</td></tr>"
+        for key, value in data_dict.items():            
+            html_content += f"<tr style='height: 50%;'><td style='font-size: 30px;' >{key}</td><td style='font-size: 30px;'>{value}</td></tr>"
+            if orig_tags_names is not None and key.endswith(' Tags') and key != orig_tags_names:
+                curr_tags = value.split(' . ')
+                additions = [('+' + x) for x in list(set(curr_tags) - orig_tags)]
+                deletions = [('-' + x) for x in list(orig_tags - set(curr_tags))]
+                html_content += f"<tr style='height: 50%;'><td style='font-size: 30px;' >{key} additions:</td> <td class='green-text' style='font-size: 30px;'>{', '.join(additions)}</td></tr>"
+                html_content += f"<tr style='height: 50%;'><td style='font-size: 30px;' >{key} deletions:</td> <td class='red-text' style='font-size: 30px;'>{', '.join(deletions)}</td></tr>"
         html_content += "</table>"
 
         # Close the container div and add horizontal line
@@ -134,11 +154,20 @@ def run_comparison(device: str, num_imgs: int):
     df = pd.DataFrame({'filename': chosen_filenames})
     # df = fd.caption(model_name='blip2', device = 'gpu' if device == 'cuda' else 'cpu', batch_size=8, subset=chosen_filenames)
     
-    df = fd.enrich(task='zero-shot-classification', model='recognize-anything-model', device=device, input_df=df, input_col='filename')
+    # df = fd.enrich(task='zero-shot-classification', model='recognize-anything-model', device=device, input_df=df, input_col='filename')
 
     df['ram_plus_tags'] = 'N/A'
-    for i, row in df.iterrows():
+    df['ram_tags'] = 'N/A'
+
+    ram_start = time.perf_counter()
+    for i, row in tqdm(df.iterrows(), desc='Running RAM inference', total=len(df)):
+        df.iloc[i]['ram_tags'] = ram_inference(row['filename'])
+    ram_inference_time = time.perf_counter() - ram_start
+    
+    ram_plus_start = time.perf_counter()
+    for i, row in tqdm(df.iterrows(), desc='Running RAM++ inference', total=len(df)):
         df.iloc[i]['ram_plus_tags'] = ram_plus_inference(row['filename'])
+    ram_plus_inference_time = time.perf_counter() - ram_plus_start
 
     df = fd.enrich(task='zero-shot-detection', 
                model='grounding-dino', 
@@ -167,12 +196,11 @@ def run_comparison(device: str, num_imgs: int):
     os.makedirs(plots_output_path, exist_ok=True)
 
     for _, row in df.iterrows():
-        nice_filename = '_'.join(filename.split('/')[-2:])
-        img_output_path = os.path.join(plots_output_path, nice_filename)
-
         filename = row['filename']
         ram_labels = row['ram_tags']
         ram_plus_labels = row['ram_plus_tags']
+        nice_filename = '_'.join(filename.split('/')[-2:])
+        img_output_path = os.path.join(plots_output_path, nice_filename)
 
         # Read the image using PIL
         image = Image.open(filename)
@@ -219,13 +247,16 @@ def run_comparison(device: str, num_imgs: int):
 
     html_path = os.path.join(output_dir, 'all_imgs.html')
     imgs_path = glob(os.path.join(plots_output_path, "*.jpg"))    
-    generate_html(imgs_path, output_file_path=html_path) 
+    generate_html(imgs_path, output_file_path=html_path, orig_tags_names='RAM Tags') 
     print(f'Entire pipeline took {time.perf_counter() - cap_start} seconds')
     print(f'Output HTML is under: {html_path}')
+    print(f'RAM inference on {len(df)} imgs took avg of {(ram_inference_time) / len(df)} seconds per image')
+    print(f'RAM++ inference on {len(df)} imgs took avg of {(ram_plus_inference_time) / len(df)} seconds per image')
+
     shutil.rmtree(plots_output_path)  # we can delete the plots path since the data is already in the HTML
 
 
 if __name__ == '__main__':
     device = 'cpu'
-    num_imgs = 5
+    num_imgs = 50
     run_comparison(device, num_imgs)
