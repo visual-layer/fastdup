@@ -18,7 +18,7 @@
 [pypi-shield]: https://img.shields.io/badge/Python-3.7%20|%203.8%20|%203.9%20|%203.10-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
 [pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=success
-[downloads-shield]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fv2%2Fprojects%2Ffastdup&color=lightblue
+[downloads-shield]: https://img.shields.io/pypi/dm/fastdup?style=for-the-badge&color=lightblue
 [downloads-url]: https://pypi.org/project/fastdup/
 [contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge&color=orange
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
