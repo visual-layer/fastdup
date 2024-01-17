@@ -55,6 +55,7 @@ class FastdupController:
         self._bbox = None
         self._valid_bbox_annot = False
         self._valid_rotated_annot = False
+        self._run_stats = True
 
         if self._fastdup_applied:
             assert not isinstance(input_dir, list), \
@@ -120,6 +121,7 @@ class FastdupController:
                     import paddle
                     import paddleocr
                 except Exception as ex:
+                    fastdup_capture_exception("Failed import paddle/paddleoecr", ex)
                     assert False, "For running with bounding_box='ocr' need to install paddlepaddle and paddleocr, using 'pip install -U paddlepaddle \"padleocr>=2.0.6\" \"numpy==1.23\" \"PyMuPDF==1.21.1\""
             self._run_mode = FD.MODE_CROP
             self._dtype = FD.BBOX
@@ -200,6 +202,51 @@ class FastdupController:
             else self._df_annot
         return df_annot
 
+
+    def init_search(self, k, verbose=False, license=""):
+        """
+        Initialize search
+        Args:
+            k (int): number of returned images
+            verbose (bool): verbose level
+            license (str): optional license string
+
+        Returns:
+
+        """
+        return fastdup.init_search(k=k,
+                                   work_dir=self.config['work_dir'],
+                                   d=self.config['d'],
+                                   model_path=self.config['model_path'],
+                                   verbose=verbose,
+                                   license=license
+                                   )
+
+    def search(self, filename, img=None, verbose=False):
+        '''
+           Search for similar images in the image database.
+
+           Args:
+               filename (str): full path pointing to an image.
+               img (PIL.Image): (Optional) loaded and resized PIL.Image, in case given it is not red from filename
+               verbose (bool): (Optiona) run in verbose mode, default is False
+           Returns:
+               ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
+           '''
+        return fastdup.search(filename=filename, img=img, verbose=verbose)
+
+    def vector_search(self, filename="query_vector", vec=None, verbose=False):
+        '''
+        Search for similar embeddings to a given vector
+
+        Args:
+            filename: vector name (used for debugging)
+            vec (numpy): Mandatory numpy matrix of size 1xd or a vector of size d
+            verbose (bool): (Optiona) run in verbose mode, default is False
+        Returns:
+            ret (pd.DataFrame): None in case of error, otherwise a pd.DataFrame with from,to,distance columns
+        '''
+        return fastdup.vector_search(filename, vec, verbose=verbose)
 
     def similarity(self, data: bool = True, split: Union[str, List[str]] = None,
                    include_unannotated: bool = False, load_crops: bool = False) -> pd.DataFrame:
@@ -524,6 +571,8 @@ class FastdupController:
             fastdup_kwargs['run_mode'] = 2
             fastdup_kwargs['d'] = self._embeddings_dim
         fastdup_kwargs = set_fastdup_kwargs(fastdup_kwargs)
+        if 'run_stats' in fastdup_kwargs and not fastdup_kwargs['run_stats']:
+            self._run_stats = False
 
         os.makedirs(self._work_dir, exist_ok=True)
         assert os.path.exists(self._work_dir), "Failed to create folder " + str(self._work_dir)
@@ -617,23 +666,28 @@ class FastdupController:
                           f"similarity values.")
             summary_stats.append(f"For a detailed list of outliers, use `.outliers()`.\n")
         except Exception as e:
+            fastdup_capture_exception("failed to calc outliers", e)
             summary_stats.append(f"Outliers: Unable to calculate outliers.")
         
         try:
             # Blurry, dark and bright images
-            stats_df = self.img_stats()
-            blurry_images = (stats_df.blur < blur_threshold).sum()
-            bright_images = (stats_df['mean'] > brightness_threshold).sum()
-            dark_images = (stats_df['mean'] < darkness_threshold).sum()
-            stats_str = f"Blur: found {pct(blurry_images):.2f}% of images ({blurry_images:,d}) "\
-                        f"that are blurry.\n "\
-                        f"Brightness: found {pct(bright_images):.2f}% of images ({bright_images:,d}) " \
-                        f"that are bright.\n "\
-                        f"Darkness: found {pct(dark_images):.2f}% of images ({dark_images:,d}) " \
-                        f"that are dark.\n "\
-                        f"For more information, use `.img_stats()`.\n"
+            if self._run_stats:
+                stats_df = self.img_stats()
+                blurry_images = (stats_df.blur < blur_threshold).sum()
+                bright_images = (stats_df['mean'] > brightness_threshold).sum()
+                dark_images = (stats_df['mean'] < darkness_threshold).sum()
+                stats_str = f"Blur: found {pct(blurry_images):.2f}% of images ({blurry_images:,d}) "\
+                            f"that are blurry.\n "\
+                            f"Brightness: found {pct(bright_images):.2f}% of images ({bright_images:,d}) " \
+                            f"that are bright.\n "\
+                            f"Darkness: found {pct(dark_images):.2f}% of images ({dark_images:,d}) " \
+                            f"that are dark.\n "\
+                            f"For more information, use `.img_stats()`.\n"
+            else:
+                stats_str = "Skipped running stats\n"
         except Exception as e:
             stats_str = f"Unable to calculate blur, brightness and darkness.\n"
+            fastdup_capture_exception(stats_str, e)
 
         if verbose:
             print('\n', FD.PRINTOUT_BAR_WIDTH * '#')
@@ -798,7 +852,7 @@ class FastdupController:
             df_annot = self._df_annot.copy()
             assert FD.ANNOT_FILENAME in self._df_annot.columns, f"Failed to find column {FD.ANNOT_FILENAME} in annotations columns"
 
-            df_annot['filename'] = df_annot[FD.ANNOT_FILENAME].apply(lambda fname: self._input_dir / fname)
+            df_annot['filename'] = df_annot[FD.ANNOT_FILENAME].apply(lambda fname: Path(self._input_dir) / fname)
             df_annot = df_annot.astype({FD.ANNOT_FD_ID: int})
 
             # convert column names input expected: "filename,col_x,row_y,width,height"
@@ -940,9 +994,9 @@ class FastdupController:
         :return: pd.DataFrame
         """
 
-        filename = csv_name if csv_name.startswith(self.work_dir) else self._work_dir / csv_name
-        if not load_crops and os.path.exists(self._work_dir / FOLDER_FULL_IMAGE_RUN / csv_name):
-             filename = self._work_dir / FOLDER_FULL_IMAGE_RUN / csv_name
+        filename = csv_name if csv_name.startswith(self.work_dir) else os.path.join(self._work_dir,csv_name)
+        if not load_crops and os.path.exists(os.path.join(self._work_dir, FOLDER_FULL_IMAGE_RUN, csv_name)):
+             filename = os.path.join(self._work_dir, FOLDER_FULL_IMAGE_RUN, csv_name)
 
         if not os.path.exists(filename):
             if force_error:
@@ -1129,7 +1183,7 @@ class FastdupController:
         """
         is_s3_input = False if input_dir is None else (str(input_dir).startswith('s3://') or str(input_dir).startswith('minio://'))
         if is_s3_input:
-            return self._work_dir / "tmp" / str(input_dir).split("/", 3)[-1]
+            return os.path.join(self._work_dir ,"tmp", str(input_dir).split("/", 3)[-1])
         else:
             return input_dir
 
@@ -1260,6 +1314,88 @@ class FastdupController:
             else:
                 assert False, f"Wrong data type {data_type}"
 
+
+    def enrich(self, task, model, input_df, input_col, num_rows=None, device=None):
+
+        self._fastdup_applied = True # Hack: Allow users to run enrichment without first running fastdup
+        if num_rows:
+            df = input_df.head(num_rows)
+        else: df = input_df
+
+        if task == "zero-shot-classification":
+            if model == "recognize-anything-model":
+                from fastdup.models_ram import RecognizeAnythingModel
+
+                enrichment_model = RecognizeAnythingModel(device=device)
+                df["ram_tags"] = df[input_col].apply(enrichment_model.run_inference)
+
+            elif model == "tag2text":
+                from fastdup.models_tag2text import Tag2TextModel
+
+                enrichment_model = Tag2TextModel(device=device)
+                df["tag2text_tags"] = df[input_col].apply(
+                    lambda x: enrichment_model.run_inference(x)[0].replace(" | ", " . ")
+                )
+                df["tag2text_caption"] = df[input_col].apply(
+                    lambda x: enrichment_model.run_inference(x)[2]
+                )
+
+        elif task == "zero-shot-detection":
+            if model == "grounding-dino":
+                from fastdup.models_grounding_dino import GroundingDINO
+
+                enrichment_model = GroundingDINO(device=device)
+
+                def compute_bbox(row):
+                    results = enrichment_model.run_inference(
+                        row["filename"], text_prompt=row[input_col]
+                    )
+                    return results["boxes"], results["scores"], results["labels"]
+
+                df["grounding_dino_bboxes"], df["grounding_dino_scores"], df["grounding_dino_labels"] = zip(
+                    *df.apply(compute_bbox, axis=1)
+                )
+
+        elif task == "zero-shot-segmentation":
+            if model == "segment-anything":
+                import torch
+                from fastdup.models_sam import SegmentAnythingModel
+
+                enrichment_model = SegmentAnythingModel(device=device)
+
+                try:
+                    tensor_list = [
+                        torch.tensor(bbox, dtype=torch.float32)
+                        for bbox in df[input_col]
+                    ]
+                except Exception as e:
+                    raise KeyError(
+                        f"Column `{input_col}` does not exist."
+                    )
+
+                def preprocess_and_run(filename, bbox):
+                    try:
+                        result = enrichment_model.run_inference(filename, bboxes=bbox)
+
+                        if isinstance(result, torch.Tensor) and result.device.type == "cuda":
+                            result = result.cpu()
+
+                        return result
+                    except Exception as e:
+                        print(e)
+                        
+                df["sam_masks"] = [
+                    preprocess_and_run(filename, bbox)
+                    for filename, bbox in zip(df["filename"], tensor_list)
+                ]
+
+        try:
+            enrichment_model.unload_model()
+        except Exception as e:
+            raise ValueError("Please select a valid enrichment model")
+        return df
+
+
     def caption(self, model_name='automatic', device = 'cpu', batch_size: int = 8, subset: list = None, vqa_prompt: str = None, kwargs=None) -> pd.DataFrame:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
@@ -1280,10 +1416,9 @@ class FastdupController:
             from fastdup.captions import generate_age_labels
             df['caption'] = generate_age_labels(df['filename'], kwargs)
         else:
-            assert False, "Unknown model name provided. Available models for caption generation are 'vitgpt2', 'blip2', and 'blip'.\n Available models for VQA are 'vqa' and 'age'."
+            assert False, f"Unknown model name provided {model_name}. Available models for caption generation are 'vitgpt2', 'blip2', and 'blip'.\n Available models for VQA are 'vqa' and 'age'."
 
         return df
-
 
 
 def is_fastdup_dir(work_dir):
@@ -1326,6 +1461,7 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
         'delete_img': {'map': {True: 1, False: 0}, 'default': False},
         'tar_only': {'map': {True: 1, False: 0}, 'default': False},
         'run_stats': {'map': {True: 1, False: 0}, 'default': True},
+        'run_stats_only': {'map': {True: 1, False: 0}, 'default': False},
         'run_advanced_stats': {'map': {True: 1, False: 0}, 'default': False},
         'sync_s3_to_local': {'map': {True: 1, False: 0}, 'default': False},
         'store_int': {'map': {True: 1, False: 0}, 'default': True},
@@ -1349,7 +1485,11 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
         'min_input_image_height': {'map': None, 'default': 10},
         'min_input_image_width': {'map': None, 'default': 10},
         'save_thumbnails': {'map': {True: 1, False: 0}, 'default': False},
-        'find_regex': {'map': None, 'default': ""}
+        'find_regex': {'map': None, 'default': ""},
+        'no_sort': {'map': {True: 1, False: 0}, 'default': False},
+        'quiet': {'map': {True: 1, False: 0}, 'default': False},
+        'fastdup_ocr_lang': {'map': None, 'default': "en"},
+        'fastdup_ocr_no_crop': {'map': {True: 1, False: 0}, 'default': False}
     }
 
     for key, value in input_kwargs.items():

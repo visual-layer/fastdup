@@ -4,6 +4,7 @@ import sys
 import tempfile
 
 FILENAME_SIMILARITY = "similarity.csv"
+FILENAME_SEARCH = "search.csv"
 FILENAME_OUTLIERS = "outliers.csv"
 FILENAME_NNF_INDEX = "nnf.index"
 FILENAME_FEATURES = "features.dat"
@@ -49,7 +50,7 @@ PRINTOUT_BAR_WIDTH = 88
 
 DEFUALT_METRIC_ZERO = 0
 DEFAULT_METRIC_MINUS_ONE = -1
-VERSION__ = "1.39"
+VERSION__ = "1.86"
 
 GITHUB_URL = "https://github.com/visual-layer/fastdup/issues"
 
@@ -58,8 +59,8 @@ MATPLOTLIB_ERROR_MSG = "Warning: failed to import matplotlib, plot is not genera
 "and special care needs to select the right backend for your OS/Hardware combination. You can install matplot lib using "
 "python3.8 -m pip install matplotlib matplotlib-inline. (change the python3.8 to your python version). "
 
-SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".tiff", ".heic", ".heif", ".bmp", ".webp"]
-SUPPORTED_VID_FORMATS = ["mp4", ".avi"]
+SUPPORTED_IMG_FORMATS = [".png", ".jpg", ".jpeg", ".giff", ".jpeg", ".tif", ".tiff", ".heic", ".heif", ".bmp", ".webp", ".jp2"]
+SUPPORTED_VID_FORMATS = [".mp4", ".avi", ".dav", ".m4a", ".m4v", ".mov"]
 
 RUN_ALL = 0
 RUN_EXTRACT = 1

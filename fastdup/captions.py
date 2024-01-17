@@ -1,10 +1,15 @@
+import torch
 from fastdup.sentry import fastdup_capture_exception
 from fastdup.definitions import MISSING_LABEL
 from fastdup.galleries import fastdup_imread
 import cv2
+from tqdm import tqdm
 
+device_to_captioner = {}
 
-def generate_labels(filenames, model_name='automatic', device = 'cpu', batch_size=8):
+def init_captioning(model_name='automatic', device='cpu', batch_size=8, max_new_tokens=20,
+                        use_float_16=True):
+
     '''
     This function generates captions for a given set of images, and takes the following arguments:
         - filenames: the list of images passed to the function
@@ -15,63 +20,81 @@ def generate_labels(filenames, model_name='automatic', device = 'cpu', batch_siz
             - BLIP: 'blip'
         - batch_size: the size of image batches to caption (default: 8)
         - device: whether to use a GPU (default: -1, CPU only ; set to 0 for GPU)
+        - max_bew_tokens: set the number of allowed tokens
     '''
+
+    global device_to_captioner
     # use GPU if device is specified
     if device == 'gpu':
         device = 0
     elif device == 'cpu':
         device = -1
+        use_float_16 = False
     else:
-        assert False, "Incompatible device name entered. Available device names are gpu and cpu."
+        assert False, "Incompatible device name entered {device}. Available device names are gpu and cpu."
 
     # confirm necessary dependencies are installed, and import them
     try:
         from transformers import pipeline
         from transformers.utils import logging
-        logging.set_verbosity_info()
-        import torch
-        from PIL import Image
-        from tqdm import tqdm
+        logging.set_verbosity(50)
+
     except Exception as e:
         fastdup_capture_exception("Auto generate labels", e)
         print("Auto captioning requires an installation of the following libraries:\n")
-        print("   huggingface transformers\n   pytorch\n   pillow\n   tqdm\n")
-        print("to install, use `pip install transformers torch pillow tqdm`")
-        return [MISSING_LABEL] * len(filenames)
+        print("   huggingface transformers\n   pytorch\n")
+        print("   to install, use `pip3 install transformers torch`")
+        raise
 
     # dictionary of captioning models
     models = {
         'automatic': "nlpconnect/vit-gpt2-image-captioning",
         'vitgpt2': "nlpconnect/vit-gpt2-image-captioning",
-        'blip2': "Salesforce/blip2-opt-2.7b",
+        'blip-2': "Salesforce/blip2-opt-2.7b",
         'blip': "Salesforce/blip-image-captioning-large"
     }
-
+    assert model_name in models.keys(), f"Unknown captioning model {model_name} allowed models are {models.keys()}"
     model = models[model_name]
+    has_gpu = torch.cuda.is_available()
+    captioner = pipeline("image-to-text", model=model, device=device if has_gpu else "cpu", max_new_tokens=max_new_tokens,
+                         torch_dtype=torch.float16 if use_float_16 else torch.float32)
+    device_to_captioner[device] = captioner
 
+    return captioner
+
+def generate_labels(filenames, model_name='automatic', device = 'cpu', batch_size=8, max_new_tokens=20, use_float_16=True):
+    global device_to_captioner
+    if device not in device_to_captioner:
+        captioner = init_captioning(model_name, device, batch_size, max_new_tokens, use_float_16)
+    else:
+        captioner = device_to_captioner[device]
+
+    captions = []
     # generate captions
     try:
-        captioner = pipeline("image-to-text", model=model, device=device)
-
-        captions = []
-
-        for pred in captioner(filenames, batch_size=batch_size):
-            #caption = pred['generated_text']
-            caption = ''.join([d['generated_text'] for d in pred])
-            captions.append(caption)
-
-
-        '''for image_path in tqdm(filenames):
-            img = Image.open(image_path)
-            pred = captioner(img)
-            caption = pred[0]['generated_text']
-            captions.append(caption)'''
-        return captions
-
+        for i in tqdm(range(0, len(filenames), batch_size)):
+            chunk = filenames[i:i + batch_size]
+            try:
+                for pred in captioner(chunk, batch_size=batch_size):
+                    charstring = '' if model_name != 'blip' else ' '
+                    caption = charstring.join([d['generated_text'] for d in pred])
+                    # Split the sentence into words
+                    words = caption.split()
+                    # Filter out words containing '#'
+                    filtered_words = [word for word in words if '#' not in word]
+                    # Join the filtered words back into a sentence
+                    caption = ' '.join(filtered_words)
+                    caption = caption.strip()
+                    captions.append(caption)
+            except Exception as ex:
+                print("Failed to caption chunk", chunk[:5], ex)
+                captions.extend([MISSING_LABEL] * len(chunk))
 
     except Exception as e:
         fastdup_capture_exception("Auto caption image", e)
         return [MISSING_LABEL] * len(filenames)
+
+    return captions
 
 
 def generate_vqa_labels(filenames, text, kwargs):
@@ -156,3 +179,15 @@ def generate_age_labels(filenames, kwargs):
         fastdup_capture_exception("Age label", e)
         return [MISSING_LABEL] * len(filenames)
 
+if __name__ == "__main__":
+    import fastdup
+    from fastdup.captions import generate_labels
+    file = "/Users/dannybickson/visual_database/cxx/unittests/two_images/"
+    import os
+    files = os.listdir(file)
+    files = [os.path.join(file, f) for f in files]
+    ret = generate_labels(files, model_name='blip')
+    assert(len(ret) == 2)
+    print(ret)
+    for r in ret:
+        assert "shelf" in r or "shelves" in r or "store" in r

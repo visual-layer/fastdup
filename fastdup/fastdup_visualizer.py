@@ -379,6 +379,7 @@ class FastdupVisualizer:
             load_crops = True
         if (draw_bbox or self._controller._dtype == FD.BBOX) and external_df is None:
             external_df = self._controller.img_stats(load_crops=load_crops)
+            external_df = external_df.sort_values(metric, ascending=ascending)
 
         ret = fastdup.create_stats_gallery(self._controller.work_dir if external_df is None else external_df,
                                      save_path=html_dst_path,

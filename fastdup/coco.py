@@ -2,7 +2,7 @@
 # FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.
 # This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives
 # 4.0 International license. Please reach out to info@databasevisual.com for licensing options.
-
+from fastdup.sentry import fastdup_capture_exception
 
 import os
 cat = {0: u'__background__',
@@ -103,8 +103,8 @@ def read_coco_labels(path):
           #print('cat is', cat[int_cat])
           label_dict[os.path.join(path.replace('labels','images'),f).replace('.txt','.jpg')] = cat[int_cat]
       except Exception as ex:
-        print('Failed to read file ', os.path.join(path, f), ' with error: ', ex)
-        
+        fastdup_capture_exception(f'Failed to read coco file {os.path.join(path, f)}', ex)
+
   return label_dict
 
 

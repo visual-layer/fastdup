@@ -94,6 +94,9 @@ def fastdup_capture_exception(section, e, warn_only=False, extra=""):
 def fastdup_performance_capture(section, start_time):
     if 'SENTRY_OPT_OUT' not in os.environ:
         try:
+            total_time = time.time()-start_time
+            if total_time == 0:
+                return
             # avoid reporting unit tests back to sentry
             if token == '41840345eec72833b7b9928a56260d557ba2a1e06f86d61d5dfe755fa05ade85':
                 import random
@@ -105,7 +108,7 @@ def fastdup_performance_capture(section, start_time):
                 scope.set_tag("section", section)
                 scope.set_tag("unit_test", unit_test)
                 scope.set_tag("token", token)
-                scope.set_tag("runtime-sec", time.time()-start_time)
+                scope.set_tag("runtime-sec", total_time)
                 scope.set_tag("platform", platform.platform())
                 scope.set_tag("platform.version", platform.version())
                 scope.set_tag("python", sys.version.strip().replace("\n", " "))
@@ -132,6 +135,13 @@ def v1_sentry_handler(func):
             ret = func(*args, **kwargs)
             fastdup_performance_capture(f"V1:{func.__name__}", start_time)
             return ret
+
+        except RuntimeError as ex:
+            if str(ex) == 'Fastdup execution failed':
+                pass
+            else:
+                fastdup_capture_exception(f"V1:{func.__name__}", ex)
+            raise ex
 
         except Exception as ex:
             fastdup_capture_exception(f"V1:{func.__name__}", ex)

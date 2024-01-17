@@ -1,4 +1,3 @@
-import os
 import glob
 import random
 import platform
@@ -11,6 +10,13 @@ import pathlib
 import subprocess
 import time
 import os
+import requests
+import tqdm.auto as tqdm
+import tarfile
+from multiprocessing import Pool
+
+import shutil
+import datetime
 
 def read_local_error_file(ret, local_error_file):
     if (ret != 0 and 'JPY_PARENT_PID' in os.environ) or 'COLAB_JUPYTER_IP' in os.environ:
@@ -22,6 +28,7 @@ def read_local_error_file(ret, local_error_file):
                 print(f"fastdup C++ {data_type} received: ", error[:5000], "\n")
                 if ret != 0:
                     fastdup_capture_exception("C++ error", RuntimeError(error[:5000]))
+
 
 def download_from_s3(input_dir, work_dir, verbose, is_test=False):
     """
@@ -68,16 +75,37 @@ def download_from_s3(input_dir, work_dir, verbose, is_test=False):
 
 
 def download_from_web(url, local_model=None):
-    import urllib.request
-    local_file = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url if local_model is None else local_model))
-    urllib.request.urlretrieve(url, local_file)
-    assert os.path.isfile(local_file), f"Failed to download url {url} to local file {local_file}, please try to download manually"
+    # Determine the home directory and separator based on the platform
+    local_directory = os.environ["USERPROFILE"] if platform.system() == "Windows" else os.path.expanduser("~")
+
+    # Generate the local file path
+    filename = os.path.basename(url if local_model is None else local_model)
+    local_file = os.path.join(local_directory, filename)
+
+    # Request the URL with streaming enabled
+    response = requests.get(url, stream=True)
+    response.raise_for_status()  # Raise an exception for HTTP errors
+
+    # Get the total size of the file from the response headers (if available)
+    total_size = int(response.headers.get('content-length', 0))
+
+    # Open the local file for writing as binary
+    with open(local_file, 'wb') as f:
+        # Use tqdm to show the progress bar
+        for chunk in tqdm.tqdm(response.iter_content(chunk_size=8192), total=total_size // 8192, unit='KB',
+                               desc="Downloading: "):
+            f.write(chunk)
+
+    # Check if the file exists at the local path and raise an exception if not
+    if not os.path.isfile(local_file):
+        raise Exception(f"Failed to download url {url} to local file {local_file}. Please try downloading manually.")
+
     return local_file
-    #url = "https://github.com/itsnine/yolov5-onnxruntime/raw/master/models/yolov5s.onnx"
+
 
 def find_model(model_name, url):
     local_model = os.path.expanduser((os.environ["USERPROFILE"] + get_sep() if platform.system() == "Windows" else "~/") + os.path.basename(url))
-    #handle clip model where all models are called visual.onnx and thus may override which other
+    # handle clip model where all models are called visual.onnx and thus may override which other
     if 'clip336' in model_name:
         local_model = local_model.replace('visual.onnx', 'visual336.onnx')
     elif 'clip14' in model_name:
@@ -109,30 +137,28 @@ def check_latest_version(curversion):
         latest_version_num = int(str(latest_version).split(".")[0])
         latest_version_frac = int(str(latest_version).split(".")[1])
 
-        latest_version = latest_version_num*1000+latest_version_frac
+        latest_version = latest_version_num * 1000 + latest_version_frac
         cur_version_num = int(curversion.split(".")[0])
         cur_version_frac = int(curversion.split(".")[1])
-        if latest_version > cur_version_num*1000+cur_version_frac+25:
+        if latest_version > cur_version_num * 1000 + cur_version_frac + 25:
             return True
 
     except Exception as e:
         fastdup_capture_exception("check_latest_version", e, True)
 
-
     return False
-
 
 
 def convert_v1_to_v02(df):
     if 'filename_from' in df.columns and 'filename_to' in df.columns:
         del df['from']
         del df['to']
-        df = df.rename(columns={'filename_from':'from', 'filename_to':'to'})
+        df = df.rename(columns={'filename_from': 'from', 'filename_to': 'to'})
     if 'filename_outlier' in df.columns and 'filename_nearest' in df.columns:
         df = df.rename(columns={'filename_outlier': 'from', 'filename_nearest': 'to'})
     if 'label_from' in df.columns and 'label_to' in df.columns:
-        df = df.rename(columns={'label_from':'label', 'label_to':'label2'})
-    if 'label_outlier' in df.columns :
+        df = df.rename(columns={'label_from': 'label', 'label_to': 'label2'})
+    if 'label_outlier' in df.columns:
         df = df.rename(columns={'label_outlier': 'label'})
     return df
 
@@ -143,10 +169,11 @@ def record_time():
         date_time = now.strftime("%Y-%m-%d")
         with open("/tmp/.timeinfo", "w") as f:
             if date_time.endswith('%'):
-                date_time = date_time[:len(date_time)-1]
+                date_time = date_time[:len(date_time) - 1]
             f.write(date_time)
     except Exception as ex:
         fastdup_capture_exception("Timestamp", ex)
+
 
 def calc_save_dir(save_path):
     save_dir = save_path
@@ -155,6 +182,7 @@ def calc_save_dir(save_path):
         if save_dir == "":
             save_dir = "."
     return save_dir
+
 
 def get_images_from_path(path):
     "List a subfoler recursively and get all image files supported by fastdup"
@@ -188,7 +216,7 @@ def list_subfolders_from_file(file_path):
     with open(file_path, "r") as f:
         for line in f:
             if os.path.isdir(line.strip()):
-               ret += get_images_from_path(line.strip())
+                ret += get_images_from_path(line.strip())
 
     assert len(ret), "Failed to find any folder listing from file " + file_path
     return ret
@@ -211,6 +239,7 @@ def shorten_path(path):
 
     return path
 
+
 def check_if_folder_list(file_path):
     assert os.path.isfile(file_path), "Failed to find file " + file_path
     if file_path.endswith('yaml'):
@@ -222,10 +251,10 @@ def check_if_folder_list(file_path):
 
 
 def save_as_csv_file_list(filenames, files_path):
-     import pandas as pd
-     files = pd.DataFrame({'filename':filenames})
-     files.to_csv(files_path)
-     return files_path
+    import pandas as pd
+    files = pd.DataFrame({'filename': filenames})
+    files.to_csv(files_path)
+    return files_path
 
 
 def expand_list_to_files(the_list):
@@ -235,7 +264,8 @@ def expand_list_to_files(the_list):
         if isinstance(f, str) or isinstance(f, pathlib.PosixPath):
             f = str(f)
             if f.startswith("s3://") or f.startswith("minio://"):
-                if os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS or os.path.splitext(f.lower()) in SUPPORTED_VID_FORMATS:
+                if os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS or os.path.splitext(
+                        f.lower()) in SUPPORTED_VID_FORMATS:
                     files.append(f)
                     break
 
@@ -252,12 +282,14 @@ def expand_list_to_files(the_list):
     assert len(files), "Failed to extract any files from list"
     return files
 
+
 def ls_crop_folder(path):
     assert os.path.isdir(path), "Failed to find directlry " + path
     files = os.listdir(path)
     import pandas as pd
-    df = pd.DataFrame({'filename':files})
+    df = pd.DataFrame({'filename': files})
     assert len(df), "Failed to find any crops in folder " + path
+
 
 def find_nrows(kwargs):
     nrows = None
@@ -265,6 +297,7 @@ def find_nrows(kwargs):
         nrows = kwargs['nrows']
         assert isinstance(nrows, int) and nrows > 0, "Wrong 'nrows' parameter, should be integer > 0"
     return nrows
+
 
 def load_filenames(work_dir, kwargs):
     assert work_dir is not None and isinstance(work_dir, str) and os.path.exists(work_dir), \
@@ -289,10 +322,13 @@ def load_filenames(work_dir, kwargs):
         filenames["filename"] = filenames["crop_filename"]
     return filenames
 
+
 def merge_stats_with_filenames(df, filenames):
     df = df.merge(filenames, left_on='index', right_on='index')
-    assert len(df), "Failed to merge stats input with filenames"
+    assert len(df), f"Failed to merge stats input with filenames {df.head(3)}"
+    assert 'filename' in fd.columns and df['filename'].values[0] is not None, f"Failed to find filename {df.head(3)}"
     return df
+
 
 def load_stats(stats_file, work_dir, kwargs={}, usecols=None):
     assert stats_file is not None, "None stat file"
@@ -336,10 +372,11 @@ def load_stats(stats_file, work_dir, kwargs={}, usecols=None):
         else:
             stats = merge_stats_with_filenames(stats, filenames)
 
-    assert stats is not None, "Failed to read stats"
+    assert stats is not None and len(stats), "Failed to read stats"
     assert 'filename' in stats.columns, f"Error: Failed to find filename column"
-
+    assert stats['filename'].values[0] is not None, "Failed to find stats filenames"
     return stats
+
 
 def load_labels(get_label_func, kwargs={}):
     assert isinstance(get_label_func, str)
@@ -352,13 +389,14 @@ def load_labels(get_label_func, kwargs={}):
         quoting = kwargs['quoting']
     import pandas as pd
     df_labels = pd.read_csv(get_label_func, nrows=nrows, quoting=quoting)
-    assert len(df_labels), "Found empty file "+ get_label_func
+    assert len(df_labels), "Found empty file " + get_label_func
     assert 'label' in df_labels.columns, f"Error: wrong columns in labels file {get_label_func} expected 'label' column"
     return df_labels
 
+
 def merge_with_filenames(df, filenames):
     df2 = df.merge(filenames, left_on='from', right_on='index').merge(filenames, left_on='to', right_on='index')
-    assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file, \n{df.head()}, \n{filenames.head()}"
+    assert df2 is not None and len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file, \n{df.head()}, \n{filenames.head()}"
     df = df2
     del df['from']
     del df['to']
@@ -367,17 +405,21 @@ def merge_with_filenames(df, filenames):
     df = df.rename(columns={'filename_x': 'from', 'filename_y': 'to'})
     return df
 
+
 def merge_with_filenames_one_sided(df, filenames):
     df2 = df.merge(filenames, left_on='from', right_on='index')
     assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file \n{df.head()}, \n{filenames.head()}"
     df = df2
     return df
 
+
 def merge_with_filenames_search(df, filenames):
     df2 = df.merge(filenames, left_on='to', right_on='index')
     assert len(df2), f"Failed to merge similarity/outliers with atrain_features.dat.csv file \n{df.head()}, \n{filenames.head()}"
     df = df2
     return df
+
+
 def get_bounding_box_func_helper(get_bounding_box_func):
     if get_bounding_box_func is None:
         return None
@@ -409,34 +451,32 @@ def get_bounding_box_func_helper(get_bounding_box_func):
     my_dict = df.set_index('filename')['bbox'].to_dict()
     return my_dict
 
+
 def sample_from_components(row, metric, kwargs, howmany):
     selection_strategy = kwargs['selection_strategy']
     if selection_strategy == SELECTION_STRATEGY_FIRST:
-        return list(itertools.islice(zip(row['files'],row['files_ids']), howmany))
+        return list(itertools.islice(zip(row['files'], row['files_ids']), howmany))
     elif selection_strategy == SELECTION_STRATEGY_RANDOM:
         return list(itertools.islice(random.sample(zip(row['files'], row['files_ids'])), howmany))
     elif selection_strategy == SELECTION_STRATEGY_UNIFORM_METRIC:
         assert metric in row, "When using selection_strategy=2 (SELECTION_STRATEGY_UNIFORM_METRIC) need to call with metric=metric."
         assert len(row[metric]) == len(row['files'])
-        #Combine the lists into a list of tuples
-        combined = zip(zip(row['files'],row['files_ids']), row[metric])
+        # Combine the lists into a list of tuples
+        combined = zip(zip(row['files'], row['files_ids']), row[metric])
 
         # Sort the list of tuples by the float value
         sorted_combined = sorted(combined, key=lambda x: x[1])
-        if len (sorted_combined) < howmany:
+        if len(sorted_combined) < howmany:
             sindices = range(0, len(sorted_combined))
         else:
-            sindices = range(0, max(1, int(len(sorted_combined)/howmany)), len(sorted_combined))
+            sindices = range(0, max(1, int(len(sorted_combined) / howmany)), len(sorted_combined))
 
         # Extract the filenames from the selected subset
         filenames = [sorted_combined[t][0] for t in sindices]
         return filenames
 
 
-
-
-
-def s3_partial_sync(uri: str, work_dir: str, num_images: int, verbose:bool, check_interval: int, *args) -> None:
+def s3_partial_sync(uri: str, work_dir: str, num_images: int, verbose: bool, check_interval: int, *args) -> None:
     from tqdm import tqdm
     assert os.path.exists(work_dir)
 
@@ -454,14 +494,14 @@ def s3_partial_sync(uri: str, work_dir: str, num_images: int, verbose:bool, chec
         arglist = ['aws', 's3', 'sync', uri, local_dir, *args]
 
     if verbose:
-      print('Going to run', arglist)
+        print('Going to run', arglist)
     process = subprocess.Popen(arglist)
     pbar = tqdm(desc='files', total=num_images)
 
     while process.poll() is None:
         time.sleep(check_interval)
         files = os.listdir(local_dir)
-        #files = [f for f in files if (os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS) or (os.path.splitext(f.lower()) in SUPPORTED_VID_FORMATS)]
+        # files = [f for f in files if (os.path.splitext(f.lower()) in SUPPORTED_IMG_FORMATS) or (os.path.splitext(f.lower()) in SUPPORTED_VID_FORMATS)]
         pbar.update(len(files) - pbar.n)
 
         if len(files) >= num_images:
@@ -473,8 +513,6 @@ def s3_partial_sync(uri: str, work_dir: str, num_images: int, verbose:bool, chec
 
             break
     return local_dir
-
-
 
 
 def convert_coco_dict_to_df(coco_dict: dict, input_dir: str):
@@ -495,10 +533,10 @@ def convert_coco_dict_to_df(coco_dict: dict, input_dir: str):
                   left_on='id', right_on='image_id')
     assert len(df), f"Failed to merge coco dict {str(coco_dict)[:250]}"
     if 'rot_bb_view' in df.columns:
-        rotated_bb = list(df['rot_bb_view'].apply(lambda x: {'x1':x[0][0], 'y1':x[1][0],
-                                                           'x2':x[0][1], 'y2':x[1][1],
-                                                           'x3':x[0][2], 'y3':x[1][2],
-                                                           'x4':x[0][3], 'y4':x[1][3]}).values)
+        rotated_bb = list(df['rot_bb_view'].apply(lambda x: {'x1': x[0][0], 'y1': x[1][0],
+                                                             'x2': x[0][1], 'y2': x[1][1],
+                                                             'x3': x[0][2], 'y3': x[1][2],
+                                                             'x4': x[0][3], 'y4': x[1][3]}).values)
         assert len(rotated_bb) == len(df), f"Failed to find any bounding boxes {str(coco_dict)[:250]}"
         df = pd.concat([df, pd.DataFrame(rotated_bb)], axis=1)
         assert len(df), f"Failed to add rotated cols {str(coco_dict)[:250]}"
@@ -508,15 +546,13 @@ def convert_coco_dict_to_df(coco_dict: dict, input_dir: str):
         df = pd.concat([df, pd.DataFrame(bbox_df)], axis=1)
         assert len(df), f"Failed to add bbox cols {str(coco_dict)[:250]}"
 
-    #merge category id to extrac the category name
+    # merge category id to extrac the category name
     df = df.merge(pd.DataFrame(coco_dict['categories']), left_on='category_id', right_on='id')
     assert len(df), f"Failed to merge coco dict with labels {str(coco_dict)[:250]}"
-    df = df.rename(columns={'file_name':'filename','name':'label'})
+    df = df.rename(columns={'file_name': 'filename', 'name': 'label'})
 
-
-
-    #df['filename'] = df['filename'].apply(lambda x: os.path.join(input_dir, x))
-    #those are the required fields needed by fastdup
+    # df['filename'] = df['filename'].apply(lambda x: os.path.join(input_dir, x))
+    # those are the required fields needed by fastdup
     assert 'filename' in df.columns, f"Failed to find columns in coco label dataframe {str(coco_dict)[:250]}"
     if 'col_x' in df.columns:
         df = df[['filename','col_x','row_y','width','height','label']]
@@ -525,6 +561,7 @@ def convert_coco_dict_to_df(coco_dict: dict, input_dir: str):
         df = df[['filename', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4', 'label']]
 
     return df
+
 
 def find_model_path(model_path, d):
     if model_path.lower().startswith('dinov2') or model_path.lower() in ['efficientnet', 'resnet50', 'clip', 'clip336', 'clip14']:
@@ -557,7 +594,185 @@ def find_model_path(model_path, d):
     return model_path, d
 
 
+
+images_per_tar = 10000
+
+
+def test_tar(tar_filename, expected_files):
+    with tarfile.open(tar_filename, "r") as tar:
+        # Get the list of files in the tar archive
+        files_in_tar = tar.getnames()
+
+        # Check if the number of files in the tar matches the expected number
+        assert len(files_in_tar) == len(expected_files), "Number of files in the tar does not match the expected number"
+        return True
+
+def create_tar(tar_filename, files, input_dir):
+    with tarfile.open(tar_filename, "w") as tar:
+        for file in files:
+            tar.add(file, arcname=file if input_dir == "." else file.replace(input_dir, ''))
+    assert os.path.exists(tar_filename), f"Failed to create tar {tar_filename}"
+    assert test_tar(tar_filename, files)
+
+def process_group(group):
+    i, input_dir, output_dir, group = group
+    tar_filename = f"{output_dir}/visual_layer_{str(int(i/images_per_tar)).zfill(6)}.tar"
+    create_tar(tar_filename, group, input_dir)
+
+
+def returnfilelist(input_dir, suffixes=['.jpg', '.png', '.mp4']):
+    filenames_list = []
+    for path, subdirs, files in os.walk(input_dir):
+        files = [f for f in files]
+        for name in files:
+            _, ext = os.path.splitext(name)
+            if ext in suffixes:
+                filenames_list.append(os.path.join(path, name))
+    return filenames_list
+
+def find_recently_created_files(directory, hours, suffixes=['.jpg', '.png', '.mp4']):
+    current_time = datetime.datetime.now()
+    ten_hours_ago = current_time - datetime.timedelta(hours=hours)
+
+    recent_images = []
+    recent_videos = []
+
+    file_list = returnfilelist(directory, suffixes)
+    for file_path in file_list:
+        creation_time = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
+
+        # Check if the file was created in the last 10 hours
+        if creation_time > ten_hours_ago:
+            if (file_path.endswith('.png') \
+                    or file_path.endswith('.jpg')):
+                recent_images.append(file_path)
+            if file_path.endswith('.mp4') or file_path.endswith(".avi"):
+                recent_videos.append(file_path)
+
+    return recent_images, recent_videos
+
+
+def select_by_date(directory_to_search, work_dir):
+    # Example usage:
+    recent_images, recent_videos = find_recently_created_files(directory_to_search)
+
+    print("Recently created files:")
+    print("videos", len(recent_videos))
+    print("images", len(recent_images))
+    import pandas as pd
+    pd.DataFrame({'filename':recent_images}).to_csv(f'{work_dir}/images.csv', index=False)
+    pd.DataFrame({'filename':recent_videos}).to_csv(f'{work_dir}/videos.csv', index=False)
+    return recent_images, recent_videos
+
+
+
+def package_webdataset(input_dir, work_dir, output_dir, _images_per_tar = 10000, image_suffix = ['.jpg', '.png'], num_threads=32, limit=None, exclude_dups=None, exclude_bad=None):
+    """
+    Package a recusive folder of images as webdataset
+
+    Args:
+        input_dir: the input directory with images
+        work_dir: temp working dir
+        output_dir: the output dir for the packaged tars
+        _images_per_tar: how many images per tar (default 10000)
+        image_suffix: list of images suffix to package for example ['.jpg', '.png']
+        num_threads: (optional) number of threads to use for packaging
+        limit: (optional) limit the number of tars created to limit
+        exclude_dups: (optional) a pd.DataFrame of duplicates to remove or a csv file
+        exclude_bad: (optional) a pd.DataFrame of corrupted images to remove or a csv file
+
+    Returns:
+
+    """
+    image_list_file = "image_list.txt"
+    images_per_tar = _images_per_tar
+    assert isinstance(image_suffix, list) and len(image_suffix)
+    assert isinstance(_images_per_tar, int) and _images_per_tar > 0
+    assert isinstance(input_dir, (str, pathlib.Path))
+    assert isinstance(work_dir, (str, pathlib.Path))
+    assert isinstance(output_dir, (str, pathlib.Path))
+
+    input_dir = shorten_path(input_dir)
+    work_dir = shorten_path(work_dir)
+    output_dir = shorten_path(output_dir)
+
+    if not os.path.exists(work_dir):
+        os.makedirs(work_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    assert os.path.exists(input_dir)
+    import pandas as pd
+
+    if not input_dir.endswith(".csv"):
+        os.system(f'find {input_dir} -type f -name \'*{image_suffix[0]}\' > {work_dir}/{image_list_file}')
+        for i in range(1, len(image_suffix)):
+            os.system(f'find {input_dir} -type f -name \'*{image_suffix[i]}\' >> {work_dir}/{image_list_file}')
+        # Read image file paths from the file
+        with open(f'{work_dir}/{image_list_file}', "r") as file:
+            image_files = [line.strip() for line in file if line != "filename" ]
+        os.system(f'mv {work_dir}/{image_list_file} {output_dir}/')
+    else:
+
+        image_files = pd.read_csv(input_dir)['filename'].values
+        shutil.copy(input_dir, output_dir)
+
+    print('Found a total', len(image_files), 'images to package')
+    if exclude_dups:
+        if isinstance(exclude_dups, str):
+            shutil.copy(exclude_dups, output_dir)
+            exclude_dups = pd.read_csv(exclude_dups)['filename'].values
+        elif isinstance(exclude_dups, pd.DataFrame):
+            exclude_dups.to_csv(f'{output_dir}/duplicates_removed.csv')
+            exclude_dups = exclude_dups['filename'].values
+        print(exclude_dups[:10])
+        print(image_files[:10])
+        image_files = list(set(image_files) - set(exclude_dups))
+        print('After dedup remained with', len(image_files), 'images to package')
+    if exclude_bad:
+        if isinstance(exclude_bad, str):
+            shutil.copy(exclude_bad, output_dir)
+            exclude_bad = pd.read_csv(exclude_bad)['filename'].values
+        elif isinstance(exclude_bad, pd.DataFrame):
+            exclude_dups.to_csv(f'{output_dir}/bad_files_removed.csv')
+            exclude_bad = exclude_bad['filename'].values
+        image_files = list(set(image_files) - set(exclude_bad))
+        print('After corruption removal remained with', len(image_files), 'images to package')
+
+
+
+    print(image_files[:10])
+    # Divide image files into groups of 10,000
+    groups = [(i, input_dir, output_dir, image_files[i:i + images_per_tar]) for i in range(0, len(image_files), images_per_tar)]
+
+    if limit is not None:
+        groups = groups[:limit]
+
+    # Process each group in parallel
+    with Pool(num_threads) as pool:
+        pool.map(process_group, groups)
+
+    print("Finished packaging into", output_dir)
+
+
+
 if __name__ == "__main__":
-    import fastdup
-    fd = fastdup.create(input_dir='/mnt/data/sku110k', work_dir='abcd')
-    fd.run(num_images=10, overwrite=True)
+    #import fastdup
+    #fd = fastdup.create(input_dir='/mnt/data/sku110k', work_dir='abcd')
+    #fd.run(num_images=10, overwrite=True)
+    if os.path.exists("mytest"):
+        import shutil
+        shutil.rmtree("mytest")
+    os.makedirs("mytest", exist_ok=True)
+    os.system("touch mytest/a.jpg")
+    file_list = returnfilelist("mytest")
+    print(file_list)
+    assert len(file_list) == 1
+    assert file_list == ["mytest/a.jpg"]
+    image, videos = find_recently_created_files("mytest", 1)
+    assert image == ["mytest/a.jpg"]
+    assert videos == []
+    os.system("touch mytest/a.mp4")
+    image, videos = find_recently_created_files("mytest", 1)
+    assert image == ["mytest/a.jpg"]
+    assert videos == ["mytest/a.mp4"]
+

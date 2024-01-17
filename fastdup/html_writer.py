@@ -10,6 +10,7 @@ from fastdup.image import image_base64
 from pathlib import Path
 import numbers
 LOCAL_DIR = os.path.dirname(__file__)
+from fastdup.sentry import fastdup_capture_exception
 
 def write_css(css_dir=None, max_width=None, jupyter_html=False):
     header_bg_color = '#FFFCF3' if jupyter_html else '#657BEC'
@@ -416,7 +417,7 @@ line-height: 1;
 position: absolute;
 margin: 0;
 bottom: 0;
-width: 150px;
+width: 150px
 right: 59px;
 }
 
@@ -564,7 +565,7 @@ def write_html_header(title, subtitle = None, max_width = None, jupyter_html = F
         logo_base_64 = image_base64(str(Path(LOCAL_DIR) / 'assets' / 'logo' / 'logo.png'))
         # corner_base_64 = image_base64(str(Path(LOCAL_DIR) / 'assets' / 'logo' / 'corner.png'))
     except Exception as e:
-        print(e)
+        fastdup_capture_exception("write_html_header", e)
         logo_base_64 = '/cant/find/image'
     corner_base_64 = 'no_corner'
 

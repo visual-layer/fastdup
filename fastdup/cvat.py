@@ -277,8 +277,8 @@ def copy_images_and_zip(files, save_path):
             rel_path = os.path.relpath(f, save_path)
             zip_path = os.path.join('data', rel_path)
             zipf.write(f, zip_path)
-    assert os.path.exists(local_file)
-    print('Zipped file:', local_file, ' for cvat')
+    assert os.path.exists(zip_path)
+    print('Zipped file:', zip_path, ' for cvat')
     return 0    
 
     

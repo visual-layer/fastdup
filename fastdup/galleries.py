@@ -10,6 +10,7 @@ import time
 import numpy as np
 import traceback
 import shutil
+import pathlib
 from fastdup.image import plot_bounding_box, my_resize, get_type, imageformatter, create_triplet_img, fastdup_imread, calc_image_path, clean_images, pad_image, enhance_image, fastdup_imwrite
 from fastdup.definitions import *
 import re
@@ -18,9 +19,9 @@ from fastdup.sentry import *
 from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir, convert_v1_to_v02
 
 try:
-    from tqdm import tqdm
+    from tqdm.auto import tqdm
 except:
-    tqdm = (lambda x, total=None: x)
+    tqdm = (lambda x, total=None, desc=None: x)
 
 
 # def get_label(filename, get_label_func):
@@ -49,6 +50,7 @@ def shorten_image(x, save_path):
     if save_path is None:
         return str(x)
     else:
+        save_path = str(save_path)
         if save_path.endswith('/'):
             save_path = save_path[:-1]
         x = str(x)
@@ -386,7 +388,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
         subdf['ratio'] = subdf['ratio'].apply(lambda x: round(x,3))
 
     indexes = []
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
         if 'crop_filename_from' in row:
             im1, im2 = str(row['crop_filename_from']), str(row['crop_filename_to'])
         else:
@@ -413,7 +415,7 @@ def do_create_duplicates_gallery(similarity_file, save_path, num_images=20, desc
     html_img = format_image_html_string(img_paths, lazy_load, None, save_dir)
     subdf.insert(0, 'Image', html_img)
 
-    if save_path.endswith(".html"):
+    if str(save_path).endswith(".html"):
         out_file = save_path
     else:
         out_file = os.path.join(save_path, FILENAME_DUPLICATES_HTML) if not hierarchical_run else os.path.join(save_path, 'similarity_hierarchical.html')
@@ -633,7 +635,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
         df = find_label(get_label_func, df, 'from', 'label', kwargs)
 
     all_args = []
-    for i, row in tqdm(df.iterrows(), total=min(num_images, len(df))):
+    for i, row in tqdm(df.iterrows(), total=min(num_images, len(df)), desc="Generating gallery"):
         args = row, work_dir, input_dir, get_bounding_box_func, max_width, save_dir, kwargs
         all_args.append(args)
 
@@ -657,7 +659,7 @@ def do_create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_loa
 
     df = df.rename(columns={'distance':'Distance','from':'Path'}, inplace=False)
 
-    out_file = os.path.join(save_path, 'outliers.html') if not save_path.endswith(".html") else save_path
+    out_file = os.path.join(save_path, 'outliers.html') if not str(save_path).endswith(".html") else save_path
     title = 'Outliers Report'
     subtitle = "Showing image outliers, one per row"
     if slice is not None:
@@ -823,7 +825,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
     counter = 0
     #filname_transform_func = kwargs.get('id_to_filename_func', lambda x: x)
     all_labels = []
-    for i,row in tqdm(top_components.iterrows(), total = len(top_components)):
+    for i,row in tqdm(top_components.iterrows(), total = len(top_components), desc="Generating gallery"):
         try:
             # find the component id
             component_id = row[comp_col]
@@ -870,7 +872,9 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
             else:
                 result = []
                 for i in val_array:
-                    result.append(load_one_image(i))
+                    img = load_one_image(i)
+                    if img[0] is not None:
+                        result.append(img)
 
             for t,x in enumerate(result):
                 if x[0] is not None:
@@ -895,6 +899,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
 
             images = []
             for f in tmp_images:
+                assert f is not None, "Failed to read image"
                 if not keep_aspect_ratio:
                     f = cv2.resize(f, (avg_w,avg_h))
                 else:
@@ -976,9 +981,11 @@ def read_components_from_file(work_dir, get_label_func, kwargs):
     debug_cc = (kwargs is not None) and ("debug_cc" in kwargs) and kwargs["debug_cc"]
 
     # read fastdup connected components, for each image id we get component id
+    if isinstance(work_dir, pathlib.Path):
+        work_dir = str(work_dir)
     if isinstance(work_dir, str):
         # read a specific given file
-        if work_dir.endswith('.csv'):
+        if str(work_dir).endswith('.csv'):
             components = pd.read_csv(work_dir, nrows=nrows)
         else: # read the default component file
             assert os.path.exists(os.path.join(work_dir, FILENAME_CONNECTED_COMPONENTS)), "Failed to find fastdup output file. Please run using fastdup.run(..) to generate this file. " + work_dir
@@ -1515,7 +1522,7 @@ def do_create_components_gallery(work_dir, save_path, num_images=20, lazy_load=F
     img_html = format_image_html_string(img_paths, lazy_load, max_width, save_path)
     ret.insert(0, 'image', img_html)
 
-    if save_path.endswith('.html'):
+    if str(save_path).endswith('.html'):
         out_file = save_path
     else:
         out_file = os.path.join(save_dir, "components_hierarchical.html") if run_hierarchical else os.path.join(save_dir, 'components.html')
@@ -1642,13 +1649,15 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
             subdf = df.sort_values(metric, ascending=not descending).head(num_images)
         else:
             subdf = df.head(num_images)
+        assert len(subdf), "Encountered an empty stats data frame"
         subdf = find_label(get_label_func, subdf, 'filename', 'label', kwargs)
 
     save_dir = calc_save_dir(save_path)
     stat_info = ""
     filename = "N/A"
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
         try:
+            assert row['filename'] is not None, f"Failed with empty filename {subdf.head(2)}"
             filename = lookup_filename(row['filename'], work_dir)
             img = fastdup_imread(filename, None, None)
             assert img is not None, "Failed to read image " + filename + " orig filename " + row['filename']
@@ -1659,6 +1668,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
             fastdup_imwrite(imgpath, img)
 
         except Exception as ex:
+            fastdup_capture_exception("do_create_stats_gallery", ex)
             traceback.print_exc()
             print("Failed to generate viz for images", filename, ex)
             imgpath = None
@@ -1677,7 +1687,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
     if callable(get_reformat_filename_func):
         subdf['filename'] = subdf['filename'].apply(lambda x: get_reformat_filename_func(x))
 
-    out_file = os.path.join(save_path, metric + '.html') if not save_path.endswith(".html") else save_path
+    out_file = os.path.join(save_path, metric + '.html') if not str(save_path).endswith(".html") else save_path
     title = metric + ' Image Report'
     if metric == "mean" and descending:
         title = "Bright Image Report"
@@ -1853,7 +1863,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         stat_info = None
     else:
         assert len(subdf), "Empty dataframe"
-        for i, row in tqdm(subdf.iterrows(), total=len(subdf)):
+        for i, row in tqdm(subdf.iterrows(), total=len(subdf), desc="Generating gallery"):
             filename = str(row["from"])
             filename = lookup_filename(filename, work_dir)
 
@@ -1873,7 +1883,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
         df2 = subdf.copy()
         subdf = subdf.head(num_images)
 
-    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf))):
+    for i, row in tqdm(subdf.iterrows(), total=min(num_images, len(subdf)), desc="Generating gallery"):
 
         info_df = None
         info0_df = None
@@ -2010,7 +2020,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     subdf['info_to'] = info
     subdf['info_from'] = info0
 
-    if not save_path.endswith('.html'):
+    if not str(save_path).endswith('.html'):
         out_file = os.path.join(save_path, 'similarity.html')
     else:
         out_file = save_path
@@ -2600,7 +2610,7 @@ if __name__ == "__main__":
         ret = ret[0]
         assert ret.shape[1] == 576
         assert ret.shape[0] == 2
-    elif True:
+    elif False:
         import os
         os.chdir('/Users/dannybickson/Downloads/Kitti_bug')
         import fastdup
@@ -2619,7 +2629,7 @@ if __name__ == "__main__":
         #fd.vis.stats_gallery(load_crops=False)
         #fd.vis.outliers_gallery(load_crops=True)
 
-    else:
+    elif False:
         import fastdup
         os.chdir('/Users/dannybickson/Downloads/stuttgart/')
         if os.path.exists('out/atrain_croos.csv'):
@@ -2627,5 +2637,9 @@ if __name__ == "__main__":
         fd = fastdup.create(input_dir='frames', work_dir='/Users/dannybickson/Downloads/stuttgart/out2')
         fd.run(bounding_box='ocr', verbose=True, overwrite=True, num_images=3, threshold=0.3)
         fd.vis.duplicates_gallery()
+    else:
+        import fastdup
+        fastdup.remove_duplicates(input_dir="../unittests/two_images", distance=0.2)
+
 
 

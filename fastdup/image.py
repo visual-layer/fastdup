@@ -18,6 +18,7 @@ import platform
 import pathlib
 from PIL import Image
 from pillow_heif import register_heif_opener
+import tempfile
 
 register_heif_opener()
 
@@ -47,14 +48,19 @@ def get_shape(img):
 def calc_image_path(lazy_load, save_path, filename, filename_suffix=''):
     if lazy_load:
         os.makedirs(os.path.join(save_path, "images"), exist_ok=True)
-        imgpath = os.path.join(save_path, "images", safe_replace(filename))
+        folder = os.path.join(save_path, "images")
     else:
-        imgpath = os.path.join(save_path, safe_replace(filename))
+        folder = os.path.join(save_path)
 
+    filename = safe_replace(filename)
+    imgpath = os.path.join(folder, filename)
     p, ext = os.path.splitext(imgpath)
-    if ext is not None and ext != '' and ext.lower() not in ['.png','.tiff','.tif','.jpeg','.jpg','.gif','.webp']:
+    if ext is not None and ext != '' and ext.lower() not in SUPPORTED_IMG_FORMATS:
         ext += ".jpg"
     imgpath = p + filename_suffix + ext
+    if len(imgpath) > 255:
+        temp_name = next(tempfile._get_candidate_names())
+        imgpath = os.path.join(folder, temp_name + filename_suffix + ext)
     return imgpath
 
 
@@ -180,7 +186,7 @@ def fastdup_imread(img1_path, input_dir, kwargs):
             fastdup_capture_exception("fastdup_imread", ex)
             print("Error reading from tar file: ", tar_file, ex)
             return None
-    elif is_minio_or_s3:
+    elif is_minio_or_s3 and input_dir is not None:
         if input_dir.startswith("minio://"):
             local_dir_no_temp = truncate_folder_name(os.path.dirname(img1_path))
             minio_prefix = "/".join(input_dir.replace("minio://", "").split('/')[:2])
@@ -197,7 +203,7 @@ def fastdup_imread(img1_path, input_dir, kwargs):
             ret = inner_read(os.path.join(S3_TEMP_FOLDER, os.path.basename(img1_path)))
             return ret
     #Failed to read image1 ..\milvus_vector_db\data\images\..\milvus_vector_db\data\images\Egyptian_Mau_210.jpg
-    elif img1_path.startswith(input_dir) and len(img1_path) >= len(input_dir) +2:
+    elif input_dir is not None and img1_path.startswith(input_dir) and len(img1_path) >= len(input_dir) +2:
         suffix = img1_path[len(input_dir):]
         if input_dir in suffix and os.path.exists(suffix):
             img = inner_read(suffix)
