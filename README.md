@@ -424,10 +424,10 @@ It is always possible to opt out of the experimental crash report collection via
 </div>
 
 <div align="center">
-    <a href="https://visual-layer.slack.com/" target="_blank" style="text-decoration: none;"> Slack Community </a> •
+    <a href="https://discord.gg/Dqw458EG" target="_blank" style="text-decoration: none;"> Discord Community </a> •
     <a href="https://visual-layer.readme.io/discuss" target="_blank" style="text-decoration: none;"> Discussion Forum </a> •
     <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" style="text-decoration: none;"> LinkedIn </a> •
-    <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> Twitter </a>
+    <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> X (Twitter) </a>
 </div>
 
 <div align="right"><a href="#top">🔝 Back to Top</a></div>
