@@ -12,6 +12,9 @@
 [![PyPi][downloads-shield]][downloads-url]
 [![Contributors][contributors-shield]][contributors-url]
 [![License][license-shield]][license-url]
+[![OS][os-shield]][os-url]
+
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
@@ -24,6 +27,8 @@
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
 [license-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-purple.svg?style=for-the-badge
 [license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
+[os-shield]: https://img.shields.io/badge/Supported%20OS-Windows%20%7C%20macOS%20%7C%20Linux-yellow?style=for-the-badge&logo=windows&logoColor=white
+[os-url]: https://visual-layer.readme.io/docs/installation
 
 <!-- PROJECT LOGO -->
 <br />
