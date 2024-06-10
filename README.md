@@ -113,7 +113,7 @@ Visualize the result.
 
 ```python
 fd.vis.duplicates_gallery()    # gallery of duplicates
-fd.vis.outliers_gallery()      # gallery of anomalies
+fd.vis.outliers_gallery()      # gallery of outliers
 fd.vis.component_gallery()     # gallery of connected components
 fd.vis.stats_gallery()         # gallery of image statistics (e.g. blur, brightness, etc.)
 fd.vis.similarity_gallery()    # gallery of similar images
