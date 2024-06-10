@@ -84,7 +84,7 @@
 
 Run fastdup with only 3 lines of code.
 
-![run](./gallery/fastdup_run_v1.0_optimized.gif)
+![run](./gallery/fastdup_install.gif)
 
 Visualize the result.
 
