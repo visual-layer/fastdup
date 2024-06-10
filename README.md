@@ -123,8 +123,7 @@ fd.vis.similarity_gallery()    # gallery of similar images
 
 
 ## Features & Advantages
-fastdup handles both labeled and unlabeled image/video datasets, helping you to discover potential quality 
-concerns while providing extra functionalities.
+fastdup handles labeled/unlabeled image/video datasets providing the following features:
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
@@ -970,12 +969,12 @@ The notebooks in this section show how to run fastdup on your own embeddings in 
 ## Community
 
 Get help from the fastdup team or community members via the following channels -
-+ [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email).
++ [Discord](https://discord.gg/Dqw458EG) chat.
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
 
-The following are community-contributed blog posts about fastdup - 
+Community-contributed blog posts on fastdup:
 
 <table>
   <tr>
@@ -1030,7 +1029,7 @@ The following are community-contributed blog posts about fastdup -
 </table>
 
 
-What our users say
+What our users say:
 
 ![feedback](./gallery/user_quotes.jpg)
 
