@@ -57,8 +57,8 @@
     <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
     <br /> 
-    <a href="https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" alt="Logo">
+    <a href="https://discord.gg/Dqw458EG" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/DISCORD%20COMMUNITY-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Logo">
     </a>
     <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/DISCUSSION%20FORUM-slateblue?style=for-the-badge&logo=discourse&logoWidth=20" alt="Logo">
@@ -67,7 +67,7 @@
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Logo">
     </a>
     <a href="https://twitter.com/visual_layer" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Logo">
+    <img src="https://img.shields.io/badge/X%20(TWITTER)-000000?style=for-the-badge&logo=x&logoColor=white" alt="Logo">
     </a>
     <a href="https://www.youtube.com/@visual-layer" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
@@ -82,33 +82,39 @@
 
 ## Getting Started
 
-Run fastdup with only 3 lines of code.
+pip install and run fastdup:
+
+```bash
+pip install fastdup
+```
+
+```python
+import fastdup
+
+fd = fastdup.create(input_dir="IMAGE_FOLDER/")
+fd.run()
+```
+
+Explore the results in a interactive web UI:
+
+```python
+fd.explore()   
+```
+
 
 ![run](./gallery/fastdup_install.gif)
 
 Visualize the result.
 
+```python
+fd.vis.duplicates_gallery()    # gallery of duplicates
+fd.vis.outliers_gallery()      # gallery of anomalies
+fd.vis.component_gallery()     # gallery of connected components
+fd.vis.stats_gallery()         # gallery of image statistics (e.g. blur, brightness, etc.)
+fd.vis.similarity_gallery()    # gallery of similar images
+```
+
 ![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
-
-In short, you'll need 3 lines of code to run fastdup:
-
-```python
-import fastdup
-fd = fastdup.create(input_dir="IMAGE_FOLDER/")
-fd.run()
-```
-
-And 5 lines of code to visualize issues:
-
-```python
-fd.vis.duplicates_gallery()    # create a visual gallery of duplicates
-fd.vis.outliers_gallery()      # create a visual gallery of anomalies
-fd.vis.component_gallery()     # create a visualization of connected components
-fd.vis.stats_gallery()         # create a visualization of images statistics (e.g. blur)
-fd.vis.similarity_gallery()    # create a gallery of similar images
-```
-
-View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
 
 
 ## Features & Advantages
