@@ -15,7 +15,7 @@
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[pypi-shield]: https://img.shields.io/badge/Python-3.7%20|%203.8%20|%203.9%20|%203.10-blue?style=for-the-badge
+[pypi-shield]: https://img.shields.io/badge/Python-3.8%20|%203.9%20|%203.10%20|%203.11-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
 [pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=success
 [downloads-shield]: https://img.shields.io/pypi/dm/fastdup?style=for-the-badge&color=lightblue
@@ -39,7 +39,7 @@
 <h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
-<p>fastdup is founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
+<p>Founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
     <br />
     <br />
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
@@ -52,7 +52,7 @@
     ·
     <a href="https://visual-layer.readme.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
     ·
-    <a href="https://visual-layer.com/" target="_blank" rel="noopener noreferrer">Enterprise Edition</a>
+    <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme" target="_blank" rel="noopener noreferrer">Visual Layer Cloud</a>
     ·
     <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
@@ -76,85 +76,9 @@
   <br />
   <br />
 
-🚀 Introducing VL Profiler! 🚀
-We're excited to announce our new cloud product, VL Profiler. It's designed to help you gain deeper insights and enhance your productivity while using fastdup. With VL Profiler, you can visualize your data, track changes over time, and much more.
-
-<a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup" target="_blank" rel="noopener noreferrer"><strong>👉 Check out VL Profiler here 👈</strong></a>
-
-<strong>📝 Note</strong>: VL Profiler is a separate commercial product developed by the same team behind fastdup. Our goal with VL Profiler is to provide additional value to our users while continuing to support and maintain fastdup as a free, open-source project. We'd love for you to give VL Profiler a try and share your feedback with us! [Sign-up](https://cutt.ly/9wyxhZAI) now, it's free.
 
 <br />
 </div>
-
-## What's included in fastdup
-fastdup handles both labeled and unlabeled image/video datasets, helping you to discover potential quality 
-concerns while providing extra functionalities.
-
-<div align="center" style="display:flex;flex-direction:column;">
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
-    <img src="./gallery/fastdup_features_new.png" alt="fastdup" width="1000">
-  </a>
- </div>
-
-## Why fastdup?
-
-With a plethora of data visualization/profiling tools available, what sets fastdup apart? 
-Here are the top benefits of fastdup:
-
-+ **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
-+ **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
-+ **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
-+ **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
-+ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
-
-
-
-## Setting up
-
-### Prerequisites 
-
-> Supported `Python` versions:
-
-[![PyPi][pypi-shield]][pypi-url]
-
-> Supported operating systems:
-
-[![Windows 10](https://img.shields.io/badge/Windows%2010-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
-[![Windows 11](https://img.shields.io/badge/Windows%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
-[![Windows Server 2019](https://img.shields.io/badge/Windows%20Server%202019-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
-[![Windows WSL](https://img.shields.io/badge/Windows%20WSL-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://visual-layer.readme.io/docs/installation#winnative)
-[![Ubuntu 22.04 LTS](https://img.shields.io/badge/Ubuntu%2022.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://visual-layer.readme.io/docs/installation#ubuntu-20041804-lts-machine-setup-a-nameubuntua)
-[![Ubuntu 20.04 LTS](https://img.shields.io/badge/Ubuntu%2020.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://visual-layer.readme.io/docs/installation#ubuntu-20041804-lts-machine-setup-a-nameubuntua)
-[![Ubuntu 18.04 LTS](https://img.shields.io/badge/Ubuntu%2018.04%20LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://visual-layer.readme.io/docs/installation#ubuntu-20041804-lts-machine-setup-a-nameubuntua)
-[![macOS 10+ (Intel)](https://img.shields.io/badge/macOS%2010%2B%20(Intel)-000000?style=for-the-badge&logo=apple&logoColor=white)](https://visual-layer.readme.io/docs/installation#mac-os-setup-a-namemacosxa)
-[![macOS 10+ (M1)](https://img.shields.io/badge/macOS%2010%2B%20(M1)-000000?style=for-the-badge&logo=apple&logoColor=white)](https://visual-layer.readme.io/docs/installation#mac-os-setup-a-namemacosxa)
-[![Amazon Linux 2](https://img.shields.io/badge/Amazon%20Linux%202-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://visual-layer.readme.io/docs/installation#amazon-linux-2-setup-a-nameamazon_linuxa)
-[![CentOS 7](https://img.shields.io/badge/CentOS%207-262577?style=for-the-badge&logo=centos&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a)
-[![RedHat 4.8](https://img.shields.io/badge/RedHat%204.8-EE0000?style=for-the-badge&logo=red-hat&logoColor=white)](https://visual-layer.readme.io/docs/installation#centos-7-setup--amazon-linux-2--redhat-48-a-namecentos7a) 
-
-
-### Installation
-
-> **Option 1** - Install fastdup via [PyPI](https://pypi.org/project/fastdup/): 
-
-```python
-# upgrade pip to its latest version
-pip install -U pip
-
-# install fastdup
-pip install fastdup
-    
-# Alternatively, use explicit python version (XX)
-python3.XX -m pip install fastdup 
-```
-
-> **Option 2** - Install fastdup via an [Ubuntu 20.04 Docker image](https://hub.docker.com/r/karpadoni/fastdup-ubuntu-20.04) on DockerHub:
-
-```bash
-docker pull karpadoni/fastdup-ubuntu-20.04
-```
-
-Detailed installation instructions and common errors [here](https://visual-layer.readme.io/docs/installation).
 
 ## Getting Started
 
@@ -185,6 +109,28 @@ fd.vis.similarity_gallery()    # create a gallery of similar images
 ```
 
 View the API docs [here](https://visual-layer.readme.io/docs/v1-api).
+
+
+## Features & Advantages
+fastdup handles both labeled and unlabeled image/video datasets, helping you to discover potential quality 
+concerns while providing extra functionalities.
+
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
+    <img src="./gallery/fastdup_features_new.png" alt="fastdup" width="1000">
+  </a>
+ </div>
+
+
+With a plethora of data visualization/profiling tools available, what sets fastdup apart? 
+Here are the top benefits of fastdup:
+
++ **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
++ **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
++ **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
++ **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
++ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
+
 
 
 ## Learn from Examples
@@ -1011,15 +957,13 @@ The notebooks in this section show how to run fastdup on your own embeddings in 
 </table>
 
 
+## Community
 
-
-## Getting Help
 Get help from the fastdup team or community members via the following channels -
 + [Slack](https://visualdatabase.slack.com/join/shared_invite/zt-19jaydbjn-lNDEDkgvSI1QwbTXSY6dlA#/shared-invite/email).
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
-## Community Contributions
 
 The following are community-contributed blog posts about fastdup - 
 
@@ -1076,7 +1020,7 @@ The following are community-contributed blog posts about fastdup -
 </table>
 
 
-## What our users say
+What our users say
 
 ![feedback](./gallery/user_quotes.jpg)
 
