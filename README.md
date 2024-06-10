@@ -128,14 +128,13 @@ concerns while providing extra functionalities.
  </div>
 
 
-With a plethora of data visualization/profiling tools available, what sets fastdup apart? 
-Here are the top benefits of fastdup:
+What sets fastdup apart from other similar tools: 
 
-+ **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
-+ **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
-+ **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
-+ **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
-+ **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
++ 🎯 **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
++ 📊 **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
++ 🚀 **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
++ 🔒 **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
++ 😊 **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
 
 
 
