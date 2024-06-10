@@ -87,12 +87,13 @@
 
 ## Getting Started
 
-pip install and run fastdup:
+`pip` install fastdup from [PyPI](https://pypi.org/project/fastdup/):
 
 ```bash
 pip install fastdup
 ```
 
+Initialize and run fastdup:
 ```python
 import fastdup
 
@@ -109,7 +110,7 @@ fd.explore()
 
 ![run](./gallery/fastdup_install.gif)
 
-Visualize the result.
+Alternatively, visualize the result in a static gallery:
 
 ```python
 fd.vis.duplicates_gallery()    # gallery of duplicates
@@ -135,11 +136,10 @@ fastdup handles labeled/unlabeled image/video datasets providing the following f
 What sets fastdup apart from other similar tools: 
 
 + 🎯 **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
-+ 📊 **Scale**: Handles 400M images on a single CPU machine. Enterprise version scales to billions of images.
++ 📊 **Scale**: Handles 400M images on a single CPU machine. Scales to billions of images.
 + 🚀 **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
 + 🔒 **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
-+ 😊 **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Get started with just [3 lines of code](#getting-started).
-
++ 😊 **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Supported on major operating systems: MacOS, Linux and Windows.
 
 
 ## Learn from Examples
