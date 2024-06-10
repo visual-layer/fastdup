@@ -73,13 +73,6 @@
     <img src="https://img.shields.io/badge/-YouTube-black.svg?style=for-the-badge&logo=youtube&colorB=red" alt="Logo">
     </a>
   </p>
-  <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup" target="_blank" rel="noopener noreferrer">
-    <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/github_banner_profiler.gif" width=1000>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/github_banner_profiler.gif" width=1000>
-    <img alt="VL Profiler." src="./gallery/github_banner_profiler.gif">
-    </picture>
-  </a>
   <br />
   <br />
 
