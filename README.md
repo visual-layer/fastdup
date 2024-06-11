@@ -20,8 +20,8 @@
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [pypi-shield]: https://img.shields.io/badge/Python-3.8%20|%203.9%20|%203.10%20|%203.11-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
-[pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=success
-[downloads-shield]: https://img.shields.io/pepy/dt/fastdup?style=for-the-badge&color=lightblue
+[pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=lightblue
+[downloads-shield]: https://img.shields.io/pepy/dt/fastdup?style=for-the-badge&color=success
 [downloads-url]: https://pypi.org/project/fastdup/
 [contributors-shield]: https://img.shields.io/github/contributors/visual-layer/fastdup?style=for-the-badge&color=orange
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
