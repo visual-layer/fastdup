@@ -417,8 +417,6 @@ Visual Layer offers commercial services for managing, cleaning, and curating vis
 https://github.com/visual-layer/fastdup/assets/6821286/57f13d77-0ac4-4c74-8031-07fae87c5b00
 
 
-![video](./gallery/visual-layer-cloud-thumbnail.png)
-
 ## About Visual-Layer
 
 <div align="center">
