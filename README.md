@@ -197,7 +197,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
          </a>
       </td>
       <td rowspan="4">
-         <b>🧹 Clean Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+         <b>🧹 Finding and Removing Duplicates:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
          <br>
          <br>
          <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
@@ -237,7 +237,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
          </a>
       </td>
       <td rowspan="4">
-         <b>🖼 Analyze Image Classification Dataset:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
+         <b>🖼 Finding and Removing Mislabels:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
          <br>
          <br>
          <b>📌 Dataset:</b> <a href="https://github.com/fastai/imagenette">Imagenette</a>.
@@ -277,7 +277,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
          </a>
       </td>
       <td rowspan="4">
-         <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
+         <b>🎁 Image Similarity Search:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
          <br>
          <br>
          <b>📌 Dataset:</b> <a href="https://cocodataset.org/#home">COCO</a>.
