@@ -137,11 +137,11 @@ fastdup handles labeled/unlabeled image/video datasets providing the following f
 
 What sets fastdup apart from other similar tools: 
 
-+ 🎯 **Quality**: High-quality analysis to remove duplicates/near-duplicates, anomalies, mislabels, broken images, and poor-quality images.
-+ 📊 **Scale**: Handles 400M images on a single CPU machine. Scales to billions of images.
-+ 🚀 **Speed**: Highly optimized C++ engine runs efficiently even on low-resource CPU machines.
-+ 🔒 **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
-+ 😊 **Ease of use**: Works on labeled or unlabeled datasets, images, or videos. Supported on major operating systems: MacOS, Linux and Windows.
++ **Quality**: High-quality analysis to identify duplicates/near-duplicates, outliers, mislabels, broken images, and low-quality images.
++ **Scale**: Highly scalable, capable of processing 400M images on a single CPU machine. Scales up to billions of images.
++ **Speed**: Optimized C++ engine enables high performance even on low-resource CPU machines.
++ **Privacy**: Runs locally or on your cloud infrastructure. Your data stays where it is.
++ **Ease of use**: Works on labeled or unlabeled datasets in image or video format with support for major operating systems like MacOS, Linux and Windows.
 
 
 ## Learn from Examples
