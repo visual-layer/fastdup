@@ -404,7 +404,7 @@ For any more information or inquiries regarding the license, please contact us a
 
 We have added an experimental crash report collection using [Sentry](https://github.com/getsentry/). 
 
-We **DO NOT** collect user data  and it only logs fastdup library's own actions. We **DO NOT** collect user-specific information such as folder names, user names, image names, image content, etc. 
+We **DO NOT** collect user-specific information such as folder names, user names, image names, image content, etc. 
 
 We collect data related to fastdup's internal operations and performance statistics such as total number of images, average runtime per image, total free memory, total free disk space, number of cores, etc. 
 
