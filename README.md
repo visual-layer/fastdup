@@ -425,8 +425,8 @@ Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/v
 <div align="center">
 <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=300>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=300>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=250>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=250>
     <img alt="Visual Layer logo." src="./gallery/visual_layer_logo.png">
     </picture>
 </a>
