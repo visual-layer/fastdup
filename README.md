@@ -93,6 +93,8 @@
 pip install fastdup
 ```
 
+More installation options are available [here](https://visual-layer.readme.io/docs/installation).
+
 Initialize and run fastdup:
 ```python
 import fastdup
