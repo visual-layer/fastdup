@@ -126,7 +126,7 @@ fd.vis.similarity_gallery()    # gallery of similar images
 
 
 ## Features & Advantages
-fastdup handles labeled/unlabeled image/video datasets providing the following features:
+fastdup handles labeled/unlabeled datasets in image or video format, providing a range of features:
 
 <div align="center" style="display:flex;flex-direction:column;">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
