@@ -385,7 +385,7 @@ What our users say:
 ## License
 fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
 
-> ![IMPORTANT]
+> [!NOTE]
 > Under this license, you are free to:
 > Share — copy and redistribute the material in any medium or format
 >Under the following terms:
