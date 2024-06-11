@@ -402,11 +402,17 @@ For any more information or inquiries regarding the license, please contact us a
 <details>
   <summary><b>Usage Tracking</b></summary>
 
-We have added an experimental crash report collection, using [sentry.io](https://github.com/getsentry/). It does not collect user data  and it only logs fastdup library's own actions. We do NOT collect folder names, user names, image names, image content only aggregate performance statistics like total number of images, average runtime per image, total free memory, total free disk space, number of cores, etc. Collecting fastdup crashes will help us improve stability. 
+We have added an experimental crash report collection using [Sentry](https://github.com/getsentry/). 
+
+It does not collect user data  and it only logs fastdup library's own actions. We **DO NOT** collect user-specific information such as folder names, user names, image names, image content, etc. 
+
+We only collect data related to fastdup's internal operations and performance statistics such as total number of images, average runtime per image, total free memory, total free disk space, number of cores, etc. 
+
+This help us identify and resolve stability issues, thereby improving the overall reliability of fastdup.
 
 The code for the data collection is found [here](./fastdup/sentry.py). On MAC we use [Google crashpad](https://chromium.googlesource.com/crashpad/crashpad) to report crashes.
 
-It is always possible to opt out of the experimental crash report collection via either of the following two options:
+Users have the option to opt out of the experimental crash reporting system through one of the following methods:
 - Define an environment variable called `SENTRY_OPT_OUT`
 - or run() with `turi_param='run_sentry=0'`
 
