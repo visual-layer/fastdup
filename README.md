@@ -313,7 +313,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 Other [examples](EXAMPLES.md).
 
 
-## Community
+## Join the Community
 
 Get help from the fastdup team or community members via the following channels -
 + [Discord](https://discord.gg/Dqw458EG) chat.
@@ -403,6 +403,11 @@ It is always possible to opt out of the experimental crash report collection via
 - or run() with `turi_param='run_sentry=0'`
 
 </details>
+
+## Visual Layer Cloud
+Visual Layer offers commercial services for managing, cleaning, and curating visual data at scale. Sign up for free. 
+
+![video](./gallery/visual-layer-cloud-thumbnail.png)
 
 ## About Visual-Layer
 
