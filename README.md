@@ -394,7 +394,7 @@ fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivati
 > + **NonCommercial** — You may not use the material for commercial purposes.
 > + **NoDerivatives** — If you remix, transform, or build upon the material, you may not distribute the modified material.
 
-For any more information or inquiries regarding the license, please contact us at info@visual-layer.com or [LICENSE](./LICENSE).
+For any more information or inquiries regarding the license, please contact us at info@visual-layer.com or see the [LICENSE](./LICENSE) file.
 
 ## Disclaimer
 <details>
