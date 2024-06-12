@@ -62,7 +62,7 @@
     <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
     <br />
     <br /> 
-    <a href="https://discord.gg/Dqw458EG" target="_blank" rel="noopener noreferrer">
+    <a href="https://discord.gg/tkYHJCA7mb" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/DISCORD%20COMMUNITY-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Logo">
     </a>
     <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
@@ -318,7 +318,7 @@ See more [examples](EXAMPLES.md).
 ## Join the Community
 
 Get help from the fastdup team or community members via the following channels -
-+ [Discord](https://discord.gg/Dqw458EG) chat.
++ [Discord](https://discord.gg/tkYHJCA7mb) chat.
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
@@ -448,7 +448,7 @@ Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/v
 </div>
 
 <div align="center">
-    <a href="https://discord.gg/Dqw458EG" target="_blank" style="text-decoration: none;"> Discord Community </a> •
+    <a href="https://discord.gg/tkYHJCA7mb" target="_blank" style="text-decoration: none;"> Discord Community </a> •
     <a href="https://visual-layer.readme.io/discuss" target="_blank" style="text-decoration: none;"> Discussion Forum </a> •
     <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" style="text-decoration: none;"> LinkedIn </a> •
     <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> X (Twitter) </a>
