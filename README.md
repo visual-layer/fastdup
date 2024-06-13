@@ -193,7 +193,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <tr>
       <td rowspan="4" width="160">
          <a href="https://visual-layer.readme.io/docs/finding-removing-duplicates">
-         <img src="gallery/imagenette_thumbnail.jpg" width="200">
+         <img src="gallery/duplicates_horses_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
