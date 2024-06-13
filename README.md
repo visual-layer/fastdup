@@ -522,7 +522,7 @@ The code for the data collection is found [here](./fastdup/sentry.py). On MAC we
 
 Users have the option to opt out of the experimental crash reporting system through one of the following methods:
 - Define an environment variable called `SENTRY_OPT_OUT`
-- or run() with `turi_param='run_sentry=0'`
+- or `run()` with `turi_param='run_sentry=0'`
 
 </details>
 
