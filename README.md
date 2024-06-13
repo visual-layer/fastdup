@@ -152,7 +152,7 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
 <table>
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/getting-started">
+         <a href="https://visual-layer.readme.io/docs/quickstart">
          <img src="./gallery/cat_dog_thumbnail.jpg" width="200">
          </a>
       </td>
@@ -163,28 +163,28 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
          <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/quickstart.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/quickstart.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/quickstart.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quick-dataset-analysis.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/quickstart.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
@@ -192,39 +192,79 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <!-- ------------------------------------------------------------------- -->
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
-         <img src="gallery/food_thumbnail.jpg" width="200">
+         <a href="https://visual-layer.readme.io/docs/finding-removing-duplicates">
+         <img src="gallery/imagenette_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b>🧹 Finding and Removing Duplicates:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+         <b>🧹 Finding and Removing Duplicates:</b> Learn how to how to analyze an image dataset for duplicates and near-duplicates.
+         <br>
+         <br>
+         <b>📌 Dataset:</b> <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">Oxford-IIIT Pet</a>.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/finding-removing-duplicates.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/finding-removing-duplicates.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/finding-removing-duplicates.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/finding-removing-duplicates.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/finding-removing-mislabels">
+         <img src="./gallery/food_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b>🖼 Finding and Removing Mislabels:</b> Learn how to analyze an image dataset for potential image mislabels and export the list of mislabeled images for further inspection.
          <br>
          <br>
          <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/finding-removing-mislabels.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/finding-removing-mislabels.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/finding-removing-mislabels.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/finding-removing-mislabels.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
@@ -232,39 +272,113 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <!-- ------------------------------------------------------------------- -->
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
-         <img src="./gallery/imagenette_thumbnail.jpg" width="200">
+         <a href="https://visual-layer.readme.io/docs/image-search">
+         <img src="./gallery/product-matching.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b>🖼 Finding and Removing Mislabels:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
+         <b>🎁 Image Similarity Search:</b> Perform image search in a large dataset of images.
          <br>
          <br>
-         <b>📌 Dataset:</b> <a href="https://github.com/fastai/imagenette">Imagenette</a>.
+         <b>📌 Dataset:</b> <a href="https://www.kaggle.com/competitions/shopee-product-matching/data">Shopee Product Matching</a>.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/image-search.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+   <tr>
+        <td rowspan="4" width="160">
+            <a href="https://visual-layer.readme.io/docs/hugging-face-datasets">
+                <img src="./gallery/hf_thumbnail.jpg" width="200" />
+            </a>
+        </td>
+        <td rowspan="4"><b>🤗 Hugging Face Datasets:</b> Load and analyze datasets from <a href="https://huggingface.co/datasets">Hugging Face Datasets</a>. Perfect if you already have a dataset hosted on Hugging Face hub.<br><br>
+        <div align="right"><a href="https://visual-layer.readme.io/docs/hugging-face-datasets">🔗 Learn More.</a></div>
+        </td>
+        <td align="center" width="80">
+            <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/nbviewer_logo.png" height="30" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/github_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/colab_logo.png" height="20" />
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-hf-datasets.ipynb">
+                <img src="./gallery/kaggle_logo.png" height="25" />
+            </a>
+        </td>
+    </tr>
+    <!-- ------------------------------------------------------------------- -->
+    <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/embeddings-timm">
+         <img src="./gallery/timm_embeddings_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b> 🧠 TIMM Embeddings:</b> Compute dataset embeddings using <a href="https://github.com/huggingface/pytorch-image-models">TIMM (PyTorch Image Models)</a> and run fastdup over the them to surface dataset issues. Runs on CPU and GPU.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/embeddings-timm.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/embeddings-timm.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/embeddings-timm.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/embeddings-timm.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
@@ -272,39 +386,36 @@ Learn the basics of fastdup through interactive examples. View the notebooks on 
    <!-- ------------------------------------------------------------------- -->
    <tr>
       <td rowspan="4" width="160">
-         <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
-         <img src="./gallery/coco_thumbnail.jpg" width="200">
+         <a href="https://visual-layer.readme.io/docs/getting-started">
+         <img src="./gallery/dino_thumbnail.jpg" width="200">
          </a>
       </td>
       <td rowspan="4">
-         <b>🎁 Image Similarity Search:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
-         <br>
-         <br>
-         <b>📌 Dataset:</b> <a href="https://cocodataset.org/#home">COCO</a>.
+         <b>🦖 ONNX Embeddings:</b> Bring your own ONNX model. In this example we extract feature vectors of your images using <a href="https://github.com/facebookresearch/dinov2">DINOv2</a> ONNX model. Runs on CPU.
       </td>
       <td align="center" width="80">
-         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
          <img src="./gallery/nbviewer_logo.png" height="30">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
          <img src="./gallery/github_logo.png" height="25">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
          <img src="./gallery/colab_logo.png" height="20">
          </a>
       </td>
    </tr>
    <tr>
       <td align="center">
-         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/dinov2_notebook.ipynb">
          <img src="./gallery/kaggle_logo.png" height="25">
          </a>
       </td>
