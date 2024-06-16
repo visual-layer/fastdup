@@ -1,15 +1,15 @@
 <!-- PROJECT LOGO -->
 <br />
-<div align="center">
+<div align="left">
   <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer" name="top">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=600>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=600>
     <img alt="fastdup logo." src="./gallery/logo.png">
     </picture>
   </a>
 
-<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
+<h3 align="left">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
 
 [![PyPi][pypi-shield]][pypi-url]
 [![PyPi][pypiversion-shield]][pypi-url]
@@ -35,9 +35,8 @@
 
 
 
-  <p align="center">
-  An unsupervised and free tool for image and video dataset analysis.
-<p>Founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
+<p align="left">
+  An unsupervised and free tool for image and video dataset analysis founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
     <br />
     <br />
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
