@@ -9,7 +9,7 @@
     </picture>
   </a>
 
-<h3 align="left">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
+<!-- <h3 align="left">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3> -->
 
 [![PyPi][pypi-shield]][pypi-url]
 [![PyPi][pypiversion-shield]][pypi-url]
