@@ -1,11 +1,15 @@
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer" name="top">
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
+    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
+    <img alt="fastdup logo." src="./gallery/logo.png">
+    </picture>
+  </a>
+
+<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
 
 [![PyPi][pypi-shield]][pypi-url]
 [![PyPi][pypiversion-shield]][pypi-url]
@@ -13,7 +17,6 @@
 [![Contributors][contributors-shield]][contributors-url]
 [![License][license-shield]][license-url]
 [![OS][os-shield]][os-url]
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
@@ -30,18 +33,8 @@
 [os-shield]: https://img.shields.io/badge/Supported%20OS-macOS%20%7C%20Linux%20%7C%20Windows%20-yellow?style=for-the-badge
 [os-url]: https://visual-layer.readme.io/docs/installation
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer" name="top">
-    <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=400>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=400>
-    <img alt="fastdup logo." src="./gallery/logo.png">
-    </picture>
-  </a>
 
-<h3 align="center">Manage, Clean & Curate Visual Data - Fast and at Scale.</h3>
+
   <p align="center">
   An unsupervised and free tool for image and video dataset analysis.
 <p>Founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
