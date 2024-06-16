@@ -424,7 +424,7 @@ Get help from the fastdup team or community members via the following channels:
 <a href="https://visual-layer.readme.io/discuss" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/DISCUSSION%20FORUM-slateblue?style=for-the-badge&logo=discourse&logoWidth=20" alt="Logo">
     </a>
-<a href="https://github.com/your-username/your-repo/issues" target="_blank" rel="noopener noreferrer">
+<a href="https://github.com/visual-layer/fastdup/issues/new/choose" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/github/issues/visual-layer/fastdup?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Issues">
 </a>
 
