@@ -526,31 +526,6 @@ https://github.com/visual-layer/fastdup/assets/6821286/57f13d77-0ac4-4c74-8031-0
 
 Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme) public dataset with no sign-up required.
 
-## About Visual-Layer
-
-<div align="center">
-<a href="https://www.visual-layer.com" target="_blank" rel="noopener noreferrer">
-    <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./gallery/visual_layer_logo_dark_mode.png" width=250>
-    <source media="(prefers-color-scheme: light)" srcset="./gallery/visual_layer_logo.png" width=250>
-    <img alt="Visual Layer logo." src="./gallery/visual_layer_logo.png">
-    </picture>
-</a>
-</div>
-
-<div align="center">
-   <a href="https://visual-layer.com/about" target="_blank" style="text-decoration: none;"> About Us </a> •
-    <a href="https://medium.com/visual-layer" target="_blank" style="text-decoration: none;"> Blog </a> •
-    <a href="https://visual-layer.readme.io/" target="_blank" style="text-decoration: none;"> Documentation </a>
-    
-</div>
-
-<div align="center">
-    <a href="https://discord.gg/tkYHJCA7mb" target="_blank" style="text-decoration: none;"> Discord Community </a> •
-    <a href="https://visual-layer.readme.io/discuss" target="_blank" style="text-decoration: none;"> Discussion Forum </a> •
-    <a href="https://www.linkedin.com/company/visual-layer/" target="_blank" style="text-decoration: none;"> LinkedIn </a> •
-    <a href="https://twitter.com/visual_layer" target="_blank" style="text-decoration: none;"> X (Twitter) </a>
-</div>
 
 <div align="right"><a href="#top">🔝 Back to Top</a></div>
 
