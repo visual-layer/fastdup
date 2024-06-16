@@ -37,6 +37,7 @@
 
 <p align="left">
   An unsupervised and free tool for image and video dataset analysis founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
+  ---
     <br />
     <br />
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
@@ -52,7 +53,8 @@
     <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme" target="_blank" rel="noopener noreferrer">Visual Layer Cloud</a>
     ·
     <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
-    <br />
+    ---
+    <!-- <br />
     <br /> 
     <a href="https://discord.gg/tkYHJCA7mb" target="_blank" rel="noopener noreferrer">
     <img src="https://img.shields.io/badge/DISCORD%20COMMUNITY-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Logo">
@@ -71,7 +73,7 @@
     </a>
   </p>
   <br />
-  <br />
+  <br /> -->
 
 
 <br />
