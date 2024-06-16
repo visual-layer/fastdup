@@ -484,19 +484,15 @@ What our users say:
 
 ![feedback2](./gallery/feedback2.png)
 
-## License
-fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
+## Visual Layer Cloud
+Visual Layer offers commercial services for managing, cleaning, and curating visual data at scale. 
 
-> [!NOTE]
-> Under this license, you are free to:
-> + **Share** — copy and redistribute the material in any medium or format.
->
-> Under the following terms:
-> + **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
-> + **NonCommercial** — You may not use the material for commercial purposes.
-> + **NoDerivatives** — If you remix, transform, or build upon the material, you may not distribute the modified material.
+[Sign-up](https://app.visual-layer.com?utm_source=fastdup_readme) for free. 
 
-For any more information or inquiries regarding the license, please contact us at info@visual-layer.com or see the [LICENSE](./LICENSE) file.
+
+https://github.com/visual-layer/fastdup/assets/6821286/57f13d77-0ac4-4c74-8031-07fae87c5b00
+
+Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme) public dataset with no sign-up required.
 
 ## Disclaimer
 <details>
@@ -516,15 +512,10 @@ Users have the option to opt out of the experimental crash reporting system thro
 
 </details>
 
-## Visual Layer Cloud
-Visual Layer offers commercial services for managing, cleaning, and curating visual data at scale. 
+## License
+fastdup is licensed under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) Public License. 
 
-[Sign-up](https://app.visual-layer.com?utm_source=fastdup_readme) for free. 
-
-
-https://github.com/visual-layer/fastdup/assets/6821286/57f13d77-0ac4-4c74-8031-07fae87c5b00
-
-Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme) public dataset with no sign-up required.
+For any more information or inquiries regarding the license, please contact us at info@visual-layer.com or see the [LICENSE](./LICENSE) file.
 
 
 <div align="right"><a href="#top">🔝 Back to Top</a></div>
