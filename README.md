@@ -74,10 +74,6 @@
   <br />
   <br /> -->
 
-
-<br />
-</div>
-
 ## Getting Started
 
 `pip` install fastdup from [PyPI](https://pypi.org/project/fastdup/):
