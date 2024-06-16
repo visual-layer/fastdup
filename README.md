@@ -498,7 +498,7 @@ Visual Layer offers commercial services for managing, cleaning, and curating vis
 
 https://github.com/visual-layer/fastdup/assets/6821286/57f13d77-0ac4-4c74-8031-07fae87c5b00
 
-Not convinced? Interact with [Visual Layer Cloud](https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme) public dataset with no sign-up required.
+Not convinced? Interact with Visual Layer Cloud [public dataset](https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme) with no sign-up required.
 
 ## Disclaimer
 <details>
