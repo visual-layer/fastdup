@@ -416,8 +416,10 @@ See more [examples](EXAMPLES.md).
 
 ## Join the Community
 
-Get help from the fastdup team or community members via the following channels -
-+ [Discord](https://discord.gg/tkYHJCA7mb) chat.
+Get help from the fastdup team or community members via the following channels:
++ <a href="https://discord.gg/tkYHJCA7mb" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/DISCORD%20COMMUNITY-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Logo">
+    </a>
 + GitHub [issues](https://github.com/visual-layer/fastdup/issues).
 + Discussion [forum](https://visual-layer.readme.io/discuss).
 
