@@ -40,17 +40,15 @@
   <hr>
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Documentation</a>
     ·
-    <a href="#whats-included-in-fastdup" target="_blank" rel="noopener noreferrer">Features</a>
+    <a href="#features--advantages" target="_blank" rel="noopener noreferrer">Features</a>
     ·
     <a href="https://github.com/visual-layer/fastdup/issues/new/choose" target="_blank" rel="noopener noreferrer">Report Bug</a>
     ·
     <a href="https://medium.com/visual-layer" target="_blank" rel="noopener noreferrer">Blog</a>
     ·
-    <a href="https://visual-layer.readme.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
+    <a href="#getting-started" target="_blank" rel="noopener noreferrer">Quickstart</a>
     ·
-    <a href="https://app.visual-layer.com/vl-datasets?utm_source=fastdup_readme" target="_blank" rel="noopener noreferrer">Visual Layer Cloud</a>
-    ·
-    <a href="https://visual-layer.com/about" target="_blank" rel="noopener noreferrer">About us</a>
+    <a href="#visual-layer-cloud" target="_blank" rel="noopener noreferrer">Visual Layer Cloud</a>
     <hr>
 </p>
     <!-- <br />
