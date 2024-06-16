@@ -38,8 +38,8 @@
 <p align="left">
   An unsupervised and free tool for image and video dataset analysis founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
   <hr>
-    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer"><strong>Explore the docs »</strong></a>
-    <br />
+    <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Documentation</a>
+    ·
     <a href="#whats-included-in-fastdup" target="_blank" rel="noopener noreferrer">Features</a>
     ·
     <a href="https://github.com/visual-layer/fastdup/issues/new/choose" target="_blank" rel="noopener noreferrer">Report Bug</a>
