@@ -1,3 +1,129 @@
+## Learn from Examples
+Learn the basics of fastdup through interactive examples. View the notebooks on GitHub or nbviewer. Even better, run them on Google Colab or Kaggle, for free.
+
+<table>
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/cleaning-image-dataset">
+         <img src="gallery/food_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b>🧹 Clean Image Folder:</b> Learn how to analyze and clean a folder of images from potential issues and export a list of problematic files for further action. If you have an unorganized folder of images, this is a good place to start.
+         <br>
+         <br>
+         <b>📌 Dataset:</b> <a href="https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/">Food-101</a>.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/cleaning-image-dataset.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/analyzing-labeled-images">
+         <img src="./gallery/imagenette_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b>🖼 Analyze Image Classification Dataset:</b> Learn how to load a labeled image classification dataset and analyze for potential issues. If you have labeled ImageNet-style folder structure, have a go!
+         <br>
+         <br>
+         <b>📌 Dataset:</b> <a href="https://github.com/fastai/imagenette">Imagenette</a>.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-image-classification-dataset.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analysing-image-classification-dataset.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+   <tr>
+      <td rowspan="4" width="160">
+         <a href="https://visual-layer.readme.io/docs/objects-and-bounding-boxes">
+         <img src="./gallery/coco_thumbnail.jpg" width="200">
+         </a>
+      </td>
+      <td rowspan="4">
+         <b>🎁 Analyze Object Detection Dataset:</b> Learn how to load bounding box annotations for object detection and analyze for potential issues. If you have a COCO-style labeled object detection dataset, give this example a try. 
+         <br>
+         <br>
+         <b>📌 Dataset:</b> <a href="https://cocodataset.org/#home">COCO</a>.
+      </td>
+      <td align="center" width="80">
+         <a href="https://nbviewer.org/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <img src="./gallery/nbviewer_logo.png" height="30">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <img src="./gallery/github_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://colab.research.google.com/github/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <img src="./gallery/colab_logo.png" height="20">
+         </a>
+      </td>
+   </tr>
+   <tr>
+      <td align="center">
+         <a href="https://kaggle.com/kernels/welcome?src=https://github.com/visual-layer/fastdup/blob/main/examples/analyzing-object-detection-dataset.ipynb">
+         <img src="./gallery/kaggle_logo.png" height="25">
+         </a>
+      </td>
+   </tr>
+   <!-- ------------------------------------------------------------------- -->
+</table>
+
 ## Load Data From Sources
 The notebooks in this section show how to load data from various sources and analyze them with fastdup.
 
