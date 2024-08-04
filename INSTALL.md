@@ -75,26 +75,7 @@ Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
 Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 ```
 
-- Download ubuntu 18.04 from https://aka.ms/wslubuntu1804
-- After the download, run powershell as admin, goto your download folder (for example c:\\users/danny_bickson/downloads/)
-```
-cd c:\\users\danny_bickson\Download # change to your download folders
-Expand-Archive .\Ubuntu_1804.2019.522.0_x64.zip .\Ubuntu_1804
-cd .\Ubuntu_1804\
- .\ubuntu1804.exe
-```
-
-This will take a few minutes, you will see an output of the kind:
-```
-Please create a default UNIX user account. The username does not need to match your Windows username.
-For more information visit: https://aka.ms/wslusers
-Enter new UNIX username: danny_bickson # (chnage to your username)
-Enter new UNIX password: *******
-Retype new UNIX password: *******
-passwd: password updated successfully
-Installation successful!
-To run a command as administrator (user "root"), use "sudo <command>".
-See "man sudo_root" for details.
+- Download ubuntu 20 from https://linuxbeast.com/blog/install-ubuntu-20-04-or-22-04-in-wsl-2-on-windows-10/
 ```
 
 ### Optional: Update WSL to version 2 (recommended, significant performance wins!)
@@ -102,7 +83,7 @@ See "man sudo_root" for details.
 - Download the installer from https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
 - Run the installer and follow the instructions
 
-### Once WSL and Ubuntu 18.04 are set up, continue with the below instructions
+### Once WSL and Ubuntu 20.04 are set up, continue with the below instructions
 
 - Inside the Ubuntu shell, run the following installers (you will be asked for password you entered before).
 ```
@@ -110,18 +91,15 @@ sudo apt update
 sudo apt -y install software-properties-common
 sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt update
-sudo apt -y install python3.8
+sudo apt -y install python3.9
 sudo apt -y install python3-pip
 sudo apt -y install libgl1-mesa-glx
 pip3 install --upgrade pip
-python3.8 -m pip install fastdup
+python3.9 -m pip install fastdup
 ```
 
 In case python fails to find fastdup, do the following:
-- Go to the latest version in pypi (for example https://pypi.org/project/fastdup/0.143/#files)
-- Download the file cp38-cp38-manylinux_2_27_x86_64.whl
-- python3.8 -m pip install fastdup-0.143-cp38-cp38-manylinux_2_27_x86_64.whl 
-
+- Send us the output of python3.9 -m pip debug --verbose
 
 
 # Pip Package setup
