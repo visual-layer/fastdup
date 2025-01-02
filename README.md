@@ -114,7 +114,7 @@ fd.vis.similarity_gallery()    # gallery of similar images
 ## Check this [quickstart tutorial](https://youtu.be/Gt46ciEIxtw) for more info
 
 <video controls>
-    <source src="./gallery/quickstart_video.mp4" type="video/mp4">
+    <source src="./gallery/fastdup_quickstart_video.mp4" type="video/mp4">
     Your browser does not support the video tag.
 </video>
 
