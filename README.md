@@ -24,7 +24,7 @@
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[pypi-shield]: https://img.shields.io/badge/Python-3.8%20|%203.9%20|%203.10%20|%203.11|%203.12-blue?style=for-the-badge
+[pypi-shield]: https://img.shields.io/badge/Python-3.8%20|%203.9%20|%203.10%20|%203.11-blue?style=for-the-badge
 [pypi-url]: https://pypi.org/project/fastdup/
 [pypiversion-shield]: https://img.shields.io/pypi/v/fastdup?style=for-the-badge&color=lightblue
 [downloads-shield]: https://img.shields.io/pepy/dt/fastdup?style=for-the-badge&color=success
@@ -34,12 +34,12 @@
 [license-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-purple.svg?style=for-the-badge
 [license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
 [os-shield]: https://img.shields.io/badge/Supported%20OS-macOS%20%7C%20Linux%20%7C%20Windows%20-yellow?style=for-the-badge
-[os-url]: https://visual-layer.readme.io/docs/installation
+[os-url]: https://visual-layer.readme.io/docs/quickstart
 
 
 
 <p align="left">
-  An unsupervised and free tool for image and video dataset analysis founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
+  A powerful open-source tool for analyzing image and video datasets founded by the authors of <a href="https://github.com/apache/tvm">XGBoost</a>, <a href="https://github.com/apache/tvm">Apache TVM</a> & <a href="https://github.com/apple/turicreate">Turi Create</a> - <a href="https://www.linkedin.com/in/dr-danny-bickson-835b32">Danny Bickson</a>, <a href="https://www.linkedin.com/in/carlos-guestrin-5352a869">Carlos Guestrin</a> and <a href="https://www.linkedin.com/in/amiralush">Amir Alush</a>.</p>
   <hr>
     <a href="https://visual-layer.readme.io/" target="_blank" rel="noopener noreferrer">Documentation</a>
     ·
@@ -111,7 +111,12 @@ fd.vis.stats_gallery()         # gallery of image statistics (e.g. blur, brightn
 fd.vis.similarity_gallery()    # gallery of similar images
 ```
 
-![results](./gallery/gifl_fastdup_quickstart_V1_optimized.gif)
+## Check this [quickstart tutorial](https://youtu.be/Gt46ciEIxtw) for more info
+
+<video controls>
+    <source src="./gallery/quickstart_video.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
 
 
 ## Features & Advantages
