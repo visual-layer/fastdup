@@ -5,7 +5,7 @@
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./gallery/logo_dark_mode.png" width=600>
     <source media="(prefers-color-scheme: light)" srcset="./gallery/logo.png" width=600>
-    <img alt="fastdup logo." src="./gallery/logo.png">
+    <img alt="fastdup logo." src="./gallery/Logo-fastdup-by-VL.png">
     </picture>
   </a>
   <br>
