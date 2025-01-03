@@ -112,11 +112,7 @@ fd.vis.similarity_gallery()    # gallery of similar images
 ```
 
 ## Check this [quickstart tutorial](https://youtu.be/Gt46ciEIxtw) for more info
-
-<video controls>
-    <source src="./gallery/fastdup_quickstart_video.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/6679f140-7ae2-417e-bc3f-36ce057278ec
 
 
 ## Features & Advantages
