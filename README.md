@@ -112,7 +112,7 @@ fd.vis.similarity_gallery()    # gallery of similar images
 ```
 
 ## Check this [quickstart tutorial](https://youtu.be/Gt46ciEIxtw) for more info
-https://github.com/user-attachments/assets/24a89738-62ac-4d2e-adf7-867bc5cd0902
+https://github.com/user-attachments/assets/6679f140-7ae2-417e-bc3f-36ce057278ec
 
 
 ## Features & Advantages
