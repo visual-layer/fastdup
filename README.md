@@ -33,8 +33,9 @@
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
 [license-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-purple.svg?style=for-the-badge
 [license-url]: https://github.com/visual-layer/fastdup/blob/main/LICENSE
-[os-shield]: https://img.shields.io/badge/Supported%20OS-macOS%20%7C%20Linux%20%7C%20Windows%20-yellow?style=for-the-badge
-[os-url]: https://visual-layer.readme.io/docs/quickstart
+[os-shield]: https://img.shields.io/badge/Supported%20OS-macOS%20%7C%20Linux%20%7C%20Windows(WSL2)%20-yellow?style=for-the-badge
+[os-url]: https://docs.visual-layer.com/docs/installing-fastdup
+
 
 
 
@@ -113,7 +114,6 @@ fd.vis.similarity_gallery()    # gallery of similar images
 
 ## Check this [quickstart tutorial](https://youtu.be/Gt46ciEIxtw) for more info
 https://github.com/user-attachments/assets/738a329d-8063-4515-a961-f2527934a0ca
-
 
 
 ## Features & Advantages
