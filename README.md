@@ -80,8 +80,9 @@
 `pip` install fastdup from [PyPI](https://pypi.org/project/fastdup/):
 
 ```bash
-pip install fastdup
+pip3 install fastdup
 ```
+Note: should use Python3.9 - Python3.12
 
 More installation options are available [here](https://visual-layer.readme.io/docs/installation).
 
