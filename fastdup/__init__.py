@@ -1,4 +1,4 @@
-#FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.
+#FastDup Software, (C) copyright 2025 Dr. Amir Alush and Dr. Danny Bickson.
 #This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives
 #4.0 International license. Please reach out to info@databasevisual.com for licensing options.
 
