@@ -147,7 +147,7 @@ def do_run(input_dir='',
     fastdup_capture_log_debug_state(locals())
     start_time = time.time()
 
-    print("FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.")
+    print("FastDup Software, (C) copyright 2025 Dr. Amir Alush and Dr. Danny Bickson.")
     if (version):
         print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
               "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
