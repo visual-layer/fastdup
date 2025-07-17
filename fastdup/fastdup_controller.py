@@ -1,7 +1,6 @@
 import json
 import os
 import tempfile
-import warnings
 from typing import List, Union, Tuple
 import numpy as np
 import pandas as pd
@@ -11,15 +10,16 @@ from pandas.errors import EmptyDataError
 import shutil
 import fastdup.definitions as FD
 #import boto3
-from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception, fastdup_capture_log_debug_state
+from fastdup import _LOGGER, _create_fastdup_logger
+from fastdup.sentry import v1_sentry_handler, fastdup_capture_exception, fastdup_capture_log_debug_state, fastdup_metrics_increment
 from fastdup.definitions import FOLDER_FULL_IMAGE_RUN
-from fastdup.utils import convert_coco_dict_to_df, shorten_path
+from fastdup.utilities import convert_coco_dict_to_df, shorten_path, _create_template_msg, _POST_RUN_MSG
 import pathlib
 import re
-
+import logging
 
 class FastdupController:
-    def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path, list] = None):
+    def __init__(self, work_dir: Union[str, Path], input_dir: Union[str, Path, list] = None, log_level: Union[str, int] = None):
         """
         This class serves as a proxy for fastdup basic usage,
         the class wraps fastdup-run call provides quick access to
@@ -34,8 +34,13 @@ class FastdupController:
         """
 
         # allow for users to run without specifying work_dir, in this case a default work dir named work_dir is created
+        if log_level is not None:
+            self._logger = _create_fastdup_logger(f'fastdup.{__name__}.{id(self)}', log_level)
+        else:
+            self._logger = _LOGGER
+
         if work_dir is None:
-            print('Warning: fastdup create() without work_dir argument, output is stored in a folder named work_dir in your current working path.')
+            self._logger.warning('Warning: fastdup create() without work_dir argument, output is stored in a folder named work_dir in your current working path.')
             work_dir = "work_dir"
 
         # check if fastdup was already applied
@@ -67,6 +72,9 @@ class FastdupController:
         self._has_label = self._df_annot is not None and FD.ANNOT_LABEL in self._df_annot
         fastdup_capture_log_debug_state({"fastdup_applied": self._fastdup_applied, "run_mode":self._run_mode,
                                          "bbox": self._bbox, "has_split": self._has_split, "has_label": self._has_label})
+
+        if self._logger.getEffectiveLevel() <= logging.INFO:
+            print(_create_template_msg(self._work_dir, self._input_dir))
 
     def get_status_string(self):
         return f"self._run_mode={self._run_mode} self._dtype={self._dtype} self._bbox={self._bbox} self._has_label={self._has_label}"
@@ -122,7 +130,7 @@ class FastdupController:
                     import paddleocr
                 except Exception as ex:
                     fastdup_capture_exception("Failed import paddle/paddleoecr", ex)
-                    assert False, "For running with bounding_box='ocr' need to install paddlepaddle and paddleocr, using 'pip install -U paddlepaddle \"padleocr>=2.0.6\" \"numpy==1.23\" \"PyMuPDF==1.21.1\""
+                    assert False, "For running with bounding_box='ocr' need to install paddlepaddle and paddleocr, using 'pip install -U paddlepaddle \"paddleocr>=2.0.6\" \"numpy==1.23\" \"PyMuPDF==1.21.1\""
             self._run_mode = FD.MODE_CROP
             self._dtype = FD.BBOX
             self._bbox = bbox_mode
@@ -144,6 +152,7 @@ class FastdupController:
                                                 "command: features = np.zeros((rows, cols), dtype='float32')"
             self._run_mode = FD.MODE_EMBEDDING
             self._embeddings_dim = embeddings.shape[1]
+            assert df_annot is not None, "When running with embeddings, must provide annotations list with image names per each embedding row"
 
         self._fastdup_applied = is_fastdup_dir(self._work_dir)
 
@@ -261,10 +270,9 @@ class FastdupController:
         if not self._fastdup_applied:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         df = self._fetch_df(csv_name=FD.FILENAME_SIMILARITY, load_crops=load_crops, force_error=False)
-        assert df is not None, f'No similarity file found {FD.FILENAME_SIMILARITY}'
 
-        if df.empty:
-            warnings.warn(f'No similarities found, try using a lower threshold')
+        if df is None or df.empty:
+            self._logger.debug(f'No similarities found, try using a lower threshold')
             return df
         merged = self._add_annot_and_split(df, data, merge_on=[FD.SIM_SRC_IMG, FD.SIM_DST_IMG],
                                          split=split, unannotated=include_unannotated, load_crops=load_crops)
@@ -286,10 +294,9 @@ class FastdupController:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         # get df and rename columns (from, to, score) -> (outlier, nearest_neighbor, score)
         df = self._fetch_df(csv_name=FD.FILENAME_OUTLIERS, load_crops=load_crops)
-        assert df is not None, f'No outliers found {FD.FILENAME_OUTLIERS}'
-        if df.empty:
-            warnings.warn(f'No outliers found')
-            return df
+        if df is None or df.empty:
+            self._logger.debug(f'No outliers found')
+            return None
         df = df.rename({
             FD.SIM_SRC_IMG: FD.OUT_ID, FD.SIM_DST_IMG: FD.OUT_NEAREST_NEIGHBOR
         }, axis=1)
@@ -329,7 +336,7 @@ class FastdupController:
 
         """
         assert isinstance(img_path, str) or isinstance(img_path, pathlib.Path)
-        ret = self.run(input_dir=[img_path], model_path=model_path, d=d, overwrite=True, print_summary=False, run_mode=1)
+        ret = self.run(input_dir=[img_path], model_path=model_path, d=d, overwrite=True, print_summary=False, run_mode=1, run_explore=False)
         if ret != 0:
             return ret
         files, embs = self.embeddings()
@@ -362,7 +369,7 @@ class FastdupController:
             return ret
         files, embs = self.embeddings()
         if len(files) != len(img_paths):
-            print("Warning: failed to generate feature vectors for some images. Run ")
+            self._logger.debug("failed to generate feature vectors for some images. Run ")
         return embs, files
 
     def invalid_instances(self):
@@ -390,7 +397,9 @@ class FastdupController:
         if load_crops is None:
             load_crops = self._dtype == FD.BBOX
         df = self._fetch_df(csv_name=FD.STATS_CSV, load_crops=load_crops)
-        assert df is not None, f'No stats file found in {self._work_dir}'
+        if df is None:
+            self._logger.info(f'Warning: No stats file found in {self._work_dir}')
+            return pd.DataFrame()
         if df.empty:
             return df
         assert 'width' in df.columns and 'height' in df.columns, "df is missing needed columns: width and height"
@@ -424,12 +433,14 @@ class FastdupController:
             raise RuntimeError('Fastdup was not applied yet, call run() first')
         # get connected components and add annotation
         df_cc = self._fetch_df(csv_name=FD.FILENAME_CONNECTED_COMPONENTS, load_crops=load_crops)
-        assert df_cc is not None, f'No connected components found {FD.FILENAME_CONNECTED_COMPONENTS}'
+        if df_cc is None:
+            self._logger.debug(f'No connected components found, try using a lower threshold')
+            return pd.DataFrame(), None
         assert FD.CC_INST_ID in df_cc.columns, f'Missing column {FD.CC_INST_ID} in connected component file'
-        df_cc = df_cc[df_cc['sum'] != 0] # remove singletons
+        df_cc = df_cc[df_cc['count'] != 0] # remove singletons
 
         if df_cc.empty:
-            warnings.warn(f'No connected components found, try using a lower threshold')
+            self._logger.debug(f'No connected components found, try using a lower threshold')
             return df_cc, None
         assert FD.CC_INST_ID in df_cc.columns, f'Missing column {FD.CC_INST_ID} in connected component file'
         df_cc = df_cc.rename({FD.CC_INST_ID: FD.ANNOT_FD_ID}, axis=1)
@@ -438,7 +449,7 @@ class FastdupController:
                                               unannotated=include_unannotated, load_crops=load_crops)
         df_info = self._fetch_df(csv_name=FD.FILENAME_COMPONENT_INFO, load_crops=load_crops)
         if df_info is None or df_info.empty:
-            print(f"Warning: Missing file {self.work_dir}/{FD.FILENAME_COMPONENT_INFO}")
+            self._logger.debug(f"Warning: Missing file {self.work_dir}/{FD.FILENAME_COMPONENT_INFO}")
         return df_cc, df_info
 
 
@@ -511,7 +522,9 @@ class FastdupController:
     @v1_sentry_handler
     def run(self, input_dir: Union[str, Path] = None, annotations: Union[pd.DataFrame,list] = None, subset: list = None,
             embeddings=None, data_type: str = FD.IMG, overwrite: bool = False,
-            print_summary: bool = True, print_vl_datasets_ref: bool = True, **fastdup_kwargs):
+            print_summary: bool = False, print_vl_datasets_ref: bool = False, run_explore: bool = True, dataset_name: str = None, verbose: bool=False,
+            run_fast: bool=False,
+            **fastdup_kwargs):
         """
         This function
             1. calculate subset of images to analyze
@@ -527,19 +540,22 @@ class FastdupController:
              - split (Optional): data split, e.g. train, test, etc ...
              Alternatively, a list of filenames
              Alternatively, a filename of json coco format contains bounding box annotations
-             Alternatively, a dictionry containing coco format annotations
+             Alternatively, a dictionary containing coco format annotations
         :param subset: (Optional) subset of images to analyze
         :param embeddings: (Optional) pre-calculated feature embeddings. Data type of np.ndarray of size n x d, n is the number of data points, d is the feature vector length.
-            data type must be 'float32'.
+            data type must be 'float32'. When embedding is given, must send annotations which are list of filenames matching the same length of the embeddings.
         :param data_type: (Optional) data type, one of 'image', 'bbox'
         :param overwrite: (Optional) overwrite existing files
         :param print_summary: Print summary report of fastdup run results
+        :param run_fast: Skip backward compatible code to run faster
         :param fastdup_kwargs: (Optional) fastdup run arguments, see fastdup.run() documentation
+
         """
         fastdup_capture_log_debug_state(locals())
+        fastdup_metrics_increment('run')
 
         if self._fastdup_applied and not overwrite:
-            warnings.warn('Fastdup was already applied, use overwrite=True to re-run')
+            self._logger.info('Fastdup was already applied, use overwrite=True to re-run')
             return
         if annotations is not None:
             if isinstance(annotations, list):
@@ -559,14 +575,29 @@ class FastdupController:
                     annotations = convert_coco_dict_to_df(label, self._input_dir)
                 else:
                     assert False, "Unknown annotation file format, should end with .csv or .json"
-
+            elif isinstance(annotations, pd.DataFrame):
+                annotations = annotations.copy() # fastdup changes the input
 
             assert isinstance(annotations, pd.DataFrame) and not annotations.empty and "filename" in annotations.columns, f"Got wrong annotation parameter, should be pd.DataFrame with the mandatory columns: filename {annotations}"
             first_filename = annotations['filename'].values[0]
+            user_columns = list(annotations.columns)
+        else:
+            user_columns = None
         self._init_run(input_dir, annotations, subset, embeddings, data_type, overwrite, fastdup_kwargs)
 
         # get user's fastdup kwargs or use default
         fastdup_kwargs = {} if fastdup_kwargs is None else fastdup_kwargs
+        if embeddings is not None:
+            if 'run_stats'  in fastdup_kwargs:
+                assert not fastdup_kwargs['run_stats'], "When computing a model on embeddings stats are not computed. If you like to compute stats run with run_stats_only=True without embeddings on a clean work_dir."
+            if 'run_advanced_stats' in fastdup_kwargs:
+                assert not fastdup_kwargs['run_advanced_stats'], "When computing a model on embeddings advanced_stats are not computed. If you like to compute stats run with run_stats_only=True without embeddings on a clean work_dir."
+            self._run_stats = False
+            run_explore = False
+
+        if 'bounding_box' in fastdup_kwargs:
+            run_explore = False
+
         if self._pre_calc_features is not None:
             fastdup_kwargs['run_mode'] = 2
             fastdup_kwargs['d'] = self._embeddings_dim
@@ -574,37 +605,60 @@ class FastdupController:
         if 'run_stats' in fastdup_kwargs and not fastdup_kwargs['run_stats']:
             self._run_stats = False
 
+        assert not os.path.isfile(self._work_dir), f"Work dir {self._work_dir} is pointing to a file"
         os.makedirs(self._work_dir, exist_ok=True)
         assert os.path.exists(self._work_dir), "Failed to create folder " + str(self._work_dir)
 
         if overwrite and os.path.isfile(os.path.join(self._work_dir, 'atrain_features.dat.csv')):
             os.unlink(os.path.join(self._work_dir, 'atrain_features.dat.csv'))
         # run fastdup - create embeddings
-        if fastdup.run(self._set_fastdup_input(), work_dir=str(self._work_dir), **fastdup_kwargs) != 0:
-            raise RuntimeError('Fastdup execution failed')
+        fastdup_input = self._set_fastdup_input()
+        if not run_fast:
+            if fastdup.run(fastdup_input, work_dir=str(self._work_dir), logger=self._logger, **fastdup_kwargs) != 0:
+                raise RuntimeError('Fastdup execution failed')
+        
+            # post process - map fastdup-id to image (for bbox this is done in self._set_fastdup_input)
+            if self._dtype == FD.IMG or self._run_mode == FD.MODE_CROP:
+                self._create_img_mapping()
 
-        #fastdup_convert_to_relpath(self._work_dir, self._filename_prefix)
+            # expand annotation csv to include files that are not in annotation but is in subset
+            self._expand_annot_df()
+            if self._dtype != FD.BBOX:
+                self._index_annot_df()
 
-        # post process - map fastdup-id to image (for bbox this is done in self._set_fastdup_input)
-        if self._dtype == FD.IMG or self._run_mode == FD.MODE_CROP:
-            self._create_img_mapping()
+            self._save_artifacts(fastdup_kwargs)
+            self._fastdup_applied = True
 
-        # expand annotation csv to include files that are not in annotation but is in subset
-        self._expand_annot_df()
-        if self._dtype != FD.BBOX:
-            self._index_annot_df()
+        if run_explore:
+            fastdup_metrics_increment('run_with_explore')
+            from fastdup.fastdup_runner.run import do_visual_layer
+            vl_input = self._input_dir if user_columns is None else self.annotations()[user_columns]
+            num_images = fastdup_kwargs.get('num_images', None)
+            if num_images is not None:
+                assert isinstance(num_images, int), "num_images argument should be int"
+                os.environ["FASTDUP_NUM_IMAGES"] = str(num_images)
+            do_visual_layer(work_dir=self._work_dir, input_dir=vl_input,
+                            dataset_name=dataset_name, overwrite=overwrite, run_server=False, verbose=verbose)
+        else:
+            fastdup_metrics_increment('run_without_explore')
 
-        self._save_artifacts(fastdup_kwargs)
-        self._fastdup_applied = True
         if print_summary:
-            self.summary()
+            self.summary(show_comp = fastdup_kwargs.get('run_stats_only', 0 ) == 0)
         if print_vl_datasets_ref:
             self.vl_datasets_ref_printout()
 
+        if self._logger.getEffectiveLevel() <= logging.INFO:
+            print(_POST_RUN_MSG)
+
         return 0
+    
+    def explore(self, verbose=False) -> None:
+        from fastdup.fastdup_runner.run import do_visual_layer
+        fastdup_metrics_increment('explore')
+        do_visual_layer(work_dir=self._work_dir, overwrite=False, run_server=True, verbose=verbose)
 
     def summary(self, verbose=True, blur_threshold: float = 150.0, brightness_threshold: float = 253.0,
-                darkness_threshold: float = 4.0) -> List[str]:
+                darkness_threshold: float = 4.0, show_comp: bool = True) -> List[str]:
         """
         This function provides a summary of the dataset statistics and issues uncovered
         using fastdup. This includes total number of images, invalid images, duplicates, outliers,
@@ -635,40 +689,44 @@ class FastdupController:
             summary_stats.append("For a detailed analysis, use `.invalid_instances()`.\n")
         # Images belonging to clusters
         # X percent of images belong to Y clusters, the largest of ZZ images.
-        try:
-            cc_df, _ = self.connected_components(fast_mode=True)
-            number_of_ccs = cc_df[cc_df['count'] != 0]['count'].nunique()
-            images_in_ccs = int((cc_df['count'] != 0).sum())
-            images_not_in_ccs = total_image_count - images_in_ccs
-            largest_cc_image_count = int(cc_df['count'].max())
-            summary_stats.append(f"Similarity:  {pct(images_in_ccs):.2f}% ({images_in_ccs:,d}) belong to "\
-                                 f"{number_of_ccs} similarity clusters (components).")
-            summary_stats.append(f"{pct(images_not_in_ccs):.2f}% ({images_not_in_ccs:,d}) images do not "
-                                 f"belong to any similarity cluster.")
-            summary_stats.append(f"Largest cluster has {largest_cc_image_count:,d} "
-                                 f"({pct(largest_cc_image_count):.2f}%) images.")
-            sim_thresh = self.config['fastdup_kwargs']['threshold']
-            cc_thresh = self.config['fastdup_kwargs']['turi_param']['ccthreshold']
-            summary_stats.append(f"For a detailed analysis, use `.connected_components()`\n"
-                                 f"(similarity threshold used is {sim_thresh}, "
-                                 f"connected component threshold used is {cc_thresh}).\n")
-        except Exception as e:
-            summary_stats.append(f"Components:  failed to find images clustered into components, try to run with lower cc_threshold.")
 
-    
-        try:
-            # Outlier counts
-            outlier_df = self.outliers(fast_mode=True)
-            number_of_outliers = len(outlier_df)
-            outlier_threhold = 100 * self._config.get('lower_threshold', 0.05)
-            summary_stats.append(f"Outliers: {pct(number_of_outliers):.2f}% ({number_of_outliers:,d}) of images are "\
-                          f"possible outliers, and fall in the bottom {outlier_threhold:.2f}% of "\
-                          f"similarity values.")
-            summary_stats.append(f"For a detailed list of outliers, use `.outliers()`.\n")
-        except Exception as e:
-            fastdup_capture_exception("failed to calc outliers", e)
-            summary_stats.append(f"Outliers: Unable to calculate outliers.")
-        
+        if show_comp:
+            try:
+                cc_df, cc_info_df = self.connected_components(fast_mode=True)
+                number_of_ccs = len(cc_info_df)
+                images_in_ccs = int(cc_df)
+                images_not_in_ccs = total_image_count - images_in_ccs
+                largest_cc_image_count = int(cc_df['count'].max())
+                summary_stats.append(f"Similarity:  {pct(images_in_ccs):.2f}% ({images_in_ccs:,d}) belong to "\
+                                     f"{number_of_ccs} similarity clusters (components).")
+                summary_stats.append(f"{pct(images_not_in_ccs):.2f}% ({images_not_in_ccs:,d}) images do not "
+                                     f"belong to any similarity cluster.")
+                summary_stats.append(f"Largest cluster has {largest_cc_image_count:,d} "
+                                     f"({pct(largest_cc_image_count):.2f}%) edges.")
+                sim_thresh = self.config['fastdup_kwargs']['threshold']
+                cc_thresh = self.config['fastdup_kwargs']['turi_param']['ccthreshold']
+                summary_stats.append(f"For a detailed analysis, use `.connected_components()`\n"
+                                     f"(similarity threshold used is {sim_thresh}, "
+                                     f"connected component threshold used is {cc_thresh}).\n")
+            except Exception as e:
+                # summary_stats.append(f"Components:  failed to find images clustered into components, try to run with lower cc_threshold.")
+                pass
+
+        if show_comp:
+            try:
+                # Outlier counts
+                outlier_df = self.outliers(fast_mode=True)
+                if outlier_df is not None:
+                    number_of_outliers = len(outlier_df)
+                    outlier_threhold = 100 * self._config.get('lower_threshold', 0.05)
+                    summary_stats.append(f"Outliers: {pct(number_of_outliers):.2f}% ({number_of_outliers:,d}) of images are "\
+                                  f"possible outliers, and fall in the bottom {outlier_threhold:.2f}% of "\
+                                  f"similarity values.")
+                    summary_stats.append(f"For a detailed list of outliers, use `.outliers()`.\n")
+            except Exception as e:
+                fastdup_capture_exception("failed to calc outliers", e)
+                summary_stats.append(f"Outliers: Unable to calculate outliers.")
+
         try:
             # Blurry, dark and bright images
             if self._run_stats:
@@ -1117,7 +1175,10 @@ class FastdupController:
             annot[FD.ANNOT_VALID] = annot['index'].apply(lambda x: False if pd.isnull(x) else True)
             self._df_annot = annot
         else:
-            seen_by_fastdup = set(df_bad_files[FD.BAD_FD_ID]).union(set(df_mapping[FD.ANNOT_FD_ID]))
+            if df_bad_files is None:
+                seen_by_fastdup = set(df_mapping[FD.ANNOT_FD_ID])
+            else:
+                seen_by_fastdup = set(df_bad_files[FD.BAD_FD_ID]).union(set(df_mapping[FD.ANNOT_FD_ID]))
             df_mapping_not_in_annot = df_mapping[~df_mapping[FD.ANNOT_FD_ID].isin(self._df_annot[FD.ANNOT_FD_ID])]
             df_annot_in_subset = self._df_annot[self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
             df_annot_not_in_subset = self._df_annot[~self._df_annot[FD.ANNOT_FD_ID].isin(seen_by_fastdup)]
@@ -1132,7 +1193,7 @@ class FastdupController:
             assert len(merged), f"Failed to merge {df_annot_in_subset.head()} {df_mapping.head()}" + self.get_status_string()
             self._df_annot = pd.concat([merged,
                 df_annot_not_in_subset])
-            self._df_annot[FD.ANNOT_FILENAME].fillna(self._df_annot[FD.ANNOT_FILENAME + '_map'], inplace=True)
+            self._df_annot[FD.ANNOT_FILENAME] = self._df_annot[FD.ANNOT_FILENAME].fillna(self._df_annot[FD.ANNOT_FILENAME + '_map'])
             self._df_annot.drop(FD.ANNOT_FILENAME + '_map', axis=1, inplace=True)
 
             # 4. mark default error type as VALID
@@ -1215,7 +1276,7 @@ class FastdupController:
         assert requested_dtype != FD.BBOX or bbox_cols_available, f"missing df-annotations or missing bounding box columns in annotation df: {bbox_cols} or {rotated_bbox_cols}"
         return requested_dtype
 
-    def _verify_fastdup_run_args(self, input_dir, work_dir, df_annot, subset, data_type, pre_calc_features):
+    def _verify_fastdup_run_args(self, input_dir, work_dir, df_annot, subset, data_type, embeddings):
         """
         Verify constructor arguments and raise exception if invalid.
         This method is called by the constructor, and checks that the requested procedure is supported.
@@ -1251,9 +1312,9 @@ class FastdupController:
             'there is already an active fastup run on the working dir, change work_dir or run with overwrite=True'
 
         # verify arguments contains valid values
-        assert isinstance(pre_calc_features, np.ndarray) or pre_calc_features is None, \
+        assert isinstance(embeddings, np.ndarray) or embeddings is None, \
             'pre_calc_features must be a numpy array'
-        assert pre_calc_features is not None or (isinstance(input_dir, list) or isinstance(input_dir, str) or
+        assert embeddings is not None or (isinstance(input_dir, list) or isinstance(input_dir, str) or
                                                  isinstance(input_dir, Path)), \
             'input_dir must be provided and be a string/pathlib.Path or a list of strings/pathlib.Path'
         assert work_dir is not None and (isinstance(work_dir, str) or isinstance(work_dir, Path)), \
@@ -1262,9 +1323,9 @@ class FastdupController:
             f'invalid data_type, found: {data_type} supported: img, bbox'
         assert df_annot is None or isinstance(df_annot, pd.DataFrame), 'df_annot must be a pandas DataFrame'
 
-        if pre_calc_features is not None and df_annot is not None:
-            assert pre_calc_features.shape[0] == df_annot.shape[0], \
-                f'pre_calc_features and df_annot must have the same number of rows, got {pre_calc_features.shape[0]} vs. {df_annot.shape[0]}, {df_annot.head()}'
+        if embeddings is not None and df_annot is not None:
+            assert embeddings.shape[0] == df_annot.shape[0], \
+                f'pre_calc_features and df_annot must have the same number of rows, got {embeddings.shape[0]} vs. {df_annot.shape[0]}, {df_annot.head()}'
 
         # verify arguments combinations
         assert any(
@@ -1275,13 +1336,14 @@ class FastdupController:
              # single input dir, with annotations, with/without subset - image/bbox
              (isinstance(input_dir, str) or isinstance(input_dir, Path)) and df_annot is not None,
              # no input dir, with/without annotations, with/without subset - with-pre-calc-features
-             input_dir is None and pre_calc_features is not None]
+             input_dir is None and embeddings is not None]
         ),\
             'invalid input (input-dir, annotation, subset, data-type) ' \
             '\nsupported options: ' \
             '\n1. single input dir, with annotations, with/without subset' \
             '\n2. single input dir, without annotations, with/without subset - image data-type only' \
-            '\n3. list of input dirs, without annotations, without subset - image data-type only'
+            '\n3. list of input dirs, without annotations, without subset - image data-type only' \
+            '\n4. given embeddings, in this case input_dir should be done.'
 
         # verify df_annot columns
         if df_annot is not None:
@@ -1310,7 +1372,7 @@ class FastdupController:
                     df_annot = df_annot.drop_duplicates(subset=rotated_bbox_cols)
 
                 if len(df_annot) < len_df_annot:
-                    print(f"Warning: removed {len_df_annot - len(df_annot)} duplicate bounding boxes")
+                    self._logger.warn(f"Warning: removed {len_df_annot - len(df_annot)} duplicate bounding boxes")
             else:
                 assert False, f"Wrong data type {data_type}"
 
@@ -1382,7 +1444,7 @@ class FastdupController:
 
                         return result
                     except Exception as e:
-                        print(e)
+                        self._logger.error(f'{e}')
                         
                 df["sam_masks"] = [
                     preprocess_and_run(filename, bbox)
@@ -1489,7 +1551,9 @@ def set_fastdup_kwargs(input_kwargs: dict) -> dict:
         'no_sort': {'map': {True: 1, False: 0}, 'default': False},
         'quiet': {'map': {True: 1, False: 0}, 'default': False},
         'fastdup_ocr_lang': {'map': None, 'default': "en"},
-        'fastdup_ocr_no_crop': {'map': {True: 1, False: 0}, 'default': False}
+        'fastdup_ocr_no_crop': {'map': {True: 1, False: 0}, 'default': False},
+        'global_log_error_level': {'map': None, 'default': 3}
+
     }
 
     for key, value in input_kwargs.items():
@@ -1514,4 +1578,3 @@ def get_input_dir(_input_dir):
         return c if (c.startswith('s3://') or c.startswith("smb://") or c.startswith("minio://")) else Path(c)
     return [pathlib_or_s3_cast(f) for f in _input_dir] if isinstance(_input_dir, list)\
         else pathlib_or_s3_cast(_input_dir)
-

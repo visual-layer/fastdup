@@ -1,5 +1,5 @@
 
-# FastDup Software, (C) copyright 2025 Dr. Amir Alush and Dr. Danny Bickson.
+# FastDup Software, (C) copyright 2022 Dr. Amir Alush and Dr. Danny Bickson.
 # This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives
 # 4.0 International license. Please reach out to info@databasevisual.com for licensing options.
 
@@ -16,7 +16,7 @@ from fastdup.definitions import *
 import re
 from multiprocessing import Pool
 from fastdup.sentry import *
-from fastdup.utils import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir, convert_v1_to_v02
+from fastdup.utilities import load_filenames, merge_with_filenames, get_bounding_box_func_helper, load_stats, load_labels, sample_from_components, calc_save_dir, convert_v1_to_v02
 
 try:
     from tqdm.auto import tqdm
@@ -510,7 +510,7 @@ def load_one_image_for_outliers(args):
         #make sure image file is unique, so add also folder name into the imagefile
         lazy_load = 'lazy_load' in kwargs and kwargs['lazy_load']
         imgpath = calc_image_path(lazy_load, save_path, impath1, "")
-        fastdup_imwrite(imgpath, img)
+        imgpath = fastdup_imwrite(imgpath, img)
 
     except Exception as ex:
         fastdup_capture_exception(f"load_one_image_for_outliers", ex)
@@ -920,7 +920,7 @@ def visualize_top_components(work_dir, save_path, num_components, get_label_func
                 local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{row["label"]}.jpg')
             else:
                 local_file = os.path.join(save_dir, f'{subfolder}component_{counter}_{component_id}.jpg')
-            fastdup_imwrite(local_file, img)
+            local_file = fastdup_imwrite(local_file, img)
             img_paths.append(local_file)
             counter+=1
 
@@ -1665,7 +1665,7 @@ def do_create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=Fals
             img = my_resize(img, max_width)
 
             imgpath = calc_image_path(lazy_load, save_dir, filename)
-            fastdup_imwrite(imgpath, img)
+            imgpath = fastdup_imwrite(imgpath, img)
 
         except Exception as ex:
             fastdup_capture_exception("do_create_stats_gallery", ex)
@@ -1918,7 +1918,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
             image_suffix = ''
 
             imgpath = calc_image_path(lazy_load, subdir, filename, filename_suffix=image_suffix)
-            fastdup_imwrite(imgpath, img)
+            imgpath = fastdup_imwrite(imgpath, img)
 
             MAX_IMAGES = 10
             to_impaths_ = row["to"][:MAX_IMAGES]
@@ -1962,7 +1962,7 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
                 imgpath2 = calc_image_path(lazy_load, save_dir, imgpath2, filename_suffix=image_suffix)
                 if 'enhance_image' in kwargs and kwargs['enhance_image']:
                     im = enhance_image(im)
-                fastdup_imwrite(imgpath2, im)
+                imgpath2 = fastdup_imwrite(imgpath2, im)
                 to_impaths.append(imgpath2)
 
             distances = row['distance'][:MAX_IMAGES]
@@ -2047,116 +2047,6 @@ def do_create_similarity_gallery(similarity_file, save_path, num_images=20, lazy
     return df2
 
 
-def do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, lazy_load=False, max_width=None, num_images=0, slice=None,
-                                   get_reformat_filename_func=None, input_dir=None, **kwargs):
-    '''
-    Create an html gallery of images with aspect ratio
-     stats_file:
-     save_path:
-     get_label_func:
-     max_width:
-     num_images:
-     slice:
-     get_reformat_filename_func:
-    Returns:
-    '''
-
-    try:
-        import matplotlib.pyplot as plt
-    except Exception as e:
-        fastdup_capture_exception("create_aspect_ratio_gallery", e)
-        print(MATPLOTLIB_ERROR_MSG)
-        return None
-
-    from .html_writer import write_to_html_file
-    from .image import imageformatter
-    import matplotlib.pyplot as plt
-
-    work_dir = None
-    if isinstance(stats_file, pd.DataFrame):
-        df = stats_file
-    else:
-        work_dir = os.path.dirname(os.path.abspath(stats_file))
-        df = pd.read_csv(stats_file)
-    assert len(df), "Zero rows found in " + stats_file
-
-    if num_images is not None and num_images>0:
-        df = df.head(num_images)
-
-    if get_label_func is not None:
-        df = find_label(get_label_func, df, 'filename', 'label', kwargs)
-        df = slice_df(df, slice, 'label', kwargs)
-
-    assert len(df), "Empty stats file " + stats_file
-    df = df[df['width'] > DEFUALT_METRIC_ZERO]
-    df = df[df['height'] > DEFUALT_METRIC_ZERO]
-
-    shape = df[['width','height']].to_numpy()
-
-    max_width_ = np.max(shape[:,0])
-    max_height_ = np.max(shape[:,1])
-    ret = shape[:,0]/shape[:,1]
-    max_dim = max(max_height_, max_width_)
-
-    fig, axs = plt.subplots(2, 1, figsize=(10, 10))
-
-    axs[0].scatter(shape[:,0], shape[:, 1])
-    axs[0].plot(range(0, max_dim), range(0, max_dim), 'k')
-    axs[0].set_ylabel('Width', fontsize=13)
-    axs[0].set_xlabel('Height', fontsize=13)
-    axs[0].grid()
-    axs[0].set_title('Scatter of images shapes', fontsize=18)
-    axs[0].set_xlim([0, max_width_])
-    axs[0].set_ylim([0, max_height_])
-
-    axs[1].hist(shape[:, 0]/shape[:, 1], bins=100)
-    axs[1].grid()
-    axs[1].set_xlabel('Aspect Ratio', fontsize=13)
-    axs[1].set_ylabel('Frequency', fontsize=13)
-    axs[1].set_title('Histogram of aspect ratio for images', fontsize=18)
-    axs[1].set_xlim([0, 2])
-
-    local_fig = f"{save_path}/aspect_ratio.jpg"
-    fig.savefig(local_fig ,dpi=100)
-    img = cv2.imread(local_fig)
-
-    max_width_img = df[df['width'] == max_width_]['filename'].values[0]
-    max_width_img = lookup_filename(max_width_img, work_dir)
-    max_height_img = df[df['height'] == max_height_]['filename'].values[0]
-    max_height_img = lookup_filename(max_height_img, work_dir)
-
-    try:
-        img_max_width = fastdup_imread(max_width_img, input_dir, kwargs)
-        img_max_height = fastdup_imread(max_height_img, input_dir, kwargs)
-        if max_width is not None:
-            img_max_width = my_resize(img_max_width, max_width)
-            img_max_height = my_resize(img_max_height, max_width)
-    except Exception as ex:
-        print("Failed to read images ", max_width_img, max_height_img)
-        fastdup_capture_exception("aspect ratio", ex)
-        img_max_width = None
-        img_max_height = None
-
-    if get_reformat_filename_func is not None:
-        max_width_img = get_reformat_filename_func(max_width_img)
-        max_height_img = get_reformat_filename_func(max_height_img)
-
-    aspect_ratio_info = pd.DataFrame({'Number of images':[len(df)],
-                                      'Avg width':[np.mean(shape[0, :])],
-                                      'Avg height':[np.mean(shape[1, :])],
-                                      'Max width': [max_width_],
-                                      'Max height': [max_height_],
-                                      'Plot':[imageformatter(img, None)],
-                                      'Max width Image<br>' + max_width_img+ f'<br>width: {max_width_}':[imageformatter(img_max_width, max_width)],
-                                      'Max height Image<br>' + max_height_img + f'<br>height: {max_height_}':[imageformatter(img_max_height, max_width)]
-                                      }).T
-
-    ret = pd.DataFrame({'stats':[aspect_ratio_info]})
-
-    title = 'Aspect ratio report'
-    out_file = os.path.join(save_path, 'aspect_ratio.html')
-    print_success_msg('aspect ratio', out_file, lazy_load)
-    return write_to_html_file(ret, title, out_file, None)
 
 if __name__ == "__main__":
     import pandas as pd
@@ -2502,7 +2392,7 @@ if __name__ == "__main__":
     elif False:
         import pathlib
         dir = pathlib.Path('~/')
-        from fastdup.utils import shorten_path
+        from fastdup.utilities import shorten_path
         dir = shorten_path(dir)
         assert os.path.exists(dir)
         dir = pathlib.Path('~')
@@ -2637,7 +2527,7 @@ if __name__ == "__main__":
         fd = fastdup.create(input_dir='frames', work_dir='/Users/dannybickson/Downloads/stuttgart/out2')
         fd.run(bounding_box='ocr', verbose=True, overwrite=True, num_images=3, threshold=0.3)
         fd.vis.duplicates_gallery()
-    else:
+    elif False:
         import fastdup
         fastdup.remove_duplicates(input_dir="../unittests/two_images", distance=0.2)
 

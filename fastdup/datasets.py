@@ -1,17 +1,17 @@
-import os
-import pandas as pd
-from datasets import load_dataset, Dataset
-from datasets.config import HF_DATASETS_CACHE
-from tqdm.auto import tqdm
 import hashlib
 import logging
-from typing import Optional, Any
+import os
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Optional
+
+import pandas as pd
+from fastdup.datasets import Dataset, load_dataset
+from datasets.config import HF_DATASETS_CACHE
 from fastdup.sentry import fastdup_capture_exception
+from PIL import Image
+from tqdm.auto import tqdm
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
-
 
 class FastdupHFDataset(Dataset):
     """
@@ -55,7 +55,7 @@ class FastdupHFDataset(Dataset):
     ) -> None:
         self.img_key: str = img_key
         self.label_key: str = label_key
-        self.jpg_save_dir = jpg_save_dir
+        self.jpg_save_dir: str = jpg_save_dir
 
         if cache_dir:
             self.cache_dir: str = cache_dir
@@ -73,6 +73,22 @@ class FastdupHFDataset(Dataset):
         super().__init__(
             self.hf_dataset.data, self.hf_dataset.info, self.hf_dataset.split
         )
+
+        # Check if img_key and label_key matches the keys from the dataset
+        valid_columns = list(self.hf_dataset.features.keys())
+
+        if self.img_key not in valid_columns:
+            raise ValueError(
+                f"The specified img_key '{self.img_key}' is not present in the dataset's columns. "
+                f"Please ensure that the img_key matches one of the existing dataset columns. "
+                f"Available columns are: {', '.join(valid_columns)}."
+            )
+        if self.label_key not in valid_columns:
+            raise ValueError(
+               f"The specified label_key '{self.label_key}' is not present in the dataset's columns. "
+               f"Please ensure that the label_key matches one of the existing dataset columns. "
+               f"Available columns are: {', '.join(valid_columns)}."
+            )
 
         # If jpg folder does not exist, run conversion and cache the folder
         jpg_img_folder = os.path.join(self.cache_dir, self.hf_dataset.info.dataset_name, self.jpg_save_dir)
@@ -149,14 +165,24 @@ class FastdupHFDataset(Dataset):
                 str(label),
             )
             os.makedirs(label_dir, exist_ok=True)
-            image.save(os.path.join(label_dir, f"{idx}.jpg"))
+
+            if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
+                # Convert to RGB by pasting on a white background
+                background = Image.new('RGB', image.size, (255, 255, 255))
+                if image.mode == 'P':
+                    image = image.convert('RGBA')
+                background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
+                image = background
+
+            image.convert('RGB').save(os.path.join(label_dir, f"{idx}.jpg"), 'JPEG')
             pbar.update(1)
+
         except Exception as e:
             fastdup_capture_exception("Error saving an image", e)
             logging.error(f"Error in saving image at index {idx}: {e}")
 
     def _save_as_image_files(self) -> None:
-        with tqdm(total=len(self.hf_dataset), desc="Converting to .jpg images") as pbar:
+        with tqdm(total=len(self.hf_dataset), desc="Converting images for analysis:") as pbar:
             with ThreadPoolExecutor() as executor:
                 executor.map(
                     self._save_single_image,
@@ -186,5 +212,4 @@ class FastdupHFDataset(Dataset):
 
         df: pd.DataFrame = pd.DataFrame({"filename": filenames, "label": labels})
         return df
-
 

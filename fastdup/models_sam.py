@@ -1,7 +1,7 @@
 import logging
 import logging
 import cv2
-from fastdup.utils import find_model
+from fastdup.utilities import find_model
 from fastdup.image import fastdup_imread
 from fastdup.sentry import fastdup_capture_exception
 
@@ -19,7 +19,7 @@ except ImportError as e:
 
 try:
     from segment_anything import SamPredictor, sam_model_registry
-except ImportError as e:
+except (ImportError, ModuleNotFoundError) as e:
     fastdup_capture_exception("enrichment_missing_dependencies", e, True)
     logger.error(
         f"The `segment-anything` package is not installed. Please run `pip install git+https://github.com/facebookresearch/segment-anything.git`."
