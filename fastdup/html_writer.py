@@ -9,6 +9,7 @@ import pandas as pd
 from fastdup.image import image_base64
 from pathlib import Path
 import numbers
+from fastdup.utilities import _GETTING_STARTED_LINK
 LOCAL_DIR = os.path.dirname(__file__)
 from fastdup.sentry import fastdup_capture_exception
 
@@ -384,7 +385,20 @@ bottom: 0;
 
 .hero {
     position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
 }
+
+@media screen and (max-width: 1889px) {
+    .hero {
+        margin-bottom: 40px;
+    }
+}
+
+
 .hero-corner {
     position: absolute;
     top: 0;
@@ -504,9 +518,9 @@ font-weight: 600;
     object-fit: contain;'''
     if max_width is None:
         content += "\nwidth: 100%;\n"
-
-    content += '''}
-
+    content += '''}'''
+    content += write_css_for_exploration_banner()
+    content += '''
     /*# sourceMappingURL=style.css.map */
     '''
 
@@ -516,6 +530,90 @@ font-weight: 600;
         local_css = os.path.join(css_dir, 'style.css')
         with open(local_css, 'w') as f:
             f.write(content)
+
+def write_css_for_exploration_banner():
+    return '''
+.explore-wrapper {
+    position: absolute;
+    right: 20px;
+    top: 0;
+}
+
+.explore {
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+    flex-direction: column;    
+    padding: 20px 0;    
+}
+.explore-up {
+    background: linear-gradient(90deg, #6E79E6 0%, #3D4380 100%);
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;     
+    align-content: center;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    height: 52px;
+    line-height: 24px; /* 150% */
+    margin-bottom: 5px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    width: 511px;
+}
+.explore-up-left__title {
+    margin-right: 4px;
+}
+
+.explore-up-left__link {
+    color: white;
+}
+
+.explore-bottom {
+    background-color: #333; /* Slightly lighter black */
+    border-radius: 5px;
+    color: #ccc; /* Light gray */
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    height: 52px;
+    justify-content: space-between;
+    padding: 10px 20px;
+    width: 511px;
+}
+
+.explore-bottom-left {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+
+    /* this should be twice as big as the other one */
+    flex: 2 1 0;
+}
+.explore-text {
+    margin-left: 10px;
+}
+
+.explore-bottom-right {
+    display: flex;
+}
+'''
 
 def write_css_map(css_dir):
     css_map = os.path.join(css_dir, 'style.css.map')
@@ -540,10 +638,15 @@ def copy_assets(work_dir):
     assert os.path.exists(os.path.join(logo_dir, 'logo.svg'))
     assert os.path.exists(os.path.join(logo_dir, 'corner.svg'))
 
-def write_component_header():
-    return ''' <section class="components">
+def write_component_header(title, subtitle = None):
+
+    result = ''' <section class="components">
+    '''
+    result += write_title_container(title=title, subtitle=subtitle)
+    result += '''
         <div class="container">
     '''
+    return result
 
 def write_components_footer():
     return '''        
@@ -599,6 +702,40 @@ def write_html_header(title, subtitle = None, max_width = None, jupyter_html = F
                 </a>
             </div>
            
+'''
+    result += write_exploration_banner()
+    result += '''
+        </section>
+    '''
+    # <link rel="stylesheet" href="css/style.css" type="text/css" />
+    return result
+
+def write_exploration_banner():
+    return f'''
+            <div class="explore-wrapper">
+                <div class="explore">
+                <div class="explore-up">                
+                    <span class="explore-up-left__title">For the new and interactive data exploration</span>
+                    <a class="explore-up-left__link" href="{_GETTING_STARTED_LINK}">
+                        Read more                            
+                    </a>                                        
+                </div>
+                <div class="explore-bottom">
+                    <div class="explore-bottom-left">
+                        <div>
+                            <img width="37px" height="17px" class="figure" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzciIGhlaWdodD0iMTciIHZpZXdCb3g9IjAgMCAzNyAxNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9Ikdyb3VwIDExNzEyNzcyNDMiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNOS4wNTY3OCAxMi44NzY0TDYuNzM1MTIgMTUuMTk4NUwwIDguNDYyOTFMNi43MzUxMiAxLjcyNzc5TDkuMDU2NzggNC4wNDk0NUw0LjY0MzMyIDguNDYyOTFMOS4wNTY3OCAxMi44NzY0Wk0xNi4wMjI2IDE2LjkyNThMMTMuMDg1NyAxNS40NTc0TDIwLjgxNDIgMEwyMy43NTExIDEuNDY4NDVMMTYuMDIyNiAxNi45MjU4Wk0zMC4xMDE3IDE1LjE5OEwyNy43Nzk2IDEyLjg3NjRMMzIuMTkzNSA4LjQ2MjkxTDI3Ljc3OTYgNC4wNDk0NUwzMC4xMDE3IDEuNzI3MzZMMzYuODM2OCA4LjQ2MjkxTDMwLjEwMTcgMTUuMTk4WiIgZmlsbD0iI0ZFRkNGNCIvPgo8L2c+Cjwvc3ZnPgo="/>
+                        </div>
+                        <span class="explore-text">fastdup.explore()</span>
+                    </div>
+                    <div class="explore-bottom-right">
+                        <img width="32px" height="28px" class="figure" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzMiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAzMyAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggaWQ9IlZlY3RvciIgZD0iTTUuMjEyNjIgNS40NDIyOEM2LjIyMDU1IDQuNjgxODcgNy4xMjA0OSAzLjk2ODM1IDcuODU0MjQgMy4zNDA3NEM5LjMyNDgyIDIuMDk2MTkgMTAuMTUyMSAxLjE4OTM3IDkuOTg2MDEgMC45NTI1MTNDOS44MTk5MyAwLjcxNTY1NyA4LjcwMDMyIDEuMTI2MzIgNy4wNDUzMyAxLjk4OTJDNi4yMjEyOSAyLjQyMjU4IDUuMjI3OTcgMy4wMTE4NyA0LjE1MzQ2IDMuNjgxMDNMMi40ODYxNiA0Ljc0MzIzTDEuNjEzMDUgNS4zMjgzNkMxLjM5MTI2IDUuNDcyNTIgMS4xODUxNyA1LjYzOTEgMC45OTgwMjUgNS44MjU0NkMwLjczNzc5NCA2LjA4MTQ1IDAuNTQwNDYyIDYuMzkzNzcgMC40MjExMzMgNi43Mzg1NkMwLjMwOTk0MyA3LjA4MTY0IDAuMjgxNzYzIDcuNDQ2NjkgMC4zMzg4NTUgNy44MDQyMUMwLjM2NjEzMSA3Ljk3MjY4IDAuNDA5NjU0IDguMTM4MjkgMC40Njg4NDcgOC4yOTg3NUMwLjUxMjYxNyA4LjQxNjMzIDAuNTYyOTM4IDguNTMxNDUgMC42MTk1NzcgOC42NDM1NkMwLjc5NzIyMiA4Ljk3NzA0IDAuOTkzOTc2IDkuMzAwMjQgMS4yMDg4NSA5LjYxMTU1QzEuNTgwNDUgMTAuMTU5OCAxLjk4Mzk5IDEwLjY4NjEgMi40MTczOCAxMS4xODc4QzMuMTM3MjUgMTIuMDMxNCAzLjk1MjAzIDEyLjc5MDQgNC44NDU0NiAxMy40NDk3QzYuMzcxMTUgMTQuNTU4NiA3LjUwMzUyIDE0Ljg5OTQgNy42NzA1NCAxNC42MzQ2QzcuODM3NTUgMTQuMzY5OSA3LjA3Mjg3IDEzLjUzNjQgNS45Mjc4MSAxMi4yMDIxQzUuMzg4MiAxMS41NDkgNC43MDA4OCAxMC43MjMxIDQuMDMyNzMgOS43ODI1MkwzLjcxNzQxIDkuMzI3MjRDNC43MTU4MyA5LjUwMzA0IDYuMDMyMDMgOS42NzgxNyA3Ljc4MzkzIDkuODIwM0MxMC4yMTEgMTAuMDA5IDEyLjY0NTIgMTAuMDcyNyAxNS4wNzY1IDEwLjAxMUMxNy43NjI4IDkuOTQ5MzEgMjAuNDQyNCA5Ljc0Mzc0IDIzLjEwMzYgOS4zOTUyMUMyOC4xODgxIDguNzM4OTcgMzIuMTUwMyA3LjU5NTEzIDMyLjA4IDcuMjY4NjRDMzIuMDA5NiA2Ljk0MjE0IDI4LjAyOTQgNy4yOTU2NiAyMy4wNDkxIDcuNDI3NjlDMTguMDc5NyA3LjU3NTY2IDEzLjEwMzEgNy40MzkxMyA4LjE0Mzk4IDcuMDE4NzdDNi4wNzU4NiA2Ljg0MjMxIDQuNjE2NDcgNi43MTIyIDMuNTYzNjQgNi42NDkyOUwzLjU4NjYyIDYuNjA4NDFMNS4xNjA1NSA1LjQyMTk4IiBmaWxsPSIjRkVGQ0Y0Ii8+Cjwvc3ZnPgo="/>
+                    </div>
+                </div>
+                </div>            
+            </div>            
+            '''
+def write_title_container(title, subtitle = None):
+    result = f''' 
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-logo">
@@ -611,9 +748,7 @@ def write_html_header(title, subtitle = None, max_width = None, jupyter_html = F
                     </div>
                 </div>
             </div>
-        </section>
-    '''
-    # <link rel="stylesheet" href="css/style.css" type="text/css" />
+            '''
     return result
 
 def write_html_footer():
@@ -745,7 +880,7 @@ def write_to_html_file(df, title='', filename='out.html', stats_info = None, sub
     #if stats_info is not None:
     #    result += '<left>' + stats_info + '</left><br>'
     result = write_html_header(title, subtitle, max_width, jupyter_html)
-    result += write_component_header()
+    result += write_component_header(title, subtitle)
     for i,row in df.iterrows():
         result += write_component(df.columns, row, i, max_width, write_row_name)
     result += write_components_footer()

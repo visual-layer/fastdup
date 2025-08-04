@@ -1,3 +1,7 @@
+from fastdup.utilities import _DOC_MSG, dcheck_latest_version, is_macos_intel, is_python_3_8
+__doc__ = _DOC_MSG
+
+
 #FastDup Software, (C) copyright 2025 Dr. Amir Alush and Dr. Danny Bickson.
 #This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives
 #4.0 International license. Please reach out to info@databasevisual.com for licensing options.
@@ -6,13 +10,12 @@
 
 
 
-import sys
 import os
 import json
-import shutil
-import tempfile
-from pathlib import Path
-
+import logging
+import sklearn # bug related to import order of sklearn with TLS out of memory due to libgomp
+import cv2
+import numpy as np
 import fastdup
 
 os.environ["QT_QPA_PLATFORM"] ="offscreen"
@@ -22,19 +25,16 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.max_rows', 10)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
-import numpy as np
-import cv2
-import platform
 from fastdup.galleries import do_create_similarity_gallery, do_create_outliers_gallery, do_create_stats_gallery, \
-    do_create_components_gallery, do_create_duplicates_gallery, do_create_aspect_ratio_gallery
+    do_create_components_gallery, do_create_duplicates_gallery
 import contextlib
-import time
 from fastdup import coco
-from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture, fastdup_capture_log_debug_state
+from fastdup.sentry import init_sentry, fastdup_capture_exception, fastdup_performance_capture, fastdup_capture_log_debug_state, fastdup_metrics_increment
 from fastdup.definitions import *
-from fastdup.utils import *
+from fastdup.utilities import *
 from datetime import datetime
 from fastdup.sentry import v1_sentry_handler
+from argparse import ArgumentParser
 
 try:
     from tqdm import tqdm
@@ -42,17 +42,32 @@ except:
     tqdm = lambda x, total=None: x
 
 
-__version__="1.74"
+__version__="1.100"
 CONTACT_EMAIL="info@visual-layer.com"
 
 init_sentry()
-#record_time()
+if is_macos_intel():
+    print("Warning: detected MACOS running on Intel Platform, fastdup latest version supports MACOS on M1 only.")
+elif is_python_3_8():
+    print("Warning: detected Python3.8 fastdup latest version supports Python3.9 and up.")
 
-ret = check_latest_version(__version__)
+ret = dcheck_latest_version(__version__)
 if ret:
+    fastdup_capture_exception("check_latest_version " + str(__version__), None, True)
     raise RuntimeError(f"fastdup detected your are running an old version {__version__} (10 versions or more vs. the latest) please upgrade fastdup")
 
+def _create_fastdup_logger(name: str = 'fastdup', level: Union[int, str] = logging.INFO) -> logging.Logger:
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.propagate = False
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(level)
+    formatter = logging.Formatter('%(message)s')
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    return logger
 
+_LOGGER = _create_fastdup_logger()
 
 LOCAL_DIR=os.path.dirname(os.path.abspath(__file__))
 os.environ['FASTDUP_LOCAL_DIR'] = LOCAL_DIR
@@ -69,11 +84,15 @@ if platform.system() == "Windows":
         os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'crashpad_handler.exe')
 elif platform.system() == "Darwin":
     SO_SUFFIX=".dylib"
-    # https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
-    if os.path.exists(os.path.join(LOCAL_DIR, 'lib/crashpad_handler')):
-        os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
+    if sys.version_info.minor == 9:
+        # disable sentry on mac python3.9 due to a semaphore leak
+        os.environ['SENTRY_OPT_OUT'] = '1'
     else:
-        print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
+        # https://docs.sentry.io/platforms/native/configuration/backends/crashpad/
+        if os.path.exists(os.path.join(LOCAL_DIR, 'lib/crashpad_handler')):
+            os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'lib/crashpad_handler')
+        else:
+            print('Failed to find crashpad handler on ', os.path.join(LOCAL_DIR, 'lib/crashpad_handler'))
     so_file = os.path.join(LOCAL_DIR, 'libfastdup_shared' + SO_SUFFIX)
 else:
     SO_SUFFIX=".so"
@@ -116,6 +135,22 @@ if not os.path.exists(model_path_full):
 #if 'conda' in sys.version.lower() and 'clang' in sys.version.lower():
 #    print("Warning: detected conda environment on Mac, this may lead to unstable behavior. It is recommended to switch to python. You can install python using 'brew install python@3.8'")
 
+VERBOSE_DEBUG = 0
+VERBOSE_INFO = 1
+VERBOSE_WARNING = 2
+VERBOSE_ERROR = 3
+VERBOSE_FATAL = 4
+
+def get_verbose_level(turi_param: str, default: int) -> int:
+    try:
+        param = 'global_log_error_level='
+        index = turi_param.find(param)
+        if index == -1:
+            return default
+        
+        return int(turi_param[index + len(param)])
+    except Exception as e:
+        return default
 
 def do_run(input_dir='',
            work_dir='.',
@@ -126,7 +161,7 @@ def do_run(input_dir='',
            num_images=0,
            turi_param='nnmodel=0',
            distance='cosine',     #distance metric for the nearest neighbor model.
-           threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
+           threshold=0.9,         #threshold for finding simiar images. (allowed values -1->1)
            lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
            model_path=model_path_full,
            license='',            #license string
@@ -142,35 +177,46 @@ def do_run(input_dir='',
            bounding_box="",
            batch_size = 1,
            resume = 0,
-           high_accuracy=False):
+           high_accuracy=False,
+           logger: logging.Logger = _LOGGER):
 
     fastdup_capture_log_debug_state(locals())
     start_time = time.time()
 
-    print("FastDup Software, (C) copyright 2025 Dr. Amir Alush and Dr. Danny Bickson.")
+    if "FASTDUP_CORE_LIMIT" in os.environ:
+        num_threads = int(os.environ["FASTDUP_CORE_LIMIT"])
+
+    if not verbose and 'global_log_error_level=' not in turi_param:
+        turi_param = turi_param + f',global_log_error_level={VERBOSE_ERROR}'
+
+    logger.info("fastdup By Visual Layer, Inc. 2024. All rights reserved.")
+
     if (version):
-        print("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
-              "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
+        logger.info("This software is free for non-commercial and academic usage under the Creative Common Attribution-NonCommercial-NoDerivatives 4.0 "
+                    "International license. Please reach out to %s for licensing options.", CONTACT_EMAIL);
         return 0
 
     assert input_dir is not None and isinstance(input_dir, (str,list)), "input_dir must be a string or a list"
     if isinstance(input_dir, str):
         input_dir = shorten_path(input_dir)
 
-    try:
-        from .ascii_art import get_ascii_art
-        print(get_ascii_art())
-    except:
-        pass
-
+    # try:
+    #     from .ascii_art import get_ascii_art
+    #     print(get_ascii_art())
+    # except:
+    #     pass
 
     if 'sync_s3_to_local=1' in turi_param and isinstance(input_dir, str):
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
         if 'delete_img=1' in turi_param:
-            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            logger.warning('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
             turi_param = turi_param.replace('delete_img=1', '')
         if 'delete_img=0' not in turi_param:
             turi_param += ',delete_img=0'
+        if 'MIN_FEATURE_ALLOWED_VAL' in os.environ:
+            turi_param += f",MIN_FEATURE_ALLOWED_VAL={os.environ['MIN_FEATURE_ALLOWED_VAL']}"
+        if 'MAX_FEATURE_ALLOWED_VAL' in os.environ:
+            turi_param += f",MAX_FEATURE_ALLOWED_VAL={os.environ['MAX_FEATURE_ALLOWED_VAL']}"
 
     _model_path = model_path
     if (bounding_box == "face"):
@@ -194,12 +240,11 @@ def do_run(input_dir='',
     work_dir = shorten_path(work_dir)
     try:
         if not work_dir.startswith('smb://'):
-            if not os.path.exists(work_dir):
-                os.mkdir(work_dir)
+            os.makedirs(work_dir, exist_ok=True)
             with open(f"{work_dir}/config.json", "w") as f:
                 json.dump(config, f, indent=4)
     except Exception as ex:
-        print(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
+        logger.warning(f"Warning: error writing config file: {ex} to file {work_dir}/config.json")
 
     if isinstance(input_dir, list):
         os.makedirs(work_dir, exist_ok=True)
@@ -208,7 +253,7 @@ def do_run(input_dir='',
         input_dir = save_as_csv_file_list(files, os.path.join(work_dir, 'files.txt'))
 
     elif (input_dir.strip() == '' and run_mode != RUN_NN):
-        print("Found an empty input directory, please point to the directory where you are images are found")
+        logger.fatal("Found an empty input directory, please point to the directory where you are images are found")
         return 1
 
     input_dir = shorten_path(input_dir)
@@ -225,7 +270,7 @@ def do_run(input_dir='',
     if not os.path.exists(input_dir):
         if input_dir.startswith('s3://') or input_dir.startswith('minio://') or input_dir.startswith('smb://'):
             if input_dir.startswith('33://') and 'sync_s3_to_local=1' not in turi_param:
-                print("Warning: Reading images directly with s3 may result in slow execution. If you have enough disk space it is recommened to run with sync_s3_to_local=True. This will download the s3 content first to the local drive and then run fastdup.")
+                logger.warning("Warning: Reading images directly with s3 may result in slow execution. If you have enough disk space it is recommened to run with sync_s3_to_local=True. This will download the s3 content first to the local drive and then run fastdup.")
         else:
             if run_mode != RUN_NN and run_mode != RUN_NNF_SEARCH_STORED_FEATURES:
                 assert False, f"Failed to find input dir {input_dir} please check your input."
@@ -253,7 +298,7 @@ def do_run(input_dir='',
 
     if ((run_mode == RUN_NNF_SEARCH_IMAGE_DIR or run_mode == RUN_NNF_SEARCH_STORED_FEATURES or run_mode == RUN_KMEANS_STORED_FEATURES) \
             and not os.path.exists(os.path.join(work_dir, FILENAME_NNF_INDEX))):
-        print(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
+        logger.fatal(f"An {FILENAME_NNF_INDEX} file is required for run_mode=3, please run with run_mode=0 to generate this file")
         return 1
 
     # support for YOLO dataset format
@@ -261,13 +306,13 @@ def do_run(input_dir='',
         import yaml
         with open(input_dir, "r") as stream:
             try:
-                print('Detected yolo config file')
+                logger.info('Detected yolo config file')
                 config = yaml.safe_load(stream)
                 if 'path' not in config or 'train' not in config:
-                    print('Failed to find path or train in yolo config file')
+                    logger.fatal('Failed to find path or train in yolo config file')
                     return 1
                 if isinstance(config['train'], list):
-                    print('Train location folder list is not supported, please create a single train folder')
+                    logger.warning('Train location folder list is not supported, please create a single train folder')
                 # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
                 #path: ../datasets/coco128  # dataset root dir
                 #train: images/train2017  # train images (relative to 'path') 128 images
@@ -280,12 +325,12 @@ def do_run(input_dir='',
             except Exception as exc:
                 import traceback
                 traceback.print_exc();
-                print('Error when loading yolo .yaml config', input_dir, exc)
+                logger.fatal('Error when loading yolo .yaml config', input_dir, exc)
                 return 1
 
 
     if batch_size < 1 or batch_size > 200:
-        print("Allowed values for batch size 1->200.")
+        logger.fatal("Allowed values for batch size 1->200.")
         return 1
 
 
@@ -325,20 +370,20 @@ def do_run(input_dir='',
     if 'sync_s3_to_local=1' in turi_param:
         assert input_dir.startswith('s3://') or input_dir.startswith('minio://'), 'sync_s3_to_local=1 can only be used with s3:// or minio:// input_dir'
         if 'delete_img=1' in turi_param:
-            print('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
+            logger.warning('Warning: delete_img=1 is not supported with sync_s3_to_local=1, please delete images manually from the work_dir after their download')
             turi_param = turi_param.replace('delete_img=1', '')
         if 'delete_img=0' not in turi_param:
             turi_param += ',delete_img=0'
 
         if (num_images > 0):
-            print(f"Fast mode detected, downloading  {num_images} images from s3")
+            logger.info(f"Fast mode detected, downloading  {num_images} images from s3")
             start_time = time.time()
             input_dir = s3_partial_sync(input_dir, work_dir, num_images, verbose, check_interval=int((num_images / 100000)*60+1))
             elapsed_time = time.time() - start_time
-            print(f"S3 download time: {elapsed_time // 3600:.0f}:{(elapsed_time % 3600) // 60:02.0f}:{elapsed_time % 60:02.0f}. Note that this is download time from s3 bucket using aws s3 sync before fastdup is run. To speed up fastdup we recommend using EBS volume attached to the ec2 compute node.")
+            logger.info(f"S3 download time: {elapsed_time // 3600:.0f}:{(elapsed_time % 3600) // 60:02.0f}:{elapsed_time % 60:02.0f}. Note that this is download time from s3 bucket using aws s3 sync before fastdup is run. To speed up fastdup we recommend using EBS volume attached to the ec2 compute node.")
 
         else:
-            print(f"Warning: synching s3 input dir {input_dir} to local folder. ")
+            logger.warning(f"Warning: synching s3 input dir {input_dir} to local folder. ")
             input_dir = download_from_s3(input_dir, work_dir, verbose, False)
 
         if test_dir.startswith('s3://') or test_dir.startswith('minio://'):
@@ -410,7 +455,10 @@ def do_run(input_dir='',
                           resume)
 
         read_local_error_file(ret, local_error_file)
-        fastdup_performance_capture("do_run", start_time)
+        
+        if ret == 2:
+            raise KeyboardInterrupt('fastdup was interrupted')
+
         return ret
 
     return 1
@@ -430,7 +478,7 @@ def run(input_dir='',
         num_images=0,
         turi_param='nnmodel=0',
         distance='cosine',     #distance metric for the nearest neighbor model.
-        threshold=0.9,         #threshold for finding simiar images. (allowed values 0->1)
+        threshold=0.9,         #threshold for finding simiar images. (allowed values -1->1)
         lower_threshold=0.05,   #lower percentile threshold for finding simiar images (values 0->1)
         model_path=model_path_full,
         license='',            #license string
@@ -446,7 +494,8 @@ def run(input_dir='',
         bounding_box="",
         batch_size = 1,
         resume = 0,
-        high_accuracy=False):
+        high_accuracy=False,
+        logger: logging.Logger = _LOGGER):
 
     '''
     Run fastdup tool for finding duplicate, near duplicates, outliers and clusters of related images in a corpus of images.
@@ -513,7 +562,7 @@ def run(input_dir='',
             When using nnf_mode='Flat': 'cosine', 'euclidean', 'l1','linf','canberra','braycurtis','jensenshannon' are supported.
             Otherwise 'cosine' and 'euclidean' are supported.
 
-        threshold (float): Similarity measure in the range 0->1, where 1 is totally identical, 0.98 and above is almost identical.
+        threshold (float): Similarity measure in the range -1->1, where 1 is totally identical, -1 is completely different, 0.98 and above is almost identical.
 
         lower_threshold (float): Similarity percentile measure to outline images that are far away (outliers) vs. the total distribution. (means 5% out of the total similarities computed).
 
@@ -586,10 +635,7 @@ def run(input_dir='',
 
     _input_dir = input_dir
     fd_model = False
-    model_path, d = find_model_path(model_path, d)
-
-
-
+    model_path, d = find_model_path(model_path, d, high_accuracy)
 
     if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr', 'quick_face', 'quick_yolov5s', 'quick_ocr']:
         if bounding_box == 'face' or bounding_box == 'quick_face':
@@ -635,9 +681,10 @@ def run(input_dir='',
                      bounding_box='ocr' if bounding_box == 'ocr' else '',
                      batch_size = batch_size,
                      resume = resume,
-                     high_accuracy=high_accuracy)
+                     high_accuracy=high_accuracy,
+                     logger=logger)
         if (ret != 0):
-            print("Failed to run fastdup")
+            logger.fatal("Failed to run fastdup")
             return ret
 
         if bounding_box in ['quick_face', 'quick_yolov5s']:
@@ -665,7 +712,7 @@ def run(input_dir='',
             if os.path.exists(os.path.join(work_dir, 'atrain_features.dat')):
                 os.unlink(os.path.join(work_dir, 'atrain_features.dat'))
         except Exception as ex:
-            print('Warning, exception', ex)
+            logger.warning('Warning, exception', ex)
 
         input_dir = os.path.join(tempfile.gettempdir(), 'crops_input.csv')
         if bounding_box in ['face', 'yolov5s', 'rotated', 'xywh_bbox', 'ocr']:
@@ -820,7 +867,6 @@ def load_binary_feature(filename, d=576):
     df = pd.read_csv(filename + '.csv')['filename'].values
     assert df is not None, "Failed to read input file " + filename
     num_images = len(df);
-    print('Read a total of ', num_images, 'images')
 
     data = np.reshape(data, (num_images, d))
     assert data.shape[1] == d
@@ -1114,7 +1160,6 @@ def create_duplicates_gallery(similarity_file, save_path, num_images=20, descend
 
         ret = do_create_duplicates_gallery(similarity_file, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
                                             get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, **kwargs)
-        fastdup_performance_capture("create_duplicates_gallery", start_time)
         return ret
 
     except Exception as ex:
@@ -1189,7 +1234,7 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
             return ret
 
         if threshold:
-            assert threshold >= 0 and threshold <= 1, "threshold should be between 0 and 1"
+            assert threshold >= -1 and threshold <= 1, "threshold should be between -1 and 1"
 
         if work_dir is None and isinstance(similarity_file, str):
             if  os.path.isdir(similarity_file):
@@ -1206,7 +1251,6 @@ def create_duplicate_videos_gallery(similarity_file, save_path, num_images=20, d
 
         ret = create_duplicates_gallery(df, save_path, num_images, descending, lazy_load, get_label_func, slice, max_width, get_bounding_box_func,
                                                 get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, threshold, **kwargs)
-        fastdup_performance_capture("create_duplicates_gallery", start_time)
         return ret
     except Exception as ex:
         fastdup_capture_exception( "create_duplicates_gallery", ex)
@@ -1283,7 +1327,6 @@ def create_outliers_gallery(outliers_file, save_path, num_images=20, lazy_load=F
         ret = do_create_outliers_gallery(outliers_file, save_path, num_images, lazy_load, get_label_func, how, slice, descending,
                                           max_width, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir,
                                         **kwargs)
-        fastdup_performance_capture("create_outliers_gallery", start_time)
         return ret
 
 
@@ -1388,7 +1431,6 @@ def create_components_gallery(work_dir, save_path, num_images=20, lazy_load=Fals
                                             max_width, max_items, min_items, get_bounding_box_func,
                                             get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
                                             descending=descending, keyword=keyword, comp_type="component", input_dir=input_dir, **kwargs)
-        fastdup_performance_capture("create_components_gallery", start_time)
         return ret
 
     except Exception as ex:
@@ -1467,7 +1509,6 @@ def create_component_videos_gallery(work_dir, save_path, num_images=20, lazy_loa
                                          get_reformat_filename_func=get_reformat_filename_func, get_extra_col_func=get_extra_col_func, threshold=threshold, metric=metric,
                                          descending=descending, min_items=min_items, keyword=keyword, comp_type="component",
                                          input_dir=input_dir, **kwargs)
-        fastdup_performance_capture("create_component_video_gallery", start_time)
         return ret
 
     except Exception as ex:
@@ -1545,7 +1586,6 @@ def create_kmeans_clusters_gallery(work_dir, save_path, num_images=20, lazy_load
                                             get_reformat_filename_func, get_extra_col_func, threshold, metric=metric,
                                             descending=descending, keyword=keyword, comp_type="cluster",
                                             input_dir=input_dir, **kwargs)
-        fastdup_performance_capture("create_components_gallery", start_time)
         return ret
 
     except Exception as ex:
@@ -1585,24 +1625,6 @@ def inner_delete(files, dry_run, how, save_path=None, verbose=True):
 
 
 
-def inner_retag(files, labels=None, how='retag=labelImg', save_path=None):
-    fastdup_capture_log_debug_state(locals())
-
-    assert files is not None and len(files)
-    assert how == 'retag=labelImg' or how == 'retag=cvat', "Currently only retag=labelImg is supported"
-    if save_path:
-        assert os.path.exists(save_path)
-
-    from fastdup.label_img import do_export_to_labelimg
-    from fastdup.cvat import do_export_to_cvat
-
-
-    if how == 'retag=labelImg':
-        return do_export_to_labelimg(files, labels, save_path)
-    elif how == 'retag=cvat':
-        return do_export_to_cvat(files, labels, save_path)
-    else:
-        assert False, "not supported"
 
 def delete_components(top_components, to_delete = None,  min_distance = 0.98, how = 'one', dry_run = True, verbose = True):
     '''
@@ -1630,6 +1652,7 @@ def delete_components(top_components, to_delete = None,  min_distance = 0.98, ho
         start_time = time.time()
         assert isinstance(top_components, pd.DataFrame), "top_components should be a pandas dataframe"
         assert len(top_components), "top_components should not be enpty"
+        assert 'len' in top_components.columns, "top_components dataframe should contain a len column with an integer value of the number of iamges in this component"
         assert to_delete is None or isinstance(to_delete, list), "to_delete should be a list of integer component ids"
         if isinstance(to_delete, list):
             assert len(to_delete), "to_delete should not be empty"
@@ -1651,7 +1674,6 @@ def delete_components(top_components, to_delete = None,  min_distance = 0.98, ho
             inner_delete(files[1:], how='delete', dry_run=dry_run, verbose=verbose)
             total_deleted += files[1:]
 
-        fastdup_performance_capture("delete_components", start_time)
         return total_deleted
     except Exception as ex:
         fastdup_capture_exception("delete_components", ex)
@@ -1709,7 +1731,6 @@ def delete_components_by_label(top_components_file,  min_items=10, min_distance=
             else:
                 assert False, "how should be one of 'majority'|'all'"
 
-        fastdup_performance_capture("delete_components_by_label", start_time)
         return total
     except Exception as e:
         fastdup_capture_exception("delete_components_by_label", e)
@@ -1760,7 +1781,7 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 
         dry_run (bool): if True does not delete but print the rm commands used, otherwise deletes
 
-        how (str): either 'delete' or 'move' or 'retag'. In case of retag allowed value is retag=labelImg or retag=cvat
+        how (str): either 'delete' or 'move'.
 
         save_path (str): optional. In case of a folder and how == 'retag' the label files will be moved to this folder.
 
@@ -1849,16 +1870,9 @@ def delete_or_retag_stats_outliers(stats_file, metric, filename_col = 'filename'
 
         if how == 'delete' or how == 'move':
             return inner_delete(files, how=how, dry_run=dry_run, save_path=save_path)
-        elif how.startswith('retag'):
-            if label_col is not None:
-                label = df[label_col].values
-            else:
-                label = None
-            return inner_retag(files, label, how, save_path)
         else:
-            assert(False), "How should be one of 'delete'|'move'|'retag'"
+            assert(False), "How should be one of 'delete'|'move'"
 
-        fastdup_performance_capture("delete_or_retag_stats_outliers", start_time)
         return files
     except Exception as e:
         fastdup_capture_exception("delete_or_retag_stats_outliers", e)
@@ -1925,7 +1939,6 @@ def export_to_tensorboard_projector(work_dir, log_dir, sample_size = 900,
             assert isinstance(file_list, list), 'file_list should be a list of absolute file names given in the same order'
             assert len(file_list) == len(imglist), "file_list should be the same length as imglist got " + str(len(file_list)) + " and " + str(len(imglist))
         export_to_tensorboard_projector_inner(imglist, features, log_dir, sample_size, sample_method, with_images, get_label_func, d=d)
-        fastdup_performance_capture("export_to_tensorboard_projector", start_time)
 
     except Exception as ex:
         fastdup_capture_exception("export_to_tensorboard_projector", ex)
@@ -2035,7 +2048,7 @@ def find_top_components(work_dir, get_label_func=None, group_by='visual', slice=
         ret = do_find_top_components(work_dir, get_label_func, group_by, slice, threshold=threshold,
                                       metric=metric, descending=descending, min_items=min_items, max_items = max_items,
                                       keyword=keyword, save_path=save_path, comp_type=comp_type, kwargs=kwargs)
-        fastdup_performance_capture("find_top_components", start_time)
+
         return ret
     except Exception as ex:
         fastdup_capture_exception("find_top_components", ex)
@@ -2044,12 +2057,17 @@ search_d = 576
 search_model_path = model_path_full
 search_work_dir = ""
 search_store_int = 0
+search_nnf_load_multiple = 0
+search_high_accuracy = 0
 
-def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=False, license = "", store_int = 0):
+def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=False, license = "",
+                store_int = 0, turi_param="", threshold=0.7, high_accuracy=False):
     global search_d
     global search_model_path
     global search_work_dir
     global search_store_int
+    global search_nnf_load_multiple
+    global search_high_accuracy
     '''
     Initialize real time search and precomputed nnf data.
     This function should be called only once before running searches. The search function is search().
@@ -2061,7 +2079,9 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
         model_path (str): (Optional): path to the onnx model file. Optional.
         verbose (bool): (Optional): True for verbose mode.
         license (str): License key for using search.
-        store_int (int) 0 to return filename, 1 to return offset 
+        store_int (int): 0 to return filename, 1 to return offset 
+        turi_param (str): optional additional directions
+        threshold (float): optional threshold to find images similar >= threshold, default 0.85
 
     Example:
         >>> import fastdup
@@ -2088,13 +2108,21 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
         if os.path.exists(local_error_file):
             os.unlink(local_error_file)
 
-        model_path, d = find_model_path(model_path, d)
+        model_path, d = find_model_path(model_path, d, high_accuracy)
 
         start_time = time.time()
         search_model_path = model_path
         search_d = d
         search_work_dir = work_dir
         search_store_int = store_int
+        search_nnf_load_multiple = "nnf_load_multiple=1" in turi_param
+        search_high_accuracy = high_accuracy
+        if store_int:
+            assert "store_int" not in turi_param
+            if turi_param == "":
+                turi_param += "store_int=1"
+            else:
+                turi_param+=',store_int=1'
         fastdup_capture_log_debug_state(locals())
 
         assert os.path.exists(model_path), "Failed to find model_path " + model_path
@@ -2108,18 +2136,20 @@ def init_search(k, work_dir, d = 576, model_path = model_path_full, verbose=Fals
                         c_int,
                         c_char_p,
                         c_int,
-                        c_char_p]
+                        c_char_p,
+                        c_char_p,
+                        c_float]
 
         ret = fun(k, bytes(work_dir, 'utf-8'),
                   d, bytes(model_path, 'utf-8'),
-                  int(verbose), bytes(license, 'utf-8'))
+                  int(verbose), bytes(license, 'utf-8'),
+                  bytes(turi_param, 'utf-8'), float(threshold))
 
         read_local_error_file(ret, local_error_file)
         if ret != 0:
             print("Failed to initialize search")
             return ret
 
-        fastdup_performance_capture("init_search", start_time)
     except Exception as e:
         fastdup_capture_exception("init_search", e)
 
@@ -2146,6 +2176,8 @@ def search(filename, img=None, verbose=False):
     global search_work_dir
     assert search_work_dir != "", "Must call init_search() first before calling search()"
     global search_store_int
+    global search_nnf_load_multiple
+    print(search_store_int, search_nnf_load_multiple)
 
     local_error_file = os.path.join(search_work_dir, FILENAME_ERROR_MSG)
     if os.path.exists(local_error_file):
@@ -2162,7 +2194,7 @@ def search(filename, img=None, verbose=False):
             assert os.path.isfile(filename), f"Failed to find image file {filename}"
             img = Image.open(filename)
             assert img is not None, f"Failed to read image form {filename}"
-            if search_model_path == model_path_full:
+            if search_model_path == model_path_full or 'UndisclosedFastdupModel2.ort' in search_model_path:
                 if hasattr(Image, 'Resampling'):  # Pillow<9.0
                     img = img.resize((224, 224), Image.Resampling.NEAREST)
                 else:
@@ -2200,7 +2232,9 @@ def search(filename, img=None, verbose=False):
             del df['index']
             df = df.rename(columns={'filename':'to'})
 
-        fastdup_performance_capture("search", start_time)
+        if search_store_int and search_nnf_load_multiple:
+            df['from'] = df['from'].apply(lambda x: "OBJECTS" if x == 1 else "IMAGES")
+
         return df
     except Exception as e:
         fastdup_capture_exception("search", e)
@@ -2264,7 +2298,6 @@ def vector_search(filename = "query_vector", vec=None, verbose=False):
             del df['index']
             df = df.rename(columns={'filename':'to'})
 
-        fastdup_performance_capture("vector_search", start_time)
         return df
     except Exception as e:
         fastdup_capture_exception("vector_search", e)
@@ -2366,7 +2399,6 @@ def create_stats_gallery(stats_file, save_path, num_images=20, lazy_load=False, 
         assert isinstance(stats_file, pd.DataFrame), f"Failed to read stats file {stats_file}"
         ret = do_create_stats_gallery(stats_file, save_path, num_images, lazy_load, get_label_func, metric, slice, max_width,
                                        descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func, input_dir, work_dir, **kwargs)
-        fastdup_performance_capture("create_stats_gallery", start_time)
         return ret
 
     except Exception as e:
@@ -2444,7 +2476,6 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         ret = do_create_similarity_gallery(similarity_file, save_path, num_images, lazy_load, get_label_func,
             slice, max_width, descending, get_bounding_box_func, get_reformat_filename_func, get_extra_col_func,
             input_dir,  work_dir, min_items, max_items, **kwargs)
-        fastdup_performance_capture("create_similarity_gallery", start_time)
         return ret
 
     except Exception as e:
@@ -2452,121 +2483,9 @@ def create_similarity_gallery(similarity_file, save_path, num_images=20, lazy_lo
         return None
 
 
-def create_aspect_ratio_gallery(stats_file, save_path, get_label_func=None, lazy_load=False, max_width=None, num_images=0, slice=None,
-                                get_filename_reformat_func=None, input_dir=None, **kwargs):
-    '''
-    Function to create and display a gallery of aspect ratio distribution.
-
-    Args:
-         stats_file (str): csv file with the computed image statistics by the fastdup tool, or work_dir path or a pandas dataframe with the stats compouted by fastdup.
-
-        save_path (str): output folder location for the visuals
-
-        get_label_func (callable): optional function given an absolute path to an image return the image label.
-            Image label can be a string or a list of strings. Alternatively, get_label_func can be a dictionary where the key is the absolute file name and the value is the label or list of labels.
-            Alternatively, get_label_func can be a filename containing string label for each file. First row should be index,label. Label file should be same length and same order of the atrain_features_data.csv image list file.
-
-        lazy_load (boolean): If False, write all images inside html file using base64 encoding. Otherwise use lazy loading in the html to load images when mouse curser is above the image (reduced html file size).
-
-
-         max_width (int): optional parameter to limit the plot image width
 
 
 
-         num_images (int): optional number of images to compute the statistics on (default computes on all images)
-
-         slice (str): optional parameter to slice the stats file based on a specific label or a list of labels.
-
-         get_filename_reformat_func (callable): optional function to reformat the filename before displaying it.
-
-        input_dir (str): Optional parameter to specify the input directory of webdataset tar files,
-            in case when working with webdataset tar files where the image was deleted after run using turi_param='delete_img=1'
-
-    Returns:
-        ret (int): 0 in case of success, otherwise 1.
-    '''
-    try:
-        start_time = time.time()
-        fastdup_capture_log_debug_state(locals())
-
-        ret = check_params(stats_file, 1, False, get_label_func, slice, save_path, max_width)
-        if ret != 0:
-            return ret
-
-        stats_file = load_stats(stats_file, kwargs)
-
-        try:
-            import matplotlib
-        except Exception as e:
-            fastdup_capture_exception("create_aspect_ratio_gallery", e)
-            print("Failed to import matplotlib. Please install matplotlib using 'python3.8 -m pip install matplotlib'")
-            return 1
-
-
-        ret = do_create_aspect_ratio_gallery(stats_file, save_path, get_label_func, lazy_load, max_width, num_images, slice, input_dir, **kwargs)
-        fastdup_performance_capture("create_aspect_ratio_gallery", start_time)
-        return ret
-
-    except Exception as e:
-        fastdup_capture_exception("create_aspect_ratio_gallery", e)
-
-
-def export_to_cvat(files, labels, save_path):
-    """
-    Function to export a collection of files that needs to be annotated again to cvat batch job format.
-    This creates a file named fastdup_label.zip in the directory save_path.
-    The files can be retagged in cvat using Tasks -> Add (plus button) -> Create from backup -> choose the location of the fastdup_label.zip file.
-
-    Args:
-        files (str):
-        labels (str):
-        save_path (str):
-
-    Returns:
-        ret (int): 0 in case of success, otherwise 1.
-    """
-    try:
-        start_time = time.time()
-        fastdup_capture_log_debug_state(locals())
-
-        assert len(files), "Please provide a list of files"
-        assert labels is None or isinstance(labels, list), "Please provide a list of labels"
-
-        from fastdup.cvat import do_export_to_cvat
-        ret =  do_export_to_cvat(files, labels, save_path)
-        fastdup_performance_capture("export_to_cvat", start_time)
-        return ret
-    except Exception as e:
-        fastdup_capture_exception("export_to_cvat", e)
-
-def export_to_labelImg(files, labels, save_path):
-    """
-    Function to export a collection of files that needs to be annotated again to cvat batch job format.
-    This creates a file named fastdup_label.zip in the directory save_path.
-    The files can be retagged in cvat using Tasks -> Add (plus button) -> Create from backup -> choose the location of the fastdup_label.zip file.
-
-    Args:
-        files (str):
-        labels (str):
-        save_path (str):
-
-    Returns:
-        ret (int): 0 in case of success, otherwise 1.
-    """
-    try:
-        start_time = time.time()
-        fastdup_capture_log_debug_state(locals())
-
-        assert len(files), "Please provide a list of files"
-        assert labels is None or isinstance(labels, list), "Please provide a list of labels"
-
-        from fastdup.label_img import do_export_to_labelimg
-        ret =  do_export_to_labelimg(files, labels, save_path)
-        fastdup_performance_capture("export_to_labelImg", start_time)
-        return ret
-    except Exception as e:
-        fastdup_capture_exception("export_to_labelImg", e)
-        return 1
 
 def top_k_label(labels_col, distance_col, k=10, threshold = None,  min_count=None, unknown_class=None):
     '''
@@ -2651,7 +2570,7 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
             "each row is a label corresponding to the image in the atrain_features_data.csv file"
 
         if threshold is not None:
-            assert threshold >= 0 and threshold <= 1, "Please provide a valid threshold 0->1"
+            assert threshold >= -1 and threshold <= 1, "Please provide a valid threshold -1->1"
 
         if isinstance(work_dir, pd.DataFrame):
             df = work_dir
@@ -2706,7 +2625,6 @@ def create_knn_classifier(work_dir, k, get_label_func, threshold=None):
         p1_values = df_merge['top_k'].tolist()
         filenames = df_merge.index.tolist()
         print(classification_report(y_values, p1_values))
-        fastdup_performance_capture("create_knn_classifier", start_time)
         return pd.DataFrame({'filename':filenames, 'prediction':p1_values, 'label':y_values})
     except Exception as ex:
         fastdup_capture_exception("create_knn_classifier", ex)
@@ -2754,7 +2672,6 @@ def create_kmeans_classifier(work_dir, k, get_label_func, threshold=None):
                 p1_values.append(cluster_label)
 
         print(classification_report(y_values, p1_values))
-        fastdup_performance_capture("create_kmeans_classifier", start_time)
         return pd.DataFrame({'prediction':p1_values, 'label':y_values, 'filename':files})
 
     except Exception as ex:
@@ -2820,7 +2737,6 @@ def run_kmeans(input_dir='',
                 nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}",
                 bounding_box=bounding_box,
                 high_accuracy=high_accuracy)
-        fastdup_performance_capture("run_kmeans", start_time)
         return ret
 
     except Exception as ex:
@@ -2880,7 +2796,6 @@ def run_kmeans_on_extracted(input_dir='',
                    d=d,
                    run_mode=6,
                    nnf_param=f"num_clusters={num_clusters},num_em_iter={num_em_iter}")
-        fastdup_performance_capture("run_kmeans_on_extracted", start_time)
         return ret
     except Exception as ex:
         fastdup_capture_exception("run_kmeans_on_extracted", ex)
@@ -2890,7 +2805,7 @@ def run_kmeans_on_extracted(input_dir='',
 def extract_video_frames(input_dir, work_dir, verbose=False,
                          num_threads=-1, num_images=0, min_offset=0, max_offset=0, turi_param="",
                          model_path = model_path_full, d=576,
-                         resize_video=0, keyframes_only=1, license="", no_sort=0, resume=1):
+                         resize_video=0, keyframes_only=1, license="", no_sort=0, resume=1, save_timestamp=0):
     """
     A function to go over a collection of videos and etract them into frames. The output is saved to the work_dir/tmp
     subfolder.
@@ -2949,6 +2864,8 @@ def extract_video_frames(input_dir, work_dir, verbose=False,
 
         resume (int): 0 = default, 1 = resume running on previous dataset
 
+        save_timestamp (int):  0 = default, 1 = save frame time info at atrain_crops.csv output file
+
     Returns:
         ret (int): Status code 0 = success, 1 = error.
     """
@@ -2961,6 +2878,11 @@ def extract_video_frames(input_dir, work_dir, verbose=False,
         t_param += "," + turi_param
     if (no_sort):
         t_param += f",no_sort={no_sort},save_crops=1"
+    elif (save_timestamp):
+        t_param += ",save_crops=1"
+
+    if "FASTDUP_CORE_LIMIT" in os.environ:
+        num_threads = int(os.environ["FASTDUP_CORE_LIMIT"])
 
     return run(input_dir=input_dir, work_dir=work_dir, verbose=verbose, run_mode=1,
                turi_param=t_param, num_images=num_images, num_threads=num_threads,
@@ -3066,13 +2988,26 @@ def iterate_on_webdatasets(input_dir, work_dir=None, bounding_box=None, caption=
 # give access to the main class
 # at the end of the file to solve circular dependencies
 from fastdup.engine import Fastdup
-from typing import Union
+from typing import Union, Optional, List
 import fastdup.fastdup_controller as FD
+from fastdup.fastdup_runner.run import do_visual_layer
 
-@v1_sentry_handler
 def create(work_dir: Union[str, Path]=None, input_dir: Union[str, Path] = None) -> Fastdup:
+    fastdup_metrics_increment('create')
     fd = Fastdup(work_dir=work_dir, input_dir=input_dir)
     return fd
 
+@v1_sentry_handler
+def explore(work_dir: Union[str, Path], input_dir: Optional[Union[str, Path, List[str]]] = None,
+            dataset_name: Optional[str] = None, overwrite: bool = False, verbose: bool = False) -> None:
+    do_visual_layer(work_dir, input_dir, dataset_name, overwrite, verbose=verbose)
 
+def cli() -> None:
+    parser = ArgumentParser()
+    parser.add_argument('-w', '--work-dir', type=str, required=True)
+    parser.add_argument('-i', '--input-dir', type=str, default=None)
+    parser.add_argument('-n', '--dataset-name', type=str, default=None)
+    parser.add_argument('--overwrite', action='store_true')
 
+    args = parser.parse_args()
+    explore(work_dir=args.work_dir, input_dir=args.input_dir, dataset_name=args.dataset_name, overwrite=args.overwrite)

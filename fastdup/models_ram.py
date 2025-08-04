@@ -1,5 +1,5 @@
 import logging
-from fastdup.utils import find_model
+from fastdup.utilities import find_model
 from fastdup.image import fastdup_imread
 from fastdup.sentry import fastdup_capture_exception
 from PIL import Image
