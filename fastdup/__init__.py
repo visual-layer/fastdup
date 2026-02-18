@@ -84,6 +84,11 @@ if platform.system() == "Windows":
         os.environ['SENTRY_CRASHPAD'] = os.path.join(LOCAL_DIR, 'crashpad_handler.exe')
 elif platform.system() == "Darwin":
     SO_SUFFIX=".dylib"
+    # Prevent segfaults from duplicate OpenMP runtime on macOS (especially ARM64/Apple Silicon).
+    # Multiple copies of libomp can be loaded when numpy/scipy/torch each bundle their own;
+    # KMP_DUPLICATE_LIB_OK tells the runtime to tolerate this instead of aborting.
+    if 'KMP_DUPLICATE_LIB_OK' not in os.environ:
+        os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
     if sys.version_info.minor == 9:
         # disable sentry on mac python3.9 due to a semaphore leak
         os.environ['SENTRY_OPT_OUT'] = '1'
@@ -2281,7 +2286,7 @@ def vector_search(filename = "query_vector", vec=None, verbose=False):
         elems = vec.shape[0]*vec.shape[1] if len(vec.shape) == 2 else vec.shape[0]
         assert elems == search_d, f"Wrong vector width got {elems} instead of expected d={search_d}"
         img_arr = np.ascontiguousarray(vec,dtype=np.float32)
-        ret = fun(vec, int(elems), int(verbose), bytes(filename, 'utf-8'))
+        ret = fun(img_arr, int(elems), int(verbose), bytes(filename, 'utf-8'))
         read_local_error_file(ret, local_error_file)
 
         assert ret == 0,"Failed to search for vector"
