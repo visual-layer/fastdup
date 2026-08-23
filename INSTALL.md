@@ -165,9 +165,9 @@ Operating system
 - `Windows 10 Server` (via WSL)
 
 Software versions
-- `Python 3.7, 3.8, 3.9` (via pip) 
+- `Python 3.9, 3.10, 3.11, 3.12` (via pip)
 - Note: conda is not recommended
-- pyenv installed python is not working on Mac, install python using `brew install python@3.8`
+- pyenv installed python is not working on Mac, install python using `brew install python@3.11`
 
 Hardware support
 - CPU (GPU not needed!)
